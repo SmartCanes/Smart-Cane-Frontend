@@ -3,7 +3,7 @@ import React from 'react'
 const PrimaryButton = ({ 
   text = 'Sign in', 
   bgColor = 'bg-primary',
-  hoverColor = 'hover:bg-[#1C253C]/90',
+  hoverColor = 'hover:bg-[#1C253C]/100',
   textColor = 'text-white',
   onClick,
   type = 'button',
