@@ -1,17 +1,26 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import SidebarContent from '../ui/components/SidebarContent'
 import TextField from '../ui/components/TextField'
 import PasswordField from '../ui/components/PasswordField'
 import PrimaryButton from '../ui/components/PrimaryButton'
+
 const Login = () => {
+  const navigate = useNavigate()
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    // Simulate login - you can add actual authentication here
+    navigate('/dashboard')
+  }
+
   return (
     <div className='h-screen w-full relative flex justify-between'>
         
         <SidebarContent />
         <div className='w-1/2 h-full flex flex-col items-center justify-center'>
 
-            <form className='px-5 w-1/2' action="">
+            <form className='px-5 w-1/2' onSubmit={handleSubmit}>
 
             <div className='text-center mb-10'>
               <h1 className='font-poppins text-h1 font-bold text-[#1C253C] mb-6'>
@@ -27,9 +36,9 @@ const Login = () => {
                           
                 
                 </PasswordField>
-                      
-                <a href="#" className='font-poppins block text-left hover:underline text-[16px] underline mt-2'>Forgot password?</a>
-                
+
+                <Link to="/forgot-password" className='font-poppins block text-left hover:underline text-[16px] underline mt-2'>Forgot password?</Link>
+
                 <PrimaryButton className='font-poppins w-full py-4 text-[18px] font-medium mt-6' bgColor='bg-primary-100' text='Sign In' type='submit'></PrimaryButton>
                 
                 <p className='font-poppins text-center text-[18px] mt-4'>Need An Account? <Link to="/register" className='font-poppins text-blue-500 hover:underline text-[18px]'>Sign Up</Link></p>
