@@ -7,12 +7,6 @@ import PasswordField from '../ui/components/PasswordField'
 import PrimaryButton from '../ui/components/PrimaryButton'
 import ValidationModal from '../ui/components/ValidationModal'
 import Loader from '../ui/components/Loader'
-import {
-  getRegions,
-  getProvincesByRegion,
-  getCitiesByProvince,
-  getBarangaysByCity
-} from '../../Api/Locations'
 
 const Register = () => {
   const navigate = useNavigate()
@@ -24,6 +18,38 @@ const Register = () => {
   })
   const [otp, setOtp] = useState(['', '', '', ''])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState({})
+  
+  // Form data state
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    streetAddress: '',
+    barangay: '',
+    city: '',
+    province: '',
+    relationship: '',
+    email: '',
+    contactNumber: ''
+  })
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
+  }
+
   const otpRefs = [
     React.createRef(),
     React.createRef(),
@@ -67,50 +93,7 @@ const Register = () => {
   const [selectedProvince, setSelectedProvince] = useState('')
   const [selectedCity, setSelectedCity] = useState('')
 
-  /* TEMPORARILY DISABLED API CALLS
-  const loadRegions = async () => {
-    try {
-      const regionOptions = await getRegions()
-      setRegions(regionOptions)
-    } catch (error) {
-      console.error('Error fetching regions:', error)
-    }
-  }
-
-  useEffect(() => {
-    loadRegions()
-  }, [])
-
-  const loadProvinces = async (regionCode) => {
-    try {
-      const provinceOptions = await getProvincesByRegion(regionCode)
-      setProvinces(provinceOptions)
-      setCities([])
-      setBarangays([])
-    } catch (error) {
-      console.error('Error fetching provinces:', error)
-    }
-  }
-
-  const loadCities = async (provinceCode) => {
-    try {
-      const cityOptions = await getCitiesByProvince(provinceCode)
-      setCities(cityOptions)
-      setBarangays([])
-    } catch (error) {
-      console.error('Error fetching cities:', error)
-    }
-  }
-
-  const loadBarangays = async (cityCode) => {
-    try {
-      const barangayOptions = await getBarangaysByCity(cityCode)
-      setBarangays(barangayOptions)
-    } catch (error) {
-      console.error('Error fetching barangays:', error)
-    }
-  }
-  */
+  
 
   const handleRegionChange = (e) => {
     const regionCode = e.target.value
@@ -147,6 +130,13 @@ const Register = () => {
   const handleNext = (e) => {
     e.preventDefault()
     if (step === 1) {
+      if (formData.password !== formData.confirmPassword) {
+        setErrors(prev => ({
+          ...prev,
+          confirmPassword: "Password don't match!"
+        }))
+        return
+      }
       setStep(2)
     } else if (step === 2) {
       // Show phone verification modal
@@ -201,11 +191,11 @@ const Register = () => {
   }
 
   return (
-    <div className='h-screen w-full relative flex justify-between'>
-      <SidebarContent />
+    <div className='min-h-screen sm:h-screen w-full relative flex flex-col sm:flex-row'>
+      <SidebarContent className='hidden sm:flex sm:flex-1 sm:min-h-screen' />
 
       {step === 3 && isSubmitting && (
-        <div className='absolute inset-y-0 left-0 w-1/2 flex items-center justify-center z-30'>
+        <div className='absolute inset-0 sm:inset-y-0 sm:left-0 w-full sm:w-1/2 flex items-center justify-center z-30'>
           <Loader size="large" color='#FDFCFA' />
         </div>
       )}
@@ -227,8 +217,8 @@ const Register = () => {
         </div>
       )}
 
-      <div className='w-1/2 h-full flex flex-col items-center justify-center overflow-y-auto py-8'>
-        <form className='px-2 w-1/2' onSubmit={handleNext}>
+      <div className='w-full sm:flex-1 sm:min-h-screen flex flex-col items-center justify-center bg-[#FDFCFA] py-12 px-6 sm:px-10 overflow-y-auto'>
+        <form className='w-full max-w-xl sm:max-w-2xl' onSubmit={handleNext}>
           
           <div className='text-center mb-10'>
             <h1 className='font-poppins text-h1 font-bold text-[#1C253C] mb-6'>
@@ -238,19 +228,23 @@ const Register = () => {
               {step === 1 
                 ? 'Start your journey to safer and smarter mobility by signing up.'
                 : step === 2
-                ? 'Please provide your address information.'
+                ? 'Start your journey to safer and smarter mobility by signing up.'
                 : <>Enter the <span className="font-bold">One-Time Password (OTP)</span> we have sent to your registered contact number 09*******345.</>}
             </p>
           </div>
 
           {/* Step 1: Basic Information */}
           {step === 1 && (
-            <div className='space-y-4'>
-              <div className='grid grid-cols-2 gap-4'>
+            <div className='space-y-3 sm:space-y-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4'>
                 <TextField 
                   className='font-poppins' 
                   label={"First Name"} 
                   placeholder='First Name...'
+                  name='firstName'
+                  value={formData.firstName}
+                  onChange={handleFormChange}
+                  inputClassName='py-3'
                   required
                 />
                 
@@ -258,6 +252,10 @@ const Register = () => {
                   className='font-poppins' 
                   label={"Last Name"} 
                   placeholder='Last Name...'
+                  name='lastName'
+                  value={formData.lastName}
+                  onChange={handleFormChange}
+                  inputClassName='py-3'
                   required
                 />
               </div>
@@ -266,6 +264,10 @@ const Register = () => {
                 className='font-poppins' 
                 label={"Username"} 
                 placeholder='Enter your username...'
+                name='username'
+                value={formData.username}
+                onChange={handleFormChange}
+                inputClassName='py-3'
                 required
               />
 
@@ -273,6 +275,12 @@ const Register = () => {
                 className='font-poppins' 
                 label={"Password"} 
                 placeholder='Enter your password...'
+                name='password'
+                value={formData.password}
+                onChange={handleFormChange}
+                error={errors.password}
+                showValidationRules
+                inputClassName='py-3'
                 required
               />
 
@@ -280,6 +288,11 @@ const Register = () => {
                 className='font-poppins' 
                 label={"Re-enter Password"} 
                 placeholder='Re-enter your password...'
+                name='confirmPassword'
+                value={formData.confirmPassword}
+                onChange={handleFormChange}
+                error={errors.confirmPassword}
+                inputClassName='py-3'
                 required
               />
 
@@ -296,55 +309,72 @@ const Register = () => {
           {/* Step 2: Address Information */}
           {step === 2 && (
             <div className='space-y-4'>
-              {/* Lot No./Bldg./Street - Full width */}
-              <TextField
-                className='font-poppins'
-                label={"Lot No./Bldg./Street"}
-                placeholder='Enter your'
-                required
-              />
+              {/* Lot No./Bldg./Street and Province - Side by side */}
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                <TextField
+                  className='font-poppins'
+                  label={"Lot No./Bldg./Street"}
+                  placeholder='Enter your Lot No...'
+                  name='streetAddress'
+                  value={formData.streetAddress}
+                  onChange={handleFormChange}
+                  required
+                />
+
+                <SelectField
+                  className='font-poppins'
+                  label={"Province"}
+                  placeholder='Province...'
+                  required
+                  options={provinces}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, province: e.target.value }))
+                    handleProvinceChange(e)
+                  }}
+                  value={formData.province}
+                />
+              </div>
 
               {/* Barangay and City - Side by side */}
-              <div className='grid grid-cols-2 gap-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 <SelectField
                   className='font-poppins'
                   label={"Barangay"}
                   placeholder='Barangay...'
                   required
                   options={barangays}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  value={selectedCity}
+                  onChange={(e) => setFormData(prev => ({ ...prev, barangay: e.target.value }))}
+                  value={formData.barangay}
                 />
                 
                 <SelectField
-                  className='font-poppins'
+                  className='font-poppins '
                   label={"City"}
                   placeholder='City...'
                   required
                   options={cities}
-                  onChange={handleCityChange}
-                  value={selectedCity}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, city: e.target.value }))
+                    handleCityChange(e)
+                  }}
+                  value={formData.city}
                 />
               </div>
 
-              {/* Province - Full width */}
+              {/* Relationship to the VIP - Full width */}
               <SelectField
-                className='font-poppins'
-                label={"Province"}
-                placeholder='Province...'
+                className='font-poppins py-[16px]'
+                label={"Relationship to the VIP"}
+                placeholder='Relationship...'
                 required
-                options={provinces}
-                onChange={handleProvinceChange}
-                value={selectedProvince}
-              />
-
-              {/* Email Address - Full width */}
-              <TextField
-                className='font-poppins'
-                label={"Email Address"}
-                placeholder='sample.email@gmail.com'
-                type='email'
-                required
+                options={[
+                  { value: 'Husband', label: 'Husband' },
+                  { value: 'Legal Guardian', label: 'Legal Guardian' },
+                  { value: 'Sibling', label: 'Sibling' },
+                  { value: 'Wife', label: 'Wife' }
+                ]}
+                onChange={(e) => setFormData(prev => ({ ...prev, relationship: e.target.value }))}
+                value={formData.relationship || ''}
               />
 
               {/* Contact Number - Full width */}
@@ -353,6 +383,21 @@ const Register = () => {
                 label={"Contact Number"}
                 placeholder='09XX XXX XXXX'
                 type='tel'
+                name='contactNumber'
+                value={formData.contactNumber}
+                onChange={handleFormChange}
+                required
+              />
+
+              {/* Email Address - Full width */}
+              <TextField
+                className='font-poppins'
+                label={"Email Address"}
+                placeholder='sample.email@gmail.com'
+                type='email'
+                name='email'
+                value={formData.email}
+                onChange={handleFormChange}
                 required
               />
 

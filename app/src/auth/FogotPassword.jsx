@@ -9,10 +9,52 @@ const ForgotPassword = () => {
   const [step, setStep] = useState(1) // 1 = Enter Email, 2 = Change Password
   const [showModal, setShowModal] = useState(false)
   const [userEmail, setUserEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [formData, setFormData] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [errors, setErrors] = useState({})
+
+  const VALID_EMAIL = 'admin@gmail.com'
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
+  }
+
+  const handleEmailChange = (e) => {
+    const email = e.target.value
+    setUserEmail(email)
+    // Clear error when user starts typing
+    if (emailError) {
+      setEmailError('')
+    }
+  }
 
   const handleNext = (e) => {
     e.preventDefault()
     if (step === 1) {
+      // Validate email
+      if (!userEmail.trim()) {
+        setEmailError('Email is required')
+        return
+      }
+      
+      if (userEmail !== VALID_EMAIL) {
+        setEmailError('Email not registered')
+        return
+      }
+
       // Show verification modal first, stay on step 1
       setShowModal(true)
       // Auto-hide modal and move to step 2 after 4 seconds
@@ -21,7 +63,13 @@ const ForgotPassword = () => {
         setTimeout(() => setStep(2), 500) // Slight delay before transitioning
       }, 4000)
     } else {
-      // Submit password change
+      if (formData.newPassword !== formData.confirmPassword) {
+        setErrors(prev => ({
+          ...prev,
+          confirmPassword: "Password don't match!"
+        }))
+        return
+      }
       console.log('Password changed')
     }
   }
@@ -66,8 +114,11 @@ const ForgotPassword = () => {
                   label="Email Address" 
                   placeholder="sample.email@gmail.com"
                   type="email"
+                  name="email"
+                  value={userEmail}
+                  onChange={handleEmailChange}
+                  error={emailError}
                   required
-                  onChange={(e) => setUserEmail(e.target.value)}
                 />
 
                 <PrimaryButton 
@@ -75,7 +126,7 @@ const ForgotPassword = () => {
                   bgColor="bg-primary-100" 
                   text="Send Code" 
                   type="submit"
-                />
+                />  
               </div>
             )}
 
@@ -86,13 +137,22 @@ const ForgotPassword = () => {
                   className="font-poppins" 
                   label="New Password" 
                   placeholder="enter your new password"
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  error={errors.newPassword}
+                  showValidationRules
                   required
                 />
 
                 <PasswordField 
                   className="font-poppins" 
                   label="Re-enter Password" 
-                  placeholder="re-enter your username..."
+                  placeholder="re-enter your password..."
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  error={errors.confirmPassword}
                   required
                 />
 
