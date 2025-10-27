@@ -55,11 +55,7 @@ const ForgotPassword = () => {
         return
       }
 
-<<<<<<< HEAD
       // Show verification modal first, stay on step 1
-=======
-     
->>>>>>> origin/feature/Guest-page
       setShowModal(true)
       // Auto-hide modal and move to step 2 after 4 seconds
       setTimeout(() => {
@@ -79,13 +75,8 @@ const ForgotPassword = () => {
   }
 
   return (
-<<<<<<< HEAD
-    <div className="h-screen w-full relative flex justify-between">
-         <SidebarContent />
-=======
     <div className="relative w-full min-h-screen flex flex-col lg:flex-row">
       <SidebarContent className="order-2 lg:order-1 lg:w-1/2" />
->>>>>>> origin/feature/Guest-page
 
         {/* Verification Code Modal */}
         {showModal && (
@@ -96,19 +87,6 @@ const ForgotPassword = () => {
           />
         )}
 
-<<<<<<< HEAD
-        <div className="w-1/2 h-full flex flex-col items-center justify-center">
-          
-          <h1 className="font-poppins text-[64px] font-bold text-[#1C253C] mb-6 whitespace-nowrap">
-                {step === 1 ? 'Forgot Password' : 'Change Password'}
-              </h1>
-
-          
-          <form className="px-5 w-1/2" onSubmit={handleNext}>
-           
-           
-            <div className="text-left mb-10">
-=======
   <div className="order-1 lg:order-2 w-full lg:w-1/2 h-full flex flex-col items-center justify-center bg-[#FDFCFA] py-12 px-6 sm:px-10">
           <div className="w-full max-w-md lg:max-w-lg flex flex-col items-center text-center">
             <h1 className="font-poppins text-4xl sm:text-5xl lg:text-[64px] font-bold text-[#1C253C] mb-6">
@@ -116,7 +94,6 @@ const ForgotPassword = () => {
             </h1>
 
             <div className="mb-10">
->>>>>>> origin/feature/Guest-page
               <p className="font-poppins text-[#1C253C] text-paragraph">
                 {step === 1 
                   ? 'Enter your email address and we\'ll send you a code to reset your password.'
@@ -125,67 +102,6 @@ const ForgotPassword = () => {
               </p>
             </div>
 
-<<<<<<< HEAD
-            {/* Step 1: Enter Email */}
-            {step === 1 && (
-              <div className="space-y-4">
-                <TextField 
-                  className="font-poppins" 
-                  label="Email Address" 
-                  placeholder="sample.email@gmail.com"
-                  type="email"
-                  name="email"
-                  value={userEmail}
-                  onChange={handleEmailChange}
-                  error={emailError}
-                  required
-                />
-
-                <PrimaryButton 
-                  className="font-poppins w-full py-4 text-[18px] font-medium mt-6" 
-                  bgColor="bg-primary-100" 
-                  text="Send Code" 
-                  type="submit"
-                />  
-              </div>
-            )}
-
-            {/* Step 2: Change Password */}
-            {step === 2 && (
-              <div className="space-y-4">
-                <PasswordField 
-                  className="font-poppins" 
-                  label="New Password" 
-                  placeholder="enter your new password"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleChange}
-                  error={errors.newPassword}
-                  showValidationRules
-                  required
-                />
-
-                <PasswordField 
-                  className="font-poppins" 
-                  label="Re-enter Password" 
-                  placeholder="re-enter your password..."
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  error={errors.confirmPassword}
-                  required
-                />
-
-                <PrimaryButton 
-                  className="font-poppins w-full py-4 text-[18px] font-medium mt-6" 
-                  bgColor="bg-primary-100" 
-                  text="Submit" 
-                  type="submit"
-                />
-              </div>
-            )}
-          </form>
-=======
             <form className="w-full text-left" onSubmit={handleNext}>
               {/* Step 1: Enter Email */}
               {step === 1 && (
@@ -247,7 +163,6 @@ const ForgotPassword = () => {
               )}
             </form>
           </div>
->>>>>>> origin/feature/Guest-page
         </div>
     </div>
 

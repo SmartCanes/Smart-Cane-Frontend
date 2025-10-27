@@ -3,10 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import Welcome from './pages/Welcome.jsx'
-<<<<<<< HEAD
-=======
 import GuestPage from './pages/GuestPage.jsx'
->>>>>>> origin/feature/Guest-page
 import Login from './auth/Login.jsx'
 import Register from './auth/Register.jsx'
 import ForgotPassword from './auth/FogotPassword.jsx'
@@ -14,20 +11,13 @@ import Dashboard from './pages/Dashboard.jsx'
 
 
 
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/feature/Guest-page
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-<<<<<<< HEAD
-        <Route path="/" element={<Welcome />} />
-=======
   <Route path="/" element={<GuestPage />} />
   <Route path="/welcome" element={<Welcome />} />
->>>>>>> origin/feature/Guest-page
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -19,11 +19,7 @@ const Welcome = () => {
           Bringing independence closer through a cane that's more than just support — it's smart.
         </p>
           <PrimaryButton 
-<<<<<<< HEAD
-            className='w-1/4 py-4 hover:bg-gray-400 hover:text-white hover:cursor-pointer  text-[20px] z-10' 
-=======
             className='w-full max-w-xs sm:max-w-sm md:max-w-md lg:w-1/4 mx-4 py-3 md:py-4 hover:bg-gray-400 hover:text-white hover:cursor-pointer text-lg md:text-[20px] z-10' 
->>>>>>> origin/feature/Guest-page
             text="Get Started" 
             textColor='text-[#11285A]' 
             bgColor='bg-white'
