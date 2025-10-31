@@ -78,10 +78,8 @@ const Login = () => {
     <div className='min-h-screen w-full flex flex-col sm:flex-row'>
       <SidebarContent className='hidden sm:flex sm:flex-1 sm:min-h-screen' />
       <div className='w-full sm:flex-1 sm:min-h-screen flex flex-col items-center justify-center bg-[#FDFCFA] py-12 px-6 sm:px-10'>
-<<<<<<< HEAD
-=======
         
->>>>>>> origin/feature/Guest-page
+main
         <form className='w-full max-w-md sm:max-w-none lg:max-w-lg' onSubmit={handleSubmit}>
           <div className='flex flex-col items-center text-center mb-10 space-y-2 sm:space-y-3'>
             <h1 className='font-poppins text-center text-h1 font-bold text-[#1C253C]'>
