@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { Icon } from '@iconify/react'
 import icaneLogo from '../assets/images/smartcanelogo 1.png'
 import heroBackground from '../assets/images/background.png'
-import smartcaneMark from '../assets/images/smartcane-logo.png'
 import gpsCardArrow from '../assets/images/gps-card-arrow.png'
 import dangerTriangle from '../assets/images/danger-triangle.svg'
 import SwitchFilled from '../assets/images/SwitchFilled.png'
@@ -34,23 +33,31 @@ const featureCards = [
 		backgroundColor: '#122550'
 	},
 	
-	{
+{
 		id: 'emergency-sos',
 		icon: 'jam:triangle-danger-f',
 		title: 'SOS',
 		description: 'During emergencies, iCane automatically sends an SOS alert with the user\'s exact location to registered guardians, enabling quick response and immediate assistance.',
-		backgroundImage: dangerTriangle,
-		backgroundImageOpacity: 2,
+		backgroundImage: dangerTriangle,	
+		
+		// --- ITO ANG MGA TAMANG SETTINGS ---
+
+		// 1. Naka-set sa 0.12 para "faint" lang at kita ang text
+		backgroundImageOpacity: 0.12, 
+		
 		backgroundImagePosition: 'center',
 		backgroundImageSize: '794.2px 719.75px',
+		
+		// 2. TINANGGAL LAHAT maliban sa 'transform'
 		backgroundImageStyle: {
-			top: '110px',
-			left: '100px',
-			width: '794.2px',
-			height: '719.75px',
 			transform: 'rotate(-33.82deg)'
 		},
+		
+		// 3. Ibinalik sa puti, tulad ng design
 		backgroundColor: '#FDFCFA',
+
+		// --- WAKAS NG MGA PAGBABAGO ---
+
 		textColor: '#11285A',
 		descriptionColor: '#1C253C',
 		iconWrapperClassName: 'bg-transparent shadow-none text-[#11285A]',
@@ -59,8 +66,8 @@ const featureCards = [
 		iconClassName: 'text-[160px]',
 		inactiveClassName: FEATURE_CARD_INACTIVE_CLASS,
 		activeClassName: FEATURE_CARD_ACTIVE_CLASS,
-		outlineColor: '#11285A26',
-		overlayGradient: false
+		outlineColor: '#11285A26'
+		// TANDAAN: Tinanggal ko ang 'overlayGradient: false'
 	
 	},
 
@@ -116,7 +123,7 @@ const featureCards = [
 		title: 'Shared Notes & Reminders',
 		description: 'Through the shared notes feature, guardians can send text messages that iCane reads aloud via its AI assistant — keeping users informed, reminded, and connected anytime.',
 		backgroundImage: Document,
-		backgroundImageOpacity: 0.3,
+		backgroundImageOpacity: 0.5,
 		backgroundImagePosition: 'top',
 		backgroundImageSize: '500px',
 		backgroundImageStyle: {
@@ -292,7 +299,7 @@ const GuestPage = () => {
 
 					<button
 						onClick={() => navigate('/welcome')}
-						className='flex items-center justify-center rounded-[10px] bg-[#1C253C] px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#0d1c3f]'
+						className='flex items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f] sm:px-10 sm:py-3.5'
 					>
 						Log In
 					</button>
@@ -302,25 +309,25 @@ const GuestPage = () => {
 			{/* Hero Section */}
 			<section
 				id='home'
-				className='relative w-full overflow-hidden py-20 md:py-28 lg:py-32'
+				className='relative w-full overflow-hidden min-h-[calc(100vh-72px)] flex items-center justify-center py-16 sm:py-20 md:py-24'
 			>   {/* Hero section //Background Image */}
 				<img
 					src={heroBackground}
 					alt='Group of people walking with canes'
-					className='absolute inset-0 h-full w-full object-cover'
+					className='absolute inset-0 h-full w-full object-cover object-center'
 				/>
-				<div className='absolute inset-0 bg-ffff' />
+				<div className='absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30' />
 
 
-				<div className='relative mx-auto max-w-5xl px-4 text-center text-white space-y-6 sm:px-6'>
+				<div className='relative mx-auto max-w-5xl px-4 text-center text-white space-y-6 sm:px-6 z-10'>
 					
-					<h1 className='font-poppins text-3xl md:text-5xl font-semibold leading-tight'>The Smart Cane That Sees Ahead.</h1>
-					<h2 className='font-poppins text-xl font-medium md:text-2xl text-white/90'>iCane: Redefining Mobility with AI-Powered Safety.</h2>
-					<p className='font-poppins text-[16px] md:text-lg text-white/90 max-w-3xl mx-auto'>
+					<h1 className='font-poppins text-3xl md:text-5xl lg:text-6xl font-semibold leading-tight'>The Smart Cane That Sees Ahead.</h1>
+					<h2 className='font-poppins text-xl font-medium md:text-2xl lg:text-3xl text-white/90'>iCane: Redefining Mobility with AI-Powered Safety.</h2>
+					<p className='font-poppins text-[16px] md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto'>
 						iCane uses advanced sensor technology and AI to detect obstacles, analyze terrain, and guide you with real-time feedback. Gain confidence and independence with a device built for your journey.
 					</p>
 					<div className='mx-auto max-w-xs pt-4 sm:max-w-none'>
-						<button className='mx-auto w-full rounded-[10px] bg-white px-6 py-3 text-[#11285A] shadow-[0_12px_25px_rgba(0,0,0,0.15)] transition-colors duration-200 hover:bg-[#F0F4FF] sm:w-[170px]'>
+						<button className='mx-auto w-full rounded-[10px] bg-white px-6 py-3 text-[#11285A] font-semibold shadow-[0_12px_25px_rgba(0,0,0,0.15)] transition-colors duration-200 hover:bg-[#F0F4FF] sm:w-[170px]'>
 							Sign Up
 						</button>
 					</div>
