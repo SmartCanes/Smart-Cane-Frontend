@@ -1,8 +1,17 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import { Icon } from '@iconify/react';
-import L from 'leaflet';
-import CustomZoomControl from './CustomZoomControl';
+import React, { useEffect } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  useMap,
+  GeoJSON,
+} from "react-leaflet";
+import { Icon } from "@iconify/react";
+import L from "leaflet";
+import CustomZoomControl from "./CustomZoomControl";
+import novaliches from "../../data/novaliches";
 
 // Keeps the view focused on both user and destination.
 const FitBoundsToRoute = ({ userPos, destPos }) => {
@@ -18,12 +27,33 @@ const FitBoundsToRoute = ({ userPos, destPos }) => {
   return null;
 };
 
-function LiveMap({ userPos, destPos, routePath, activeTab, searchQuery, onSearchChange }) {
+const SetMapBounds = () => {
+  const map = useMap();
+
+  useEffect(() => {
+    const novalichesBounds = L.geoJSON(novaliches).getBounds();
+    map.setMaxBounds(novalichesBounds);
+    map.fitBounds(novalichesBounds);
+    map.setMinZoom(15);
+    map.setMaxZoom(20);
+  }, [map]);
+
+  return null;
+};
+
+function LiveMap({
+  userPos,
+  destPos,
+  routePath,
+  activeTab,
+  searchQuery,
+  onSearchChange,
+}) {
   if (!userPos) {
     return <div>Getting your location...</div>;
   }
 
-  const shouldShowRoute = activeTab !== 'history';
+  const shouldShowRoute = activeTab !== "history";
 
   return (
     <div className="relative w-full h-full">
@@ -36,7 +66,7 @@ function LiveMap({ userPos, destPos, routePath, activeTab, searchQuery, onSearch
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-[230px] h-[50px] pl-12 pr-4 rounded-full font-poppins text-sm text-gray-700 shadow-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            style={{ backgroundColor: '#C1D2FF' }}
+            style={{ backgroundColor: "#C1D2FF" }}
           />
           <Icon
             icon="mdi:magnify"
@@ -53,8 +83,12 @@ function LiveMap({ userPos, destPos, routePath, activeTab, searchQuery, onSearch
                 <Icon icon="mdi:map-marker" className="text-blue-600 text-xl" />
               </div>
               <div>
-                <p className="font-poppins font-semibold text-sm text-gray-800">SM City Novaliches</p>
-                <p className="font-poppins text-xs text-gray-500">Recently viewed</p>
+                <p className="font-poppins font-semibold text-sm text-gray-800">
+                  SM City Novaliches
+                </p>
+                <p className="font-poppins text-xs text-gray-500">
+                  Recently viewed
+                </p>
               </div>
             </div>
           </div>
@@ -64,8 +98,12 @@ function LiveMap({ userPos, destPos, routePath, activeTab, searchQuery, onSearch
                 <Icon icon="mdi:store" className="text-gray-600 text-xl" />
               </div>
               <div>
-                <p className="font-poppins font-medium text-sm text-gray-800">ERODMA READY MIX CONCRETE CO</p>
-                <p className="font-poppins text-xs text-gray-500">Nearby location</p>
+                <p className="font-poppins font-medium text-sm text-gray-800">
+                  ERODMA READY MIX CONCRETE CO
+                </p>
+                <p className="font-poppins text-xs text-gray-500">
+                  Nearby location
+                </p>
               </div>
             </div>
           </div>
@@ -75,7 +113,7 @@ function LiveMap({ userPos, destPos, routePath, activeTab, searchQuery, onSearch
       <MapContainer
         center={userPos}
         zoom={16}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: "100%", width: "100%" }}
         zoomControl={false}
       >
         <TileLayer
@@ -83,17 +121,29 @@ function LiveMap({ userPos, destPos, routePath, activeTab, searchQuery, onSearch
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
+        <GeoJSON
+          data={novaliches}
+          style={{
+            color: "#1E90FF",
+            weight: 2,
+            fillColor: "#1E90FF",
+            fillOpacity: 0.15,
+          }}
+        />
+
         <Marker position={userPos}>
-          <Popup>Ito ang location mo.</Popup>
+          <Popup>Your current location.</Popup>
         </Marker>
 
-        <Marker position={destPos}>
+        {/* <Marker position={destPos}>
           <Popup>Ito ang destination: SM Novaliches</Popup>
-        </Marker>
+        </Marker> */}
 
-        {shouldShowRoute && routePath && (
+        {/* {shouldShowRoute && routePath && (
           <Polyline positions={routePath} color="blue" weight={5} />
-        )}
+        )} */}
+
+        <SetMapBounds />
 
         <FitBoundsToRoute userPos={userPos} destPos={destPos} />
         <CustomZoomControl userPos={userPos} />
