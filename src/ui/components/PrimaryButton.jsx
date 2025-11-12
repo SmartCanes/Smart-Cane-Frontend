@@ -1,15 +1,13 @@
-import React from 'react'
-
-const PrimaryButton = ({ 
-  text = 'Sign in', 
-  bgColor = 'bg-primary',
-  hoverColor = 'hover:bg-[#1C253C]/100',
-  textColor = 'text-white',
+const PrimaryButton = ({
+  text = "Sign in",
+  bgColor = "bg-primary",
+  hoverColor = "hover:bg-[#1C253C]/100",
+  textColor = "text-white",
   onClick,
-  type = 'button',
-  className = '',
+  type = "button",
+  className = "",
   disabled = false,
-  ...props 
+  ...props
 }) => {
   return (
     <button
@@ -33,4 +31,4 @@ const PrimaryButton = ({
   );
 };
 
-export default PrimaryButton
+export default PrimaryButton;
