@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SidebarContent from "../ui/components/SidebarContent";
 import TextField from "../ui/components/TextField";
 import SelectField from "../ui/components/SelectField";
@@ -184,13 +184,9 @@ const Register = () => {
     }
   };
 
-  const handleBack = () => {
-    setStep(1);
-  };
-
   return (
-    <div className="min-h-screen sm:h-screen w-full relative flex flex-col sm:flex-row">
-      <SidebarContent className="hidden sm:flex sm:flex-1 sm:min-h-screen" />
+    <div className="min-h-dv w-full flex flex-col sm:flex-row">
+      <SidebarContent />
 
       {step === 3 && isSubmitting && (
         <div className="absolute inset-0 sm:inset-y-0 sm:left-0 w-full sm:w-1/2 flex items-center justify-center z-30">
@@ -214,259 +210,271 @@ const Register = () => {
 </p> */}
         </div>
       )}
-
-      <div className="w-full sm:flex-1 sm:min-h-screen flex flex-col items-center justify-center bg-[#FDFCFA] py-12 px-6 sm:px-10 overflow-y-auto">
-        <form className="w-full max-w-xl sm:max-w-2xl" onSubmit={handleNext}>
-          <div className="text-center mb-10">
-            <h1 className="font-poppins text-h1 font-bold text-[#1C253C] mb-6">
-              {step === 3 ? "Phone Verification" : "Welcome"}
-            </h1>
-            <p className="font-poppins text-[#1C253C] text-paragraph">
-              {step === 1 ? (
-                "Start your journey to safer and smarter mobility by signing up."
-              ) : step === 2 ? (
-                "Start your journey to safer and smarter mobility by signing up."
-              ) : (
-                <>
-                  Enter the{" "}
-                  <span className="font-bold">One-Time Password (OTP)</span> we
-                  have sent to your registered contact number 09*******345.
-                </>
-              )}
-            </p>
+      <div className="relative flex flex-col w-full min-h-dvh sm:flex-1 sm:min-h-screen bg-[#FDFCFA] px-6 sm:px-10 not-first:overflow-auto">
+        <Link to="/">
+          <div className="sm:hidden py-4 flex gap-2 absolute top-0 left-4">
+            <img
+              src="src/assets/images/smartcane-logo-blue.png"
+              alt="Smart Cane Logo"
+              width={45}
+              className="object-contain"
+            />
+            <h1 className="font-gabriela text-4xl text-card-100">icane</h1>
           </div>
-
-          {/* Step 1: Basic Information */}
-          {step === 1 && (
-            <div className="space-y-3 sm:space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <TextField
-                  className="font-poppins"
-                  label={"First Name"}
-                  placeholder="First Name..."
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleFormChange}
-                  inputClassName="py-3"
-                  required
-                />
-
-                <TextField
-                  className="font-poppins"
-                  label={"Last Name"}
-                  placeholder="Last Name..."
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleFormChange}
-                  inputClassName="py-3"
-                  required
-                />
-              </div>
-
-              <TextField
-                className="font-poppins"
-                label={"Username"}
-                placeholder="Enter your username..."
-                name="username"
-                value={formData.username}
-                onChange={handleFormChange}
-                inputClassName="py-3"
-                required
-              />
-
-              <PasswordField
-                className="font-poppins"
-                label={"Password"}
-                placeholder="Enter your password..."
-                name="password"
-                value={formData.password}
-                onChange={handleFormChange}
-                error={errors.password}
-                showValidationRules
-                inputClassName="py-3"
-                required
-              />
-
-              <PasswordField
-                className="font-poppins"
-                label={"Re-enter Password"}
-                placeholder="Re-enter your password..."
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleFormChange}
-                error={errors.confirmPassword}
-                inputClassName="py-3"
-                required
-              />
-
-              <PrimaryButton
-                className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
-                bgColor="bg-primary-100"
-                text="Next"
-                type="submit"
-              />
+        </Link>
+        <div className="flex-1 flex justify-center items-center pt-24 pb-5 sm:pt-0 sm:pb-0">
+          <form
+            className="w-full max-w-md sm:max-w-none lg:max-w-lg"
+            onSubmit={handleNext}
+          >
+            <div className="text-center mb-7 sm:mb-10">
+              <h1 className="font-poppins text-5xl sm:text-h1 font-bold text-[#1C253C] mb-4">
+                {step === 3 ? "Phone Verification" : "Welcome"}
+              </h1>
+              <p className="font-poppins text-[#1C253C] text-paragraph">
+                {step === 1 ? (
+                  "Start your journey to safer and smarter mobility by signing up."
+                ) : step === 2 ? (
+                  "Start your journey to safer and smarter mobility by signing up."
+                ) : (
+                  <>
+                    Enter the{" "}
+                    <span className="font-bold">One-Time Password (OTP)</span>{" "}
+                    we have sent to your registered contact number 09*******345.
+                  </>
+                )}
+              </p>
             </div>
-          )}
 
-          {/* Step 2: Address Information */}
-          {step === 2 && (
-            <div className="space-y-4">
-              {/* Lot No./Bldg./Street and Province - Side by side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Step 1: Basic Information */}
+            {step === 1 && (
+              <div className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <TextField
+                    className="font-poppins"
+                    label={"First Name"}
+                    placeholder="First Name..."
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleFormChange}
+                    inputClassName="py-3"
+                    required
+                  />
+
+                  <TextField
+                    className="font-poppins"
+                    label={"Last Name"}
+                    placeholder="Last Name..."
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleFormChange}
+                    inputClassName="py-3"
+                    required
+                  />
+                </div>
+
                 <TextField
                   className="font-poppins"
-                  label={"Lot No./Bldg./Street"}
-                  placeholder="Enter your Lot No..."
-                  name="streetAddress"
-                  value={formData.streetAddress}
+                  label={"Username"}
+                  placeholder="Enter your username..."
+                  name="username"
+                  value={formData.username}
                   onChange={handleFormChange}
+                  inputClassName="py-3"
                   required
                 />
 
-                <SelectField
+                <PasswordField
                   className="font-poppins"
-                  label={"Province"}
-                  placeholder="Province..."
+                  label={"Password"}
+                  placeholder="Enter your password..."
+                  name="password"
+                  value={formData.password}
+                  onChange={handleFormChange}
+                  error={errors.password}
+                  showValidationRules
+                  inputClassName="py-3"
                   required
-                  options={provinces}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      province: e.target.value
-                    }));
-                    handleProvinceChange(e);
-                  }}
-                  value={formData.province}
+                />
+
+                <PasswordField
+                  className="font-poppins"
+                  label={"Re-enter Password"}
+                  placeholder="Re-enter your password..."
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleFormChange}
+                  error={errors.confirmPassword}
+                  inputClassName="py-3"
+                  required
                 />
               </div>
+            )}
 
-              {/* Barangay and City - Side by side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Step 2: Address Information */}
+            {step === 2 && (
+              <div className="space-y-4">
+                {/* Lot No./Bldg./Street and Province - Side by side */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <TextField
+                    className="font-poppins"
+                    label={"Lot No./Bldg./Street"}
+                    placeholder="Enter your Lot No..."
+                    name="streetAddress"
+                    value={formData.streetAddress}
+                    onChange={handleFormChange}
+                    required
+                  />
+
+                  <SelectField
+                    className="font-poppins"
+                    label={"Province"}
+                    placeholder="Province..."
+                    required
+                    options={provinces}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        province: e.target.value
+                      }));
+                      handleProvinceChange(e);
+                    }}
+                    value={formData.province}
+                  />
+                </div>
+
+                {/* Barangay and City - Side by side */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <SelectField
+                    className="font-poppins"
+                    label={"Barangay"}
+                    placeholder="Barangay..."
+                    required
+                    options={barangays}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        barangay: e.target.value
+                      }))
+                    }
+                    value={formData.barangay}
+                  />
+
+                  <SelectField
+                    className="font-poppins "
+                    label={"City"}
+                    placeholder="City..."
+                    required
+                    options={cities}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        city: e.target.value
+                      }));
+                      handleCityChange(e);
+                    }}
+                    value={formData.city}
+                  />
+                </div>
+
+                {/* Relationship to the VIP - Full width */}
                 <SelectField
-                  className="font-poppins"
-                  label={"Barangay"}
-                  placeholder="Barangay..."
+                  className="font-poppins py-[16px]"
+                  label={"Relationship to the VIP"}
+                  placeholder="Relationship..."
                   required
-                  options={barangays}
+                  options={[
+                    { value: "Husband", label: "Husband" },
+                    { value: "Legal Guardian", label: "Legal Guardian" },
+                    { value: "Sibling", label: "Sibling" },
+                    { value: "Wife", label: "Wife" }
+                  ]}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      barangay: e.target.value
+                      relationship: e.target.value
                     }))
                   }
-                  value={formData.barangay}
+                  value={formData.relationship || ""}
                 />
 
-                <SelectField
-                  className="font-poppins "
-                  label={"City"}
-                  placeholder="City..."
+                {/* Contact Number - Full width */}
+                <TextField
+                  className="font-poppins"
+                  label={"Contact Number"}
+                  placeholder="09XX XXX XXXX"
+                  type="tel"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleFormChange}
                   required
-                  options={cities}
-                  onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, city: e.target.value }));
-                    handleCityChange(e);
-                  }}
-                  value={formData.city}
+                />
+
+                {/* Email Address - Full width */}
+                <TextField
+                  className="font-poppins"
+                  label={"Email Address"}
+                  placeholder="sample.email@gmail.com"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleFormChange}
+                  required
                 />
               </div>
+            )}
 
-              {/* Relationship to the VIP - Full width */}
-              <SelectField
-                className="font-poppins py-[16px]"
-                label={"Relationship to the VIP"}
-                placeholder="Relationship..."
-                required
-                options={[
-                  { value: "Husband", label: "Husband" },
-                  { value: "Legal Guardian", label: "Legal Guardian" },
-                  { value: "Sibling", label: "Sibling" },
-                  { value: "Wife", label: "Wife" }
-                ]}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    relationship: e.target.value
-                  }))
-                }
-                value={formData.relationship || ""}
-              />
+            {/* Step 3: OTP Verification */}
+            {step === 3 && (
+              <div className="space-y-6">
+                {/* OTP Input Boxes */}
+                <div className="flex justify-center gap-4">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={otpRefs[index]}
+                      type="text"
+                      maxLength="1"
+                      value={digit}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      className="w-16 h-16 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
+                    />
+                  ))}
+                </div>
 
-              {/* Contact Number - Full width */}
-              <TextField
-                className="font-poppins"
-                label={"Contact Number"}
-                placeholder="09XX XXX XXXX"
-                type="tel"
-                name="contactNumber"
-                value={formData.contactNumber}
-                onChange={handleFormChange}
-                required
-              />
-
-              {/* Email Address - Full width */}
-              <TextField
-                className="font-poppins"
-                label={"Email Address"}
-                placeholder="sample.email@gmail.com"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleFormChange}
-                required
-              />
-
-              <PrimaryButton
-                className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
-                bgColor="bg-primary-100"
-                text="Next"
-                type="submit"
-              />
-            </div>
-          )}
-
-          {/* Step 3: OTP Verification */}
-          {step === 3 && (
-            <div className="space-y-6">
-              {/* OTP Input Boxes */}
-              <div className="flex justify-center gap-4">
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    ref={otpRefs[index]}
-                    type="text"
-                    maxLength="1"
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    className="w-16 h-16 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
-                  />
-                ))}
+                {/* Resend OTP Link */}
+                <div className="text-center">
+                  <p className="font-poppins text-[#1C253C] text-sm mb-2">
+                    Didn't receive an OTP?
+                  </p>
+                  <button
+                    type="button"
+                    className="font-poppins text-[#1C253C] hover:underline text-sm"
+                  >
+                    Resend OTP
+                  </button>
+                </div>
               </div>
-
-              {/* Resend OTP Link */}
-              <div className="text-center">
-                <p className="font-poppins text-[#1C253C] text-sm mb-2">
-                  Didn't receive an OTP?
-                </p>
-                <button
-                  type="button"
-                  className="font-poppins text-[#1C253C] hover:underline text-sm"
-                >
-                  Resend OTP
-                </button>
-              </div>
-
-              <PrimaryButton
-                className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
-                bgColor="bg-primary-100"
-                text="Submit"
-                type="submit"
-                disabled={isSubmitting}
-              />
-            </div>
-          )}
-        </form>
+            )}
+            <PrimaryButton
+              className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
+              bgColor="bg-primary-100"
+              text={`${step === 3 ? "Submit" : "Next"}`}
+              type="submit"
+              disabled={isSubmitting}
+            />
+            <p className="font-poppins text-center text-[18px] mt-4">
+              Already have an Account?{" "}
+              <Link
+                to="/login"
+                className="font-poppins text-blue-500 hover:underline text-[18px]"
+              >
+                Sign In
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );
