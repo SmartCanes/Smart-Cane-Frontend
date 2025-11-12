@@ -11,7 +11,7 @@ import {
 import { Icon } from "@iconify/react";
 import L from "leaflet";
 import CustomZoomControl from "./CustomZoomControl";
-import novaliches from "../../data/novaliches";
+import novaliches from "@/data/novaliches";
 
 // Keeps the view focused on both user and destination.
 const FitBoundsToRoute = ({ userPos, destPos }) => {
