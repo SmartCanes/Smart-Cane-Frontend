@@ -1,8 +1,8 @@
 import React from 'react'
 import { Icon } from '@iconify/react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import icaneLogo from '../../assets/images/smartcane-logo.png'
-import findCaneIcon from '../../assets/images/findcane.png'
+import icaneLogo from '@/assets/images/smartcane-logo.png'
+import findCaneIcon from '@/assets/images/findcane.png'
 
 const DashboardSide = ({ className = '' }) => {
   const navigate = useNavigate()

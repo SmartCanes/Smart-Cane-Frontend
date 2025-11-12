@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import checkboxIcon from '../../assets/images/checkbox.png'
+import checkboxIcon from '@/assets/images/checkbox.png'
 
 const PasswordField = ({
   label,
