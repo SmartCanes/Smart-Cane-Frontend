@@ -1,6 +1,5 @@
-import React from 'react';
-import { useMap } from 'react-leaflet';
-import { Icon } from '@iconify/react';
+import { useMap } from "react-leaflet";
+import { Icon } from "@iconify/react";
 
 function CustomZoomControl({ userPos }) {
   const map = useMap();

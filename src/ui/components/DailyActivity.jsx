@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Icon } from '@iconify/react';
+import { useState } from "react";
+import { Icon } from "@iconify/react";
 
 const DailyActivity = () => {
-  const [activeTab, setActiveTab] = useState('Today');
+  const [activeTab, setActiveTab] = useState("Today");
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 w-full font-poppins">
@@ -10,14 +10,14 @@ const DailyActivity = () => {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-semibold text-gray-800">Daily Activity</h3>
         <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-          {['Today', 'Week', 'Month'].map((tab) => (
+          {["Today", "Week", "Month"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-1.5 rounded-lg transition-colors ${
                 activeTab === tab
-                  ? 'bg-gray-100 text-gray-800'
-                  : 'hover:bg-gray-50'
+                  ? "bg-gray-100 text-gray-800"
+                  : "hover:bg-gray-50"
               }`}
             >
               {tab}
@@ -32,7 +32,10 @@ const DailyActivity = () => {
         <div className="bg-gray-50/70 rounded-xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 flex-shrink-0 bg-[#16A34A]/20 rounded-lg flex items-center justify-center">
-              <Icon icon="fa7-solid:route" className="text-[#16A34A] text-2xl" />
+              <Icon
+                icon="fa7-solid:route"
+                className="text-[#16A34A] text-2xl"
+              />
             </div>
             <div>
               <p className="font-medium text-gray-800">Distance</p>
@@ -49,7 +52,10 @@ const DailyActivity = () => {
         <div className="bg-gray-50/70 rounded-xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 flex-shrink-0 bg-[#EA580C]/20 rounded-lg flex items-center justify-center">
-              <Icon icon="tabler:clock-filled" className="text-[#EA580C] text-2xl" />
+              <Icon
+                icon="tabler:clock-filled"
+                className="text-[#EA580C] text-2xl"
+              />
             </div>
             <div>
               <p className="font-medium text-gray-800">Active Time</p>

@@ -1,12 +1,11 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
-  Polyline,
   useMap,
-  GeoJSON,
+  GeoJSON
 } from "react-leaflet";
 import { Icon } from "@iconify/react";
 import L from "leaflet";
@@ -47,7 +46,7 @@ function LiveMap({
   routePath,
   activeTab,
   searchQuery,
-  onSearchChange,
+  onSearchChange
 }) {
   if (!userPos) {
     return <div>Getting your location...</div>;
@@ -127,7 +126,7 @@ function LiveMap({
             color: "#1E90FF",
             weight: 2,
             fillColor: "#1E90FF",
-            fillOpacity: 0.15,
+            fillOpacity: 0.15
           }}
         />
 
