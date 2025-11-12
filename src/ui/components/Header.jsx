@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Icon } from '@iconify/react'
-import notifBell from '../../assets/images/notifbell.png'
+import notifBell from '@/assets/images/notifbell.png'
 
 const Header = ({ 
   userName = 'Z',
