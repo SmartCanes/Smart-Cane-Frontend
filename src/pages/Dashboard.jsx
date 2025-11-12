@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import ValidationModal from "@/ui/components/ValidationModal";
@@ -28,7 +28,7 @@ const Dashboard = () => {
           backgroundColor: "var(--color-primary-100)",
           color: "#FFFFFF",
           borderColor: "#E5E7EB",
-          fill: "#F3F4F6",
+          fill: "#F3F4F6"
         }
       : {};
 
@@ -90,7 +90,7 @@ const Dashboard = () => {
       {
         enableHighAccuracy: true, // Para mas accurate ang GPS
         maximumAge: 0, // Huwag gumamit ng cached location
-        timeout: 5000, // 5 seconds timeout
+        timeout: 5000 // 5 seconds timeout
       }
     );
 

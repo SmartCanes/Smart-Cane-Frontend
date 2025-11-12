@@ -1,9 +1,8 @@
-import React from 'react';
-import { Icon } from '@iconify/react';
+import { Icon } from "@iconify/react";
 
 const QuickActions = () => {
   return (
-  <div className="bg-white rounded-2xl shadow-sm p-6 w-full font-poppins">
+    <div className="bg-white rounded-2xl shadow-sm p-6 w-full font-poppins">
       <h3 className="text-xl font-semibold text-gray-800 mb-4">
         Quick Actions
       </h3>

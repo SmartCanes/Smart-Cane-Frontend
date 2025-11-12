@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import checkboxIcon from '@/assets/images/checkbox.png'
+import { useState } from "react";
+import checkboxIcon from "@/assets/images/checkbox.png";
 
 const PasswordField = ({
   label,
@@ -9,119 +9,114 @@ const PasswordField = ({
   name,
   value,
   onChange,
-  error = '',
-  helperText = '',
+  error = "",
+  helperText = "",
   showValidationRules = false,
-  inputClassName = '',
+  inputClassName = "",
   showErrorIcon = true,
   ...rest
 }) => {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
-  const validationColor = 'var(--color-validation-100, #CE4B34)'
-  const hasError = Boolean(error)
+  const [showPassword, setShowPassword] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const validationColor = "var(--color-validation-100, #CE4B34)";
+  const hasError = Boolean(error);
   const errorHasContent =
-    typeof error === 'string' ? error.trim().length > 0 : Boolean(error)
-  const passwordValue = value || ''
+    typeof error === "string" ? error.trim().length > 0 : Boolean(error);
+  const passwordValue = value || "";
   const {
     onFocus: inputOnFocus,
     onBlur: inputOnBlur,
     type: _ignoredInputType,
     ...inputProps
-  } = rest
+  } = rest;
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
   const labelColor = hasError
     ? validationColor
-    : 'var(--color-secondary-100, #1C253C)'
+    : "var(--color-secondary-100, #1C253C)";
 
-  const hasLower = /[a-z]/.test(passwordValue)
-  const hasUpper = /[A-Z]/.test(passwordValue)
-  const hasNumber = /[0-9]/.test(passwordValue)
-  const hasSpecial = /[!@#$%^&*]/.test(passwordValue)
-  const hasLength = passwordValue.length >= 8
+  const hasLower = /[a-z]/.test(passwordValue);
+  const hasUpper = /[A-Z]/.test(passwordValue);
+  const hasNumber = /[0-9]/.test(passwordValue);
+  const hasSpecial = /[!@#$%^&*]/.test(passwordValue);
+  const hasLength = passwordValue.length >= 8;
 
   const passwordRules = [
     {
-      key: 'lowerUpper',
-      label: 'Lowercase & Uppercase',
+      key: "lowerUpper",
+      label: "Lowercase & Uppercase",
       isValid: hasLower && hasUpper
     },
     {
-      key: 'number',
-      label: 'Number (0-9)',
+      key: "number",
+      label: "Number (0-9)",
       isValid: hasNumber
     },
     {
-      key: 'special',
-      label: 'Special Character (!@#$%^&*)',
+      key: "special",
+      label: "Special Character (!@#$%^&*)",
       isValid: hasSpecial
     },
     {
-      key: 'length',
-      label: 'At least 8 Characters',
+      key: "length",
+      label: "At least 8 Characters",
       isValid: hasLength
     }
-  ]
+  ];
 
-  const shouldShowRules = showValidationRules && (isFocused || passwordValue.length > 0)
+  const shouldShowRules =
+    showValidationRules && (isFocused || passwordValue.length > 0);
 
   const handleFocus = (event) => {
-    setIsFocused(true)
+    setIsFocused(true);
     if (inputOnFocus) {
-      inputOnFocus(event)
+      inputOnFocus(event);
     }
-  }
+  };
 
   const handleBlur = (event) => {
-    setIsFocused(false)
+    setIsFocused(false);
     if (inputOnBlur) {
-      inputOnBlur(event)
+      inputOnBlur(event);
     }
-  }
+  };
 
   const renderRuleIndicator = (isValid) => (
-    <span className='flex h-5 w-5 shrink-0 items-center justify-center'>
-      {isValid && (
-        <img
-          src={checkboxIcon}
-          alt='Valid'
-          className='h-4 w-4'
-        />
-      )}
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+      {isValid && <img src={checkboxIcon} alt="Valid" className="h-4 w-4" />}
     </span>
-  )
+  );
 
   return (
     <div className={`flex flex-col top-left item-align-center ${className}`}>
       {label && (
         <label
-          className='font-poppins font-medium mt-2 text-[16px] align-center'
+          className="font-poppins font-medium mt-2 text-[16px] align-center"
           style={{ color: labelColor }}
         >
           {label}
           {required && <span className="text-[#CE4B34] ml-1">*</span>}
         </label>
       )}
-      <div className='relative'>
+      <div className="relative">
         <input
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           name={name}
-          value={value || ''}
+          value={value || ""}
           onChange={onChange}
           placeholder={placeholder}
           required={required}
           className={`w-full px-4 py-4 border rounded-customradius focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent item-center ${
-            hasError ? '' : 'border-gray-300'
+            hasError ? "" : "border-gray-300"
           } ${inputClassName}`}
           style={
             hasError
               ? {
                   borderColor: validationColor,
-                  '--tw-ring-color': validationColor
+                  "--tw-ring-color": validationColor
                 }
               : undefined
           }
@@ -130,35 +125,35 @@ const PasswordField = ({
           {...inputProps}
         />
         <button
-          type='button'
+          type="button"
           onClick={togglePasswordVisibility}
-          className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none'
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
         >
-          <span className='material-symbols-outlined item-center py-2'>
-            {showPassword ? 'visibility_off' : 'visibility'}
+          <span className="material-symbols-outlined item-center py-2">
+            {showPassword ? "visibility_off" : "visibility"}
           </span>
         </button>
       </div>
       {hasError && errorHasContent && (
         <p
-          className='flex items-center gap-2 text-sm mt-1'
+          className="flex items-center gap-2 text-sm mt-1"
           style={{ color: validationColor }}
         >
           {showErrorIcon && (
-            <span className='material-symbols-outlined text-base'>error</span>
+            <span className="material-symbols-outlined text-base">error</span>
           )}
-          <span>{typeof error === 'string' ? error.trim() : error}</span>
+          <span>{typeof error === "string" ? error.trim() : error}</span>
         </p>
       )}
       {shouldShowRules && (
-        <ul className='mt-3 space-y-2 text-sm font-poppins'>
+        <ul className="mt-3 space-y-2 text-sm font-poppins">
           {passwordRules.map((rule) => (
             <li
               key={rule.key}
               className={`flex items-center gap-2 transition-colors duration-150 ${
                 rule.isValid
-                  ? 'text-[color:var(--color-secondary-100,#1C253C)]'
-                  : 'text-[#1C253C80]'
+                  ? "text-[color:var(--color-secondary-100,#1C253C)]"
+                  : "text-[#1C253C80]"
               }`}
             >
               {renderRuleIndicator(rule.isValid)}
@@ -171,7 +166,7 @@ const PasswordField = ({
         <p className="text-gray-500 text-sm mt-1">{helperText}</p>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default PasswordField
+export default PasswordField;

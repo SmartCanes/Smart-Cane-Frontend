@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-
+import { useState, useEffect, useRef } from "react";
 
 const SelectField = ({
   label,
-  placeholder = '',
+  placeholder = "",
   value,
-  onChange, 
+  onChange,
   name,
   id,
   required = false,
   disabled = false,
-  error = '',
-  helperText = '',
-  className = '',
-  inputClassName = '', //
-  labelClassName = '',
+  error = "",
+  helperText = "",
+  className = "",
+  inputClassName = "", //
+  labelClassName = "",
   options = [],
   ...props
 }) => {
@@ -39,24 +38,23 @@ const SelectField = ({
     const mockEvent = {
       target: {
         name: name, // Ipasa 'yung pangalan ng field
-        value: option.value, // Ipasa 'yung napiling value
-      },
+        value: option.value // Ipasa 'yung napiling value
+      }
     };
 
-    onChange(mockEvent); 
-    setIsOpen(false); 
+    onChange(mockEvent);
+    setIsOpen(false);
   };
 
- 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (selectRef.current && !selectRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [selectRef]);
 
@@ -90,20 +88,20 @@ const SelectField = ({
             transition-all duration-200
             ${
               disabled
-                ? 'bg-gray-100 cursor-not-allowed'
-                : 'bg-white cursor-pointer'
+                ? "bg-gray-100 cursor-not-allowed"
+                : "bg-white cursor-pointer"
             }
             ${
               error
-                ? 'border-[#CE4B34] focus:ring-[#CE4B34]'
-                : 'border-gray-300 focus:ring-secondary-100'
+                ? "border-[#CE4B34] focus:ring-[#CE4B34]"
+                : "border-gray-300 focus:ring-secondary-100"
             }
             ${inputClassName} 
           `}
           {...props}
         >
           {/* Ito 'yung text (placeholder or selected value) */}
-          <span className={value ? 'text-secondary-100' : 'text-gray-400'}>
+          <span className={value ? "text-secondary-100" : "text-gray-400"}>
             {displayLabel}
           </span>
 
@@ -115,7 +113,7 @@ const SelectField = ({
             strokeWidth={2}
             stroke="currentColor"
             className={`w-5 h-5 text-gray-500 transition-transform duration-200
-                        ${isOpen ? 'transform rotate-180' : ''}`}
+                        ${isOpen ? "transform rotate-180" : ""}`}
           >
             <path
               strokeLinecap="round"
