@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
-import icaneLogo from "@/assets/images/smartcanelogo 1.png";
+import icaneLogo from "@/assets/images/smartcane-logo-blue.png";
 import heroBackground from "@/assets/images/background.png";
 import gpsCardArrow from "@/assets/images/gps-card-arrow.png";
 import dangerTriangle from "@/assets/images/danger-triangle.svg";
