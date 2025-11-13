@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from "framer-motion";
 import PrimaryButton from "./PrimaryButton";
 
 const ValidationModal = ({
@@ -5,7 +6,8 @@ const ValidationModal = ({
   email,
   onClose,
   onAction,
-  position = "center"
+  position = "center",
+  isVisible = true
 }) => {
   const getContent = () => {
     switch (type) {
@@ -26,7 +28,6 @@ const ValidationModal = ({
           ),
           showButton: false
         };
-
       case "account-created":
         return {
           title: "Account Created!",
@@ -39,7 +40,6 @@ const ValidationModal = ({
           buttonText: "Go to Login",
           showButton: true
         };
-
       case "login-success":
         return {
           title: "Welcome!",
@@ -51,7 +51,6 @@ const ValidationModal = ({
           ),
           showButton: false
         };
-
       case "phone-verification":
         return {
           title: "Phone Verification",
@@ -68,7 +67,6 @@ const ValidationModal = ({
           ),
           showButton: false
         };
-
       default:
         return {
           title: "Notification",
@@ -80,7 +78,6 @@ const ValidationModal = ({
 
   const content = getContent();
 
-  // Determine positioning and styling based on position prop
   const isCornerPosition =
     position === "top-right" ||
     position === "top-left" ||
@@ -95,7 +92,6 @@ const ValidationModal = ({
 
   const shouldDimBackground =
     position === "center" && content.title !== "Account Created!";
-  const overlayClasses = shouldDimBackground ? "bg-black bg-opacity-50" : "";
 
   const modalSizeClasses = isCornerPosition
     ? "max-w-sm"
@@ -106,38 +102,67 @@ const ValidationModal = ({
   const descriptionSize = isCornerPosition ? "text-sm" : "text-lg";
 
   return (
-    <div
-      className={`${positionClasses[position] || positionClasses.center} ${overlayClasses} z-50`}
-    >
-      <div className={`bg-white rounded-3xl shadow-2xl ${modalSizeClasses}`}>
-        {/* Header with curved background */}
-        <div className={`bg-[#1C253C] ${headerHeight} rounded-t-3xl`}></div>
-
-        {/* Content */}
-        <div className={`${contentPadding} text-center`}>
-          <h1
-            className={`font-poppins ${titleSize} font-bold text-[#1C253C] mb-4`}
-          >
-            {content.title}
-          </h1>
-
-          <p
-            className={`font-poppins text-[#1C253C] ${descriptionSize} leading-relaxed ${content.showButton ? "mb-8" : ""}`}
-          >
-            {content.description}
-          </p>
-
-          {content.showButton && (
-            <PrimaryButton
-              className="font-poppins w-full max-w-md mx-auto py-4 text-[18px] font-medium"
-              bgColor="bg-primary-100"
-              text={content.buttonText}
-              onClick={onAction}
+    <AnimatePresence>
+      {isVisible && (
+        <>
+          {shouldDimBackground && (
+            <motion.div
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999]"
+              onClick={onClose}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
             />
           )}
-        </div>
-      </div>
-    </div>
+
+          {/* Modal */}
+          <motion.div
+            className={`${positionClasses[position] || positionClasses.center} z-[9999] pointer-events-none`}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{
+              duration: 0.3,
+              ease: "easeOut"
+            }}
+          >
+            <div
+              className={`bg-white rounded-3xl shadow-2xl ${modalSizeClasses} pointer-events-auto`}
+            >
+              {/* Header */}
+              <div
+                className={`bg-[#1C253C] ${headerHeight} rounded-t-3xl`}
+              ></div>
+
+              {/* Content */}
+              <div className={`${contentPadding} text-center`}>
+                <h1
+                  className={`font-poppins ${titleSize} font-bold text-[#1C253C] mb-4`}
+                >
+                  {content.title}
+                </h1>
+
+                <p
+                  className={`font-poppins text-[#1C253C] ${descriptionSize} leading-relaxed ${content.showButton ? "mb-8" : ""}`}
+                >
+                  {content.description}
+                </p>
+
+                {content.showButton && (
+                  <PrimaryButton
+                    className="font-poppins w-full max-w-md mx-auto py-4 text-[18px] font-medium"
+                    bgColor="bg-primary-100"
+                    text={content.buttonText}
+                    onClick={onAction}
+                  />
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 
