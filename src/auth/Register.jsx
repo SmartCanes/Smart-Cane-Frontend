@@ -16,6 +16,7 @@ const Register = () => {
     type: null,
     position: "center"
   });
+
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -141,7 +142,7 @@ const Register = () => {
       setModalConfig({
         visible: true,
         type: "phone-verification",
-        position: "top-center"
+        position: "center"
       });
       // Auto-hide modal and move to step 3 after 3 seconds
       setTimeout(() => {

@@ -57,7 +57,7 @@ function LiveMap({
   return (
     <div className="relative w-full h-full">
       {/* Search bar overlay */}
-      <div className="absolute top-4 left-4 z-[1000] pointer-events-none">
+      <div className="absolute top-4 left-4 pointer-events-none">
         <div className="relative pointer-events-auto">
           <input
             type="text"
@@ -75,7 +75,7 @@ function LiveMap({
       </div>
 
       {searchQuery && (
-        <div className="absolute top-[64px] left-4 z-[1000] w-[230px] overflow-hidden rounded-xl bg-white shadow-xl pointer-events-auto">
+        <div className="absolute top-[64px] left-4 w-[230px] overflow-hidden rounded-xl bg-white shadow-xl pointer-events-auto">
           <div className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
