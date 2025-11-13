@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import PrimaryButton from "./PrimaryButton";
+import { useEffect, useState } from "react";
 
 const ValidationModal = ({
   type,
@@ -9,6 +10,22 @@ const ValidationModal = ({
   position = "center",
   isVisible = true
 }) => {
+  const [isModalVisible, setIsModalVisible] = useState(isVisible || onClose);
+  useEffect(() => {
+    if (!isModalVisible) return;
+
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    return () => {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, [isModalVisible]);
+
   const getContent = () => {
     switch (type) {
       case "verification-code":
@@ -90,25 +107,32 @@ const ValidationModal = ({
     "top-center": "fixed top-4 left-1/2 transform -translate-x-1/2"
   };
 
-  const shouldDimBackground =
-    position === "center" && content.title !== "Account Created!";
+  const shouldDimBackground = position === "center";
 
   const modalSizeClasses = isCornerPosition
-    ? "max-w-sm"
-    : "max-w-2xl w-full mx-4";
-  const headerHeight = isCornerPosition ? "h-20" : "h-32";
-  const contentPadding = isCornerPosition ? "px-8 py-6" : "px-12 py-10";
-  const titleSize = isCornerPosition ? "text-3xl" : "text-5xl";
-  const descriptionSize = isCornerPosition ? "text-sm" : "text-lg";
+    ? "max-w-sm w-80"
+    : "w-full max-w-2xl mx-10 sm:mx-7";
+
+  const contentPadding = isCornerPosition
+    ? "px-4 py-4 sm:px-8 sm:py-6"
+    : "px-4 py-6 sm:px-12 sm:py-10";
+  const headerHeight = isCornerPosition ? "h-16 sm:h-20" : "h-24 sm:h-32";
+
+  const titleSize = isCornerPosition
+    ? "text-lg sm:text-3xl"
+    : "text-2xl sm:text-5xl";
+  const descriptionSize = isCornerPosition
+    ? "text-xs sm:text-sm"
+    : "text-sm sm:text-lg";
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {isModalVisible && (
         <>
           {shouldDimBackground && (
             <motion.div
               className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999]"
-              onClick={onClose}
+              onClick={() => setIsModalVisible(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -119,16 +143,45 @@ const ValidationModal = ({
           {/* Modal */}
           <motion.div
             className={`${positionClasses[position] || positionClasses.center} z-[9999] pointer-events-none`}
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{
+              opacity: 0,
+              scale: position === "center" ? 0.9 : 1,
+              x:
+                position === "top-right"
+                  ? 50
+                  : position === "top-left"
+                    ? -50
+                    : 0,
+              y:
+                position === "center" ? 20 : position === "top-center" ? -50 : 0
+            }}
+            animate={{
+              opacity: 1,
+              scale: position === "center" ? 1 : 1,
+              x: 0,
+              y: 0
+            }}
+            exit={{
+              opacity: 0,
+              scale: position === "center" ? 0.9 : 1,
+              x:
+                position === "top-right"
+                  ? 50
+                  : position === "top-left"
+                    ? -50
+                    : 0,
+              y:
+                position === "center" ? 20 : position === "top-center" ? -50 : 0
+            }}
             transition={{
-              duration: 0.3,
-              ease: "easeOut"
+              type: "spring",
+              stiffness: 300,
+              damping: 25
             }}
           >
             <div
               className={`bg-white rounded-3xl shadow-2xl ${modalSizeClasses} pointer-events-auto`}
+              onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               <div
