@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import icaneLogo from "@/assets/images/smartcane-logo-blue.png";
 import heroBackground from "@/assets/images/background.png";
@@ -23,7 +23,10 @@ import {
   BlinkingIcon,
   FadeIn,
   HoverIcon,
+  HoverNavEffect,
   ScaleIn,
+  SlideInFromLeft,
+  SlideInFromRight,
   SlideUp,
   TextFade,
   TextReveal
@@ -347,25 +350,25 @@ const GuestPage = () => {
               targetId="home"
               className="hover:text-[#11285A] transition-colors duration-200"
             >
-              Home
+              <HoverNavEffect>Home</HoverNavEffect>
             </ScrollLink>
             <ScrollLink
               targetId="features"
               className="hover:text-[#11285A] transition-colors duration-200"
             >
-              iCane
+              <HoverNavEffect>iCane</HoverNavEffect>
             </ScrollLink>
             <ScrollLink
               targetId="about"
               className="hover:text-[#11285A] transition-colors duration-200"
             >
-              About Us
+              <HoverNavEffect>About Us</HoverNavEffect>
             </ScrollLink>
             <ScrollLink
               targetId="contact"
               className="hover:text-[#11285A] transition-colors duration-200"
             >
-              Contact Us
+              <HoverNavEffect>Contact Us</HoverNavEffect>
             </ScrollLink>
           </nav>
 
@@ -609,45 +612,59 @@ const GuestPage = () => {
       </FadeIn>
 
       <div className="flex flex-col gap-8 justify-center items-center mx-auto px-4 text-[12px] text-center max-w-7xl sm:flex-row sm:text-left">
-        <div className="flex-1 flex flex-col gap-8">
-          <div className="flex flex-col gap-3 items-center sm:items-start ">
-            <h3 className="text-[14px] text-card-100 font-semibold">Call Us</h3>
-            <p>We’re just a call away for any questions or support you need.</p>
-            <div className="flex items-center justify-start gap-3 min-w-40">
-              <HoverIcon src={callIcon} alt="Call" size={10} />
-              <p>09XXXXXXXXX</p>
+        <div className="flex-1">
+          <SlideInFromLeft delay={0.6} className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 items-center sm:items-start ">
+              <h3 className="text-[14px] text-card-100 font-semibold">
+                Call Us
+              </h3>
+              <p>
+                We’re just a call away for any questions or support you need.
+              </p>
+              <div className="flex items-center justify-start gap-3 min-w-40">
+                <HoverIcon src={callIcon} alt="Call" size={10} />
+                <p>09XXXXXXXXX</p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-3 items-center sm:items-start">
-            <h3 className="text-[14px] text-card-100 font-semibold">
-              Email Us
-            </h3>
-            <p>
-              Send us an email and we’ll get back to you as soon as possible.
-            </p>
-            <div className="flex items-center justify-start gap-3 min-w-36">
-              <HoverIcon src={emailIcon} alt="Email" size={10} />
-              <p>iCane@gmail.com</p>
+            <div className="flex flex-col gap-3 items-center sm:items-start">
+              <h3 className="text-[14px] text-card-100 font-semibold">
+                Email Us
+              </h3>
+              <p>
+                Send us an email and we’ll get back to you as soon as possible.
+              </p>
+              <div className="flex items-center justify-start gap-3 min-w-36">
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <HoverIcon src={emailIcon} alt="Email" size={10} />
+                </a>
+                <p>iCane@gmail.com</p>
+              </div>
             </div>
-          </div>
+          </SlideInFromLeft>
         </div>
 
         <div className="hidden sm:block w-px bg-gray-300 mx-8 self-stretch"></div>
 
-        <div className="flex-1 w-full max-w-7xl flex flex-col gap-3">
-          <h3 className="text-[14px] text-card-100 font-semibold">
-            Frequently Asked Questions
-          </h3>
-          <div className="flex flex-col gap-2 ">
-            {faqs.map((faq, index) => (
-              <FAQItem
-                key={index}
-                question={faq.question}
-                answer={faq.answer}
-              />
-            ))}
-          </div>
+        <div className="flex-1 w-full max-w-7xl">
+          <SlideInFromRight delay={0.6} className="flex flex-col gap-3">
+            <h3 className="text-[14px] text-card-100 font-semibold">
+              Frequently Asked Questions
+            </h3>
+            <div className="flex flex-col gap-2 ">
+              {faqs.map((faq, index) => (
+                <FAQItem
+                  key={index}
+                  question={faq.question}
+                  answer={faq.answer}
+                />
+              ))}
+            </div>
+          </SlideInFromRight>
         </div>
       </div>
 
@@ -676,27 +693,27 @@ const GuestPage = () => {
               <nav className="space-y-3 text-sm text-white/70">
                 <ScrollLink
                   targetId="home"
-                  className="hover:text-white transition-colors duration-200 block"
+                  className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  Home
+                  <HoverNavEffect direction="right">Home</HoverNavEffect>
                 </ScrollLink>
                 <ScrollLink
                   targetId="features"
-                  className="hover:text-white transition-colors duration-200 block"
+                  className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  iCane
+                  <HoverNavEffect direction="right">iCane</HoverNavEffect>
                 </ScrollLink>
                 <ScrollLink
                   targetId="about"
-                  className="hover:text-white transition-colors duration-200 block"
+                  className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  About Us
+                  <HoverNavEffect direction="right">About Us</HoverNavEffect>
                 </ScrollLink>
                 <ScrollLink
                   targetId="contact"
-                  className="hover:text-white transition-colors duration-200 block"
+                  className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  Contact Us
+                  <HoverNavEffect direction="right">Contact Us</HoverNavEffect>
                 </ScrollLink>
               </nav>
             </div>
@@ -706,7 +723,16 @@ const GuestPage = () => {
               </h4>
               <ul className="space-y-3 text-sm text-white/70">
                 <li>09XXXXXXXXX</li>
-                <li>iCane@gmail.com</li>
+                <li>
+                  <a
+                    href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors duration-200"
+                  >
+                    iCane@gmail.com
+                  </a>
+                </li>
                 <li>Quezon City University</li>
               </ul>
             </div>
@@ -716,7 +742,7 @@ const GuestPage = () => {
               </h4>
               <div className="flex flex-wrap gap-3">
                 <a
-                  href="!"
+                  href="https://www.facebook.com/profile.php?id=61583597618139&rdid=FklUw1PMZ8WdboYJ&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1WUW3U1mRm%2F#"
                   aria-label="Visit the iCane Facebook page"
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
@@ -749,12 +775,12 @@ const GuestPage = () => {
                   />
                 </a>
               </div>
-              <a
-                href="faq"
-                className="block text-sm text-white/70 hover:text-white transition-colors duration-200"
+              <ScrollLink
+                targetId="contact"
+                className="text-white/70 hover:text-white transition-colors duration-200 block cursor-pointer"
               >
-                FAQ
-              </a>
+                <HoverNavEffect direction="right">FAQ</HoverNavEffect>
+              </ScrollLink>
             </div>
           </div>
         </div>

@@ -25,7 +25,7 @@ export const SlideUp = ({ children, delay = 0, duration = 0.6 }) => (
 
 export const ScaleIn = ({ children, delay = 0, duration = 0.6 }) => (
   <motion.div
-    initial={{ opacity: 0, scale: 0.9 }}
+    initial={{ opacity: 0.0, scale: 0.9 }}
     whileInView={{ opacity: 1, scale: 1 }}
     transition={{ duration, delay }}
     viewport={{ amount: 0.2 }}
@@ -45,12 +45,18 @@ export const SlideInFromLeft = ({ children, delay = 0, duration = 0.6 }) => (
   </motion.div>
 );
 
-export const SlideInFromRight = ({ children, delay = 0, duration = 0.6 }) => (
+export const SlideInFromRight = ({
+  children,
+  delay = 0,
+  duration = 0.6,
+  className
+}) => (
   <motion.div
     initial={{ opacity: 0, x: 40 }}
     whileInView={{ opacity: 1, x: 0 }}
     transition={{ duration, delay }}
     viewport={{ amount: 0.2 }}
+    className={className}
   >
     {children}
   </motion.div>
@@ -219,5 +225,33 @@ export const BlinkingIcon = ({
         ease: "easeInOut"
       }}
     />
+  );
+};
+
+export const HoverNavEffect = ({
+  children,
+  className = "",
+  distance = 5,
+  direction = "up"
+}) => {
+  const motionProps = {};
+  if (direction === "right") motionProps.x = distance;
+  else if (direction === "left") motionProps.x = -distance;
+  else if (direction === "up") motionProps.y = -distance;
+  else if (direction === "down") motionProps.y = distance;
+
+  return (
+    <motion.div
+      initial={{ x: 0, y: 0 }}
+      whileHover={motionProps}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      }}
+      className={`inline-block cursor-pointer ${className}`}
+    >
+      {children}
+    </motion.div>
   );
 };
