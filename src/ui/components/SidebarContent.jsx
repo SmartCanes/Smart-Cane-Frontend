@@ -1,3 +1,4 @@
+import { BlinkIcon } from "@/wrapper/MotionWrapper";
 import { Link } from "react-router-dom";
 
 const SidebarContent = () => {
@@ -13,11 +14,10 @@ const SidebarContent = () => {
         />
         <div className="absolute top-1/2 -translate-y-1/2 flex items-center flex-col gap-y-24">
           <Link to="/">
-            <img
+            <BlinkIcon
               src="src/assets/images/smartcane-logo.png"
               alt="Sidebar Image"
-              width={290}
-              className=""
+              className="w-[290px]"
             />
           </Link>
 

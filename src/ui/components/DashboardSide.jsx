@@ -1,7 +1,8 @@
 import { Icon } from "@iconify/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
 import findCaneIcon from "@/assets/images/findcane.png";
+import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 
 const DashboardSide = ({ className = "" }) => {
   const navigate = useNavigate();
@@ -69,16 +70,18 @@ const DashboardSide = ({ className = "" }) => {
     >
       {/* Logo and Brand - Same height as header */}
       <div className="h-[80px] flex items-center justify-start px-6 border-b border-gray-700/30">
-        <div className="flex items-center gap-3">
-          <img
-            src={icaneLogo}
-            alt="iCane logo"
-            className="h-12 w-[60px] object-contain"
-          />
-          <span className="text-white text-4xl font-gabriela tracking-wide">
-            icane
-          </span>
-        </div>
+        <Link to="/dashboard">
+          <div className="flex items-center gap-3">
+            <BlinkingIcon
+              src={icaneLogo}
+              alt="iCane logo"
+              className="h-12 w-[60px] object-contain"
+            />
+            <span className="text-white text-4xl font-gabriela tracking-wide">
+              icane
+            </span>
+          </div>
+        </Link>
       </div>
 
       {/* Navigation Menu */}
