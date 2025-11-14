@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import notifBell from "@/assets/images/notifbell.png";
+import { useNavigate } from "react-router-dom";
+import { useUserStore } from "@/stores/useStore";
 
 const Header = ({
   userName = "Z",
@@ -8,10 +10,11 @@ const Header = ({
   notificationCount = 0,
   onNotificationClick,
   onProfileClick,
-  onLogoutClick,
   className = ""
 }) => {
+  const { logout } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -33,7 +36,8 @@ const Header = ({
 
   const handleLogoutClick = () => {
     setIsDropdownOpen(false);
-    if (onLogoutClick) onLogoutClick();
+    logout();
+    navigate("/");
   };
 
   return (

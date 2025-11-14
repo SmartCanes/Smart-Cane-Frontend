@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PrimaryButton from "../ui/components/PrimaryButton.jsx";
 import smartcaneLogo from "../assets/images/smartcane-logo.png";
+import { BlinkingIcon } from "@/wrapper/MotionWrapper.jsx";
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -15,14 +16,17 @@ const Welcome = () => {
         src={smartcaneLogo}
         alt="Smart Cane Logo"
         width={720}
-        className="absolute opacity-5 select-none z-0"
+        className="absolute opacity-5 select-none z-0 pointer-events-none"
       />
-      <img
-        src={smartcaneLogo}
-        alt="Smart Cane Logo"
-        width={290}
-        className="z-10"
-      />
+
+      <Link to="/">
+        <BlinkingIcon
+          src={smartcaneLogo}
+          alt="Smart Cane Logo"
+          className="z-10 w-[290px]"
+        />
+      </Link>
+
       <p className="font-poppins text-white max-w-[490px] py-16 text-center text-[20px] z-10">
         Bringing independence closer through a cane that's more than just
         support — it's smart.

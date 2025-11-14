@@ -61,10 +61,7 @@ const ValidationModal = ({
         return {
           title: "Welcome!",
           description: (
-            <>
-              You have successfully logged into your ICane account. We are
-              redirecting you to your dashboard now.
-            </>
+            <>You have successfully logged into your ICane account.</>
           ),
           showButton: false
         };

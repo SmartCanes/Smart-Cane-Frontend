@@ -1,3 +1,6 @@
+import { BlinkIcon } from "@/wrapper/MotionWrapper";
+import { Link } from "react-router-dom";
+
 const SidebarContent = () => {
   return (
     <>
@@ -10,12 +13,14 @@ const SidebarContent = () => {
           className="opacity-5"
         />
         <div className="absolute top-1/2 -translate-y-1/2 flex items-center flex-col gap-y-24">
-          <img
-            src="src/assets/images/smartcane-logo.png"
-            alt="Sidebar Image"
-            width={290}
-            className=""
-          />
+          <Link to="/">
+            <BlinkIcon
+              src="src/assets/images/smartcane-logo.png"
+              alt="Sidebar Image"
+              className="w-[290px]"
+            />
+          </Link>
+
           <h1 className="font-gabriela text-h1 text-[#FDFCFA]">icane</h1>
           <p className="font-poppins text-paragraph text-[#FDFCFA] text-center max-w-nigga">
             Bringing independence closer through a cane that’s more than just

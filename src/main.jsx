@@ -13,6 +13,7 @@ import Login from "./auth/Login.jsx";
 import Register from "./auth/Register.jsx";
 import ForgotPassword from "./auth/FogotPassword.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -20,10 +21,15 @@ createRoot(document.getElementById("root")).render(
       <Routes>
         <Route path="/" element={<GuestPage />} />
         <Route path="/welcome" element={<Welcome />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route element={<PublicLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
+
+        <Route element={<ProtectedLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   </StrictMode>

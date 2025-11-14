@@ -26,3 +26,8 @@
   --text-h1: 70px;
   --color-logout-100: #f3c8c8;
 }
+
+body {
+  font-family: var(--font-poppins);
+}
+
