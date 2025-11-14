@@ -13,6 +13,7 @@ import icaneLabel from "@/assets/images/icane-label.png";
 import facebookIcon from "@/assets/images/facebook-icon.png";
 import twitterIcon from "@/assets/images/twitter-icon.png";
 import instagramIcon from "@/assets/images/instagram-icon.png";
+import teamPhoto from "@/assets/images/team-photo.png";
 import FeatureCard from "@/ui/components/FeatureCard";
 
 const FEATURE_CARD_ACTIVE_CLASS =
@@ -344,7 +345,6 @@ const GuestPage = () => {
           </button>
         </div>
       </header>
-
       {/* Hero Section */}
       <section
         id="home"
@@ -377,7 +377,6 @@ const GuestPage = () => {
           </div>
         </div>
       </section>
-
       {/* Feature carousel */}
       <section
         id="features"
@@ -477,22 +476,16 @@ const GuestPage = () => {
           ))}
         </div>
       </section>
-
       {/* Section divider for iCane */}
-
       <div className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16">
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
         <h3 className="absolute bg-[#FDFCF9] px-12 text-[10px] font-semibold tracking-[0.5em] text-[#11285A] sm:px-20">
           iCane
         </h3>
       </div>
-
       {/* iCane placeholder */}
-
       <div className="mx-auto flex w-full  h-[500px] bg-[#dfdfdf] px-4 py-10 sm:min-h-[200px] sm:px-8 md:min-h-[240px] md:px-12"></div>
-
       {/* Section divider for About */}
-
       <div
         id="about"
         className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16"
@@ -502,37 +495,53 @@ const GuestPage = () => {
           ABOUT US
         </h3>
       </div>
-
       {/* About placeholder */}
       <section
         aria-label="Placeholder for About Us section"
         className="px-4 sm:px-6"
       >
-        <div className="mx-auto flex max-w-5xl min-h-[160px] rounded-2xl bg-[#dfdfdf] px-4 py-10 sm:min-h-[200px] sm:px-8 md:min-h-[240px]" />
+        <div className="flex justify-center rounded-2xl bg-[#dfdfdf] min-h-36 w-full overflow-hidden sm:min-h-[200px] md:min-h-[240px]">
+          <img
+            src={teamPhoto}
+            alt="Team Photo"
+            className="object-cover w-full rounded-2xl"
+          />
+        </div>
       </section>
-
-      <p className="mx-auto mt-10 max-w-4xl px-4 text-center font-montserrat text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
-        “Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat.”
+      <p className="mx-auto mt-10 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
+        At iCane, we believe technology should make life easier for everyone.
+        Our smart cane is designed to help people with visual impairments move
+        safely and confidently every day.
       </p>
-
+      <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
+        The iCane Smart Cane uses smart sensors and simple feedback to guide
+        users and prevent obstacles. It’s built to be reliable, easy to use, and
+        supportive of greater independence.
+      </p>
+      <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm pb-16">
+        Our team is passionate about creating tools that truly make a
+        difference. We listen to our users, learn from their experiences, and
+        keep improving to make iCane even better.
+      </p>
       <div
         id="contact"
-        className="relative flex items-center justify-center py-16"
+        className="relative mx-auto flex w-full items-center justify-center "
       >
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
-        <h3 className="absolute bg-[#FDFCF9] px-20 text-[10px] font-semibold tracking-[0.5em] text-[#11285A]">
+        <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[10px] font-semibold tracking-[0.5em] text-[#11285A]">
           CONTACT US
         </h3>
       </div>
 
-      <p className="mx-auto mt-20 max-w-4xl text-center font-montserrat text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] pb-16">
-        “Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat.”
+      <p className="mx-auto mt-14 px-4 max-w-7xl text-center text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] font-poppins">
+        <strong className="text-card-100">Welcome to iCane</strong> — we’re here
+        to help.
+      </p>
+
+      <p className="mx-auto px-4 max-w-7xl text-center font-poppins text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] pb-16">
+        Whether you have questions, need support, or want to share your
+        experience, our team is ready to assist. Your feedback helps us improve
+        and deliver technology that enhances mobility, safety, and independence.
       </p>
 
       {/* Footer */}
