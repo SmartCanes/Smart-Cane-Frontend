@@ -10,9 +10,12 @@ import QuickActions from "@/ui/components/QuickActions";
 import DailyActivity from "@/ui/components/DailyActivity";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import { fetchRoute } from "@/api/GraphHopperService";
+import { useUserStore } from "@/stores/useStore";
 
 const Dashboard = () => {
-  const [showModal, setShowModal] = useState(true);
+  const { logout, isLoggedIn, showLoginModal, setShowLoginModal } =
+    useUserStore();
+  const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("track"); // 'track' or 'history'
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -108,8 +111,15 @@ const Dashboard = () => {
     };
   }, []); // Ang empty array [] ay nagsasabing "gawin ito isang beses lang pagka-load"
 
+  useEffect(() => {
+    if (isLoggedIn && !showLoginModal) {
+      setShowModal(true); // show modal locally
+      setShowLoginModal(true); // mark as shown in store
+    }
+  }, [isLoggedIn, showLoginModal]);
+
   const handleLogout = () => {
-    // Navigate to guest page
+    logout();
     navigate("/");
   };
 
