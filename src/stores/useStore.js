@@ -6,9 +6,11 @@ export const useUserStore = create(
     (set) => ({
       userName: "",
       isLoggedIn: false,
+      showLoginModal: false,
 
       login: (username) => set({ userName: username, isLoggedIn: true }),
-      logout: () => set({ userName: "", isLoggedIn: false })
+      logout: () => set({ userName: "", isLoggedIn: false }),
+      setShowLoginModal: (value) => set({ showLoginModal: value })
     }),
     {
       name: "user-session",
