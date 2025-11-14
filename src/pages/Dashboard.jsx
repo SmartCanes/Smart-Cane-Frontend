@@ -13,8 +13,7 @@ import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
 
 const Dashboard = () => {
-  const { logout, isLoggedIn, showLoginModal, setShowLoginModal } =
-    useUserStore();
+  const { logout, showLoginModal, setShowLoginModal } = useUserStore();
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("track"); // 'track' or 'history'
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,7 +96,6 @@ const Dashboard = () => {
       }
     );
 
-    // Auto-hide modal after 3 seconds
     const timer = setTimeout(() => {
       setShowModal(false);
     }, 3000);
@@ -109,14 +107,13 @@ const Dashboard = () => {
       }
       clearTimeout(timer);
     };
-  }, []); // Ang empty array [] ay nagsasabing "gawin ito isang beses lang pagka-load"
+  }, []);
 
   useEffect(() => {
-    if (isLoggedIn && !showLoginModal) {
-      setShowModal(true); // show modal locally
-      setShowLoginModal(true); // mark as shown in store
-    }
-  }, [isLoggedIn, showLoginModal]);
+    if (!showLoginModal) return;
+    setShowModal(true);
+    setShowLoginModal(false);
+  }, [showLoginModal, setShowLoginModal]);
 
   const handleLogout = () => {
     logout();
