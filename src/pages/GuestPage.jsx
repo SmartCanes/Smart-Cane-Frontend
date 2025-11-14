@@ -32,8 +32,7 @@ import {
   TextReveal
 } from "@/wrapper/MotionWrapper";
 
-const FEATURE_CARD_ACTIVE_CLASS =
-  "opacity-100 scale-100 sm:scale-[1.02] shadow-[0_40px_80px_rgba(9,20,46,0.45)]";
+const FEATURE_CARD_ACTIVE_CLASS = "opacity-100 scale-100 sm:scale-[1.02]";
 const FEATURE_CARD_INACTIVE_CLASS = "opacity-40 sm:opacity-60 scale-[0.92]";
 
 const featureCards = [
@@ -347,7 +346,7 @@ const GuestPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FDFCF9] text-[#1C253C]">
+    <div className="min-h-screen w-full bg-[#FDFCF9] text-[#1C253C] overflow-x-hidden">
       {/* Navigation */}
       <header className="w-full bg-white/95 backdrop-blur shadow-sm sticky top-0 z-20">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
@@ -468,7 +467,7 @@ const GuestPage = () => {
           <div
             ref={carouselRef}
             onScroll={updateActiveCard}
-            className="flex snap-x snap-proximity gap-6 overflow-x-auto pb-6 pt-4 scroll-smooth sm:gap-8 lg:gap-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-proximity gap-6 overflow-x-auto pb-6 pt-4 px-2 scroll-smooth sm:gap-8 lg:gap-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
             style={{
               scrollPaddingLeft: "min(10%, 72px)",
               scrollPaddingRight: "min(10%, 72px)"

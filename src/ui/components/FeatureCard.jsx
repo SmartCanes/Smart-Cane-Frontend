@@ -21,7 +21,7 @@ const FeatureCard = forwardRef(
       overlayClassName = "bg-[linear-gradient(135deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0)_62%)]",
       outlineColor,
       isActive = false,
-      activeClassName = "scale-[1.015] shadow-[0_36px_72px_rgba(9,20,46,0.5)]",
+      activeClassName = "scale-[1.015]",
       inactiveClassName = "opacity-95",
       children,
       className = "",
@@ -76,8 +76,8 @@ const FeatureCard = forwardRef(
                 md:w-[500px] md:h-[540px] 
                 lg:w-[580px] lg:h-[580px] 
                 rounded-[32px] md:rounded-[48px] 
-                px-8 py-10 md:px-12 md:py-14 
-                text-center shadow-[0_28px_56px_rgba(9,20,46,0.45)] 
+                px-3 py-10 md:px-12 md:py-14 
+                text-center border-card-100 border-4
                 transition-all duration-300 ease-out 
                 ${isActive ? activeClassName : inactiveClassName} ${className}`}
         style={{ backgroundColor, ...outlineStyle }}
