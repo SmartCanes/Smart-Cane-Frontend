@@ -275,44 +275,65 @@ const GuestPage = () => {
   const isFirstCardActive = activeCardIndex === 0;
   const isLastCardActive = activeCardIndex === featureCards.length - 1;
 
+  const ScrollLink = ({ targetId, children, className }) => {
+    const handleClick = () => {
+      const el = document.getElementById(targetId);
+      const header = document.querySelector("header"); // get sticky header
+      if (el) {
+        const headerHeight = header ? header.offsetHeight : 0;
+        const elementTop = el.getBoundingClientRect().top + window.scrollY;
+        const scrollPosition = elementTop - headerHeight;
+        window.scrollTo({ top: scrollPosition, behavior: "smooth" });
+      }
+    };
+
+    return (
+      <button onClick={handleClick} className={className}>
+        {children}
+      </button>
+    );
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#FDFCF9] text-[#1C253C] font-poppins">
       {/* Navigation */}
       <header className="w-full bg-white/95 backdrop-blur shadow-sm sticky top-0 z-20">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center gap-3">
-            <img
-              src={icaneLogo}
-              alt="iCane logo"
-              className="h-11 w-11 object-contain"
-            />
+            <ScrollLink targetId="home">
+              <img
+                src={icaneLogo}
+                alt="iCane logo"
+                className="h-11 w-11 object-contain"
+              />
+            </ScrollLink>
           </div>
 
-          <nav className="hidden md:flex items-center gap-10 font-montserrat text-sm  tracking-wide">
-            <a
-              href="#home"
+          <nav className="hidden md:flex items-center gap-10 font-montserrat text-sm tracking-wide">
+            <ScrollLink
+              targetId="home"
               className="hover:text-[#11285A] transition-colors duration-200"
             >
               Home
-            </a>
-            <a
-              href="#features"
+            </ScrollLink>
+            <ScrollLink
+              targetId="features"
               className="hover:text-[#11285A] transition-colors duration-200"
             >
               iCane
-            </a>
-            <a
-              href="#about"
+            </ScrollLink>
+            <ScrollLink
+              targetId="about"
               className="hover:text-[#11285A] transition-colors duration-200"
             >
               About Us
-            </a>
-            <a
-              href="#contact"
+            </ScrollLink>
+            <ScrollLink
+              targetId="contact"
               className="hover:text-[#11285A] transition-colors duration-200"
             >
               Contact Us
-            </a>
+            </ScrollLink>
           </nav>
 
           <button
@@ -472,7 +493,10 @@ const GuestPage = () => {
 
       {/* Section divider for About */}
 
-      <div className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16">
+      <div
+        id="about"
+        className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16"
+      >
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
         <h3 className="absolute bg-[#FDFCF9] px-12 text-[10px] font-semibold tracking-[0.5em] text-[#11285A] sm:px-20">
           ABOUT US
@@ -494,7 +518,10 @@ const GuestPage = () => {
         commodo consequat.”
       </p>
 
-      <div className="relative flex items-center justify-center py-16">
+      <div
+        id="contact"
+        className="relative flex items-center justify-center py-16"
+      >
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
         <h3 className="absolute bg-[#FDFCF9] px-20 text-[10px] font-semibold tracking-[0.5em] text-[#11285A]">
           CONTACT US
@@ -535,30 +562,30 @@ const GuestPage = () => {
                 Category
               </h4>
               <nav className="space-y-3 text-sm text-white/70">
-                <a
-                  href="#home"
-                  className="block hover:text-white transition-colors duration-200"
+                <ScrollLink
+                  targetId="home"
+                  className="hover:text-white transition-colors duration-200 block"
                 >
                   Home
-                </a>
-                <a
-                  href="#features"
-                  className="block hover:text-white transition-colors duration-200"
+                </ScrollLink>
+                <ScrollLink
+                  targetId="features"
+                  className="hover:text-white transition-colors duration-200 block"
                 >
                   iCane
-                </a>
-                <a
-                  href="#about"
-                  className="block hover:text-white transition-colors duration-200"
+                </ScrollLink>
+                <ScrollLink
+                  targetId="about"
+                  className="hover:text-white transition-colors duration-200 block"
                 >
                   About Us
-                </a>
-                <a
-                  href="#contact"
-                  className="block hover:text-white transition-colors duration-200"
+                </ScrollLink>
+                <ScrollLink
+                  targetId="contact"
+                  className="hover:text-white transition-colors duration-200 block"
                 >
                   Contact Us
-                </a>
+                </ScrollLink>
               </nav>
             </div>
             <div className="space-y-4">
@@ -577,7 +604,7 @@ const GuestPage = () => {
               </h4>
               <div className="flex flex-wrap gap-3">
                 <a
-                  href="#!"
+                  href="!"
                   aria-label="Visit the iCane Facebook page"
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
@@ -588,7 +615,7 @@ const GuestPage = () => {
                   />
                 </a>
                 <a
-                  href="#!"
+                  href="!"
                   aria-label="Visit the iCane Twitter page"
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
@@ -611,7 +638,7 @@ const GuestPage = () => {
                 </a>
               </div>
               <a
-                href="#faq"
+                href="faq"
                 className="block text-sm text-white/70 hover:text-white transition-colors duration-200"
               >
                 FAQ
