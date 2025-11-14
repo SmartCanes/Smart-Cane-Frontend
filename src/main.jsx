@@ -19,9 +19,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<GuestPage />} />
+        <Route path="/welcome" element={<Welcome />} />
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<GuestPage />} />
-          <Route path="/welcome" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

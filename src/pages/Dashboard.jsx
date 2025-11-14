@@ -115,11 +115,6 @@ const Dashboard = () => {
     setShowLoginModal(false);
   }, [showLoginModal, setShowLoginModal]);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -134,7 +129,6 @@ const Dashboard = () => {
           notificationCount={3}
           onNotificationClick={() => console.log("Notification clicked!")}
           onProfileClick={() => console.log("Profile clicked!")}
-          onLogoutClick={handleLogout}
         />
 
         {/* Content */}
