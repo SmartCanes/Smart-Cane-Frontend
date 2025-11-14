@@ -192,6 +192,7 @@ const GuestPage = () => {
   const navigate = useNavigate();
   const autoScrollEnabled = true;
   const isProgrammaticScrollRef = useRef(false);
+  const [isCarouselVisible, setIsCarouselVisible] = useState(false);
 
   const updateActiveCard = useCallback(() => {
     if (isProgrammaticScrollRef.current) return;
@@ -297,7 +298,7 @@ const GuestPage = () => {
   cardRefs.current = cardRefs.current.slice(0, featureCards.length);
 
   useEffect(() => {
-    if (!autoScrollEnabled) return undefined;
+    if (!autoScrollEnabled || !isCarouselVisible) return;
 
     const intervalId = setInterval(() => {
       scrollToCard(
@@ -306,7 +307,22 @@ const GuestPage = () => {
     }, 5000);
 
     return () => clearInterval(intervalId);
-  }, [autoScrollEnabled, activeCardIndex, scrollToCard]);
+  }, [autoScrollEnabled, activeCardIndex, scrollToCard, isCarouselVisible]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsCarouselVisible(entry.isIntersecting);
+      },
+      { threshold: 0.3 } // triggers when 30% visible
+    );
+
+    if (carouselRef.current) observer.observe(carouselRef.current);
+
+    return () => {
+      if (carouselRef.current) observer.unobserve(carouselRef.current);
+    };
+  }, []);
 
   const isFirstCardActive = activeCardIndex === 0;
   const isLastCardActive = activeCardIndex === featureCards.length - 1;
