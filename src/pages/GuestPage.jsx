@@ -13,8 +13,11 @@ import icaneLabel from "@/assets/images/icane-label.png";
 import facebookIcon from "@/assets/images/facebook-icon.png";
 import twitterIcon from "@/assets/images/twitter-icon.png";
 import instagramIcon from "@/assets/images/instagram-icon.png";
+import callIcon from "@/assets/images/call-icon.png";
+import emailIcon from "@/assets/images/email-icon.png";
 import teamPhoto from "@/assets/images/team-photo.png";
 import FeatureCard from "@/ui/components/FeatureCard";
+import FAQItem from "@/ui/components/FAQItem";
 
 const FEATURE_CARD_ACTIVE_CLASS =
   "opacity-100 scale-100 sm:scale-[1.02] shadow-[0_40px_80px_rgba(9,20,46,0.45)]";
@@ -147,6 +150,25 @@ const featureCards = [
     inactiveClassName: FEATURE_CARD_INACTIVE_CLASS,
     activeClassName: FEATURE_CARD_ACTIVE_CLASS,
     overlayGradient: false
+  }
+];
+
+const faqs = [
+  {
+    question: "How do I use iCane?",
+    answer: "iCane uses AI sensors to detect obstacles and guide you safely."
+  },
+  {
+    question: "How do I charge iCane?",
+    answer: "Simply connect the provided charger to the charging port."
+  },
+  {
+    question: "Can I connect iCane to my phone?",
+    answer: "Yes, iCane can connect via Bluetooth to our companion app."
+  },
+  {
+    question: "How do I use iCane?",
+    answer: "iCane uses AI sensors to detect obstacles and guide you safely."
   }
 ];
 
@@ -296,7 +318,7 @@ const GuestPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FDFCF9] text-[#1C253C] font-poppins">
+    <div className="min-h-screen w-full bg-[#FDFCF9] text-[#1C253C]">
       {/* Navigation */}
       <header className="w-full bg-white/95 backdrop-blur shadow-sm sticky top-0 z-20">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
@@ -538,18 +560,61 @@ const GuestPage = () => {
         to help.
       </p>
 
-      <p className="mx-auto px-4 max-w-7xl text-center font-poppins text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] pb-16">
+      <p className="mx-auto px-4 max-w-7xl text-center font-poppins text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] pb-8">
         Whether you have questions, need support, or want to share your
         experience, our team is ready to assist. Your feedback helps us improve
         and deliver technology that enhances mobility, safety, and independence.
       </p>
 
+      <div className="flex flex-col gap-8 justify-center items-center mx-auto px-4 text-[12px] text-center max-w-7xl sm:flex-row sm:text-left">
+        <div className="flex-1 flex flex-col gap-8">
+          <div className="flex flex-col gap-3 items-center sm:items-start ">
+            <h3 className="text-[14px] text-card-100 font-semibold">Call Us</h3>
+            <p>We’re just a call away for any questions or support you need.</p>
+            <div className="flex items-center justify-start gap-3 min-w-40">
+              <img src={callIcon} alt="call" className="w-10 h-10" />
+              <p>09XXXXXXXXX</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 items-center sm:items-start">
+            <h3 className="text-[14px] text-card-100 font-semibold">
+              Email Us
+            </h3>
+            <p>
+              Send us an email and we’ll get back to you as soon as possible.
+            </p>
+            <div className="flex items-center justify-start gap-3 min-w-36">
+              <img src={emailIcon} alt="email" className="w-10 h-10" />
+              <p>iCane@gmail.com</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden sm:block w-px bg-gray-300 mx-8 self-stretch"></div>
+
+        <div className="flex-1 w-full max-w-7xl flex flex-col gap-3">
+          <h3 className="text-[14px] text-card-100 font-semibold">
+            Frequently Asked Questions
+          </h3>
+          <div className="flex flex-col gap-2 ">
+            {faqs.map((faq, index) => (
+              <FAQItem
+                key={index}
+                question={faq.question}
+                answer={faq.answer}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Footer */}
-      <footer className="bg-[#11285A] text-white">
+      <footer className="bg-[#11285A] text-white mt-8">
         <div className="max-w-5xl mx-auto px-6 py-14 space-y-12">
           <div className=" border-white/15 pt-10 grid gap-10 md:grid-cols-4">
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 ">
                 <img
                   src={icaneLogoWhite}
                   alt="iCane emblem"
