@@ -4,8 +4,10 @@ import SidebarContent from "../ui/components/SidebarContent";
 import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
+import { useUserStore } from "@/stores/useStore";
 
 const Login = () => {
+  const { login, setShowLoginModal } = useUserStore();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
@@ -71,6 +73,8 @@ const Login = () => {
     }
 
     // Login successful
+    login(formData.username);
+    setShowLoginModal(true);
     navigate("/dashboard");
   };
 
