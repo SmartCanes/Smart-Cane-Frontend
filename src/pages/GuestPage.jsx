@@ -436,9 +436,12 @@ const GuestPage = () => {
 
           <ScaleIn delay={1.3}>
             <div className="mx-auto max-w-xs pt-4 sm:max-w-none">
-              <button className="mx-auto w-full rounded-[10px] bg-white px-6 py-3 text-[#11285A] font-semibold shadow-[0_12px_25px_rgba(0,0,0,0.15)] hover:bg-[#F0F4FF] sm:w-[170px]">
+              <Link
+                to="/welcome"
+                className="mx-auto w-full rounded-[10px] bg-white px-6 py-3 text-[#11285A] font-semibold shadow-[0_12px_25px_rgba(0,0,0,0.15)] hover:bg-[#F0F4FF] sm:w-[170px]"
+              >
                 Get Started
-              </button>
+              </Link>
             </div>
           </ScaleIn>
         </div>
