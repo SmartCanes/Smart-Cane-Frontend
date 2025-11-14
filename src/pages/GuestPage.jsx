@@ -18,6 +18,16 @@ import emailIcon from "@/assets/images/email-icon.png";
 import teamPhoto from "@/assets/images/team-photo.png";
 import FeatureCard from "@/ui/components/FeatureCard";
 import FAQItem from "@/ui/components/FAQItem";
+import {
+  BlinkIcon,
+  BlinkingIcon,
+  FadeIn,
+  HoverIcon,
+  ScaleIn,
+  SlideUp,
+  TextFade,
+  TextReveal
+} from "@/wrapper/MotionWrapper";
 
 const FEATURE_CARD_ACTIVE_CLASS =
   "opacity-100 scale-100 sm:scale-[1.02] shadow-[0_40px_80px_rgba(9,20,46,0.45)]";
@@ -324,10 +334,10 @@ const GuestPage = () => {
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center gap-3">
             <ScrollLink targetId="home">
-              <img
+              <BlinkingIcon
                 src={icaneLogo}
                 alt="iCane logo"
-                className="h-11 w-11 object-contain"
+                className="h-11 w-11"
               />
             </ScrollLink>
           </div>
@@ -381,22 +391,37 @@ const GuestPage = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
         <div className="relative mx-auto max-w-5xl px-4 text-center text-white space-y-6 sm:px-6 z-10">
-          <h1 className="font-poppins text-3xl md:text-5xl lg:text-6xl font-semibold leading-tight">
-            The Smart Cane That Sees Ahead.
-          </h1>
-          <h2 className="font-poppins text-xl font-medium md:text-2xl lg:text-3xl text-white/90">
-            iCane: Redefining Mobility with AI-Powered Safety.
-          </h2>
-          <p className="font-poppins text-[16px] md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto">
-            iCane uses advanced sensor technology and AI to detect obstacles,
-            analyze terrain, and guide you with real-time feedback. Gain
-            confidence and independence with a device built for your journey.
-          </p>
-          <div className="mx-auto max-w-xs pt-4 sm:max-w-none">
-            <button className="mx-auto w-full rounded-[10px] bg-white px-6 py-3 text-[#11285A] font-semibold shadow-[0_12px_25px_rgba(0,0,0,0.15)] transition-colors duration-200 hover:bg-[#F0F4FF] sm:w-[170px]">
-              Sign Up
-            </button>
-          </div>
+          <TextFade delay={0.3}>
+            <h1 className="font-poppins text-3xl md:text-5xl lg:text-6xl font-semibold leading-tight">
+              The Smart Cane That Sees Ahead.
+            </h1>
+          </TextFade>
+
+          <TextReveal delay={0.6}>
+            <h2 className="font-poppins text-xl font-medium md:text-2xl lg:text-3xl text-white/90">
+              iCane: Redefining Mobility with AI-Powered Safety.
+            </h2>
+          </TextReveal>
+
+          <TextFade
+            delay={1}
+            className="font-poppins text-[16px] md:text-lg lg:text-xl
+            text-white/90 pr-2"
+          >
+            <p className="font-poppins text-[16px] md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto">
+              iCane uses advanced sensor technology and AI to detect obstacles,
+              analyze terrain, and guide you with real-time feedback. Gain
+              confidence and independence with a device built for your journey.
+            </p>
+          </TextFade>
+
+          <ScaleIn delay={1.3}>
+            <div className="mx-auto max-w-xs pt-4 sm:max-w-none">
+              <button className="mx-auto w-full rounded-[10px] bg-white px-6 py-3 text-[#11285A] font-semibold shadow-[0_12px_25px_rgba(0,0,0,0.15)] hover:bg-[#F0F4FF] sm:w-[170px]">
+                Get Started
+              </button>
+            </div>
+          </ScaleIn>
         </div>
       </section>
       {/* Feature carousel */}
@@ -501,7 +526,7 @@ const GuestPage = () => {
       {/* Section divider for iCane */}
       <div className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16">
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
-        <h3 className="absolute bg-[#FDFCF9] px-12 text-[10px] font-semibold tracking-[0.5em] text-[#11285A] sm:px-20">
+        <h3 className="absolute bg-[#FDFCF9] px-12 text-[14px] font-semibold tracking-[0.5em] text-[#11285A] sm:px-20">
           iCane
         </h3>
       </div>
@@ -513,7 +538,7 @@ const GuestPage = () => {
         className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16"
       >
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
-        <h3 className="absolute bg-[#FDFCF9] px-12 text-[10px] font-semibold tracking-[0.5em] text-[#11285A] sm:px-20">
+        <h3 className="absolute bg-[#FDFCF9] px-12 text-[14px] font-semibold tracking-[0.5em] text-[#11285A] sm:px-20">
           ABOUT US
         </h3>
       </div>
@@ -522,49 +547,66 @@ const GuestPage = () => {
         aria-label="Placeholder for About Us section"
         className="px-4 sm:px-6"
       >
-        <div className="flex justify-center rounded-2xl bg-[#dfdfdf] min-h-36 w-full overflow-hidden sm:min-h-[200px] md:min-h-[240px]">
-          <img
-            src={teamPhoto}
-            alt="Team Photo"
-            className="object-cover w-full rounded-2xl"
-          />
-        </div>
+        <ScaleIn delay={0.2}>
+          <div className="flex justify-center rounded-2xl bg-[#dfdfdf] min-h-36 w-full overflow-hidden sm:min-h-[200px] md:min-h-[240px]">
+            <img
+              src={teamPhoto}
+              alt="Team Photo"
+              className="object-cover w-full rounded-2xl"
+            />
+          </div>
+        </ScaleIn>
       </section>
-      <p className="mx-auto mt-10 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
-        At iCane, we believe technology should make life easier for everyone.
-        Our smart cane is designed to help people with visual impairments move
-        safely and confidently every day.
-      </p>
-      <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
-        The iCane Smart Cane uses smart sensors and simple feedback to guide
-        users and prevent obstacles. It’s built to be reliable, easy to use, and
-        supportive of greater independence.
-      </p>
-      <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm pb-16">
-        Our team is passionate about creating tools that truly make a
-        difference. We listen to our users, learn from their experiences, and
-        keep improving to make iCane even better.
-      </p>
+      <SlideUp delay={0.4}>
+        <p className="mx-auto mt-10 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
+          At iCane, we believe technology should make life easier for everyone.
+          Our smart cane is designed to help people with visual impairments move
+          safely and confidently every day.
+        </p>
+      </SlideUp>
+
+      <SlideUp delay={0.4}>
+        <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
+          The iCane Smart Cane uses smart sensors and simple feedback to guide
+          users and prevent obstacles. It’s built to be reliable, easy to use,
+          and supportive of greater independence.
+        </p>
+      </SlideUp>
+
+      <SlideUp delay={0.6}>
+        <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm pb-16">
+          Our team is passionate about creating tools that truly make a
+          difference. We listen to our users, learn from their experiences, and
+          keep improving to make iCane even better.
+        </p>
+      </SlideUp>
+
       <div
         id="contact"
         className="relative mx-auto flex w-full items-center justify-center "
       >
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
-        <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[10px] font-semibold tracking-[0.5em] text-[#11285A]">
+
+        <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[14px] font-semibold tracking-[0.5em] text-[#11285A]">
           CONTACT US
         </h3>
       </div>
 
-      <p className="mx-auto mt-14 px-4 max-w-7xl text-center text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] font-poppins">
-        <strong className="text-card-100">Welcome to iCane</strong> — we’re here
-        to help.
-      </p>
+      <FadeIn delay={0.2}>
+        <p className="mx-auto mt-14 px-4 max-w-7xl text-center text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] font-poppins">
+          <strong className="text-card-100">Welcome to iCane</strong> — we’re
+          here to help.
+        </p>
+      </FadeIn>
 
-      <p className="mx-auto px-4 max-w-7xl text-center font-poppins text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] pb-8">
-        Whether you have questions, need support, or want to share your
-        experience, our team is ready to assist. Your feedback helps us improve
-        and deliver technology that enhances mobility, safety, and independence.
-      </p>
+      <FadeIn delay={0.4}>
+        <p className="mx-auto px-4 max-w-7xl text-center font-poppins text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] pb-8">
+          Whether you have questions, need support, or want to share your
+          experience, our team is ready to assist. Your feedback helps us
+          improve and deliver technology that enhances mobility, safety, and
+          independence.
+        </p>
+      </FadeIn>
 
       <div className="flex flex-col gap-8 justify-center items-center mx-auto px-4 text-[12px] text-center max-w-7xl sm:flex-row sm:text-left">
         <div className="flex-1 flex flex-col gap-8">
@@ -572,7 +614,7 @@ const GuestPage = () => {
             <h3 className="text-[14px] text-card-100 font-semibold">Call Us</h3>
             <p>We’re just a call away for any questions or support you need.</p>
             <div className="flex items-center justify-start gap-3 min-w-40">
-              <img src={callIcon} alt="call" className="w-10 h-10" />
+              <HoverIcon src={callIcon} alt="Call" size={10} />
               <p>09XXXXXXXXX</p>
             </div>
           </div>
@@ -585,7 +627,7 @@ const GuestPage = () => {
               Send us an email and we’ll get back to you as soon as possible.
             </p>
             <div className="flex items-center justify-start gap-3 min-w-36">
-              <img src={emailIcon} alt="email" className="w-10 h-10" />
+              <HoverIcon src={emailIcon} alt="Email" size={10} />
               <p>iCane@gmail.com</p>
             </div>
           </div>
@@ -615,11 +657,7 @@ const GuestPage = () => {
           <div className=" border-white/15 pt-10 grid gap-10 md:grid-cols-4">
             <div className="space-y-4">
               <div className="flex items-center gap-3 ">
-                <img
-                  src={icaneLogoWhite}
-                  alt="iCane emblem"
-                  className="h-12 w-12 object-contain"
-                />
+                <BlinkIcon src={icaneLogoWhite} alt="iCane emblem" size={12} />
                 <img
                   src={icaneLabel}
                   alt="iCane wordmark"
@@ -682,10 +720,10 @@ const GuestPage = () => {
                   aria-label="Visit the iCane Facebook page"
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
-                  <img
+                  <HoverIcon
                     src={facebookIcon}
                     alt="Facebook icon"
-                    className="h-10 w-10 object-contain"
+                    hoverRotate={-10}
                   />
                 </a>
                 <a
@@ -693,10 +731,10 @@ const GuestPage = () => {
                   aria-label="Visit the iCane Twitter page"
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
-                  <img
+                  <HoverIcon
                     src={twitterIcon}
                     alt="Twitter icon"
-                    className="h-10 w-10 object-contain"
+                    hoverRotate={0}
                   />
                 </a>
                 <a
@@ -704,10 +742,10 @@ const GuestPage = () => {
                   aria-label="Visit the iCane Instagram page"
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
-                  <img
+                  <HoverIcon
                     src={instagramIcon}
                     alt="Instagram icon"
-                    className="h-10 w-10 object-contain"
+                    hoverRotate={10}
                   />
                 </a>
               </div>
