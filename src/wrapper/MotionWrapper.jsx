@@ -165,13 +165,11 @@ export const HoverIcon = ({
       className={`${className} w-[${size}px] h-[${size}px]`}
       initial={{
         scale: 1,
-        rotate: 0,
-        filter: "drop-shadow(0 0 0 rgba(0,0,0,0))"
+        rotate: 0
       }}
       whileHover={{
         scale: hoverScale,
-        rotate: hoverRotate,
-        filter: "drop-shadow(0 0 1px rgba(0,0,0,0.3))"
+        rotate: hoverRotate
       }}
       transition={transition}
     />
@@ -206,7 +204,7 @@ export const BlinkingIcon = ({
   size = 40,
   className = "",
   blinkDuration = 0.3,
-  pauseDuration = 3
+  pauseDuration = 4
 }) => {
   return (
     <motion.img

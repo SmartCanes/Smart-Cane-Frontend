@@ -566,17 +566,13 @@ const GuestPage = () => {
           Our smart cane is designed to help people with visual impairments move
           safely and confidently every day.
         </p>
-      </SlideUp>
 
-      <SlideUp delay={0.4}>
         <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
           The iCane Smart Cane uses smart sensors and simple feedback to guide
           users and prevent obstacles. It’s built to be reliable, easy to use,
           and supportive of greater independence.
         </p>
-      </SlideUp>
 
-      <SlideUp delay={0.6}>
         <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm pb-16">
           Our team is passionate about creating tools that truly make a
           difference. We listen to our users, learn from their experiences, and
