@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import ValidationModal from "@/ui/components/ValidationModal";
 import Header from "@/ui/components/Header";
@@ -14,11 +13,10 @@ import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
 
 const Dashboard = () => {
-  const { logout, showLoginModal, setShowLoginModal } = useUserStore();
+  const { showLoginModal, setShowLoginModal } = useUserStore();
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("track"); // 'track' or 'history'
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
 
   const [userPosition, setUserPosition] = useState(null);
   const [route, setRoute] = useState(null);
