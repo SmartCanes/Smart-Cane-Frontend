@@ -35,7 +35,65 @@ import {
 const FEATURE_CARD_ACTIVE_CLASS = "opacity-100 scale-100 sm:scale-[1.02]";
 const FEATURE_CARD_INACTIVE_CLASS = "opacity-40 sm:opacity-60 scale-[0.92]";
 
-const featureCards = [
+const rawFeatureCards = [
+
+
+ {
+    id: "Visual-Recognition",
+    icon: "tdesign:visual-recognition-filled",
+    title: "AI-Based Visual Recognition",
+    description:
+      "Through AI-powered visual recognition, the Smart Cane identifies objects and surroundings, giving users instant audio descriptions that enhance awareness and support safer decision-making during travel.",
+    backgroundImageOpacity: 0.5,
+    backgroundImagePosition: "center",
+    backgroundImageSize: "130%",
+    backgroundImageClassName: "translate-y-[18px] scale-105",
+    backgroundColor: "#122550",
+    backgroundIcon: "tdesign:visual-recognition-filled",
+    backgroundIconProps: { width: 950, height: 950 },
+    backgroundIconStyle: {
+      color: "rgba(255,255,255,0.14)",
+      transform: "rotate(33.82deg)"
+    },
+    backgroundIconContainerStyle: {
+      overflow: "hidden"
+    },
+    iconWrapperRounded: false,
+    iconWrapperShadow: false,
+    iconWrapperClassName: "bg-transparent text-white",
+    iconWrapperWidth: "auto",
+    iconWrapperHeight: "auto",
+    iconClassName: "text-[140px]",
+    overlayGradient: true
+  },
+  
+  {
+    id: "route-navigation",
+    icon: "tdesign:map-route-planning-filled",
+    title: "Route Navigation",
+    description:
+      "The Smart Cane's route navigation feature provides guided directions through real-time voice prompts, helping users move confidently and safely toward their destination without relying solely on tactile cues.",
+    backgroundColor: "#FDFCFA",
+    textColor: "oklch(0.2914 0.0947 263.19)",
+    descriptionColor: "#1C253C",
+    iconWrapperClassName: "bg-transparent shadow-none text-[#1C253C]",
+    iconWrapperWidth: "187.86px",
+    iconWrapperHeight: "172.9px",
+    iconClassName: "text-[160px]",
+    backgroundIcon: "tdesign:map-route-planning-filled",
+    backgroundIconProps: { width: 1100, height: 1300 },
+    backgroundIconStyle: {
+      color: "rgba(0, 0, 0, 0.04)",
+      transform: "rotate(35.85deg) translateY(-95px)"
+    },
+    backgroundIconContainerStyle: {
+      overflow: "hidden"
+    },
+    inactiveClassName: FEATURE_CARD_INACTIVE_CLASS,
+    activeClassName: FEATURE_CARD_ACTIVE_CLASS,
+    outlineColor: "#11285A26"
+  },
+
   {
     id: "gps",
     icon: "solar:map-arrow-up-bold",
@@ -56,36 +114,28 @@ const featureCards = [
     title: "SOS",
     description:
       "During emergencies, iCane automatically sends an SOS alert with the user's exact location to registered guardians, enabling quick response and immediate assistance.",
-    backgroundImage: dangerTriangle,
-
-    // --- ITO ANG MGA TAMANG SETTINGS ---
-
-    // 1. Naka-set sa 0.12 para "faint" lang at kita ang text
-    backgroundImageOpacity: 0.12,
-
-    backgroundImagePosition: "center",
-    backgroundImageSize: "794.2px 719.75px",
-
-    // 2. TINANGGAL LAHAT maliban sa 'transform'
-    backgroundImageStyle: {
-      transform: "rotate(-33.82deg)"
-    },
-
-    // 3. Ibinalik sa puti, tulad ng design
     backgroundColor: "#FDFCFA",
-
-    // --- WAKAS NG MGA PAGBABAGO ---
-
     textColor: "#11285A",
     descriptionColor: "#1C253C",
     iconWrapperClassName: "bg-transparent shadow-none text-[#11285A]",
     iconWrapperWidth: "187.86px",
     iconWrapperHeight: "172.9px",
     iconClassName: "text-[160px]",
+    backgroundIcon: "jam:triangle-danger",
+    backgroundIconProps: { width: 1500, height: 1500 },
+    backgroundIconStyle: {
+      color: "rgba(0, 0, 0, 0.03)",
+      transform: "rotate(33.82deg) translateY(-90px) translateX(20px)"
+    },
+    backgroundIconContainerStyle: {
+      overflow: "hidden",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center"
+    },
     inactiveClassName: FEATURE_CARD_INACTIVE_CLASS,
     activeClassName: FEATURE_CARD_ACTIVE_CLASS,
     outlineColor: "#11285A26"
-    // TANDAAN: Tinanggal ko ang 'overlayGradient: false'
   },
 
   {
@@ -118,13 +168,6 @@ const featureCards = [
     title: "Weather Notifications",
     description:
       "Stay one step ahead of the weather. iCane delivers instant weather alerts to help users prepare for outdoor conditions and ensure safer navigation.",
-    backgroundImage: Cloud,
-    backgroundImageOpacity: 0.3,
-    backgroundImagePosition: "top left",
-    backgroundImageSize: "500px",
-    backgroundImageStyle: {
-      transform: "rotate(-15deg) translateY(-80px) translateX(-100px)"
-    },
     backgroundColor: "#FFFFFF",
     textColor: "#11285A",
     descriptionColor: "#1C253C",
@@ -135,7 +178,19 @@ const featureCards = [
     iconClassName: "text-[160px]",
     inactiveClassName: FEATURE_CARD_INACTIVE_CLASS,
     activeClassName: FEATURE_CARD_ACTIVE_CLASS,
-    overlayGradient: false
+    overlayGradient: false,
+    backgroundIcon: "bi:cloud-sun",
+    backgroundIconProps: { width: 1200, height: 1200 },
+    backgroundIconStyle: {
+      color: "rgba(0, 0, 0, 0.03)",
+      transform: "rotate(15deg) translateY(-50px) translateX(20px)"
+    },
+    backgroundIconContainerStyle: {
+      overflow: "hidden",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center"
+    }
   },
 
   {
@@ -164,6 +219,11 @@ const featureCards = [
     overlayGradient: false
   }
 ];
+
+const featureCards = rawFeatureCards.filter((card, index, arr) => {
+  // Prevent duplicated cards when the source data accidentally repeats an id
+  return arr.findIndex((item) => item.id === card.id) === index;
+});
 
 const faqs = [
   {
@@ -493,10 +553,22 @@ const GuestPage = () => {
                 backgroundImageSize={card.backgroundImageSize}
                 backgroundImageClassName={card.backgroundImageClassName}
                 backgroundImageStyle={card.backgroundImageStyle}
+                backgroundIcon={card.backgroundIcon}
+                backgroundIconProps={card.backgroundIconProps}
+                backgroundIconClassName={card.backgroundIconClassName}
+                backgroundIconStyle={card.backgroundIconStyle}
+                backgroundIconContainerClassName={
+                  card.backgroundIconContainerClassName
+                }
+                backgroundIconContainerStyle={
+                  card.backgroundIconContainerStyle
+                }
                 overlayGradient={card.overlayGradient ?? true}
                 iconWrapperClassName={card.iconWrapperClassName}
                 iconWrapperWidth={card.iconWrapperWidth}
                 iconWrapperHeight={card.iconWrapperHeight}
+                iconWrapperRounded={card.iconWrapperRounded}
+                iconWrapperShadow={card.iconWrapperShadow}
                 iconClassName={card.iconClassName}
                 badge={card.badge}
                 badgeClassName={card.badgeClassName}

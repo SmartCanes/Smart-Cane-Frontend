@@ -18,6 +18,7 @@ const Register = () => {
     position: "center"
   });
 
+  const CONTACT_NUMBER_LENGTH = 11;
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -40,9 +41,15 @@ const Register = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+    // If updating contact number, allow digits only (strip non-numeric chars)
+    const newValue =
+      name === "contactNumber"
+        ? value.replace(/[^0-9]/g, "").slice(0, CONTACT_NUMBER_LENGTH)
+        : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: newValue  
     }));
     if (errors[name]) {
       setErrors((prev) => ({
@@ -129,16 +136,48 @@ const Register = () => {
 
   const handleNext = (e) => {
     e.preventDefault();
+    const REQUIRED_MSG = "This field is required";
+
     if (step === 1) {
-      if (formData.password !== formData.confirmPassword) {
-        setErrors((prev) => ({
-          ...prev,
-          confirmPassword: "Password don't match!"
-        }));
+      const step1Errors = {};
+      if (!formData.firstName.trim()) step1Errors.firstName = REQUIRED_MSG;
+      if (!formData.lastName.trim()) step1Errors.lastName = REQUIRED_MSG;
+      if (!formData.username.trim()) step1Errors.username = REQUIRED_MSG;
+      if (!formData.password) step1Errors.password = REQUIRED_MSG;
+      if (!formData.confirmPassword)
+        step1Errors.confirmPassword = REQUIRED_MSG;
+      if (
+        formData.password &&
+        formData.confirmPassword &&
+        formData.password !== formData.confirmPassword
+      ) {
+        step1Errors.confirmPassword = "Password don't match!";
+      }
+
+      if (Object.keys(step1Errors).length) {
+        setErrors((prev) => ({ ...prev, ...step1Errors }));
         return;
       }
       setStep(2);
     } else if (step === 2) {
+      const step2Errors = {};
+      if (!formData.streetAddress.trim())
+        step2Errors.streetAddress = REQUIRED_MSG;
+      if (!formData.province) step2Errors.province = REQUIRED_MSG;
+      if (!formData.barangay) step2Errors.barangay = REQUIRED_MSG;
+      if (!formData.city) step2Errors.city = REQUIRED_MSG;
+      if (!formData.relationship) step2Errors.relationship = REQUIRED_MSG;
+      if (!formData.contactNumber) {
+        step2Errors.contactNumber = REQUIRED_MSG;
+      } else if (formData.contactNumber.length !== CONTACT_NUMBER_LENGTH) {
+        step2Errors.contactNumber = `Contact number must be ${CONTACT_NUMBER_LENGTH} digits.`;
+      }
+      if (!formData.email.trim()) step2Errors.email = REQUIRED_MSG;
+
+      if (Object.keys(step2Errors).length) {
+        setErrors((prev) => ({ ...prev, ...step2Errors }));
+        return;
+      }
       // Show phone verification modal
       setModalConfig({
         visible: true,
@@ -187,7 +226,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-dv w-full flex flex-col sm:flex-row">
+    <div className="min-h-screen w-full flex flex-col sm:flex-row">
       <SidebarContent />
 
       {step === 3 && isSubmitting && (
@@ -212,7 +251,7 @@ const Register = () => {
 </p> */}
         </div>
       )}
-      <div className="relative flex flex-col w-full min-h-dvh sm:flex-1 sm:min-h-screen bg-[#FDFCFA] px-6 sm:px-10 not-first:overflow-auto">
+      <div className="relative flex flex-col w-full sm:flex-1 min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
         <Link to="/">
           <div className="sm:hidden py-4 flex gap-2 absolute top-0 left-4">
             <BlinkingIcon
@@ -227,6 +266,7 @@ const Register = () => {
           <form
             className="w-full max-w-md sm:max-w-none lg:max-w-lg"
             onSubmit={handleNext}
+            noValidate
           >
             <div className="text-center mb-7 sm:mb-10">
               <h1 className="font-poppins text-5xl sm:text-h1 font-bold text-[#1C253C] mb-4">
@@ -259,6 +299,7 @@ const Register = () => {
                     value={formData.firstName}
                     onChange={handleFormChange}
                     inputClassName="py-3"
+                    error={errors.firstName}
                     required
                   />
 
@@ -270,6 +311,7 @@ const Register = () => {
                     value={formData.lastName}
                     onChange={handleFormChange}
                     inputClassName="py-3"
+                    error={errors.lastName}
                     required
                   />
                 </div>
@@ -282,6 +324,7 @@ const Register = () => {
                   value={formData.username}
                   onChange={handleFormChange}
                   inputClassName="py-3"
+                  error={errors.username}
                   required
                 />
 
@@ -324,6 +367,7 @@ const Register = () => {
                     name="streetAddress"
                     value={formData.streetAddress}
                     onChange={handleFormChange}
+                    error={errors.streetAddress}
                     required
                   />
 
@@ -339,8 +383,10 @@ const Register = () => {
                         province: e.target.value
                       }));
                       handleProvinceChange(e);
+                      setErrors((prev) => ({ ...prev, province: "" }));
                     }}
                     value={formData.province}
+                    error={errors.province}
                   />
                 </div>
 
@@ -359,6 +405,7 @@ const Register = () => {
                       }))
                     }
                     value={formData.barangay}
+                    error={errors.barangay}
                   />
 
                   <SelectField
@@ -373,8 +420,10 @@ const Register = () => {
                         city: e.target.value
                       }));
                       handleCityChange(e);
+                      setErrors((prev) => ({ ...prev, city: "" }));
                     }}
                     value={formData.city}
+                    error={errors.city}
                   />
                 </div>
 
@@ -397,6 +446,7 @@ const Register = () => {
                     }))
                   }
                   value={formData.relationship || ""}
+                  error={errors.relationship}
                 />
 
                 {/* Contact Number - Full width */}
@@ -408,6 +458,9 @@ const Register = () => {
                   name="contactNumber"
                   value={formData.contactNumber}
                   onChange={handleFormChange}
+                  inputMode="numeric"
+                  maxLength={11}
+                  error={errors.contactNumber}
                   required
                 />
 
@@ -420,6 +473,7 @@ const Register = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleFormChange}
+                  error={errors.email}
                   required
                 />
               </div>

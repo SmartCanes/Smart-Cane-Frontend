@@ -32,7 +32,9 @@ const TextField = ({
           style={{ color: labelColor }}
         >
           {label}
-          {required && <span className="text-[#CE4B34] ml-1">*</span>}
+          {required && (
+            <span className="ml-1" style={{ color: validationColor }}>*</span>
+          )}
         </label>
       )}
 
@@ -52,16 +54,21 @@ const TextField = ({
           disabled:bg-gray-100 disabled:cursor-not-allowed
           ${
             hasError
-              ? "border-[#CE4B34] focus:ring-[#CE4B34] focus:border-[#CE4B34]" // Kapag may error, border at ring ay #CE4B34
-              : "border-gray-300 focus:ring-primary-100" // Kapag walang error, balik sa default na ring color (assuming primary-100 is your primary blue)
+              ? "" // Use inline style for validation color to respect CSS variable
+              : "border-gray-300 focus:ring-primary-100" // Default ring color when no error
           }
           ${inputClassName}
         `}
+        style={
+          hasError
+            ? { borderColor: validationColor, "--tw-ring-color": validationColor }
+            : undefined
+        }
         {...props}
       />
 
       {hasError && errorHasContent && (
-        <p className="text-[#CE4B34] text-sm mt-1">
+        <p className="text-sm mt-1" style={{ color: validationColor }}>
           {typeof error === "string" ? error.trim() : error}
         </p>
       )}
