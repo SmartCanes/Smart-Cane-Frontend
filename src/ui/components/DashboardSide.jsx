@@ -34,12 +34,7 @@ const DashboardSide = ({ className = "" }) => {
       customIcon: findCaneIcon,
       path: "/find-my-cane"
     },
-    {
-      id: "connectivity",
-      label: "Connectivity",
-      icon: "material-symbols:wifi-rounded",
-      path: "/connectivity"
-    },
+    
     {
       id: "guardian-access",
       label: "Guardian Access",
