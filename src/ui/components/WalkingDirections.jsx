@@ -26,7 +26,6 @@ function WalkingDirections({
   const fields = [
     {
       key: "start",
-
       icon: "solar:record-bold",
       accentColor: "#2563EB",
       placeholder: startPlaceholder,
