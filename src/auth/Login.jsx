@@ -39,13 +39,14 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
+    const REQUIRED_MSG = "This field is required";
 
     // Validation
     if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
+      newErrors.username = REQUIRED_MSG;
     }
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = REQUIRED_MSG;
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -99,6 +100,7 @@ const Login = () => {
           <form
             className="w-full max-w-md sm:max-w-none lg:max-w-lg max-h-[70vh]"
             onSubmit={handleSubmit}
+            noValidate
           >
             <div className="flex flex-col items-center text-center mb-10 space-y-6 sm:space-y-3">
               <h1 className="font-poppins text-center text-5xl sm:text-h1 font-bold text-[#1C253C]">

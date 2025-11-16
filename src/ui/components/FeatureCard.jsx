@@ -17,6 +17,12 @@ const FeatureCard = forwardRef(
       backgroundImageSize = "125%",
       backgroundImageClassName = "",
       backgroundImageStyle = {},
+      backgroundIcon,
+      backgroundIconProps = {},
+      backgroundIconClassName = "",
+      backgroundIconStyle = {},
+      backgroundIconContainerClassName = "",
+      backgroundIconContainerStyle = {},
       overlayGradient = true,
       overlayClassName = "bg-[linear-gradient(135deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0)_62%)]",
       outlineColor,
@@ -29,6 +35,8 @@ const FeatureCard = forwardRef(
       iconWrapperClassName = "bg-white text-[#11285A]",
       iconWrapperWidth = "160px",
       iconWrapperHeight = "160px",
+      iconWrapperRounded = true,
+      iconWrapperShadow = true,
       iconClassName = "text-[96px]",
       mainImageClassName = "h-40 w-40 object-contain",
       titleClassName = "",
@@ -49,6 +57,25 @@ const FeatureCard = forwardRef(
         return <Icon icon={icon} className={iconClassName} />;
       }
       return icon;
+    };
+
+    const renderBackgroundIcon = () => {
+      if (!backgroundIcon) return null;
+      if (typeof backgroundIcon === "string") {
+        const { width = 420, height = 420, ...iconProps } = backgroundIconProps;
+        return (
+          <Icon
+            icon={backgroundIcon}
+            width={width}
+            height={height}
+            className={backgroundIconClassName}
+            style={backgroundIconStyle}
+            aria-hidden
+            {...iconProps}
+          />
+        );
+      }
+      return backgroundIcon;
     };
 
     const primaryVisual = mainImage ? (
@@ -87,9 +114,6 @@ const FeatureCard = forwardRef(
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 overflow-hidden rounded-[32px] md:rounded-[48px]"
         >
-          {overlayGradient && (
-            <div className={`absolute inset-0 ${overlayClassName}`} />
-          )}
           {backgroundImage && (
             <div
               className={`absolute inset-0 bg-no-repeat ${backgroundImageClassName}`}
@@ -101,6 +125,17 @@ const FeatureCard = forwardRef(
                 ...backgroundImageStyle
               }}
             />
+          )}
+          {backgroundIcon && (
+            <div
+              className={`absolute inset-0 flex items-center justify-center ${backgroundIconContainerClassName}`}
+              style={backgroundIconContainerStyle}
+            >
+              {renderBackgroundIcon()}
+            </div>
+          )}
+          {overlayGradient && (
+            <div className={`absolute inset-0 ${overlayClassName}`} />
           )}
         </div>
 
@@ -120,7 +155,13 @@ const FeatureCard = forwardRef(
           <div className="flex flex-1 flex-col items-center justify-center gap-6 md:gap-8">
             {primaryVisual && (
               <div
-                className={`flex items-center justify-center rounded-full shadow-[0_24px_44px_rgba(0,0,0,0.35)] ${iconWrapperClassName}`}
+                className={`flex items-center justify-center ${
+                  iconWrapperRounded ? "rounded-full" : ""
+                } ${
+                  iconWrapperShadow
+                    ? "shadow-[0_24px_44px_rgba(0,0,0,0.35)]"
+                    : ""
+                } ${iconWrapperClassName}`}
                 style={{
                   width: iconWrapperWidth,
                   height: iconWrapperHeight,
