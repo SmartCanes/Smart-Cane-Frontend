@@ -66,8 +66,7 @@ const ForgotPassword = () => {
     } else {
       const step2Errors = {};
       if (!formData.newPassword) step2Errors.newPassword = REQUIRED_MSG;
-      if (!formData.confirmPassword)
-        step2Errors.confirmPassword = REQUIRED_MSG;
+      if (!formData.confirmPassword) step2Errors.confirmPassword = REQUIRED_MSG;
       if (formData.newPassword !== formData.confirmPassword) {
         step2Errors.confirmPassword = "Password don't match!";
       }

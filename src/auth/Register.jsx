@@ -49,7 +49,7 @@ const Register = () => {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: newValue  
+      [name]: newValue
     }));
     if (errors[name]) {
       setErrors((prev) => ({
@@ -144,8 +144,7 @@ const Register = () => {
       if (!formData.lastName.trim()) step1Errors.lastName = REQUIRED_MSG;
       if (!formData.username.trim()) step1Errors.username = REQUIRED_MSG;
       if (!formData.password) step1Errors.password = REQUIRED_MSG;
-      if (!formData.confirmPassword)
-        step1Errors.confirmPassword = REQUIRED_MSG;
+      if (!formData.confirmPassword) step1Errors.confirmPassword = REQUIRED_MSG;
       if (
         formData.password &&
         formData.confirmPassword &&
