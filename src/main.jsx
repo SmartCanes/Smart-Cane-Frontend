@@ -1,9 +1,7 @@
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client"; // Ito lang ang kailangan
+import { createRoot } from "react-dom/client"; 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
-
-// Import ng CSS para sa Leaflet (TAMA ITO)
 import "leaflet/dist/leaflet.css";
 
 // Mga Pages at Components
@@ -15,12 +13,16 @@ import ForgotPassword from "./auth/FogotPassword.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
 
+// 👇 1. IMPORT MO YUNG WEATHERBOARD (Siguraduhin tama ang path kung nasa ui/components)
+import WeatherBoard from "./ui/components/WeatherBoard.jsx"; 
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<GuestPage />} />
         <Route path="/welcome" element={<Welcome />} />
+        
         <Route element={<PublicLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -29,6 +31,10 @@ createRoot(document.getElementById("root")).render(
 
         <Route element={<ProtectedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* 👇 2. ADD MO ITONG ROUTE PARA SA WEATHER BOARD */}
+          <Route path="/weather-board" element={<WeatherBoard />} />
+          
         </Route>
       </Routes>
     </BrowserRouter>
