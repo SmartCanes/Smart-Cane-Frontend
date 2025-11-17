@@ -33,7 +33,9 @@ const TextField = ({
         >
           {label}
           {required && (
-            <span className="ml-1" style={{ color: validationColor }}>*</span>
+            <span className="ml-1" style={{ color: validationColor }}>
+              *
+            </span>
           )}
         </label>
       )}
@@ -61,7 +63,10 @@ const TextField = ({
         `}
         style={
           hasError
-            ? { borderColor: validationColor, "--tw-ring-color": validationColor }
+            ? {
+                borderColor: validationColor,
+                "--tw-ring-color": validationColor
+              }
             : undefined
         }
         {...props}

@@ -4,9 +4,7 @@ import { Icon } from "@iconify/react";
 import icaneLogo from "@/assets/images/smartcane-logo-blue.png";
 import heroBackground from "@/assets/images/background.png";
 import gpsCardArrow from "@/assets/images/gps-card-arrow.png";
-import dangerTriangle from "@/assets/images/danger-triangle.svg";
 import SwitchFilled from "@/assets/images/SwitchFilled.png";
-import Cloud from "@/assets/images/Cloud.png";
 import Document from "@/assets/images/document.png";
 import icaneLogoWhite from "@/assets/images/icane-logo-white.png";
 import icaneLabel from "@/assets/images/icane-label.png";
@@ -36,9 +34,7 @@ const FEATURE_CARD_ACTIVE_CLASS = "opacity-100 scale-100 sm:scale-[1.02]";
 const FEATURE_CARD_INACTIVE_CLASS = "opacity-40 sm:opacity-60 scale-[0.92]";
 
 const rawFeatureCards = [
-
-
- {
+  {
     id: "Visual-Recognition",
     icon: "tdesign:visual-recognition-filled",
     title: "AI-Based Visual Recognition",
@@ -66,7 +62,7 @@ const rawFeatureCards = [
     iconClassName: "text-[140px]",
     overlayGradient: true
   },
-  
+
   {
     id: "route-navigation",
     icon: "tdesign:map-route-planning-filled",
@@ -560,9 +556,7 @@ const GuestPage = () => {
                 backgroundIconContainerClassName={
                   card.backgroundIconContainerClassName
                 }
-                backgroundIconContainerStyle={
-                  card.backgroundIconContainerStyle
-                }
+                backgroundIconContainerStyle={card.backgroundIconContainerStyle}
                 overlayGradient={card.overlayGradient ?? true}
                 iconWrapperClassName={card.iconWrapperClassName}
                 iconWrapperWidth={card.iconWrapperWidth}

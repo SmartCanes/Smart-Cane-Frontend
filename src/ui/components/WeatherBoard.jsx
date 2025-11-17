@@ -21,7 +21,9 @@ const WeatherBoard = () => {
       }
     };
     loadForecast();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Format Date
@@ -45,7 +47,7 @@ const WeatherBoard = () => {
         bgColor: "bg-emerald-50",
         borderColor: "border-emerald-100",
         titleColor: "text-emerald-700",
-        buttonLabel: "Safe to Walk",
+        buttonLabel: "Safe to Walk"
       };
     } else {
       return {
@@ -54,7 +56,7 @@ const WeatherBoard = () => {
         bgColor: "bg-orange-50",
         borderColor: "border-orange-100",
         titleColor: "text-orange-700",
-        buttonLabel: "Stay Indoors",
+        buttonLabel: "Stay Indoors"
       };
     }
   }, [forecast]);
@@ -66,7 +68,6 @@ const WeatherBoard = () => {
 
       {/* 2. MAIN SECTION */}
       <div className="flex-1 flex flex-col">
-        
         {/* 3. HEADER */}
         <Header
           userName="Zander"
@@ -78,7 +79,6 @@ const WeatherBoard = () => {
 
         {/* 4. WEATHER CONTENT (Scrollable) */}
         <main className="flex-1 overflow-y-auto bg-white p-8">
-          
           {/* Header Title inside Content */}
           <div className="mb-8">
             <h1 className="text-3xl font-semibold text-gray-900 font-poppins mb-2">
@@ -92,24 +92,36 @@ const WeatherBoard = () => {
 
           {loading ? (
             <div className="flex flex-col items-center justify-center h-[300px] gap-3">
-               <Icon icon="eos-icons:loading" className="text-4xl text-primary-100 animate-spin" />
-               <p className="text-gray-400 font-poppins text-sm">Checking forecast...</p>
+              <Icon
+                icon="eos-icons:loading"
+                className="text-4xl text-primary-100 animate-spin"
+              />
+              <p className="text-gray-400 font-poppins text-sm">
+                Checking forecast...
+              </p>
             </div>
           ) : forecast ? (
             <div className="grid gap-6 max-w-3xl">
-              
               {/* RECOMMENDATION CARD */}
-              <div className={`rounded-3xl border-2 p-8 flex flex-col md:flex-row items-center gap-6 transition-all ${visuals.bgColor} ${visuals.borderColor}`}>
-                <div className={`w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-sm ${visuals.iconColor}`}>
-                   <Icon icon={visuals.mainIcon} className="text-6xl" />
+              <div
+                className={`rounded-3xl border-2 p-8 flex flex-col md:flex-row items-center gap-6 transition-all ${visuals.bgColor} ${visuals.borderColor}`}
+              >
+                <div
+                  className={`w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-sm ${visuals.iconColor}`}
+                >
+                  <Icon icon={visuals.mainIcon} className="text-6xl" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                     <span className={`px-3 py-1 rounded-full bg-white text-xs font-bold uppercase tracking-wider shadow-sm ${visuals.titleColor}`}>
-                        Tomorrow • {formattedDate}
-                     </span>
+                    <span
+                      className={`px-3 py-1 rounded-full bg-white text-xs font-bold uppercase tracking-wider shadow-sm ${visuals.titleColor}`}
+                    >
+                      Tomorrow • {formattedDate}
+                    </span>
                   </div>
-                  <h2 className={`text-3xl font-bold mb-2 ${visuals.titleColor}`}>
+                  <h2
+                    className={`text-3xl font-bold mb-2 ${visuals.titleColor}`}
+                  >
                     {visuals.buttonLabel}
                   </h2>
                   <p className="text-gray-600 font-poppins text-sm md:text-base">
@@ -120,32 +132,59 @@ const WeatherBoard = () => {
 
               {/* DETAILS GRID */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                 <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                    <Icon icon="solar:thermometer-bold" className="text-2xl text-red-400"/>
-                    <span className="text-gray-400 text-xs uppercase tracking-wide">Max Temp</span>
-                    <span className="text-xl font-bold text-gray-700">{forecast.tempMax}°C</span>
-                 </div>
-                 <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                    <Icon icon="solar:thermometer-bold" className="text-2xl text-blue-400"/>
-                    <span className="text-gray-400 text-xs uppercase tracking-wide">Min Temp</span>
-                    <span className="text-xl font-bold text-gray-700">{forecast.tempMin}°C</span>
-                 </div>
-                 <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                    <Icon icon="carbon:rain-drop" className="text-2xl text-blue-500"/>
-                    <span className="text-gray-400 text-xs uppercase tracking-wide">Rain Chance</span>
-                    <span className="text-xl font-bold text-gray-700">{forecast.precipProbability}%</span>
-                 </div>
-                 <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                    <Icon icon="fluent:weather-partly-cloudy-day-24-regular" className="text-2xl text-yellow-500"/>
-                    <span className="text-gray-400 text-xs uppercase tracking-wide">Condition</span>
-                    <span className="text-lg font-bold text-gray-700 whitespace-nowrap">{forecast.description}</span>
-                 </div>
+                <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
+                  <Icon
+                    icon="solar:thermometer-bold"
+                    className="text-2xl text-red-400"
+                  />
+                  <span className="text-gray-400 text-xs uppercase tracking-wide">
+                    Max Temp
+                  </span>
+                  <span className="text-xl font-bold text-gray-700">
+                    {forecast.tempMax}°C
+                  </span>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
+                  <Icon
+                    icon="solar:thermometer-bold"
+                    className="text-2xl text-blue-400"
+                  />
+                  <span className="text-gray-400 text-xs uppercase tracking-wide">
+                    Min Temp
+                  </span>
+                  <span className="text-xl font-bold text-gray-700">
+                    {forecast.tempMin}°C
+                  </span>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
+                  <Icon
+                    icon="carbon:rain-drop"
+                    className="text-2xl text-blue-500"
+                  />
+                  <span className="text-gray-400 text-xs uppercase tracking-wide">
+                    Rain Chance
+                  </span>
+                  <span className="text-xl font-bold text-gray-700">
+                    {forecast.precipProbability}%
+                  </span>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
+                  <Icon
+                    icon="fluent:weather-partly-cloudy-day-24-regular"
+                    className="text-2xl text-yellow-500"
+                  />
+                  <span className="text-gray-400 text-xs uppercase tracking-wide">
+                    Condition
+                  </span>
+                  <span className="text-lg font-bold text-gray-700 whitespace-nowrap">
+                    {forecast.description}
+                  </span>
+                </div>
               </div>
-
             </div>
           ) : (
             <div className="p-8 bg-red-50 rounded-2xl border border-red-100 text-center">
-               <p className="text-red-500">Failed to load weather data.</p>
+              <p className="text-red-500">Failed to load weather data.</p>
             </div>
           )}
         </main>

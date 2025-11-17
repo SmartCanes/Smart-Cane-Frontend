@@ -26,7 +26,7 @@ function WalkingDirections({
   const fields = [
     {
       key: "start",
-      
+
       icon: "solar:record-bold",
       accentColor: "#2563EB",
       placeholder: startPlaceholder,
@@ -48,17 +48,23 @@ function WalkingDirections({
   return (
     <section className="font-poppins bg-white rounded-3xl shadow-sm p-5 w-full">
       <header className="flex items-center justify-between mb-5">
-
         {/* burger icon */}
         <div className="flex items-center gap-3 font-poppins">
           <button
             type="button"
             aria-label={menuOpen ? "Close" : "Open"}
             onClick={() => setMenuOpen((v) => !v)}
-            className={headerIconBase + "  transition-colors hover:bg-gray-200 focus:outline-none"}
+            className={
+              headerIconBase +
+              "  transition-colors hover:bg-gray-200 focus:outline-none"
+            }
           >
             <Icon
-              icon={menuOpen ? "iconoir:xmark" : "iconamoon:menu-burger-horizontal-duotone"}
+              icon={
+                menuOpen
+                  ? "iconoir:xmark"
+                  : "iconamoon:menu-burger-horizontal-duotone"
+              }
               width="24"
               height="24"
               style={{ color: "#adadad", transition: "transform 0.3s ease" }}
@@ -66,10 +72,13 @@ function WalkingDirections({
             />
           </button>
           <div className="font-poppins">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 font-poppins">Route</p>
-            <h3 className="text-xl font-semibold text-gray-900 font-poppins">{title}</h3>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 font-poppins">
+              Route
+            </p>
+            <h3 className="text-xl font-semibold text-gray-900 font-poppins">
+              {title}
+            </h3>
           </div>
-          
         </div>
 
         <div className="flex items-center gap-2">
@@ -81,7 +90,6 @@ function WalkingDirections({
           >
             <Icon icon="ph:arrows-down-up-duotone" className="text-lg" />
           </button>
-     
         </div>
       </header>
 
