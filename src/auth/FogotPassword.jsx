@@ -14,6 +14,7 @@ const ForgotPassword = () => {
     newPassword: "",
     confirmPassword: ""
   });
+
   const [errors, setErrors] = useState({});
 
   const VALID_EMAIL = "admin@gmail.com";
@@ -43,10 +44,11 @@ const ForgotPassword = () => {
 
   const handleNext = (e) => {
     e.preventDefault();
+    const REQUIRED_MSG = "This field is required";
     if (step === 1) {
       // Validate email
       if (!userEmail.trim()) {
-        setEmailError("Email is required");
+        setEmailError(REQUIRED_MSG);
         return;
       }
 
@@ -62,11 +64,16 @@ const ForgotPassword = () => {
         setTimeout(() => setStep(2), 500); // Slight delay before transitioning
       }, 4000);
     } else {
+      const step2Errors = {};
+      if (!formData.newPassword) step2Errors.newPassword = REQUIRED_MSG;
+      if (!formData.confirmPassword)
+        step2Errors.confirmPassword = REQUIRED_MSG;
       if (formData.newPassword !== formData.confirmPassword) {
-        setErrors((prev) => ({
-          ...prev,
-          confirmPassword: "Password don't match!"
-        }));
+        step2Errors.confirmPassword = "Password don't match!";
+      }
+
+      if (Object.keys(step2Errors).length) {
+        setErrors((prev) => ({ ...prev, ...step2Errors }));
         return;
       }
       console.log("Password changed");
@@ -106,7 +113,7 @@ const ForgotPassword = () => {
             </p>
           </div>
 
-          <form className="w-full text-left" onSubmit={handleNext}>
+          <form className="w-full text-left" onSubmit={handleNext} noValidate>
             {/* Step 1: Enter Email */}
             {step === 1 && (
               <div className="space-y-4">

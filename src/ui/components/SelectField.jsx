@@ -19,6 +19,11 @@ const SelectField = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef(null);
+  const validationColor = "var(--color-validation-100, #CE4B34)";
+  const hasError = Boolean(error);
+  const labelColor = hasError
+    ? validationColor
+    : "var(--color-secondary-100, #1C253C)";
 
   // Hanapin 'yung label ng napiling option
   const selectedOption = options.find((option) => option.value === value);
@@ -64,10 +69,13 @@ const SelectField = ({
       {label && (
         <label
           htmlFor={id || name}
-          className={`block text-[18px] font-medium text-gray-700 mb-2 ${labelClassName}`}
+          className={`block text-[18px] font-medium mb-2 ${labelClassName}`}
+          style={{ color: labelColor }}
         >
           {label}
-          {required && <span className="text-[#CE4B34] ml-1">*</span>}
+          {required && (
+            <span className="ml-1" style={{ color: validationColor }}>*</span>
+          )}
         </label>
       )}
 
@@ -91,13 +99,14 @@ const SelectField = ({
                 ? "bg-gray-100 cursor-not-allowed"
                 : "bg-white cursor-pointer"
             }
-            ${
-              error
-                ? "border-[#CE4B34] focus:ring-[#CE4B34]"
-                : "border-gray-300 focus:ring-secondary-100"
-            }
+            ${hasError ? "" : "border-gray-300 focus:ring-secondary-100"}
             ${inputClassName} 
           `}
+          style={
+            hasError
+              ? { borderColor: validationColor, "--tw-ring-color": validationColor }
+              : undefined
+          }
           {...props}
         >
           {/* Ito 'yung text (placeholder or selected value) */}
@@ -151,7 +160,11 @@ const SelectField = ({
       </div>
 
       {/* 4. Error at Helper Text (mula sa luma mong component) */}
-      {error && <p className="text-[#CE4B34] text-sm mt-1">{error}</p>}
+      {error && (
+        <p className="text-sm mt-1" style={{ color: validationColor }}>
+          {error}
+        </p>
+      )}
 
       {helperText && !error && (
         <p className="text-gray-500 text-sm mt-1">{helperText}</p>

@@ -5,7 +5,7 @@ const SidebarContent = () => {
   return (
     <>
       <div
-        className={`hidden sm:flex sm:flex-1 sm:min-h-screen w-full h-full min-h-screen sm:h-screen bg-primary-100  items-center justify-center flex-col relative`}
+        className={`hidden sm:flex sm:flex-1 min-h-screen bg-primary-100 items-center justify-center flex-col relative`}
       >
         <img
           src="src/assets/images/smartcane-logo.png"

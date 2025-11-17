@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import ValidationModal from "@/ui/components/ValidationModal";
 import Header from "@/ui/components/Header";
@@ -9,19 +8,21 @@ import RecentAlerts from "@/ui/components/RecentAlert";
 import QuickActions from "@/ui/components/QuickActions";
 import DailyActivity from "@/ui/components/DailyActivity";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
+import WalkingDirections from "@/ui/components/WalkingDirections";
 import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
 
 const Dashboard = () => {
-  const { logout, showLoginModal, setShowLoginModal } = useUserStore();
+  const { showLoginModal, setShowLoginModal } = useUserStore();
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("track"); // 'track' or 'history'
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
 
   const [userPosition, setUserPosition] = useState(null);
   const [route, setRoute] = useState(null);
   const [isLoadingMap, setIsLoadingMap] = useState(true);
+  const [startPoint, setStartPoint] = useState("");
+  const [destinationPoint, setDestinationPoint] = useState("");
 
   // Style for history button when active: use CSS variable from index.css
   const historyButtonStyle =
@@ -36,6 +37,20 @@ const Dashboard = () => {
 
   // Ito ang fixed destination (SM Novaliches)
   const destinationPosition = [14.7295, 121.0504];
+
+  const handleSwapLocations = () => {
+    setStartPoint(destinationPoint);
+    setDestinationPoint(startPoint);
+  };
+
+  const handleRequestDirections = () => {
+    if (!startPoint || !destinationPoint) {
+      alert("Please specify both starting point and destination.");
+      return;
+    }
+
+    console.log("Requesting directions", { startPoint, destinationPoint });
+  };
 
   useEffect(() => {
     let watchId; // Para ma-stop later kung kailangan
@@ -233,6 +248,15 @@ const Dashboard = () => {
             </div>
 
             <div className="flex flex-col gap-6 w-full lg:max-w-[340px]">
+              <WalkingDirections
+                startValue={startPoint}
+                destinationValue={destinationPoint}
+                onStartChange={setStartPoint}
+                onDestinationChange={setDestinationPoint}
+                onSwapLocations={handleSwapLocations}
+                onRequestDirections={handleRequestDirections}
+                helperText="Preview walking routes customized for your cane"
+              />
               <RecentAlerts />
               <QuickActions />
             </div>
