@@ -27,14 +27,13 @@ const DashboardSide = ({ className = "" }) => {
       icon: "uiw:bell",
       path: "/alerts"
     },
-    {
-      id: "find-my-cane",
-      label: "Find My Cane",
-      icon: "custom-image",
-      customIcon: findCaneIcon,
-      path: "/find-my-cane"
-    },
-    
+    // {
+    //   id: "find-my-cane",
+    //   label: "Find My Cane",
+    //   icon: "custom-image",
+    //   customIcon: findCaneIcon,
+    //   path: "/find-my-cane"
+    // },
     {
       id: "guardian-access",
       label: "Guardian Access",
