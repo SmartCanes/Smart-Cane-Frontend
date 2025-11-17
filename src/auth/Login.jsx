@@ -144,7 +144,7 @@ const Login = () => {
 
               <Link
                 to="/forgot-password"
-                className="font-poppins block text-left hover:underline text-[16px] underline mt-2"
+                className="font-poppins block text-left hover:underline text-[16px] underline mt-2 w-fit"
               >
                 Forgot password?
               </Link>
