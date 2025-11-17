@@ -99,7 +99,9 @@ const PasswordField = ({
         >
           {label}
           {required && (
-            <span className="ml-1" style={{ color: validationColor }}>*</span>
+            <span className="ml-1" style={{ color: validationColor }}>
+              *
+            </span>
           )}
         </label>
       )}

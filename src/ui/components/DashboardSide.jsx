@@ -1,7 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
-import findCaneIcon from "@/assets/images/findcane.png";
 import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 
 const DashboardSide = ({ className = "" }) => {

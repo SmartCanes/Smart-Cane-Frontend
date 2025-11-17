@@ -18,7 +18,7 @@ const RecentAlerts = () => {
       <h3 className="text-xl font-semibold text-gray-800 mb-4">
         Recent Alerts
       </h3>
-      
+
       <div className="space-y-4">
         {/* ------------------------------------------------------ */}
         {/* SAFE ARRIVAL NOTIFICATION (Static - Hindi Ginalaw)     */}
@@ -40,37 +40,38 @@ const RecentAlerts = () => {
           </div>
         </div>
 
-    
         {weather ? (
           // DYNAMIC: changing color for Rain (Orange) or Clear (Blue)
-          <div 
+          <div
             className={`border rounded-xl p-4 flex items-start gap-4 transition-colors ${
-              weather.isRaining 
+              weather.isRaining
                 ? "bg-[#FEF6E6] border-[#FCEACC]" // EXACT ORANGE STYLE SA IMAGE
-                : "bg-blue-50 border-blue-100"    // BLUE STYLE (Kapag Clear)
+                : "bg-blue-50 border-blue-100" // BLUE STYLE (Kapag Clear)
             }`}
           >
-            <div 
+            <div
               className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center shadow-sm ${
                 weather.isRaining ? "bg-[#EA580C]/10" : "bg-blue-500/10"
               }`}
             >
               <Icon
-                icon={weather.isRaining ? "fa7-solid:cloud-rain" : "fa6-solid:sun"}
+                icon={
+                  weather.isRaining ? "fa7-solid:cloud-rain" : "fa6-solid:sun"
+                }
                 className={`text-2xl ${
                   weather.isRaining ? "text-[#EA580C]" : "text-blue-600"
                 }`}
               />
             </div>
             <div>
-              <p 
+              <p
                 className={`font-semibold text-sm ${
                   weather.isRaining ? "text-[#9A3412]" : "text-blue-800"
                 }`}
               >
                 {weather.title}
               </p>
-              <p 
+              <p
                 className={`text-xs ${
                   weather.isRaining ? "text-[#EA580C]" : "text-blue-600"
                 }`}
