@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SuccessIcon from "@/assets/images/check.svg";
 import ErrorIcon from "@/assets/images/warning.svg";
@@ -10,14 +10,20 @@ export default function Toast({
   message,
   type = "info",
   duration = 3000,
-  position = "bottom-right"
+  position = "bottom-right",
+  onClose
 }) {
   const [visible, setVisible] = useState(true);
 
+  const handleClose = useCallback(() => {
+    setVisible(false);
+    if (onClose) onClose();
+  }, [onClose]);
+
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), duration);
+    const timer = setTimeout(() => handleClose, duration);
     return () => clearTimeout(timer);
-  }, [duration]);
+  }, [duration, handleClose]);
 
   const colors = {
     success: "bg-green-600",
@@ -75,7 +81,7 @@ export default function Toast({
           <div className="w-px h-6 bg-white ml-5 mr-2 opacity-30"></div>
 
           <button
-            onClick={() => setVisible(false)}
+            onClick={handleClose}
             className="ml-3 font-bold text-lg focus:outline-none cursor-pointer"
           >
             <img src={ExitIcon} alt="Close icon" />
