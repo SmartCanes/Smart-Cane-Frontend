@@ -86,13 +86,11 @@ const Login = () => {
       <div className="w-full h-dvh sm:flex-1 sm:min-h-screen relative bg-[#FDFCFA] px-6 sm:px-10">
         <Link to="/">
           <div className="sm:hidden py-4 flex gap-2 absolute top-0 left-4">
-            <BlinkingIcon
+            <img
               src="src/assets/images/smartcane-logo-blue.png"
               alt="Smart Cane Logo"
               className="object-contain w-[45px]"
             />
-
-            <h1 className="font-gabriela text-4xl text-card-100">icane</h1>
           </div>
         </Link>
 
