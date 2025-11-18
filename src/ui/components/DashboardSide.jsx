@@ -53,14 +53,6 @@ const DashboardSide = ({ className = "" }) => {
       icon: "iconamoon:profile",
       path: "/manage-profile"
     },
-
-    {
-      id: "weather-board",
-      label: "Weather Board",
-      icon: "mdi:weather-partly-cloudy",
-      path: "/weather-board"
-    },
-
     {
       id: "settings",
       label: "Settings",
