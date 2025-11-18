@@ -15,6 +15,7 @@ import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
 
 // 👇 1. IMPORT MO YUNG WEATHERBOARD (Siguraduhin tama ang path kung nasa ui/components)
 import WeatherBoard from "./ui/components/WeatherBoard.jsx";
+import ScannerCamera from "./auth/Scanner";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -27,6 +28,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/scan" element={<ScannerCamera />} />
         </Route>
 
         <Route element={<ProtectedLayout />}>
