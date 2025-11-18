@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import avatar from "@/assets/images/team-photo.png";
@@ -28,10 +28,12 @@ const GuardianCard = ({ guardian, onDelete }) => (
           <h3 className="font-bold text-base md:text-lg text-gray-800 font-poppins truncate">
             {guardian.name}
           </h3>
-          <p className="text-xs md:text-sm text-gray-500 font-poppins truncate">{guardian.email}</p>
+          <p className="text-xs md:text-sm text-gray-500 font-poppins truncate">
+            {guardian.email}
+          </p>
         </div>
       </div>
-      <button 
+      <button
         onClick={() => onDelete(guardian.id)}
         className="text-gray-400 hover:text-red-500 flex-shrink-0 p-1"
       >
@@ -57,7 +59,10 @@ const GuardianAccess = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, guardianId: null });
+  const [deleteConfirm, setDeleteConfirm] = useState({
+    show: false,
+    guardianId: null
+  });
 
   const handleTabClick = (tab) => {
     if (tab === "vip") {
@@ -76,7 +81,7 @@ const GuardianAccess = () => {
     setToast({
       show: true,
       type: "success",
-      message: "Guardian removed successfully",
+      message: "Guardian removed successfully"
     });
     setDeleteConfirm({ show: false, guardianId: null });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
@@ -91,7 +96,7 @@ const GuardianAccess = () => {
       setToast({
         show: true,
         type: "error",
-        message: "Please enter a valid email address",
+        message: "Please enter a valid email address"
       });
       setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
       return;
@@ -102,7 +107,7 @@ const GuardianAccess = () => {
       setToast({
         show: true,
         type: "error",
-        message: "Something went wrong. Please try again.",
+        message: "Something went wrong. Please try again."
       });
       setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
       return;
@@ -117,14 +122,14 @@ const GuardianAccess = () => {
       //   body: JSON.stringify({ email })
       // });
       // if (!response.ok) throw new Error('Failed to send invitation');
-      
+
       // Simulate network request - REMOVE THIS when you have a real API
       await new Promise((resolve) => setTimeout(resolve, 500));
-      
+
       setToast({
         show: true,
         type: "success",
-        message: "Invitation sent successfully",
+        message: "Invitation sent successfully"
       });
       setIsModalOpen(false);
       setEmail("");
@@ -133,7 +138,7 @@ const GuardianAccess = () => {
       setToast({
         show: true,
         type: "error",
-        message: "Something went wrong. Please try again.",
+        message: "Something went wrong. Please try again."
       });
       setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
     }
@@ -148,7 +153,7 @@ const GuardianAccess = () => {
       fullName: "Juan Dela Cruz",
       cellphone: "0912345678",
       gender: "Male",
-      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches",
+      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
     },
     {
       id: 2,
@@ -158,8 +163,8 @@ const GuardianAccess = () => {
       fullName: "Juan Dela Cruz",
       cellphone: "0912345678",
       gender: "Male",
-      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches",
-    },
+      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
+    }
   ];
 
   return (
@@ -184,7 +189,7 @@ const GuardianAccess = () => {
                   <span className="absolute bottom-0 left-0 w-full h-[2px] bg-slate-900"></span>
                 )}
               </button>
-              
+
               <button
                 onClick={() => handleTabClick("vip")}
                 className={`relative pb-2 text-base md:text-lg whitespace-nowrap transition-colors duration-200 ${
@@ -231,7 +236,9 @@ const GuardianAccess = () => {
                   <span className="text-lg font-poppins">{toast.message}</span>
                 </div>
                 <button
-                  onClick={() => setToast({ show: false, type: "", message: "" })}
+                  onClick={() =>
+                    setToast({ show: false, type: "", message: "" })
+                  }
                   className="hover:opacity-80"
                 >
                   <Icon icon="ph:x-bold" className="w-6 h-6" />
@@ -245,10 +252,17 @@ const GuardianAccess = () => {
             <div className="fixed top-4 right-4 md:top-6 md:right-6 z-50 animate-slide-in max-w-[calc(100vw-2rem)] md:max-w-none">
               <div className="bg-gray-800 text-white rounded-lg shadow-lg p-3 md:p-4 min-w-[280px] md:min-w-[400px]">
                 <div className="flex items-start gap-3 mb-4">
-                  <Icon icon="ph:warning-circle-fill" className="w-8 h-8 text-yellow-400 flex-shrink-0" />
+                  <Icon
+                    icon="ph:warning-circle-fill"
+                    className="w-8 h-8 text-yellow-400 flex-shrink-0"
+                  />
                   <div>
-                    <p className="text-lg font-poppins font-medium">Remove Guardian?</p>
-                    <p className="text-sm text-gray-300 mt-1">Are you sure you want to remove this guardian?</p>
+                    <p className="text-lg font-poppins font-medium">
+                      Remove Guardian?
+                    </p>
+                    <p className="text-sm text-gray-300 mt-1">
+                      Are you sure you want to remove this guardian?
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -287,7 +301,7 @@ const GuardianAccess = () => {
                     <Icon icon="ph:x-bold" className="w-6 h-6" />
                   </button>
                 </div>
-                
+
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                     Guardian Email Address
@@ -306,14 +320,14 @@ const GuardianAccess = () => {
 
                 <div className="flex gap-3">
                   <button
-                      onClick={() => {
-                        setIsModalOpen(false);
-                        setEmail("");
-                      }}
-                      className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-[#FF0033] hover:text-white transition-colors font-poppins font-medium"
-                    >
-                      Cancel
-                    </button>
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setEmail("");
+                    }}
+                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-[#FF0033] hover:text-white transition-colors font-poppins font-medium"
+                  >
+                    Cancel
+                  </button>
                   <button
                     onClick={handleSendInvitation}
                     className="flex-1 px-4 py-3 bg-[#2ECC71] text-white rounded-lg hover:bg-green-600 transition-colors font-poppins font-bold"
@@ -324,15 +338,14 @@ const GuardianAccess = () => {
               </div>
             </div>
           )}
-          
 
           {/* Content */}
           {activeTab === "guardian" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
               {guardians.map((guardian) => (
-                <GuardianCard 
-                  key={guardian.id} 
-                  guardian={guardian} 
+                <GuardianCard
+                  key={guardian.id}
+                  guardian={guardian}
                   onDelete={handleDeleteClick}
                 />
               ))}
