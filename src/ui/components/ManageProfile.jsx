@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Icon } from "@iconify/react";
 import avatar from "@/assets/images/team-photo.png";
 import DashboardSide from "./DashboardSide";
 import Header from "./Header";
