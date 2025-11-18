@@ -57,3 +57,5 @@ storybook-static/
 
 # Misc
 dist-ssr/
+
+dist
