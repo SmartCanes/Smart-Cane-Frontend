@@ -21,6 +21,12 @@ const DashboardSide = ({ className = "" }) => {
       path: "/activity-report"
     },
     {
+      id: "weather-board",
+      label: "Weather Board",
+      icon: "mdi:weather-partly-cloudy",
+      path: "/weather-board"
+    },
+    {
       id: "alerts",
       label: "Alerts",
       icon: "uiw:bell",
@@ -50,12 +56,6 @@ const DashboardSide = ({ className = "" }) => {
       label: "Settings",
       icon: "solar:settings-bold",
       path: "/settings"
-    },
-    {
-      id: "weather-board",
-      label: "Weather Board",
-      icon: "mdi:weather-partly-cloudy",
-      path: "/weather-board"
     }
   ];
 
