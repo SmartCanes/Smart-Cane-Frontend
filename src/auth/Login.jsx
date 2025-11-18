@@ -5,7 +5,6 @@ import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import { useUserStore } from "@/stores/useStore";
-import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 
 const Login = () => {
   const { login, setShowLoginModal } = useUserStore();

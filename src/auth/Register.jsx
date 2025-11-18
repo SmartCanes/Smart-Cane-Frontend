@@ -7,7 +7,6 @@ import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import ValidationModal from "../ui/components/ValidationModal";
 import Loader from "../ui/components/Loader";
-import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 
 const Register = () => {
   const navigate = useNavigate();
