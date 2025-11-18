@@ -1,7 +1,7 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState } from "react";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
-import { BlinkingIcon, HoverNavEffect, SlideUp } from "@/wrapper/MotionWrapper";
+import { BlinkingIcon, HoverNavEffect } from "@/wrapper/MotionWrapper";
 import { Icon } from "@iconify/react";
 
 const DashboardSide = ({ className = "" }) => {
