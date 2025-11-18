@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import avatar from "@/assets/images/team-photo.png";
 import DashboardSide from "./DashboardSide";
 import Header from "./Header";
+import Toast from "./Toast";
 
 // ... (Keep ProfileInfo exactly as it was) ...
 const ProfileInfo = ({ label, value, isEditing, onChange, name }) => {
@@ -72,7 +73,6 @@ const ManageProfile = () => {
       type: "info",
       message: "Edit mode enabled"
     });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
   const handleCancelEdit = () => {
@@ -97,7 +97,6 @@ const ManageProfile = () => {
       type: "success",
       message: "Profile updated successfully"
     });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
   const handleInputChange = (e) => {
@@ -147,39 +146,12 @@ const ManageProfile = () => {
 
           {/* Toast Notification */}
           {toast.show && (
-            <div className="fixed top-6 right-6 z-50 animate-slide-in">
-              <div
-                className={`${
-                  toast.type === "success"
-                    ? "bg-[#2ECC71]"
-                    : toast.type === "info"
-                      ? "bg-[#2196F3]"
-                      : "bg-[#FF0033]"
-                } text-white rounded-lg shadow-lg p-4 flex items-center gap-4 min-w-[400px]`}
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <Icon
-                    icon={
-                      toast.type === "success"
-                        ? "ph:check-circle-fill"
-                        : toast.type === "info"
-                          ? "ph:info-fill"
-                          : "ph:warning-fill"
-                    }
-                    className="w-8 h-8"
-                  />
-                  <span className="text-lg font-poppins">{toast.message}</span>
-                </div>
-                <button
-                  onClick={() =>
-                    setToast({ show: false, type: "", message: "" })
-                  }
-                  className="hover:opacity-80"
-                >
-                  <Icon icon="ph:x-bold" className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
+            <Toast
+              type={toast.type}
+              message={toast.message}
+              position="top-right"
+              onClose={() => setToast({ show: false, type: "", message: "" })}
+            />
           )}
 
           {/* VIP Profile Content */}
