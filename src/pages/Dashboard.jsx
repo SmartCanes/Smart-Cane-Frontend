@@ -11,6 +11,7 @@ import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
 import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
+import Toast from "@/ui/components/Toast";
 
 const Dashboard = () => {
   const { showLoginModal, setShowLoginModal } = useUserStore();
@@ -149,7 +150,12 @@ const Dashboard = () => {
         {/* Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 p-8">
           {showModal && (
-            <ValidationModal type="login-success" position="center" />
+            // <ValidationModal type="login-success" position="center" />
+            <Toast
+              message="You have successfully logged into your account."
+              type="success"
+              position="top-right"
+            />
           )}
 
           {/* Title Section */}
