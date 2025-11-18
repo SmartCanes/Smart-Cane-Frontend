@@ -14,6 +14,17 @@
   }
 }
 
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @theme {
   --color-primary-100: oklch(0.2914 0.0947 263.19);
   --font-poppins: "Poppins", sans-serif;
@@ -25,6 +36,7 @@
   --color-card-100: #11285a;
   --text-h1: 70px;
   --color-logout-100: #f3c8c8;
+  --animate-slide-in: slideIn 0.3s ease-out;
 }
 
 body {
