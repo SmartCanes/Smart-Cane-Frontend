@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import ValidationModal from "@/ui/components/ValidationModal";
 import Header from "@/ui/components/Header";
 import DashboardSide from "@/ui/components/DashboardSide";
 import LiveMap from "@/ui/components/LiveMap";
