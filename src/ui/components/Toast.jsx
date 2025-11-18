@@ -5,14 +5,7 @@ import ErrorIcon from "@/assets/images/warning.svg";
 import InfoIcon from "@/assets/images/information.svg";
 import WarningIcon from "@/assets/images/warning.svg";
 import ExitIcon from "@/assets/images/exit.svg";
-/**
- * Toast Component
- * Props:
- * - message: string
- * - type: "success" | "error" | "info" | "warning"
- * - duration: number (ms)
- * - position: "top-left" | "top-right" | "bottom-left" | "bottom-right"
- */
+
 export default function Toast({
   message,
   type = "info",
