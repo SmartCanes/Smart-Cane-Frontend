@@ -67,16 +67,17 @@ const ValidationModal = ({
         };
       case "phone-verification":
         return {
-          title: "Phone Verification",
+          title: "Email Verification",
           description: (
             <>
               We've sent a <span className="font-bold">verification code</span>{" "}
-              to your phone number:
+              to your email:
               <br />
-              +63 9** *** ****
+              {email || "your email address"}
               <br />
               <br />
-              Please check your <span className="font-bold">Messages</span>.
+              Please check your <span className="font-bold">Inbox</span> or{" "}
+              <span className="font-bold">Spam</span> Folder.
             </>
           ),
           showButton: false
