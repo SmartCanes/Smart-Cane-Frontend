@@ -5,6 +5,7 @@ import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import { useUserStore } from "@/stores/useStore";
+import api from "../api/axios";
 
 const Login = () => {
   const { login, setShowLoginModal } = useUserStore();
@@ -14,69 +15,56 @@ const Login = () => {
     password: ""
   });
   const [errors, setErrors] = useState({});
-
-  // Sample credentials
-  const VALID_USERNAME = "admin";
-  const VALID_PASSWORD = "admin";
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error for this field when user starts typing
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name] || errors.general) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-        general: ""
-      }));
+      setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newErrors = {};
-    const REQUIRED_MSG = "This field is required";
 
     // Validation
-    if (!formData.username.trim()) {
-      newErrors.username = REQUIRED_MSG;
-    }
-    if (!formData.password) {
-      newErrors.password = REQUIRED_MSG;
-    }
-
+    const newErrors = {};
+    if (!formData.username.trim())
+      newErrors.username = "This field is required";
+    if (!formData.password) newErrors.password = "This field is required";
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    // Check credentials
-    const isUsernameValid = formData.username === VALID_USERNAME;
-    const isPasswordValid = formData.password === VALID_PASSWORD;
+    setLoading(true);
+    try {
+      // Call backend login API
+      const response = await api.post("/auth/login", {
+        username: formData.username,
+        password: formData.password
+      });
 
-    if (!isUsernameValid || !isPasswordValid) {
-      if (!isUsernameValid && !isPasswordValid) {
-        setErrors({
-          general: "Incorrect username and password",
-          username: " ",
-          password: " "
-        });
-      } else {
-        setErrors({
-          username: !isUsernameValid ? "Incorrect username" : "",
-          password: !isPasswordValid ? "Incorrect password" : ""
-        });
-      }
-      return;
+      const token = response.data.access_token;
+
+      // Save JWT in localStorage
+      localStorage.setItem("token", token);
+
+      // Update your user store
+      login(formData.username);
+      setShowLoginModal(true);
+
+      // Redirect to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      // Handle backend error message
+      const msg = err.response?.data?.message || "Login failed";
+      setErrors({ general: msg });
+    } finally {
+      setLoading(false);
     }
-
-    // Login successful
-    login(formData.username);
-    setShowLoginModal(true);
-    navigate("/dashboard");
   };
 
   return (
@@ -125,6 +113,7 @@ const Login = () => {
                 onChange={handleChange}
                 error={errors.username}
               />
+              {errors.username && <p className="error">{errors.username}</p>}
 
               <PasswordField
                 className="font-poppins relative"
@@ -138,6 +127,9 @@ const Login = () => {
                 error={errors.password}
                 showErrorIcon={false}
               />
+              {errors.password && <p className="error">{errors.password}</p>}
+
+              {errors.general && <p className="error">{errors.general}</p>}
 
               <Link
                 to="/forgot-password"
@@ -149,7 +141,7 @@ const Login = () => {
               <PrimaryButton
                 className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
                 bgColor="bg-primary-100"
-                text="Sign In"
+                text={loading ? "Logging in..." : "Sign In"}
                 type="submit"
               />
 

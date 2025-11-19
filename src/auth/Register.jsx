@@ -5,8 +5,9 @@ import TextField from "../ui/components/TextField";
 import SelectField from "../ui/components/SelectField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
-import ValidationModal from "../ui/components/ValidationModal";
+import EmailValidationModal from "../ui/components/EmailValidationModal";
 import Loader from "../ui/components/Loader";
+import axios from "axios";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,8 +19,12 @@ const Register = () => {
   });
 
   const CONTACT_NUMBER_LENGTH = 11;
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]); // 6-digit OTP
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const [errors, setErrors] = useState({});
 
   // Form data state
@@ -38,6 +43,85 @@ const Register = () => {
     contactNumber: ""
   });
 
+  // OTP input refs
+  const otpRefs = [
+    React.useRef(),
+    React.useRef(),
+    React.useRef(),
+    React.useRef(),
+    React.useRef(),
+    React.useRef()
+  ];
+
+  // Validation functions
+  const validateField = (name, value) => {
+    switch (name) {
+      case "firstName":
+      case "lastName":
+        if (!value.trim()) return "This field is required";
+        if (!/^[a-zA-Z\s]+$/.test(value))
+          return "Should contain only letters and spaces";
+        if (value.length < 2) return "Should be at least 2 characters long";
+        return "";
+
+      case "username":
+        if (!value.trim()) return "This field is required";
+        if (value.length < 3)
+          return "Username must be at least 3 characters long";
+        if (!/^[a-zA-Z0-9_]+$/.test(value))
+          return "Username can only contain letters, numbers, and underscores";
+        return "";
+
+      case "password":
+        if (!value) return "This field is required";
+        if (value.length < 8)
+          return "Password must be at least 8 characters long";
+        if (!/(?=.*[a-z])/.test(value))
+          return "Password must contain at least one lowercase letter";
+        if (!/(?=.*[A-Z])/.test(value))
+          return "Password must contain at least one uppercase letter";
+        if (!/(?=.*\d)/.test(value))
+          return "Password must contain at least one number";
+        if (!/(?=.*[@$!%*?&])/.test(value))
+          return "Password must contain at least one special character (@$!%*?&)";
+        return "";
+
+      case "confirmPassword":
+        if (!value) return "This field is required";
+        if (value !== formData.password) return "Passwords don't match!";
+        return "";
+
+      case "streetAddress":
+        if (!value.trim()) return "This field is required";
+        if (value.length < 5) return "Address should be more specific";
+        return "";
+
+      case "email":
+        if (!value.trim()) return "This field is required";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          return "Please enter a valid email address";
+        return "";
+
+      case "contactNumber":
+        if (!value) return "This field is required";
+        if (value.length !== CONTACT_NUMBER_LENGTH)
+          return `Contact number must be ${CONTACT_NUMBER_LENGTH} digits`;
+        if (!/^09\d{9}$/.test(value))
+          return "Contact number must start with 09 and contain 11 digits";
+        return "";
+
+      case "province":
+      case "city":
+      case "barangay":
+      case "relationship":
+        if (!value) return "This field is required";
+        return "";
+
+      default:
+        return "";
+    }
+  };
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     // If updating contact number, allow digits only (strip non-numeric chars)
@@ -50,22 +134,291 @@ const Register = () => {
       ...prev,
       [name]: newValue
     }));
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: ""
-      }));
+
+    // Validate field in real-time
+    const error = validateField(name, newValue);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error
+    }));
+  };
+
+  const validateStep = (stepNumber) => {
+    const newErrors = {};
+
+    if (stepNumber === 1) {
+      const step1Fields = [
+        "firstName",
+        "lastName",
+        "username",
+        "password",
+        "confirmPassword"
+      ];
+      step1Fields.forEach((field) => {
+        const error = validateField(field, formData[field]);
+        if (error) newErrors[field] = error;
+      });
+    } else if (stepNumber === 2) {
+      const step2Fields = [
+        "streetAddress",
+        "province",
+        "barangay",
+        "city",
+        "relationship",
+        "contactNumber",
+        "email"
+      ];
+      step2Fields.forEach((field) => {
+        const error = validateField(field, formData[field]);
+        if (error) newErrors[field] = error;
+      });
+    }
+
+    return newErrors;
+  };
+
+  // Send OTP function
+  const sendOtp = async () => {
+    setIsSendingOtp(true);
+    setOtpError("");
+
+    try {
+      await axios.post("http://127.0.0.1:5000/api/auth/send-otp", {
+        email: formData.email
+      });
+
+      setOtpSent(true);
+      setCountdown(60); // 60 seconds countdown
+
+      // Start countdown
+      const countdownInterval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("Failed to send OTP:", error);
+      setOtpError("Failed to send OTP. Please try again.");
+    } finally {
+      setIsSendingOtp(false);
     }
   };
 
-  const otpRefs = [
-    React.createRef(),
-    React.createRef(),
-    React.createRef(),
-    React.createRef()
-  ];
+  // Resend OTP function
+  const resendOtp = async () => {
+    if (countdown > 0) return;
 
-  // Temporary dummy data for testing
+    await sendOtp();
+  };
+
+  // OTP input handlers
+  const handleOtpChange = (index, value) => {
+    if (value.length <= 1 && /^[0-9]*$/.test(value)) {
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
+      setOtpError("");
+
+      // Auto-focus next input
+      if (value && index < 5) {
+        otpRefs[index + 1].current?.focus();
+      }
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    // Handle backspace to go to previous input
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs[index - 1].current?.focus();
+    }
+  };
+
+  const hideModal = () => {
+    setModalConfig({ visible: false, type: null, position: "center" });
+  };
+
+  const handleModalAction = () => {
+    if (modalConfig.type === "account-created") {
+      navigate("/login");
+    } else if (modalConfig.type === "verification-success") {
+      hideModal();
+    }
+    hideModal();
+  };
+
+  const handleNext = async (e) => {
+    e.preventDefault();
+
+    // Validate current step
+    const stepErrors = validateStep(step);
+
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+
+      // Scroll to first error
+      const firstErrorField = Object.keys(stepErrors)[0];
+      const errorElement = document.querySelector(
+        `[name="${firstErrorField}"]`
+      );
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        errorElement.focus();
+      }
+      return;
+    }
+
+    if (step === 1) {
+      // Check username availability before proceeding to step 2
+      setIsSubmitting(true);
+
+      try {
+        const checkPayload = {
+          username: formData.username
+        };
+
+        await axios.post(
+          "http://127.0.0.1:5000/api/auth/check-credentials",
+          checkPayload
+        );
+
+        // Username is available, proceed to step 2
+        setStep(2);
+      } catch (error) {
+        console.error(error);
+        const errorMessage =
+          error.response?.data?.message || "Username check failed";
+
+        if (errorMessage.includes("Username")) {
+          setErrors((prev) => ({
+            ...prev,
+            username: "Username already taken"
+          }));
+          document
+            .querySelector('[name="username"]')
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          document.querySelector('[name="username"]')?.focus();
+        } else {
+          alert(errorMessage);
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else if (step === 2) {
+      // Check email and contact number availability before proceeding to verification
+      setIsSubmitting(true);
+
+      try {
+        const checkPayload = {
+          email: formData.email,
+          contact_number: formData.contactNumber
+        };
+
+        await axios.post(
+          "http://127.0.0.1:5000/api/auth/check-credentials",
+          checkPayload
+        );
+
+        // Email and contact number are available, send OTP and proceed to step 3
+        await sendOtp();
+        setStep(3);
+      } catch (error) {
+        console.error(error);
+        const errorMessage =
+          error.response?.data?.message || "Credential check failed";
+
+        // Parse which field is taken and show appropriate error
+        if (errorMessage.includes("Email")) {
+          setErrors((prev) => ({ ...prev, email: "Email already registered" }));
+          document
+            .querySelector('[name="email"]')
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          document.querySelector('[name="email"]')?.focus();
+        } else if (errorMessage.includes("Contact number")) {
+          setErrors((prev) => ({
+            ...prev,
+            contactNumber: "Contact number already registered"
+          }));
+          document
+            .querySelector('[name="contactNumber"]')
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          document.querySelector('[name="contactNumber"]')?.focus();
+        } else {
+          alert(errorMessage);
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // Step 3: Verify OTP and create account
+      setIsSubmitting(true);
+      setOtpError("");
+
+      try {
+        // Verify OTP first
+        const otpCode = otp.join("");
+
+        if (otpCode.length !== 6) {
+          setOtpError("Please enter the complete 6-digit OTP");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const verifyResponse = await axios.post(
+          "http://127.0.0.1:5000/api/auth/verify-otp",
+          {
+            email: formData.email,
+            otp_code: otpCode
+          }
+        );
+
+        // OTP verified successfully, now register the user
+        const payload = {
+          username: formData.username,
+          password: formData.password,
+          guardian_name: formData.firstName + " " + formData.lastName,
+          email: formData.email,
+          contact_number: formData.contactNumber,
+          relationship_to_vip: formData.relationship,
+          province: formData.province,
+          city: formData.city,
+          barangay: formData.barangay,
+          street_address: formData.streetAddress
+        };
+
+        await axios.post("http://127.0.0.1:5000/api/auth/register", payload);
+
+        setModalConfig({
+          visible: true,
+          type: "account-created",
+          position: "center"
+        });
+      } catch (error) {
+        console.error(error);
+        const errorMessage =
+          error.response?.data?.message || "Registration failed";
+
+        if (errorMessage.includes("OTP")) {
+          setOtpError(errorMessage);
+        } else {
+          alert(errorMessage);
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  // Check if current step has any errors
+  const hasStepErrors = () => {
+    const stepErrors = validateStep(step);
+    return Object.keys(stepErrors).length > 0;
+  };
+
+  // Dummy data (keep your existing dummy data)
   const dummyBarangays = [
     { value: "brgy1", label: "Barangay 1" },
     { value: "brgy2", label: "Barangay 2" },
@@ -90,163 +443,33 @@ const Register = () => {
     { value: "prov5", label: "Rizal" }
   ];
 
-  // Geographic data states
-  const [regions, setRegions] = useState([]);
   const [provinces, setProvinces] = useState(dummyProvinces);
   const [cities, setCities] = useState(dummyCities);
   const [barangays, setBarangays] = useState(dummyBarangays);
-
-  // Selected values
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-
-  const handleRegionChange = (e) => {
-    const regionCode = e.target.value;
-    setSelectedRegion(regionCode);
-    setSelectedProvince("");
-    setSelectedCity("");
-    // loadProvinces(regionCode) // Disabled
-  };
-
-  const handleProvinceChange = (e) => {
-    const provinceCode = e.target.value;
-    setSelectedProvince(provinceCode);
-    setSelectedCity("");
-    // loadCities(provinceCode) // Disabled
-  };
-
-  const handleCityChange = (e) => {
-    const cityCode = e.target.value;
-    setSelectedCity(cityCode);
-    // loadBarangays(cityCode) // Disabled
-  };
-
-  const hideModal = () => {
-    setModalConfig({ visible: false, type: null, position: "center" });
-  };
-
-  const handleModalAction = () => {
-    if (modalConfig.type === "account-created") {
-      navigate("/login");
-    }
-    hideModal();
-  };
-
-  const handleNext = (e) => {
-    e.preventDefault();
-    const REQUIRED_MSG = "This field is required";
-
-    if (step === 1) {
-      const step1Errors = {};
-      if (!formData.firstName.trim()) step1Errors.firstName = REQUIRED_MSG;
-      if (!formData.lastName.trim()) step1Errors.lastName = REQUIRED_MSG;
-      if (!formData.username.trim()) step1Errors.username = REQUIRED_MSG;
-      if (!formData.password) step1Errors.password = REQUIRED_MSG;
-      if (!formData.confirmPassword) step1Errors.confirmPassword = REQUIRED_MSG;
-      if (
-        formData.password &&
-        formData.confirmPassword &&
-        formData.password !== formData.confirmPassword
-      ) {
-        step1Errors.confirmPassword = "Password don't match!";
-      }
-
-      if (Object.keys(step1Errors).length) {
-        setErrors((prev) => ({ ...prev, ...step1Errors }));
-        return;
-      }
-      setStep(2);
-    } else if (step === 2) {
-      const step2Errors = {};
-      if (!formData.streetAddress.trim())
-        step2Errors.streetAddress = REQUIRED_MSG;
-      if (!formData.province) step2Errors.province = REQUIRED_MSG;
-      if (!formData.barangay) step2Errors.barangay = REQUIRED_MSG;
-      if (!formData.city) step2Errors.city = REQUIRED_MSG;
-      if (!formData.relationship) step2Errors.relationship = REQUIRED_MSG;
-      if (!formData.contactNumber) {
-        step2Errors.contactNumber = REQUIRED_MSG;
-      } else if (formData.contactNumber.length !== CONTACT_NUMBER_LENGTH) {
-        step2Errors.contactNumber = `Contact number must be ${CONTACT_NUMBER_LENGTH} digits.`;
-      }
-      if (!formData.email.trim()) step2Errors.email = REQUIRED_MSG;
-
-      if (Object.keys(step2Errors).length) {
-        setErrors((prev) => ({ ...prev, ...step2Errors }));
-        return;
-      }
-      // Show email verification modal
-      setModalConfig({
-        visible: true,
-        type: "phone-verification",
-        position: "center"
-      });
-      // Auto-hide modal and move to step 3 after 3 seconds
-      setTimeout(() => {
-        hideModal();
-        setTimeout(() => setStep(3), 500);
-      }, 3000);
-    } else {
-      // Submit the form (after OTP verification)
-      setIsSubmitting(true);
-
-      // Simulate API submission
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setModalConfig({
-          visible: true,
-          type: "account-created",
-          position: "center"
-        });
-      }, 2000);
-    }
-  };
-
-  const handleOtpChange = (index, value) => {
-    if (value.length <= 1 && /^[0-9]*$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-
-      // Auto-focus next input
-      if (value && index < 3) {
-        otpRefs[index + 1].current?.focus();
-      }
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    // Handle backspace to go to previous input
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs[index - 1].current?.focus();
-    }
-  };
 
   return (
     <div className="min-h-screen w-full flex flex-col sm:flex-row">
       <SidebarContent />
 
-      {step === 3 && isSubmitting && (
+      {isSubmitting && (
         <div className="absolute inset-0 sm:inset-y-0 sm:left-0 w-full sm:w-1/2 flex items-center justify-center z-30">
           <Loader size="large" color="#FDFCFA" />
         </div>
       )}
 
-      {/* Phone Verification Modal */}
+      {/* Email Verification Modal */}
       {modalConfig.visible && (
-        <ValidationModal
+        <EmailValidationModal
           type={modalConfig.type}
           position={modalConfig.position}
           onAction={handleModalAction}
+          email={modalConfig.email}
         />
       )}
 
       {step === 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[92%] flex justify-center z-10">
-          {/* <p className='font-poppins pb-4 font-[12px] whitespace-nowrap'>
-  Thank you so much for choosing to stay with us during your recent visit. We truly enjoyed having you as our guest and hope your stay was comfortable and pleasant. Your visit brought warmth to our place, and we look forward to welcoming you again soon. If you have any questions or need help planning your next stay, feel free to reach out. 🙏😊
-</p> */}
+          {/* Optional welcome message */}
         </div>
       )}
       <div className="relative flex flex-col w-full sm:flex-1 min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
@@ -277,8 +500,12 @@ const Register = () => {
                 ) : (
                   <>
                     Enter the{" "}
-                    <span className="font-bold">One-Time Password (OTP)</span>{" "}
-                    we have sent to your registered email address.
+                    <span className="font-bold">6-digit verification code</span>{" "}
+                    we have sent to your email address.
+                    <br />
+                    <span className="text-sm text-gray-600">
+                      {formData.email}
+                    </span>
                   </>
                 )}
               </p>
@@ -379,7 +606,6 @@ const Register = () => {
                         ...prev,
                         province: e.target.value
                       }));
-                      handleProvinceChange(e);
                       setErrors((prev) => ({ ...prev, province: "" }));
                     }}
                     value={formData.province}
@@ -395,12 +621,13 @@ const Register = () => {
                     placeholder="Barangay..."
                     required
                     options={barangays}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData((prev) => ({
                         ...prev,
                         barangay: e.target.value
-                      }))
-                    }
+                      }));
+                      setErrors((prev) => ({ ...prev, barangay: "" }));
+                    }}
                     value={formData.barangay}
                     error={errors.barangay}
                   />
@@ -416,7 +643,6 @@ const Register = () => {
                         ...prev,
                         city: e.target.value
                       }));
-                      handleCityChange(e);
                       setErrors((prev) => ({ ...prev, city: "" }));
                     }}
                     value={formData.city}
@@ -432,16 +658,17 @@ const Register = () => {
                   required
                   options={[
                     { value: "Husband", label: "Husband" },
-                    { value: "Legal Guardian", label: "Legal Guardian" },
+                    { value: "Wife", label: "Wife" },
                     { value: "Sibling", label: "Sibling" },
-                    { value: "Wife", label: "Wife" }
+                    { value: "Legal Guardian", label: "Legal Guardian" }
                   ]}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       relationship: e.target.value
-                    }))
-                  }
+                    }));
+                    setErrors((prev) => ({ ...prev, relationship: "" }));
+                  }}
                   value={formData.relationship || ""}
                   error={errors.relationship}
                 />
@@ -480,7 +707,7 @@ const Register = () => {
             {step === 3 && (
               <div className="space-y-6">
                 {/* OTP Input Boxes */}
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center gap-3">
                   {otp.map((digit, index) => (
                     <input
                       key={index}
@@ -490,32 +717,59 @@ const Register = () => {
                       value={digit}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      className="w-16 h-16 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
+                      className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
                     />
                   ))}
                 </div>
 
+                {/* OTP Error Message */}
+                {otpError && (
+                  <div className="text-center">
+                    <p className="text-red-500 text-sm">{otpError}</p>
+                  </div>
+                )}
+
                 {/* Resend OTP Link */}
                 <div className="text-center">
                   <p className="font-poppins text-[#1C253C] text-sm mb-2">
-                    Didn't receive an OTP?
+                    Didn't receive the code?
                   </p>
                   <button
                     type="button"
-                    className="font-poppins text-[#1C253C] hover:underline text-sm"
+                    onClick={resendOtp}
+                    disabled={countdown > 0 || isSendingOtp}
+                    className={`font-poppins text-primary-100 text-sm font-medium ${
+                      countdown > 0 || isSendingOtp
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:underline"
+                    }`}
                   >
-                    Resend OTP
+                    {isSendingOtp
+                      ? "Sending..."
+                      : countdown > 0
+                        ? `Resend in ${countdown}s`
+                        : "Resend Verification Code"}
                   </button>
                 </div>
               </div>
             )}
+
             <PrimaryButton
               className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
               bgColor="bg-primary-100"
-              text={`${step === 3 ? "Submit" : "Next"}`}
+              text={
+                isSubmitting
+                  ? step === 3
+                    ? "Verifying..."
+                    : "Checking..."
+                  : `${step === 3 ? "Verify & Create Account" : "Next"}`
+              }
               type="submit"
-              disabled={isSubmitting}
+              disabled={
+                isSubmitting || hasStepErrors() || (step === 3 && !otpSent)
+              }
             />
+
             <p className="font-poppins text-center text-[18px] mt-4">
               Already have an Account?{" "}
               <Link
