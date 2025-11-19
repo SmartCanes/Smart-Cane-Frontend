@@ -11,6 +11,7 @@ const ValidationModal = ({
   isVisible = true
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(isVisible || onClose);
+
   useEffect(() => {
     if (!isModalVisible) return;
 
@@ -28,19 +29,48 @@ const ValidationModal = ({
 
   const getContent = () => {
     switch (type) {
+      case "email-verification":
+        return {
+          title: "Email Verification",
+          description: (
+            <>
+              We've sent a{" "}
+              <span className="font-bold">6-digit verification code</span> to
+              your email address:
+              <br />
+              <span className="font-medium text-primary-100">
+                {email || "user******@gmail.com"}
+              </span>
+              <br />
+              <br />
+              Please check your <span className="font-bold">Inbox</span> or{" "}
+              <span className="font-bold">Spam Folder</span> and enter the code
+              to verify your email address.
+              <br />
+              <br />
+              <span className="text-sm text-gray-600">
+                The code will expire in 10 minutes.
+              </span>
+            </>
+          ),
+          showButton: false
+        };
       case "verification-code":
         return {
-          title: "Email OTP",
+          title: "Check Your Email",
           description: (
             <>
               We've sent a <span className="font-bold">verification code</span>{" "}
               to your email:
               <br />
-              {email || "afri******@gmail.com"}
+              <span className="font-medium text-primary-100">
+                {email || "user******@gmail.com"}
+              </span>
               <br />
               <br />
               Please check your <span className="font-bold">Inbox</span> or{" "}
-              <span className="font-bold">Spam</span> Folder.
+              <span className="font-bold">Spam Folder</span> to complete the
+              verification.
             </>
           ),
           showButton: false
@@ -50,8 +80,8 @@ const ValidationModal = ({
           title: "Account Created!",
           description: (
             <>
-              Success! your ICane account is ready. Click below to sign in and
-              start exploring.
+              Success! Your ICane account has been created successfully. Click
+              below to sign in and start exploring.
             </>
           ),
           buttonText: "Go to Login",
@@ -59,28 +89,42 @@ const ValidationModal = ({
         };
       case "login-success":
         return {
-          title: "Welcome!",
+          title: "Welcome Back!",
           description: (
             <>You have successfully logged into your ICane account.</>
           ),
           showButton: false
         };
-      case "phone-verification":
+      case "email-sent":
         return {
-          title: "Email Verification",
+          title: "Email Sent!",
           description: (
             <>
-              We've sent a <span className="font-bold">verification code</span>{" "}
-              to your email:
+              We've sent a verification email to:
               <br />
-              {email || "your email address"}
+              <span className="font-medium text-primary-100">
+                {email || "user******@gmail.com"}
+              </span>
               <br />
               <br />
-              Please check your <span className="font-bold">Inbox</span> or{" "}
-              <span className="font-bold">Spam</span> Folder.
+              Please check your email and click the verification link to
+              activate your account.
             </>
           ),
           showButton: false
+        };
+      case "verification-success":
+        return {
+          title: "Email Verified!",
+          description: (
+            <>
+              Your email address has been successfully verified.
+              <br />
+              You can now proceed to use your ICane account.
+            </>
+          ),
+          buttonText: "Continue",
+          showButton: true
         };
       default:
         return {
@@ -194,11 +238,11 @@ const ValidationModal = ({
                   {content.title}
                 </h1>
 
-                <p
+                <div
                   className={`font-poppins text-[#1C253C] ${descriptionSize} leading-relaxed ${content.showButton ? "mb-8" : ""}`}
                 >
                   {content.description}
-                </p>
+                </div>
 
                 {content.showButton && (
                   <PrimaryButton
