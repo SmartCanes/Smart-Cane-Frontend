@@ -176,7 +176,7 @@ const Register = () => {
         setErrors((prev) => ({ ...prev, ...step2Errors }));
         return;
       }
-      // Show phone verification modal
+      // Show email verification modal
       setModalConfig({
         visible: true,
         type: "phone-verification",
@@ -267,7 +267,7 @@ const Register = () => {
           >
             <div className="text-center mb-7 sm:mb-10">
               <h1 className="font-poppins text-5xl sm:text-h1 font-bold text-[#1C253C] mb-4">
-                {step === 3 ? "Phone Verification" : "Welcome"}
+                {step === 3 ? "Email Verification" : "Welcome"}
               </h1>
               <p className="font-poppins text-[#1C253C] text-paragraph">
                 {step === 1 ? (
@@ -278,7 +278,7 @@ const Register = () => {
                   <>
                     Enter the{" "}
                     <span className="font-bold">One-Time Password (OTP)</span>{" "}
-                    we have sent to your registered contact number 09*******345.
+                    we have sent to your registered email address.
                   </>
                 )}
               </p>
