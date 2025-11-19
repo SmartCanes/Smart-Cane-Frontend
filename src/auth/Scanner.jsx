@@ -15,9 +15,9 @@ const ScanQR = () => {
       .catch(() => setHasCamera(false));
   }, []);
 
-  const handleScan = (result) => {
-    if (result) {
-      setScannedCode(result);
+  const handleScan = (detectedCodes) => {
+    if (detectedCodes && detectedCodes.length > 0) {
+      setScannedCode(detectedCodes[0].rawValue);
     }
   };
 
