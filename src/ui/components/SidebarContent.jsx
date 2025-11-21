@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SmartCaneLogo from "@/assets/images/smartcane-logo.png";
 
 const SidebarContent = () => {
   return (
@@ -6,15 +7,11 @@ const SidebarContent = () => {
       <div
         className={`hidden sm:flex sm:flex-1 min-h-screen bg-primary-100 items-center justify-center flex-col relative`}
       >
-        <img
-          src="src/assets/images/smartcane-logo.png"
-          alt="Sidebar Image"
-          className="opacity-5"
-        />
+        <img src={SmartCaneLogo} alt="Sidebar Image" className="opacity-5" />
         <div className="absolute top-1/2 -translate-y-1/2 flex items-center flex-col gap-y-24">
           <Link to="/">
             <img
-              src="src/assets/images/smartcane-logo.png"
+              src={SmartCaneLogo}
               alt="Sidebar Image"
               className="w-[290px]"
             />
