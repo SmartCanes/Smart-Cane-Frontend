@@ -68,7 +68,11 @@ const Login = () => {
       console.error(err);
       // Handle backend error message
       const msg = err.response?.data?.message || "Login failed";
-      setErrors({ general: msg });
+      setErrors({
+        general: msg,
+        username: " ",
+        password: " "
+      });
     } finally {
       setLoading(false);
     }
@@ -120,7 +124,6 @@ const Login = () => {
                 onChange={handleChange}
                 error={errors.username}
               />
-              {errors.username && <p className="error">{errors.username}</p>}
 
               <PasswordField
                 className="font-poppins relative"
@@ -134,9 +137,6 @@ const Login = () => {
                 error={errors.password}
                 showErrorIcon={false}
               />
-              {errors.password && <p className="error">{errors.password}</p>}
-
-              {errors.general && <p className="error">{errors.general}</p>}
 
               <Link
                 to="/forgot-password"
