@@ -140,7 +140,7 @@ const PasswordField = ({
       </div>
       {hasError && errorHasContent && (
         <p
-          className="flex items-center gap-2 text-sm mt-1"
+          className="flex items-center gap-2 text-sm mt-1 ml-2"
           style={{ color: validationColor }}
         >
           {showErrorIcon && (

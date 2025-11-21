@@ -73,7 +73,7 @@ const TextField = ({
       />
 
       {hasError && errorHasContent && (
-        <p className="text-sm mt-1" style={{ color: validationColor }}>
+        <p className="text-sm mt-1 ml-2" style={{ color: validationColor }}>
           {typeof error === "string" ? error.trim() : error}
         </p>
       )}
