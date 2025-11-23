@@ -31,9 +31,9 @@ const SetMapBounds = () => {
   const map = useMap();
 
   useEffect(() => {
-    const novalichesBounds = L.geoJSON(saintFrancis).getBounds();
-    // map.setMaxBounds(novalichesBounds);
-    map.fitBounds(novalichesBounds);
+    const bounds = L.geoJSON(saintFrancis).getBounds();
+    // map.setMaxBounds(bounds);
+    map.fitBounds(bounds);
     map.setMinZoom(15);
     map.setMaxZoom(18);
   }, [map]);
@@ -56,7 +56,7 @@ const ClickHandler = ({ onSetDestination }) => {
   return null;
 };
 
-function LiveMap({ userPos, destPos, routePath, activeTab }) {
+function LiveMap({ guardianPosition, destPos, routePath, activeTab }) {
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -159,7 +159,7 @@ function LiveMap({ userPos, destPos, routePath, activeTab }) {
       </div>
 
       <MapContainer
-        center={userPos}
+        center={guardianPosition}
         zoom={16}
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
@@ -180,9 +180,11 @@ function LiveMap({ userPos, destPos, routePath, activeTab }) {
           }}
         />
 
-        {/* <Marker position={userPos}>
-          <Popup>Your current location.</Popup>
-        </Marker> */}
+        {guardianPosition && (
+          <Marker position={guardianPosition}>
+            <Popup>Your current location.</Popup>
+          </Marker>
+        )}
 
         {/* <Marker position={destPos}>
           <Popup>Ito ang destination: SM Novaliches</Popup>
@@ -194,8 +196,11 @@ function LiveMap({ userPos, destPos, routePath, activeTab }) {
 
         <SetMapBounds />
 
-        {/* <FitBoundsToRoute userPos={userPos} destPos={destPos} /> */}
-        <CustomZoomControl userPos={userPos} />
+        <FitBoundsToRoute
+          guardianPosition={guardianPosition}
+          destPos={destPos}
+        />
+        <CustomZoomControl guardianPosition={guardianPosition} />
       </MapContainer>
     </div>
   );
