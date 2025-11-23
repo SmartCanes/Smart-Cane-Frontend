@@ -7,7 +7,7 @@ import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import EmailValidationModal from "../ui/components/EmailValidationModal";
 import Loader from "../ui/components/Loader";
-import axios from "axios";
+import { backendApi } from "@/api/http";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -222,7 +222,7 @@ const Register = () => {
     setOtpError("");
 
     try {
-      await axios.post("http://127.0.0.1:5000/api/auth/send-otp", {
+      await backendApi.post("/auth/send-otp", {
         email: formData.email
       });
 
@@ -319,10 +319,7 @@ const Register = () => {
           username: formData.username
         };
 
-        await axios.post(
-          "http://127.0.0.1:5000/api/auth/check-credentials",
-          checkPayload
-        );
+        await backendApi.post("/auth/check-credentials", checkPayload);
 
         // Username is available, proceed to step 2
         setStep(2);
@@ -356,10 +353,7 @@ const Register = () => {
           contact_number: formData.contactNumber
         };
 
-        await axios.post(
-          "http://127.0.0.1:5000/api/auth/check-credentials",
-          checkPayload
-        );
+        await backendApi.post("/auth/check-credentials", checkPayload);
 
         // Email and contact number are available, send OTP and proceed to step 3
         await sendOtp();
@@ -406,13 +400,10 @@ const Register = () => {
           return;
         }
 
-        const verifyResponse = await axios.post(
-          "http://127.0.0.1:5000/api/auth/verify-otp",
-          {
-            email: formData.email,
-            otp_code: otpCode
-          }
-        );
+        const verifyResponse = await backendApi.post("/auth/verify-otp", {
+          email: formData.email,
+          otp_code: otpCode
+        });
 
         // OTP verified successfully, now register the user
         const payload = {
@@ -428,7 +419,7 @@ const Register = () => {
           street_address: formData.streetAddress
         };
 
-        await axios.post("http://127.0.0.1:5000/api/auth/register", payload);
+        await backendApi.post("/auth/register", payload);
 
         setModalConfig({
           visible: true,
