@@ -8,23 +8,25 @@ import QuickActions from "@/ui/components/QuickActions";
 import DailyActivity from "@/ui/components/DailyActivity";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
-import { fetchRoute } from "@/api/GraphHopperService";
+// import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
 import Toast from "@/ui/components/Toast";
+import { getLocation } from "@/api/locationsApi";
 
 const Dashboard = () => {
+  const ignoreNextFetch = useState(false);
   const { showLoginModal, setShowLoginModal } = useUserStore();
   const [showModal, setShowModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("track"); // 'track' or 'history'
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("track");
+  const [searchSubmitCount, setSearchSubmitCount] = useState(0);
 
-  const [userPosition, setUserPosition] = useState(null);
-  const [route, setRoute] = useState(null);
+  const [guardianLocation, setGuardianLocation] = useState(null);
   const [isLoadingMap, setIsLoadingMap] = useState(true);
   const [startPoint, setStartPoint] = useState("");
+
+  // const [route, setRoute] = useState(null);
   const [destinationPoint, setDestinationPoint] = useState("");
 
-  // Style for history button when active: use CSS variable from index.css
   const historyButtonStyle =
     activeTab === "history"
       ? {
@@ -34,9 +36,6 @@ const Dashboard = () => {
           fill: "#F3F4F6"
         }
       : {};
-
-  // Ito ang fixed destination (SM Novaliches)
-  const destinationPosition = [14.7295, 121.0504];
 
   const handleSwapLocations = () => {
     setStartPoint(destinationPoint);
@@ -53,82 +52,30 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    let watchId; // Para ma-stop later kung kailangan
-
-    // Function para kunin ang ruta
-    const getRoute = async (currentPosition) => {
-      try {
-        console.log("Current Position:", currentPosition);
-
-        console.log("Kinukuha ang ruta papuntang SM Novaliches...");
-        const calculatedRoute = await fetchRoute(
-          currentPosition,
-          destinationPosition
-        );
-
-        if (calculatedRoute) {
-          console.log("Nakuha ang Ruta:", calculatedRoute);
-          setRoute(calculatedRoute); // I-save ang ruta
-        } else {
-          console.error("Hindi nakuha ang ruta.");
-        }
-      } catch (error) {
-        console.error("Nagka-error sa pagkuha ng ruta:", error);
-      }
-    };
-
-    // ✅ REAL-TIME TRACKING: Patuloy na nag-uupdate ng location
-    watchId = navigator.geolocation.watchPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        const currentCoords = [latitude, longitude];
+        setGuardianLocation([latitude, longitude]);
 
-        console.log("📍 Location Updated:", currentCoords);
-        setUserPosition(currentCoords); // I-update ang position sa map
-
-        // Kung first time pa lang, kumuha ng ruta
         if (isLoadingMap) {
-          getRoute(currentCoords);
           setIsLoadingMap(false);
         }
       },
       (error) => {
-        console.error("Error sa pagkuha ng lokasyon:", error.message);
-        alert(
-          "Paki-allow po ang location access para gumana ang real-time tracking."
-        );
-
-        // Fallback: Batasan Hills kung hindi allowed ang location
-        const fallbackCoords = [14.7061, 121.09];
-        setUserPosition(fallbackCoords);
-        getRoute(fallbackCoords);
+        console.error("Failed to get location:", error.message);
         setIsLoadingMap(false);
       },
       {
-        enableHighAccuracy: true, // Para mas accurate ang GPS
-        maximumAge: 0, // Huwag gumamit ng cached location
-        timeout: 5000 // 5 seconds timeout
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000
       }
     );
 
-    const timer = setTimeout(() => {
-      setShowModal(false);
-    }, 3000);
-
-    // Cleanup: I-stop ang location tracking pag nag-unmount ang component
     return () => {
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-      clearTimeout(timer);
+      navigator.geolocation.clearWatch(watchId);
     };
   }, []);
-
-  useEffect(() => {
-    if (!showLoginModal) return;
-    setShowModal(true);
-    setShowLoginModal(false);
-  }, [showLoginModal, setShowLoginModal]);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -148,15 +95,6 @@ const Dashboard = () => {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 p-8">
-          {showModal && (
-            // <ValidationModal type="login-success" position="center" />
-            <Toast
-              message="You have successfully logged into your account."
-              type="success"
-              position="top-right"
-            />
-          )}
-
           {/* Title Section */}
           <div className="mb-6">
             <h1 className="text-3xl font-semibold text-gray-900 font-poppins mb-2">
@@ -208,7 +146,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Map Area */}
-                <div className="w-full h-[320px]">
+                <div className="w-full h-[60vh]">
                   {isLoadingMap ? (
                     <div className="flex items-center justify-center h-full bg-gray-100">
                       <div className="text-center">
@@ -223,12 +161,10 @@ const Dashboard = () => {
                     </div>
                   ) : (
                     <LiveMap
-                      userPos={userPosition}
-                      destPos={destinationPosition}
-                      routePath={route}
+                      guardianPosition={guardianLocation}
+                      // destPos={destinationPoint}
+                      // routePath={route}
                       activeTab={activeTab}
-                      searchQuery={searchQuery}
-                      onSearchChange={setSearchQuery}
                     />
                   )}
                 </div>
@@ -264,6 +200,13 @@ const Dashboard = () => {
               />
               <RecentAlerts />
               <QuickActions />
+              {showModal && (
+                <Toast
+                  message="You have successfully logged into your account."
+                  type="success"
+                  position="top-right"
+                />
+              )}
             </div>
           </div>
         </main>
