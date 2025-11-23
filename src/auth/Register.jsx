@@ -70,6 +70,10 @@ const Register = () => {
           return "Username must be at least 3 characters long";
         if (!/^[a-zA-Z0-9_]+$/.test(value))
           return "Username can only contain letters, numbers, and underscores";
+        // Check if username contains at least 3 letters
+        const letterCount = (value.match(/[a-zA-Z]/g) || []).length;
+        if (letterCount < 3)
+          return "Username must contain at least 3 letters";
         return "";
 
       case "password":
@@ -124,6 +128,15 @@ const Register = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+    
+    // Restrict First Name and Last Name to letters and spaces only
+    if (name === "firstName" || name === "lastName") {
+      // Only allow letters and spaces, block numbers and special characters
+      if (value && !/^[a-zA-Z\s]*$/.test(value)) {
+        return; // Don't update if invalid characters are typed
+      }
+    }
+    
     // If updating contact number, allow digits only (strip non-numeric chars)
     const newValue =
       name === "contactNumber"
@@ -137,10 +150,36 @@ const Register = () => {
 
     // Validate field in real-time
     const error = validateField(name, newValue);
-    setErrors((prev) => ({
-      ...prev,
-      [name]: error
-    }));
+    
+    // Special handling for password fields - validate both when either changes
+    if (name === "password" || name === "confirmPassword") {
+      const newErrors = { ...errors };
+      
+      if (name === "password") {
+        // Validate the password field
+        newErrors.password = error;
+        // Also revalidate confirmPassword if it has a value
+        if (formData.confirmPassword) {
+          newErrors.confirmPassword = 
+            formData.confirmPassword !== newValue ? "Passwords don't match!" : "";
+        }
+      } else if (name === "confirmPassword") {
+        // Validate confirmPassword
+        newErrors.confirmPassword = error;
+        // Also revalidate password if needed
+        if (formData.password) {
+          const passwordError = validateField("password", formData.password);
+          newErrors.password = passwordError;
+        }
+      }
+      
+      setErrors(newErrors);
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: error
+      }));
+    }
   };
 
   const validateStep = (stepNumber) => {

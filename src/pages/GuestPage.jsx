@@ -665,10 +665,45 @@ const GuestPage = () => {
       </SlideUp>
 
       <div
-        id="contact"
-        className="relative mx-auto flex w-full items-center justify-center "
+        id="faq"
+        className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16"
       >
-        <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
+        
+         <div className="h-px  w-full bg-[#bfcef0]" aria-hidden="true" />
+
+        <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[14px] font-semibold tracking-[0.5em] text-[#11285A]">
+          FAQ
+        </h3>
+      </div>
+
+      <FadeIn delay={0.2}>
+        <p className="mx-auto px-4 max-w-7xl text-center font-poppins text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-card-100 font-bold">
+          Frequently Asked Question
+        </p>
+      </FadeIn>
+
+      <div className="mx-auto mt-8 w-full max-w-7xl px-4 text-center sm:px-6 md:px-8">
+        <SlideInFromRight delay={0.4} className="flex flex-col gap-3">
+          
+          <div className="flex flex-col gap-2 text-left">
+            {faqs.map((faq, index) => (
+              <FAQItem key={index} question={faq.question} answer={faq.answer} />
+            ))}
+          </div>
+        </SlideInFromRight>
+      </div>
+
+      <div
+        id="contact"
+        className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16"
+      >
+        
+
+        {/* Section divider for Contact Us */}
+        
+       
+        
+        <div className="h-px  w-full bg-[#bfcef0]" aria-hidden="true" />
 
         <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[14px] font-semibold tracking-[0.5em] text-[#11285A]">
           CONTACT US
@@ -683,7 +718,7 @@ const GuestPage = () => {
       </FadeIn>
 
       <FadeIn delay={0.4}>
-        <p className="mx-auto px-4 max-w-7xl text-center font-poppins text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] pb-8">
+        <p className="mx-auto max-w-7xl px-4 pb-8 text-center font-poppins text-[12px] leading-relaxed tracking-[0.12em] text-[#373F51] md:text-sm">
           Whether you have questions, need support, or want to share your
           experience, our team is ready to assist. Your feedback helps us
           improve and deliver technology that enhances mobility, safety, and
@@ -691,65 +726,42 @@ const GuestPage = () => {
         </p>
       </FadeIn>
 
-      <div className="flex flex-col gap-8 justify-center items-center mx-auto px-4 text-[12px] text-center max-w-7xl sm:flex-row sm:text-left">
-        <div className="flex-1">
-          <SlideInFromLeft delay={0.6} className="flex flex-col gap-3">
-            <div className="flex flex-col gap-3 items-center sm:items-start ">
-              <h3 className="text-[14px] text-card-100 font-semibold">
-                Call Us
-              </h3>
-              <p>
-                We’re just a call away for any questions or support you need.
-              </p>
-              <div className="flex items-center justify-start gap-3 min-w-40">
-                <HoverIcon src={callIcon} alt="Call" size={10} />
-                <p>09XXXXXXXXX</p>
-              </div>
-            </div>
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-y-10 px-4 text-center text-[12px] sm:grid-cols-2 sm:text-left">
+        <SlideInFromLeft
+          delay={0.6}
+          className="flex flex-col items-center gap-3 sm:items-start"
+        >
+          <h3 className="text-[14px] font-semibold text-card-100">Call Us</h3>
+          <p>We’re just a call away for any questions or support you need.</p>
+          <div className="flex min-w-40 items-center justify-start gap-3">
+            <HoverIcon src={callIcon} alt="Call" size={10} />
+            <p>09XXXXXXXXX</p>
+          </div>
+        </SlideInFromLeft>
 
-            <div className="flex flex-col gap-3 items-center sm:items-start">
-              <h3 className="text-[14px] text-card-100 font-semibold">
-                Email Us
-              </h3>
-              <p>
-                Send us an email and we’ll get back to you as soon as possible.
-              </p>
-              <div className="flex items-center justify-start gap-3 min-w-36">
-                <a
-                  href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <HoverIcon src={emailIcon} alt="Email" size={10} />
-                </a>
-                <p>iCane@gmail.com</p>
-              </div>
-            </div>
-          </SlideInFromLeft>
-        </div>
-
-        <div className="hidden sm:block w-px bg-gray-300 mx-8 self-stretch"></div>
-
-        <div className="flex-1 w-full max-w-7xl">
-          <SlideInFromRight delay={0.6} className="flex flex-col gap-3">
-            <h3 className="text-[14px] text-card-100 font-semibold">
-              Frequently Asked Questions
-            </h3>
-            <div className="flex flex-col gap-2 ">
-              {faqs.map((faq, index) => (
-                <FAQItem
-                  key={index}
-                  question={faq.question}
-                  answer={faq.answer}
-                />
-              ))}
-            </div>
-          </SlideInFromRight>
-        </div>
+        <SlideInFromRight
+          delay={0.6}
+          className="flex flex-col items-center gap-3 sm:items-start"
+        >
+          <h3 className="text-[14px] font-semibold text-card-100">Email Us</h3>
+          <p>
+            Send us an email and we’ll get back to you as soon as possible.
+          </p>
+          <div className="flex min-w-36 items-center justify-start gap-3">
+            <a
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <HoverIcon src={emailIcon} alt="Email" size={10} />
+            </a>
+            <p>iCane@gmail.com</p>
+          </div>
+        </SlideInFromRight>
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#11285A] text-white mt-8">
+      <footer className="mt-8 bg-[#11285A] text-white">
         <div className="max-w-5xl mx-auto px-6 py-14 space-y-12">
           <div className=" border-white/15 pt-10 grid gap-10 md:grid-cols-4">
             <div className="space-y-4">

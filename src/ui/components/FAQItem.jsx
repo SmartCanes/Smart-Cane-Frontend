@@ -13,7 +13,7 @@ const FAQItem = ({ question, answer }) => {
       >
         <span className="font-semibold text-card-100">{question}</span>
         <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
+          animate={{ rotate: isOpen ? 0 : 180 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
         >
           <img src={chevronIcon} alt="Chevron Icon" className="w-5 h-5" />
