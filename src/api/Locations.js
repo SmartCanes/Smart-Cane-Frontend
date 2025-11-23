@@ -45,3 +45,7 @@ export const getBarangaysByCity = async (cityCode) => {
   const data = await response.json();
   return mapOptions(data);
 };
+
+export const getLocationByName = async (query) => {
+  
+}
