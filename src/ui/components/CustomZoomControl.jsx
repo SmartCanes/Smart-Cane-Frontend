@@ -1,13 +1,12 @@
 import { useMap } from "react-leaflet";
 import { Icon } from "@iconify/react";
 
-function CustomZoomControl({ userPos }) {
+function CustomZoomControl({ guardianPosition }) {
   const map = useMap();
 
   const focusOnUser = () => {
-    if (!userPos) return;
-    // Nirerestore ang view sa kasalukuyang lokasyon ng user.
-    map.flyTo(userPos, map.getZoom(), { duration: 0.5 });
+    if (!guardianPosition) return;
+    map.flyTo(guardianPosition, map.getZoom(), { duration: 0.5 });
   };
 
   const zoomIn = () => {
