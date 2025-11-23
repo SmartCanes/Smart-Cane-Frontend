@@ -5,7 +5,7 @@ import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import { useUserStore } from "@/stores/useStore";
-import api from "../api/axios";
+import api from "../api/http";
 
 const Login = () => {
   const { login, setShowLoginModal } = useUserStore();
