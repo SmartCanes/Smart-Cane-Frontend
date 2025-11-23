@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,10 +16,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src")
     }
   },
-  server: { 
+  server: {
     host: true,
-    allowedHosts: ['.ngrok-free.dev']
+    port: 5173,
+    https: {
+      key: fs.readFileSync("../server.key"),
+      cert: fs.readFileSync("../server.cert")
+    }
   }
-
-
 });
