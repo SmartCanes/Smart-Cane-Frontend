@@ -40,7 +40,7 @@ const DashboardSide = ({ className = "" }) => {
     },
     {
       id: "guardian-access",
-      label: "Guardian Profile",
+      label: "Guardian Access",
       labelMobile: "Guardian",
       icon: "solar:users-group-two-rounded-bold",
       path: "/guardian-access"
