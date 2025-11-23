@@ -1,13 +1,14 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import startingPointPin from "../../assets/images/startingPointPin.svg";
 import destinationPin from "../../assets/images/destinationPin.svg";
+import { getLocation } from "@/api/locationsApi";
 
 const noop = () => {};
 
 const headerIconBase =
-  "w-11 h-11 rounded-2xl flex items-center justify-center "; // burger icon container
+  "w-11 h-11 rounded-2xl flex items-center justify-center ";
 
 const inputWrapperBase =
   "flex items-center gap-3 rounded-2xl bg-[#F6F7FB] px-4 py-3 border border-transparent focus-within:border-blue-200";
@@ -22,6 +23,7 @@ function WalkingDirections({
   onDestinationChange = noop,
   onSwapLocations = noop,
   onRequestDirections = noop
+  // onResultClick = noop
 }) {
   const fields = [
     {
@@ -43,6 +45,45 @@ function WalkingDirections({
   ];
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeField, setActiveField] = useState(null);
+  const ignoreNextFetch = useRef(false);
+
+  const onResultClick = (result) => {
+    if (result) {
+      if (activeField === "start") {
+        onStartChange(result.properties.name);
+      } else if (activeField === "destination") {
+        onDestinationChange(result.properties.name);
+      }
+      ignoreNextFetch.current = true;
+      setSearchResults([]);
+    }
+  };
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setSearchResults([]);
+      return;
+    }
+
+    if (ignoreNextFetch.current) {
+      ignoreNextFetch.current = false;
+      return;
+    }
+
+    const delay = setTimeout(async () => {
+      try {
+        const data = await getLocation(searchQuery);
+        setSearchResults(data.features || []);
+      } catch (err) {
+        console.error(err);
+      }
+    }, 300);
+
+    return () => clearTimeout(delay);
+  }, [searchQuery]);
 
   return (
     <section className="font-poppins bg-white rounded-3xl shadow-sm p-5 w-full">
@@ -108,7 +149,7 @@ function WalkingDirections({
                 className="w-6 h-6 shrink-0"
               />
             )}
-            <label className={inputWrapperBase + " flex-1"}>
+            <label className={inputWrapperBase + " flex-1 relative"}>
               <div className="flex-1">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-semibold">
                   {field.label}
@@ -116,10 +157,42 @@ function WalkingDirections({
                 <input
                   type="text"
                   value={field.value}
-                  onChange={(event) => field.onChange(event.target.value)}
+                  onChange={(event) => {
+                    field.onChange(event.target.value);
+                    setSearchQuery(event.target.value);
+                    setActiveField(field.key);
+                  }}
                   placeholder={field.placeholder}
                   className="w-full bg-transparent border-none outline-none text-sm font-medium text-gray-800 placeholder:text-gray-400"
                 />
+                {activeField === field.key && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 w-full mt-1 overflow-hidden rounded-b-2xl bg-white shadow-md pointer-events-auto z-20">
+                    {searchResults.map((result, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => onResultClick(result)}
+                        className="cursor-pointer hover:bg-blue-50 transition border-b border-gray-100 p-3 flex items-center gap-3"
+                      >
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Icon
+                            icon="mdi:map-marker"
+                            className="text-blue-600 text-xl"
+                          />
+                        </div>
+                        <div>
+                          <p className="font-poppins font-medium text-sm text-gray-800">
+                            {result.properties.name}
+                          </p>
+                          <p className="font-poppins text-xs text-gray-500">
+                            {result.properties.city ||
+                              result.properties.state ||
+                              "Philippines"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <Icon icon="mdi:magnify" className="text-xl text-gray-400" />
             </label>
@@ -129,17 +202,5 @@ function WalkingDirections({
     </section>
   );
 }
-
-WalkingDirections.propTypes = {
-  title: PropTypes.string,
-  startPlaceholder: PropTypes.string,
-  destinationPlaceholder: PropTypes.string,
-  startValue: PropTypes.string,
-  destinationValue: PropTypes.string,
-  onStartChange: PropTypes.func,
-  onDestinationChange: PropTypes.func,
-  onSwapLocations: PropTypes.func,
-  onRequestDirections: PropTypes.func
-};
 
 export default WalkingDirections;
