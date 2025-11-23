@@ -16,6 +16,7 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPasswordRequired, setShowPasswordRequired] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,6 +28,11 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Show password required indicator when Sign In is clicked and username has value
+    if (formData.username.trim()) {
+      setShowPasswordRequired(true);
+    }
 
     // Validation
     const newErrors = {};
@@ -130,7 +136,7 @@ const Login = () => {
                 label="Password"
                 placeholder="Enter your password..."
                 name="password"
-                required
+                required={showPasswordRequired}
                 type="password"
                 value={formData.password}
                 onChange={handleChange}

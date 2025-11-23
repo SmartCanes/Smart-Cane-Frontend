@@ -84,7 +84,7 @@ const Header = ({
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
-            <div className="absolute right-0 top-14 w-56 animate-[slideDown_0.2s_ease-out]">
+            <div className="absolute right-0 top-14 w-56 animate-[slideDown_0.2s_ease-out] z-[100]">
               {/* Dropdown content */}
               <div className="relative bg-white rounded-2xl shadow-lg">
                 {/* Arrow pointer - triangle pointing up to profile icon */}
