@@ -72,9 +72,8 @@ const DashboardSide = ({ className = "" }) => {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
         <div className="flex justify-around items-center h-16 px-2">
           {menuItems.map((item) => (
-            <HoverNavEffect delay={0.1}>
+            <HoverNavEffect delay={0.1} key={item.id}>
               <button
-                key={item.id}
                 onClick={() => handleNavigation(item.path)}
                 className={`flex flex-col items-center justify-center flex-1 py-2 ${
                   location.pathname === item.path
