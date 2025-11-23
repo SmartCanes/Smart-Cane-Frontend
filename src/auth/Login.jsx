@@ -5,7 +5,7 @@ import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import { useUserStore } from "@/stores/useStore";
-import api from "../api/http";
+import { backendApi } from "../api/http";
 
 const Login = () => {
   const { login, setShowLoginModal } = useUserStore();
@@ -54,7 +54,7 @@ const Login = () => {
       }
 
       // Call backend login API
-      const response = await api.post("/auth/login", {
+      const response = await backendApi.post("/auth/login", {
         username: formData.username,
         password: formData.password
       });
