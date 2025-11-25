@@ -668,8 +668,7 @@ const GuestPage = () => {
         id="faq"
         className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16"
       >
-        
-         <div className="h-px  w-full bg-[#bfcef0]" aria-hidden="true" />
+        <div className="h-px  w-full bg-[#bfcef0]" aria-hidden="true" />
 
         <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[14px] font-semibold tracking-[0.5em] text-[#11285A]">
           FAQ
@@ -684,10 +683,13 @@ const GuestPage = () => {
 
       <div className="mx-auto mt-8 w-full max-w-7xl px-4 text-center sm:px-6 md:px-8">
         <SlideInFromRight delay={0.4} className="flex flex-col gap-3">
-          
           <div className="flex flex-col gap-2 text-left">
             {faqs.map((faq, index) => (
-              <FAQItem key={index} question={faq.question} answer={faq.answer} />
+              <FAQItem
+                key={index}
+                question={faq.question}
+                answer={faq.answer}
+              />
             ))}
           </div>
         </SlideInFromRight>
@@ -697,12 +699,8 @@ const GuestPage = () => {
         id="contact"
         className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16"
       >
-        
-
         {/* Section divider for Contact Us */}
-        
-       
-        
+
         <div className="h-px  w-full bg-[#bfcef0]" aria-hidden="true" />
 
         <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[14px] font-semibold tracking-[0.5em] text-[#11285A]">
@@ -744,9 +742,7 @@ const GuestPage = () => {
           className="flex flex-col items-center gap-3 sm:items-start"
         >
           <h3 className="text-[14px] font-semibold text-card-100">Email Us</h3>
-          <p>
-            Send us an email and we’ll get back to you as soon as possible.
-          </p>
+          <p>Send us an email and we’ll get back to you as soon as possible.</p>
           <div className="flex min-w-36 items-center justify-start gap-3">
             <a
               href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"

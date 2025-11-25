@@ -3,12 +3,12 @@ import { Icon } from "@iconify/react";
 import { fetchTomorrowForecast } from "@/api/WeatherService";
 
 // 👇 FIX 1: Import Components (Para mawala ang "DashboardSide is not defined")
-import Header from "./Header"; 
+import Header from "./Header";
 import DashboardSide from "./DashboardSide";
 import SimulationPanel from "./SimulationPanel"; // Siguraduhing nagawa mo na ito
 
 // 👇 FIX 2: Import Notification Manager
-import { triggerSmartCaneNotification } from "@/utils/NotificationManager"; 
+import { triggerSmartCaneNotification } from "@/utils/NotificationManager";
 
 const WeatherBoard = () => {
   // 👇 FIX 3: Define States (Para mawala ang "setLoading is not defined")
@@ -19,9 +19,9 @@ const WeatherBoard = () => {
     let isMounted = true;
     const loadForecast = async () => {
       setLoading(true); // Ito ang hinahanap ng error mo kanina
-      
+
       const data = await fetchTomorrowForecast();
-      
+
       if (isMounted && data) {
         setForecast(data);
         setLoading(false);
@@ -30,7 +30,7 @@ const WeatherBoard = () => {
         // Kapag bawal lumabas, mag-no-notify agad pag-load ng page
         if (!data.canGoOutside) {
           triggerSmartCaneNotification(
-            "WEATHER", 
+            "WEATHER",
             `Warning: ${data.recommendation}`
           );
         }
@@ -85,15 +85,10 @@ const WeatherBoard = () => {
       {/* 2. MAIN SECTION */}
       <div className="flex-1 flex flex-col">
         {/* 3. HEADER */}
-        <Header
-          userName="Zander"
-          isOnline={true}
-          notificationCount={3}
-        />
+        <Header userName="Zander" isOnline={true} notificationCount={3} />
 
         {/* 4. WEATHER CONTENT */}
         <main className="flex-1 overflow-y-auto bg-white p-8 relative">
-          
           <div className="mb-8">
             <h1 className="text-3xl font-semibold text-gray-900 font-poppins mb-2">
               Weather Forecast
@@ -133,7 +128,9 @@ const WeatherBoard = () => {
                       Tomorrow • {formattedDate}
                     </span>
                   </div>
-                  <h2 className={`text-3xl font-bold mb-2 ${visuals.titleColor}`}>
+                  <h2
+                    className={`text-3xl font-bold mb-2 ${visuals.titleColor}`}
+                  >
                     {visuals.buttonLabel}
                   </h2>
                   <p className="text-gray-600 font-poppins text-sm md:text-base">
@@ -145,24 +142,52 @@ const WeatherBoard = () => {
               {/* DETAILS GRID */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                  <Icon icon="solar:thermometer-bold" className="text-2xl text-red-400" />
-                  <span className="text-gray-400 text-xs uppercase tracking-wide">Max</span>
-                  <span className="text-xl font-bold text-gray-700">{forecast.tempMax}°C</span>
+                  <Icon
+                    icon="solar:thermometer-bold"
+                    className="text-2xl text-red-400"
+                  />
+                  <span className="text-gray-400 text-xs uppercase tracking-wide">
+                    Max
+                  </span>
+                  <span className="text-xl font-bold text-gray-700">
+                    {forecast.tempMax}°C
+                  </span>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                  <Icon icon="solar:thermometer-bold" className="text-2xl text-blue-400" />
-                  <span className="text-gray-400 text-xs uppercase tracking-wide">Min</span>
-                  <span className="text-xl font-bold text-gray-700">{forecast.tempMin}°C</span>
+                  <Icon
+                    icon="solar:thermometer-bold"
+                    className="text-2xl text-blue-400"
+                  />
+                  <span className="text-gray-400 text-xs uppercase tracking-wide">
+                    Min
+                  </span>
+                  <span className="text-xl font-bold text-gray-700">
+                    {forecast.tempMin}°C
+                  </span>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                  <Icon icon="carbon:rain-drop" className="text-2xl text-blue-500" />
-                  <span className="text-gray-400 text-xs uppercase tracking-wide">Rain</span>
-                  <span className="text-xl font-bold text-gray-700">{forecast.precipProbability}%</span>
+                  <Icon
+                    icon="carbon:rain-drop"
+                    className="text-2xl text-blue-500"
+                  />
+                  <span className="text-gray-400 text-xs uppercase tracking-wide">
+                    Rain
+                  </span>
+                  <span className="text-xl font-bold text-gray-700">
+                    {forecast.precipProbability}%
+                  </span>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                  <Icon icon="fluent:weather-partly-cloudy-day-24-regular" className="text-2xl text-yellow-500" />
-                  <span className="text-gray-400 text-xs uppercase tracking-wide">Sky</span>
-                  <span className="text-lg font-bold text-gray-700 whitespace-nowrap">{forecast.description}</span>
+                  <Icon
+                    icon="fluent:weather-partly-cloudy-day-24-regular"
+                    className="text-2xl text-yellow-500"
+                  />
+                  <span className="text-gray-400 text-xs uppercase tracking-wide">
+                    Sky
+                  </span>
+                  <span className="text-lg font-bold text-gray-700 whitespace-nowrap">
+                    {forecast.description}
+                  </span>
                 </div>
               </div>
             </div>
