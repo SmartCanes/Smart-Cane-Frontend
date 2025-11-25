@@ -41,26 +41,34 @@ const SetMapBounds = () => {
   return null;
 };
 
-const ClickHandler = ({ onSetDestination }) => {
-  const map = useMapEvents({
+const ClickHandler = ({ onClickMap }) => {
+  useMapEvents({
     click: (e) => {
-      onSetDestination([e.lat, e.lng]);
-
-      L.popup()
-        .setLatLng(e.latlng)
-        .setContent("Destination set here!")
-        .openOn(map);
+      onClickMap({
+        lat: e.latlng.lat,
+        lng: e.latlng.lng,
+        screenX: e.containerPoint.x,
+        screenY: e.containerPoint.y
+      });
     }
   });
 
   return null;
 };
 
-function LiveMap({ guardianPosition, destPos, routePath, activeTab }) {
+function LiveMap({
+  guardianPosition,
+  canePosition,
+  destPos,
+  routePath,
+  activeTab,
+  onSetDestination
+}) {
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [clickMenuPos, setClickMenuPos] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
 
   useEffect(() => {
@@ -97,6 +105,18 @@ function LiveMap({ guardianPosition, destPos, routePath, activeTab }) {
     ignoreNextFetch.current = true;
     setSearchQuery(item.properties.name);
     setSearchResults([]);
+  };
+
+  const handleSetDestinationFromMenu = (type, pos) => {
+    setClickMenuPos(null);
+
+    if (type === "from") {
+      onSetDestination?.({ from: pos });
+    }
+
+    if (type === "to") {
+      onSetDestination?.({ to: pos });
+    }
   };
 
   return (
@@ -186,6 +206,12 @@ function LiveMap({ guardianPosition, destPos, routePath, activeTab }) {
           </Marker>
         )}
 
+        {canePosition && (
+          <Marker position={canePosition}>
+            <Popup>VIP current location.</Popup>
+          </Marker>
+        )}
+
         {/* <Marker position={destPos}>
           <Popup>Ito ang destination: SM Novaliches</Popup>
         </Marker> */}
@@ -201,9 +227,44 @@ function LiveMap({ guardianPosition, destPos, routePath, activeTab }) {
           destPos={destPos}
         />
         <CustomZoomControl guardianPosition={guardianPosition} />
+
+        <ClickHandler onClickMap={setClickMenuPos} />
       </MapContainer>
+      <ClickMenu
+        clickPos={clickMenuPos}
+        onSetDestination={handleSetDestinationFromMenu}
+      />
     </div>
   );
 }
 
 export default LiveMap;
+
+const ClickMenu = ({ clickPos, onSetDestination }) => {
+  if (!clickPos) return null;
+
+  return (
+    <div
+      className="absolute bg-white shadow-lg rounded-xl p-3 w-40 z-[9999]"
+      style={{
+        left: clickPos.screenX,
+        top: clickPos.screenY,
+        transform: "translate(-50%, -100%)"
+      }}
+    >
+      <p className="font-poppins text-sm text-gray-700 mb-2">Select Action</p>
+      <button
+        onClick={() => onSetDestination("from", [clickPos.lat, clickPos.lng])}
+        className="w-full h-fit bg-gray-200 text-gray-700 p-2 text-sm rounded-lg hover:bg-gray-300 transition "
+      >
+        From Here
+      </button>
+      <button
+        onClick={() => onSetDestination("to", [clickPos.lat, clickPos.lng])}
+        className="w-full h-fit bg-gray-200 text-gray-700 p-2 text-sm rounded-lg hover:bg-gray-300 transition mt-2"
+      >
+        To Here
+      </button>
+    </div>
+  );
+};
