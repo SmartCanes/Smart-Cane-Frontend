@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const WS_URL =
-  import.meta.env.VITE_MIDDLEWARE_WS_URL || "http://localhost:4000";
+  import.meta.env.VITE_MIDDLEWARE_WS_URL || "https://localhost:4000";
 
 class SocketAPI {
   constructor() {
@@ -32,6 +32,11 @@ class SocketAPI {
   on(event, callback) {
     if (!this.socket) this.connect();
     this.socket.on(event, callback);
+  }
+
+  off(event, callback) {
+    if (!this.socket) return;
+    this.socket.off(event, callback);
   }
 
   emit(event, payload) {
