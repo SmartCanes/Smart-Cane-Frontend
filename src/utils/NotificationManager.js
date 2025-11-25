@@ -10,7 +10,7 @@ export const triggerSmartCaneNotification = (type, message) => {
   // 2. Define Icons & Titles based on Type
   let title = "Smart Cane Alert";
   // Siguraduhin na ang '/vite.svg' ay nasa PUBLIC folder mo
-  let icon = "/vite.svg"; 
+  let icon = "/vite.svg";
 
   switch (type) {
     case "WEATHER":
@@ -51,19 +51,19 @@ export const triggerSmartCaneNotification = (type, message) => {
         tag: type, // Para hindi magpatong-patong
         vibrate: [200, 100, 200] // Backup vibration pattern for Service Workers
       });
-      
+
       // Optional: Click event
       notif.onclick = () => {
         window.focus();
         notif.close();
       };
-      
+
       console.log("Visual notification sent.");
     } catch (e) {
       // Dito natin sasaluhin kung mag-error ang browser
       console.error("Notification creation failed:", e);
       // Fallback: Alert kung talagang ayaw lumabas ng notif (for testing only)
-      // alert(`${title}\n${message}`); 
+      // alert(`${title}\n${message}`);
     }
   };
 
