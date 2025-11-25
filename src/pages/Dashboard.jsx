@@ -11,21 +11,56 @@ import WalkingDirections from "@/ui/components/WalkingDirections";
 // import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
 import Toast from "@/ui/components/Toast";
-import { getLocation } from "@/api/locationsApi";
+import { wsApi } from "@/api/ws-api";
 
 const Dashboard = () => {
-  const ignoreNextFetch = useState(false);
   const { showLoginModal, setShowLoginModal } = useUserStore();
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("track");
-  const [searchSubmitCount, setSearchSubmitCount] = useState(0);
+  const [status, setStatus] = useState(false);
+  const [emergency, setEmergency] = useState(false);
+  const [lastStatusTimestamp, setLastStatusTimestamp] = useState(0);
 
   const [guardianLocation, setGuardianLocation] = useState(null);
+  const [caneLocation, setCaneLocation] = useState(null);
   const [isLoadingMap, setIsLoadingMap] = useState(true);
   const [startPoint, setStartPoint] = useState("");
 
   // const [route, setRoute] = useState(null);
   const [destinationPoint, setDestinationPoint] = useState("");
+  useEffect(() => {
+    wsApi.connect();
+    wsApi.on("location", (data) => {
+      if (data?.lat != null && data?.lng != null) {
+        setCaneLocation([data.lat, data.lng]);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleStatus = (data) => {
+      if (data.status === "online") setStatus(true);
+      console.log("Status data received:", data);
+      setLastStatusTimestamp(Date.now());
+      setEmergency(data.emergency || false);
+    };
+
+    wsApi.on("status", handleStatus);
+
+    return () => {
+      wsApi.off("status", handleStatus);
+    };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (Date.now() - lastStatusTimestamp > 10000) {
+        setStatus(false);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [lastStatusTimestamp]);
 
   const historyButtonStyle =
     activeTab === "history"
@@ -42,14 +77,14 @@ const Dashboard = () => {
     setDestinationPoint(startPoint);
   };
 
-  const handleRequestDirections = () => {
-    if (!startPoint || !destinationPoint) {
-      alert("Please specify both starting point and destination.");
-      return;
-    }
+  // const handleRequestDirections = () => {
+  //   if (!startPoint || !destinationPoint) {
+  //     alert("Please specify both starting point and destination.");
+  //     return;
+  //   }
 
-    console.log("Requesting directions", { startPoint, destinationPoint });
-  };
+  //   console.log("Requesting directions", { startPoint, destinationPoint });
+  // };
 
   useEffect(() => {
     const watchId = navigator.geolocation.watchPosition(
@@ -77,6 +112,12 @@ const Dashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!showLoginModal) return;
+    setShowModal(true);
+    setShowLoginModal(false);
+  }, [showLoginModal, setShowLoginModal]);
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -87,7 +128,7 @@ const Dashboard = () => {
         {/* Header */}
         <Header
           userName="Zander"
-          isOnline={true}
+          isOnline={status}
           notificationCount={3}
           onNotificationClick={() => console.log("Notification clicked!")}
           onProfileClick={() => console.log("Profile clicked!")}
@@ -162,6 +203,8 @@ const Dashboard = () => {
                   ) : (
                     <LiveMap
                       guardianPosition={guardianLocation}
+                      canePosition={caneLocation}
+                      onSetDestination={setDestinationPoint}
                       // destPos={destinationPoint}
                       // routePath={route}
                       activeTab={activeTab}
@@ -195,7 +238,7 @@ const Dashboard = () => {
                 onStartChange={setStartPoint}
                 onDestinationChange={setDestinationPoint}
                 onSwapLocations={handleSwapLocations}
-                onRequestDirections={handleRequestDirections}
+                // onRequestDirections={handleRequestDirections}
                 helperText="Preview walking routes customized for your cane"
               />
               <RecentAlerts />
