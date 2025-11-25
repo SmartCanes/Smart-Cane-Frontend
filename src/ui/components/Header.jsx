@@ -47,13 +47,15 @@ const Header = ({
       {/* Right Section: Online Badge, Notification, User Avatar */}
       <div className="flex items-center gap-4">
         {/* Online Status Badge */}
-        {isOnline && (
-          <div className="flex items-center gap-2 bg-green-500 text-white px-4 py-1.5 rounded-md font-poppins text-sm font-medium">
-            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            online
-          </div>
-        )}
-
+        <div
+          className={
+            "flex items-center gap-2 text-white px-4 py-1.5 rounded-md font-poppins text-sm font-medium " +
+            (isOnline ? "bg-green-500" : "bg-gray-500")
+          }
+        >
+          <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+          {isOnline ? "Online" : "Offline"}
+        </div>
         {/* Notification Bell */}
         <button
           onClick={onNotificationClick}
@@ -71,7 +73,6 @@ const Header = ({
             </span>
           )}
         </button>
-
         {/* User Avatar with Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
