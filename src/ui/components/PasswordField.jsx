@@ -94,6 +94,7 @@ const PasswordField = ({
     <div className={`flex flex-col top-left item-align-center ${className}`}>
       {label && (
         <label
+          htmlFor={name}
           className="font-poppins font-medium mt-2 text-[16px] align-center"
           style={{ color: labelColor }}
         >
@@ -107,6 +108,7 @@ const PasswordField = ({
       )}
       <div className="relative">
         <input
+          id={name}
           type={showPassword ? "text" : "password"}
           name={name}
           value={value || ""}
