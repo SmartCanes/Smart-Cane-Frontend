@@ -8,59 +8,51 @@ import QuickActions from "@/ui/components/QuickActions";
 import DailyActivity from "@/ui/components/DailyActivity";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
+import { animate, motion, useAnimation } from "framer-motion";
 // import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
 import Toast from "@/ui/components/Toast";
-import { wsApi } from "@/api/ws-api";
+import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
 
 const Dashboard = () => {
-  const { showLoginModal, setShowLoginModal } = useUserStore();
+  const {
+    showLoginModal,
+    connectWs,
+    emergency,
+    status,
+    isMapLoading,
+    caneLocation,
+    guardianLocation,
+    setShowLoginModal,
+    setGuardianLocation,
+    setIsMapLoading
+  } = useUserStore();
+
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("track");
-  const [status, setStatus] = useState(false);
-  const [emergency, setEmergency] = useState(false);
-  const [lastStatusTimestamp, setLastStatusTimestamp] = useState(0);
-
-  const [guardianLocation, setGuardianLocation] = useState(null);
-  const [caneLocation, setCaneLocation] = useState(null);
-  const [isLoadingMap, setIsLoadingMap] = useState(true);
   const [startPoint, setStartPoint] = useState("");
-
   // const [route, setRoute] = useState(null);
   const [destinationPoint, setDestinationPoint] = useState("");
-  useEffect(() => {
-    wsApi.connect();
-    wsApi.on("location", (data) => {
-      if (data?.lat != null && data?.lng != null) {
-        setCaneLocation([data.lat, data.lng]);
-      }
-    });
-  }, []);
+  const controls = useAnimation();
 
   useEffect(() => {
-    const handleStatus = (data) => {
-      if (data.status === "online") setStatus(true);
-      console.log("Status data received:", data);
-      setLastStatusTimestamp(Date.now());
-      setEmergency(data.emergency || false);
-    };
-
-    wsApi.on("status", handleStatus);
-
-    return () => {
-      wsApi.off("status", handleStatus);
-    };
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Date.now() - lastStatusTimestamp > 10000) {
-        setStatus(false);
-      }
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [lastStatusTimestamp]);
+    if (emergency) {
+      controls.start({
+        backgroundColor: ["#ffffff", "#ff3232", "#ffffff"],
+        transition: {
+          repeat: Infinity,
+          repeatType: "loop",
+          duration: 0.8,
+          ease: "easeInOut"
+        }
+      });
+    } else {
+      controls.start({
+        backgroundColor: "#ffffff",
+        transition: { duration: 0.3 }
+      });
+    }
+  }, [emergency, controls]);
 
   const historyButtonStyle =
     activeTab === "history"
@@ -87,18 +79,19 @@ const Dashboard = () => {
   // };
 
   useEffect(() => {
+    connectWs();
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setGuardianLocation([latitude, longitude]);
 
-        if (isLoadingMap) {
-          setIsLoadingMap(false);
+        if (isMapLoading) {
+          setIsMapLoading(false);
         }
       },
       (error) => {
         console.error("Failed to get location:", error.message);
-        setIsLoadingMap(false);
+        setIsMapLoading(false);
       },
       {
         enableHighAccuracy: true,
@@ -110,6 +103,8 @@ const Dashboard = () => {
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -119,7 +114,8 @@ const Dashboard = () => {
   }, [showLoginModal, setShowLoginModal]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen">
+      <EmergencyOverlay emergency={emergency} />
       {/* Sidebar */}
       <DashboardSide />
 
@@ -135,7 +131,11 @@ const Dashboard = () => {
         />
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-8">
+        <motion.main
+          className="flex-1 overflow-y-auto p-8"
+          initial={{ backgroundColor: "#f9fafb" }}
+          animate={controls}
+        >
           {/* Title Section */}
           <div className="mb-6">
             <h1 className="text-3xl font-semibold text-gray-900 font-poppins mb-2">
@@ -188,7 +188,7 @@ const Dashboard = () => {
 
                 {/* Map Area */}
                 <div className="w-full h-[60vh]">
-                  {isLoadingMap ? (
+                  {isMapLoading ? (
                     <div className="flex items-center justify-center h-full bg-gray-100">
                       <div className="text-center">
                         <Icon
@@ -250,9 +250,16 @@ const Dashboard = () => {
                   position="top-right"
                 />
               )}
+              {emergency && (
+                <Toast
+                  message="Emergency Alert! Please check the live location immediately."
+                  type="error"
+                  position="bottom-right"
+                />
+              )}
             </div>
           </div>
-        </main>
+        </motion.main>
       </div>
     </div>
   );

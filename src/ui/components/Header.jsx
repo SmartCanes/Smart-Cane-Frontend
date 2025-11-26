@@ -6,7 +6,7 @@ import { useUserStore } from "@/stores/useStore";
 
 const Header = ({
   userName = "Z",
-  isOnline = true,
+  isOnline = false,
   notificationCount = 0,
   onNotificationClick,
   onProfileClick,
