@@ -14,32 +14,59 @@ export const useUserStore = create(
       setShowLoginModal: (value) => set({ showLoginModal: value }),
 
       _wsConnected: false,
-      status: false,
+      connectionStatus: false,
       emergency: false,
       caneLocation: null,
       guardianLocation: null,
 
       connectWs: () => {
-        if (get()._wsConnected) return;
-
         wsApi.connect();
 
+        wsApi.off("status");
+        wsApi.off("location");
+        wsApi.off("connect");
+        wsApi.off("disconnect");
+
+        let heartbeatTimeout;
+
+        const resetHeartbeat = () => {
+          if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
+          heartbeatTimeout = setTimeout(() => {
+            set({ connectionStatus: false });
+            console.log("WebSocket connection lost (timeout)");
+          }, 12000);
+        };
+
+        wsApi.on("connect", () => {
+          console.log("WebSocket connected:", wsApi.socket?.id);
+          set({ _wsConnected: true, connectionStatus: true });
+          resetHeartbeat();
+        });
+
+        wsApi.on("disconnect", () => {
+          console.log("WebSocket disconnected");
+          set({ _wsConnected: false, connectionStatus: false });
+          clearTimeout(heartbeatTimeout);
+
+          setTimeout(() => {
+            get().connectWs();
+          }, 5000);
+        });
+
         wsApi.on("status", (data) => {
-          console.log("STATUS UPDATE", data);
           set({
-            status: data.status === "online",
+            connectionStatus: data.status === "online",
             emergency: data.emergency
           });
+          resetHeartbeat();
         });
 
         wsApi.on("location", (data) => {
-          console.log("LOCATION UPDATE", data);
           if (data?.lat != null && data?.lng != null) {
             set({ caneLocation: [data.lat, data.lng] });
           }
+          resetHeartbeat();
         });
-
-        set({ _wsConnected: true });
       },
 
       setGuardianLocation: (loc) => set({ guardianLocation: loc })
