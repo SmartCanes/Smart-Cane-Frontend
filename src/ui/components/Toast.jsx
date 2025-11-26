@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SuccessIcon from "@/assets/images/check.svg";
 import ErrorIcon from "@/assets/images/warning.svg";
@@ -14,14 +14,20 @@ export default function Toast({
   onClose
 }) {
   const [visible, setVisible] = useState(true);
+  const exitTimerRef = useRef(null);
 
   const handleClose = useCallback(() => {
     setVisible(false);
-    if (onClose) onClose();
+
+    if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+
+    exitTimerRef.current = setTimeout(() => {
+      if (onClose) onClose();
+    }, 500);
   }, [onClose]);
 
   useEffect(() => {
-    const timer = setTimeout(() => handleClose, duration);
+    const timer = setTimeout(handleClose, duration);
     return () => clearTimeout(timer);
   }, [duration, handleClose]);
 

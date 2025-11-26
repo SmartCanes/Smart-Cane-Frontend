@@ -248,6 +248,7 @@ const Dashboard = () => {
                   message="You have successfully logged into your account."
                   type="success"
                   position="top-right"
+                  onClose={() => setShowModal(false)}
                 />
               )}
               {emergency && (
