@@ -8,7 +8,7 @@ import QuickActions from "@/ui/components/QuickActions";
 import DailyActivity from "@/ui/components/DailyActivity";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
-import { animate, motion, useAnimation } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 // import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
 import Toast from "@/ui/components/Toast";
@@ -19,7 +19,7 @@ const Dashboard = () => {
     showLoginModal,
     connectWs,
     emergency,
-    status,
+    connectionStatus,
     isMapLoading,
     caneLocation,
     guardianLocation,
@@ -124,7 +124,7 @@ const Dashboard = () => {
         {/* Header */}
         <Header
           userName="Zander"
-          isOnline={status}
+          isOnline={connectionStatus}
           notificationCount={3}
           onNotificationClick={() => console.log("Notification clicked!")}
           onProfileClick={() => console.log("Profile clicked!")}
