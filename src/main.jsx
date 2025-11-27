@@ -12,12 +12,13 @@ import Register from "./auth/Register.jsx";
 import ForgotPassword from "./auth/FogotPassword.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
+import ActivityReport from "./ui/components/ActivityReport.jsx";
+import Setting from "./ui/Setting";
 
-// 👇 1. IMPORT MO YUNG WEATHERBOARD (Siguraduhin tama ang path kung nasa ui/components)
-import WeatherBoard from "./ui/components/WeatherBoard.jsx";
+//Weather Board Import
+import WeatherBoard from "./ui/WeatherBoard.jsx";
 import ScannerCamera from "./auth/Scanner";
-import GuardianAccess from "./ui/components/GuardianAccess.jsx";
-import ManageProfile from "./ui/components/ManageProfile.jsx";
+import ManageProfile from "./ui/ManageProfile.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -35,9 +36,10 @@ createRoot(document.getElementById("root")).render(
 
         <Route element={<ProtectedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/activity-report" element={<ActivityReport />} />
+          <Route path="/settings" element={<Setting />} />
 
-          {/* 👇 2. ADD MO ITONG ROUTE PARA SA WEATHER BOARD */}
-          <Route path="/guardian-access" element={<GuardianAccess />} />
+          {/* Weather*/}
           <Route path="/manage-profile" element={<ManageProfile />} />
           <Route path="/weather-board" element={<WeatherBoard />} />
         </Route>
