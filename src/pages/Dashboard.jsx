@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import Header from "@/ui/components/Header";
-import DashboardSide from "@/ui/components/DashboardSide";
+import Header from "@/ui/Header";
+import DashboardSide from "@/ui/DashboardSide";
 import LiveMap from "@/ui/components/LiveMap";
 import RecentAlerts from "@/ui/components/RecentAlert";
-import QuickActions from "@/ui/components/QuickActions";
-import DailyActivity from "@/ui/components/DailyActivity";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
+import SendNote from "@/ui/components/SendNote";
 import { motion, useAnimation } from "framer-motion";
 // import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
@@ -226,12 +225,12 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="grid gap-8 lg:grid-cols-2">
-                <DailyActivity />
                 <GuardianNetwork />
+                <RecentAlerts />
               </div>
             </div>
 
-            <div className="flex flex-col gap-6 w-full lg:max-w-[340px]">
+            <div className="flex flex-col gap-8 w-full lg:max-w-[340px]">
               <WalkingDirections
                 startValue={startPoint}
                 destinationValue={destinationPoint}
@@ -241,8 +240,7 @@ const Dashboard = () => {
                 // onRequestDirections={handleRequestDirections}
                 helperText="Preview walking routes customized for your cane"
               />
-              <RecentAlerts />
-              <QuickActions />
+              <SendNote />
               {showModal && (
                 <Toast
                   message="You have successfully logged into your account."

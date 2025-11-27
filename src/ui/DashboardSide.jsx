@@ -19,7 +19,7 @@ const DashboardSide = ({ className = "" }) => {
     },
     {
       id: "activity-report",
-      label: "Activity Report",
+      label: "Activity Reports",
       labelMobile: "Activity",
       icon: "oui:nav-reports",
       path: "/activity-report"
@@ -28,22 +28,8 @@ const DashboardSide = ({ className = "" }) => {
       id: "weather-board",
       label: "Weather Board",
       labelMobile: "Weather",
-      icon: "mdi:weather-partly-cloudy",
+      icon: "solar:cloud-rain-outline",
       path: "/weather-board"
-    },
-    {
-      id: "alerts",
-      label: "Alerts",
-      labelMobile: "Alerts",
-      icon: "uiw:bell",
-      path: "/alerts"
-    },
-    {
-      id: "guardian-access",
-      label: "Guardian Access",
-      labelMobile: "Guardian",
-      icon: "solar:users-group-two-rounded-bold",
-      path: "/guardian-access"
     },
     {
       id: "manage-profile",

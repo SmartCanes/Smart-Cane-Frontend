@@ -86,84 +86,72 @@ function WalkingDirections({
 
   return (
     <section className="font-poppins bg-white rounded-3xl shadow-sm p-5 w-full">
-      <header className="flex items-center justify-between mb-5">
-        {/* burger icon */}
-        <div className="flex items-center gap-3 font-poppins">
-          <button
-            type="button"
-            aria-label={menuOpen ? "Close" : "Open"}
-            onClick={() => setMenuOpen((v) => !v)}
-            className={
-              headerIconBase +
-              "  transition-colors hover:bg-gray-200 focus:outline-none"
-            }
-          >
-            <Icon
-              icon={
-                menuOpen
-                  ? "iconoir:xmark"
-                  : "iconamoon:menu-burger-horizontal-duotone"
-              }
-              width="24"
-              height="24"
-              style={{ color: "#adadad", transition: "transform 0.3s ease" }}
-              className={menuOpen ? "rotate-90 scale-90" : ""}
-            />
-          </button>
-          <div className="font-poppins">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 font-poppins">
-              Route
-            </p>
-            <h3 className="text-xl font-semibold text-gray-900 font-poppins">
-              {title}
-            </h3>
-          </div>
-        </div>
+          <header className="flex items-center justify-between mb-5">
+            {/* Left walking icon */}
+            <div className="w-12 flex items-center justify-start">
+              <Icon
+                icon="fa6-solid:person-walking"
+                className="text-2xl text-gray-800"
+                aria-hidden
+              />
+            </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onSwapLocations}
-            className="w-10 h-10 rounded-2xl  text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors"
-            aria-label="Swap locations"
-          >
-            <Icon icon="ph:arrows-down-up-duotone" className="text-lg" />
-          </button>
-        </div>
-      </header>
+            {/* Centered title */}
+            <div className="flex-1 text-center">
+              <h3 className="text-xl font-semibold text-gray-900 font-poppins">
+                {title}
+              </h3>
+            </div>
+
+            {/* Right placeholder to balance layout */}
+            <div className="w-12" />
+          </header>
 
       <div className="space-y-4">
-        {fields.map((field) => (
-          <div key={field.key} className="flex items-center gap-3">
-            {field.key === "start" ? (
-              <img
-                src={startingPointPin}
-                alt="Start point"
-                className="w-6 h-6 shrink-0"
-              />
-            ) : (
-              <img
-                src={destinationPin}
-                alt="Destination point"
-                className="w-6 h-6 shrink-0"
-              />
-            )}
-            <label className={inputWrapperBase + " flex-1 relative"}>
-              <div className="flex-1">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-semibold">
-                  {field.label}
-                </p>
-                <input
-                  type="text"
-                  value={field.value}
-                  onChange={(event) => {
-                    field.onChange(event.target.value);
-                    setSearchQuery(event.target.value);
-                    setActiveField(field.key);
-                  }}
-                  placeholder={field.placeholder}
-                  className="w-full bg-transparent border-none outline-none text-sm font-medium text-gray-800 placeholder:text-gray-400"
-                />
+        <div className="flex items-start gap-4">
+          {/* Left vertical icons */}
+          <div className="flex flex-col items-center gap-3 pt-2">
+            {/* Start circle */}
+            <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-blue-400">
+              <div className="w-2 h-2 rounded-full bg-blue-400" />
+            </div>
+
+            {/* Dotted line */}
+            <div className="flex flex-col items-center gap-1 py-1">
+              <span className="w-1 h-1 rounded-full bg-gray-300" />
+              <span className="w-1 h-1 rounded-full bg-gray-300" />
+              <span className="w-1 h-1 rounded-full bg-gray-300" />
+            </div>
+
+            {/* Destination pin */}
+            <img src={destinationPin} alt="Destination" className="w-5 h-5" />
+          </div>
+
+          {/* Inputs column */}
+          <div className="flex-1 flex flex-col gap-3">
+            {fields.map((field) => (
+              <label
+                key={field.key}
+                className={inputWrapperBase + " flex items-center justify-between rounded-2xl relative"}
+              >
+                <div className="flex-1">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-semibold">
+                    {field.label}
+                  </p>
+                  <input
+                    type="text"
+                    value={field.value}
+                    onChange={(event) => {
+                      field.onChange(event.target.value);
+                      setSearchQuery(event.target.value);
+                      setActiveField(field.key);
+                    }}
+                    placeholder={field.placeholder}
+                    className="w-full bg-transparent border-none outline-none text-sm font-medium text-gray-800 placeholder:text-gray-400"
+                  />
+                </div>
+                <Icon icon="mdi:magnify" className="text-xl text-gray-400 ml-3" />
+
                 {activeField === field.key && searchResults.length > 0 && (
                   <div className="absolute top-full left-0 w-full mt-1 overflow-hidden rounded-b-2xl bg-white shadow-md pointer-events-auto z-20">
                     {searchResults.map((result, idx) => (
@@ -183,20 +171,35 @@ function WalkingDirections({
                             {result.properties.name}
                           </p>
                           <p className="font-poppins text-xs text-gray-500">
-                            {result.properties.city ||
-                              result.properties.state ||
-                              "Philippines"}
+                            {result.properties.city || result.properties.state || "Philippines"}
                           </p>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
-              </div>
-              <Icon icon="mdi:magnify" className="text-xl text-gray-400" />
-            </label>
+              </label>
+            ))}
           </div>
-        ))}
+
+          {/* Swap button on the right */}
+          <div className="flex items-center pl-2 self-center">
+            <button
+              type="button"
+              onClick={onSwapLocations}
+              className="w-10 h-10 rounded-2xl text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              aria-label="Swap locations"
+            >
+              <Icon icon="akar-icons:arrow-up-down" width="24" height="24" style={{ color: "#000" }} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Destination Section */}
+      <div className="mt-6 pt-4 border-t border-gray-100">
+        <h4 className="text-sm font-medium text-gray-600 mb-3 font-poppins">Recent Destination</h4>
+        <div className="h-48 bg-gray-50 rounded-2xl w-full"></div>
       </div>
     </section>
   );
