@@ -23,7 +23,7 @@ const GuardianNetwork = () => {
         <h3 className="text-xl font-semibold text-gray-800">
           Guardian Network
         </h3>
-        <button className="bg-[#1E3A8A] text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-900 transition-colors">
+        <button className="bg-primary-100 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-900 transition-colors">
           <Icon icon="ph:plus-bold" className="text-base" />
           <span>Add Guardian</span>
         </button>

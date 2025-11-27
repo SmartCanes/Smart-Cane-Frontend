@@ -41,31 +41,31 @@ export const fetchWeatherAlert = async () => {
   }
 };
 
-// 2. NEW: For WeatherBoard (Tomorrow's Forecast)
-export const fetchTomorrowForecast = async () => {
+// 2. NEW: For WeatherBoard (Full Forecast)
+export const fetchFullWeatherForecast = async () => {
   try {
-    // Request daily forecast: code, max temp, min temp, rain chance
+    // Request daily forecast: code, max temp, min temp, rain chance, sunrise, sunset, uv_index
+    // Request current weather: temp, humidity, apparent_temp, pressure, wind_speed, visibility
     const response = await fetch(
-      `${BASE_URL}?latitude=${LOC_COORDS.lat}&longitude=${LOC_COORDS.lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`
+      `${BASE_URL}?latitude=${LOC_COORDS.lat}&longitude=${LOC_COORDS.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,visibility,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto&forecast_days=7`
     );
 
     if (!response.ok) throw new Error("Failed to fetch forecast");
 
     const data = await response.json();
 
-    // Note: Index 0 = Today, Index 1 = Tomorrow
+    // --- 1. Tomorrow's Forecast (Main Card) ---
     const tomorrowIndex = 1;
-
-    const code = data.daily.weathercode[tomorrowIndex];
-    const tempMax = Math.round(data.daily.temperature_2m_max[tomorrowIndex]);
-    const tempMin = Math.round(data.daily.temperature_2m_min[tomorrowIndex]);
-    const precipProb = data.daily.precipitation_probability_max[tomorrowIndex];
-    const dateStr = data.daily.time[tomorrowIndex];
+    const tomCode = data.daily.weathercode[tomorrowIndex];
+    const tomTempMax = Math.round(data.daily.temperature_2m_max[tomorrowIndex]);
+    const tomTempMin = Math.round(data.daily.temperature_2m_min[tomorrowIndex]);
+    const tomPrecip = data.daily.precipitation_probability_max[tomorrowIndex];
+    const tomDate = data.daily.time[tomorrowIndex];
 
     // Logic: Bawal lumabas kung Umuulan (RainCode) OR mataas ang chance ng ulan (>50%)
-    const isRaining = RAIN_CODES.includes(code);
-    const highRainChance = precipProb > 50;
-    const canGoOutside = !isRaining && !highRainChance;
+    const isRainingTom = RAIN_CODES.includes(tomCode);
+    const highRainChanceTom = tomPrecip > 50;
+    const canGoOutside = !isRainingTom && !highRainChanceTom;
 
     // Weather Description Helper
     const getWeatherDesc = (c) => {
@@ -75,17 +75,73 @@ export const fetchTomorrowForecast = async () => {
       return "Overcast";
     };
 
-    return {
-      date: dateStr,
-      tempMax,
-      tempMin,
-      precipProbability: precipProb,
-      description: getWeatherDesc(code),
-      canGoOutside, // Ito ang gagamitin ng UI para sa Green/Red status
+    const tomorrow = {
+      date: tomDate,
+      tempMax: tomTempMax,
+      tempMin: tomTempMin,
+      precipProbability: tomPrecip,
+      description: getWeatherDesc(tomCode),
+      canGoOutside,
       recommendation: canGoOutside
         ? "Tomorrow looks safe for a walk. Use your iCane as usual."
         : "Heavy rain or showers expected tomorrow. Better to stay indoors."
     };
+
+    // --- 2. Today's Weather Details ---
+    const current = data.current;
+    const todayDaily = {
+      sunrise: data.daily.sunrise[0],
+      sunset: data.daily.sunset[0],
+      uvIndex: data.daily.uv_index_max[0]
+    };
+
+    const formatTime = (isoString) => {
+      if (!isoString) return "-----";
+      const date = new Date(isoString);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const today = {
+      sunrise: formatTime(todayDaily.sunrise),
+      sunset: formatTime(todayDaily.sunset),
+      humidity: `${current.relative_humidity_2m}%`,
+      wind: `${current.wind_speed_10m} km/h`,
+      feelsLike: `${Math.round(current.apparent_temperature)}°C`,
+      pressure: `${Math.round(current.surface_pressure)} hPa`,
+      visibility: `${(current.visibility / 1000).toFixed(1)} km`,
+      uvIndex: todayDaily.uvIndex
+    };
+
+    // --- 3. Weekly Forecast (7 Days) ---
+    const weekly = data.daily.time.map((time, index) => {
+      const code = data.daily.weathercode[index];
+      const max = Math.round(data.daily.temperature_2m_max[index]);
+      const min = Math.round(data.daily.temperature_2m_min[index]);
+      const date = new Date(time);
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+
+      // Determine icon based on weather code
+      let icon = "solar:sun-fog-bold-duotone"; // Default
+      let color = "text-yellow-500";
+      
+      if (RAIN_CODES.includes(code)) {
+        icon = "solar:cloud-rain-bold-duotone";
+        color = "text-blue-500";
+      } else if (code > 3) {
+        icon = "solar:cloud-bold-duotone";
+        color = "text-gray-500";
+      }
+
+      return {
+        day: dayName,
+        temp: `${Math.round((max + min) / 2)}°C`,
+        icon,
+        color
+      };
+    });
+
+    return { tomorrow, today, weekly };
+
   } catch (error) {
     console.error("Forecast Error:", error);
     return null;
