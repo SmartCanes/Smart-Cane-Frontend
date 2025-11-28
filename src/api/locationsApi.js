@@ -11,21 +11,19 @@ const mapOptions = (collection) =>
 
 export const getRegions = () =>
   handleRequest(async () => {
-    const { data } = await api.get(`${BASE_URL}/regions/`);
+    const data = await api.get(`${BASE_URL}/regions/`);
     return mapOptions(data);
   });
 
 export const getProvincesByRegion = (regionCode) =>
   handleRequest(async () => {
-    const { data } = await api.get(
-      `${BASE_URL}/regions/${regionCode}/provinces/`
-    );
+    const data = await api.get(`${BASE_URL}/regions/${regionCode}/provinces/`);
     return mapOptions(data);
   });
 
 export const getCitiesByProvince = (provinceCode) =>
   handleRequest(async () => {
-    const { data } = await api.get(
+    const data = await api.get(
       `${BASE_URL}/provinces/${provinceCode}/cities-municipalities/`
     );
     return mapOptions(data);
@@ -33,7 +31,7 @@ export const getCitiesByProvince = (provinceCode) =>
 
 export const getBarangaysByCity = (cityCode) =>
   handleRequest(async () => {
-    const { data } = await api.get(
+    const data = await api.get(
       `${BASE_URL}/cities-municipalities/${cityCode}/barangays/`
     );
     return mapOptions(data);
@@ -41,7 +39,7 @@ export const getBarangaysByCity = (cityCode) =>
 
 export const getLocation = (query) =>
   handleRequest(async () => {
-    const { data } = await api.get(
+    const data = await api.get(
       `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&bbox=116.87,4.59,126.6,21.21`
     );
     return data;
