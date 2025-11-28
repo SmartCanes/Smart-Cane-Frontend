@@ -5,12 +5,15 @@ import { persist } from "zustand/middleware";
 export const useUserStore = create(
   persist(
     (set, get) => ({
-      userName: "",
-      isLoggedIn: false,
+      user: "",
+      isAuthenticated: false,
       showLoginModal: false,
 
-      login: (username) => set({ userName: username, isLoggedIn: true }),
-      logout: () => set({ userName: "", isLoggedIn: false }),
+      login: (user) => set({ user, isAuthenticated: true }),
+      logout: () => {
+        localStorage.removeItem("access_token");
+        set({ user: "", isAuthenticated: false });
+      },
       setShowLoginModal: (value) => set({ showLoginModal: value }),
 
       _wsConnected: false,
