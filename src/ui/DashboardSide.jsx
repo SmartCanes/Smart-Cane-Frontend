@@ -16,7 +16,7 @@ const MenuButton = memo(({ item, isActive, onNavigate }) => (
   >
     <AnimatePresence mode="wait">
       <motion.button
-        key={item.id} // ensures exit/enter triggers properly
+        key={item.id}
         onClick={() => onNavigate(item.path)}
         initial={{
           marginLeft: 0,
@@ -104,7 +104,7 @@ const DashboardSide = ({ className = "" }) => {
     <>
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="flex justify-around items-center h-16 px-2">
+        <div className="flex justify-around items-center h-[var(--mobile-nav-height)] px-2">
           {menuItems.map((item) => (
             <HoverNavEffect delay={0.1} key={item.id}>
               <button
@@ -127,25 +127,8 @@ const DashboardSide = ({ className = "" }) => {
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex w-60 h-screen bg-primary-100 flex-col ${className}`}
+        className={`hidden md:flex w-60 min-h-[calc(100vh-var(--header-height))] bg-primary-100 flex-col ${className}`}
       >
-        {/* Logo and Brand - Same height as header */}
-        <div className="h-[80px] flex items-center justify-start px-6 border-b border-gray-700/30">
-          <Link to="/dashboard">
-            <div className="flex items-center gap-3">
-              <BlinkingIcon
-                src={icaneLogo}
-                alt="iCane logo"
-                className="h-12 w-[60px] object-contain"
-              />
-              <span className="text-white text-4xl font-gabriela tracking-wide">
-                icane
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Navigation Menu */}
         <nav className="flex-1 overflow-y-auto overflow-x-hidden">
           <ul className="">
             {menuItems.map((item) => (

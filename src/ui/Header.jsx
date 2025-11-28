@@ -3,21 +3,17 @@ import { Icon } from "@iconify/react";
 import notifBell from "@/assets/images/notifbell.png";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "@/stores/useStore";
+import icaneLogo from "@/assets/images/smartcane-logo.png";
+import { BlinkingIcon } from "@/wrapper/MotionWrapper";
+import { Link } from "react-router-dom";
 
-const Header = ({
-  userName = "Z",
-  isOnline = false,
-  notificationCount = 0,
-  onNotificationClick,
-  onProfileClick,
-  className = ""
-}) => {
-  const { logout } = useUserStore();
+const Header = () => {
+  const { connectionStatus, user, logout } = useUserStore();
+  const { notificationCount, setNotificationCount } = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -31,8 +27,9 @@ const Header = ({
 
   const handleProfileClick = () => {
     setIsDropdownOpen(false);
-    if (onProfileClick) onProfileClick();
   };
+
+  const handleNotificationClick = () => {};
 
   const handleLogoutClick = () => {
     setIsDropdownOpen(false);
@@ -42,23 +39,36 @@ const Header = ({
 
   return (
     <header
-      className={`w-full h-[80px] bg-primary-100 flex items-center justify-end px-6 border-b border-gray-700/30 ${className}`}
+      className={`w-full max-h-[var(--header-height)] bg-primary-100 flex items-center px-4 justify-between`}
     >
+      <div className="h-[var(--header-height)] flex items-center justify-start ">
+        <Link to="/dashboard">
+          <div className="flex items-center gap-3">
+            <BlinkingIcon
+              src={icaneLogo}
+              alt="iCane logo"
+              className="h-12 w-[60px] object-contain"
+            />
+            <span className="hidden sm:flex text-white text-4xl font-gabriela tracking-wide">
+              icane
+            </span>
+          </div>
+        </Link>
+      </div>
       {/* Right Section: Online Badge, Notification, User Avatar */}
       <div className="flex items-center gap-4">
         {/* Online Status Badge */}
         <div
           className={
             "flex items-center gap-2 text-white px-4 py-1.5 rounded-md font-poppins text-sm font-medium " +
-            (isOnline ? "bg-green-500" : "bg-gray-500")
+            (connectionStatus ? "bg-green-500" : "bg-gray-500")
           }
         >
           <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-          {isOnline ? "Online" : "Offline"}
+          {connectionStatus ? "Online" : "Offline"}
         </div>
-        {/* Notification Bell */}
         <button
-          onClick={onNotificationClick}
+          onClick={handleNotificationClick}
           className="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors duration-200"
           aria-label="Notifications"
         >
@@ -80,7 +90,7 @@ const Header = ({
             className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center font-poppins font-semibold text-lg transition-colors duration-200"
             aria-label="User menu"
           >
-            {userName.charAt(0).toUpperCase()}
+            {user ?? user.userName.charAt(0).toUpperCase()}
           </button>
 
           {/* Dropdown Menu */}

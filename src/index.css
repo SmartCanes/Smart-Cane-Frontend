@@ -39,6 +39,11 @@
   --animate-slide-in: slideIn 0.3s ease-out;
 }
 
+:root {
+  --header-height: 80px;
+  --mobile-nav-height: 64px;
+}
+
 body {
   font-family: var(--font-poppins);
 }
