@@ -12,7 +12,9 @@ import { triggerSmartCaneNotification } from "@/utils/NotificationManager";
 
 const WeatherDetailItem = ({ label, value }) => (
   <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-1">
-    <span className="text-xs font-bold text-[#11285A] uppercase tracking-wide">{label}:</span>
+    <span className="text-xs font-bold text-[#11285A] uppercase tracking-wide">
+      {label}:
+    </span>
     <span className="text-sm font-medium text-gray-600">{value}</span>
   </div>
 );
@@ -148,32 +150,74 @@ const WeatherBoard = () => {
 
               {/* TODAY'S WEATHER GRID */}
               <div>
-                <h3 className="text-lg font-bold text-[#11285A] mb-2">Today's Weather</h3>
-                <p className="text-sm text-gray-500 mb-4">Here are the other information you might need on our weather</p>
-                
+                <h3 className="text-lg font-bold text-[#11285A] mb-2">
+                  Today's Weather
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Here are the other information you might need on our weather
+                </p>
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <WeatherDetailItem label="Sunrise" value={weatherData.today.sunrise} />
-                  <WeatherDetailItem label="Sunset" value={weatherData.today.sunset} />
-                  <WeatherDetailItem label="Humidity" value={weatherData.today.humidity} />
-                  <WeatherDetailItem label="Wind" value={weatherData.today.wind} />
-                  <WeatherDetailItem label="Feels Like" value={weatherData.today.feelsLike} />
-                  <WeatherDetailItem label="Pressure" value={weatherData.today.pressure} />
-                  <WeatherDetailItem label="Visibility" value={weatherData.today.visibility} />
-                  <WeatherDetailItem label="UV Index" value={weatherData.today.uvIndex} />
+                  <WeatherDetailItem
+                    label="Sunrise"
+                    value={weatherData.today.sunrise}
+                  />
+                  <WeatherDetailItem
+                    label="Sunset"
+                    value={weatherData.today.sunset}
+                  />
+                  <WeatherDetailItem
+                    label="Humidity"
+                    value={weatherData.today.humidity}
+                  />
+                  <WeatherDetailItem
+                    label="Wind"
+                    value={weatherData.today.wind}
+                  />
+                  <WeatherDetailItem
+                    label="Feels Like"
+                    value={weatherData.today.feelsLike}
+                  />
+                  <WeatherDetailItem
+                    label="Pressure"
+                    value={weatherData.today.pressure}
+                  />
+                  <WeatherDetailItem
+                    label="Visibility"
+                    value={weatherData.today.visibility}
+                  />
+                  <WeatherDetailItem
+                    label="UV Index"
+                    value={weatherData.today.uvIndex}
+                  />
                 </div>
               </div>
 
               {/* WEEKLY FORECAST */}
               <div>
-                <h3 className="text-lg font-bold text-[#11285A] mb-2">Weekly Forecast</h3>
-                <p className="text-sm text-gray-500 mb-4">Here are the summary of the whole weather this week</p>
-                
+                <h3 className="text-lg font-bold text-[#11285A] mb-2">
+                  Weekly Forecast
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Here are the summary of the whole weather this week
+                </p>
+
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
                   {weatherData.weekly.map((day, idx) => (
-                    <div key={idx} className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 hover:bg-gray-100 transition-colors">
-                      <span className="text-sm font-bold text-[#11285A]">{day.day}</span>
-                      <Icon icon={day.icon} className={`text-3xl ${day.color}`} />
-                      <span className="text-sm font-medium text-gray-600">{day.temp}</span>
+                    <div
+                      key={idx}
+                      className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="text-sm font-bold text-[#11285A]">
+                        {day.day}
+                      </span>
+                      <Icon
+                        icon={day.icon}
+                        className={`text-3xl ${day.color}`}
+                      />
+                      <span className="text-sm font-medium text-gray-600">
+                        {day.temp}
+                      </span>
                     </div>
                   ))}
                 </div>

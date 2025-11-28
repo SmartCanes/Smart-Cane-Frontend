@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import { fetchWeatherAlert } from "@/api/WeatherService"; // Import yung service
+import { fetchWeatherAlert } from "@/api/weatherService"; // Import yung service
 
 const RecentAlerts = () => {
   const [weather, setWeather] = useState(null);
