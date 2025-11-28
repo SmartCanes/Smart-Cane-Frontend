@@ -19,6 +19,8 @@ import Setting from "./ui/Setting";
 import WeatherBoard from "./ui/WeatherBoard.jsx";
 import ScannerCamera from "./auth/Scanner";
 import ManageProfile from "./ui/ManageProfile.jsx";
+import GuardianAccess from "./ui/components/GuardianAccess.jsx";
+import DashboardLayout from "./layout/DashboardLayout";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -35,13 +37,15 @@ createRoot(document.getElementById("root")).render(
         </Route>
 
         <Route element={<ProtectedLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/activity-report" element={<ActivityReport />} />
-          <Route path="/settings" element={<Setting />} />
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/activity-report" element={<ActivityReport />} />
 
-          {/* Weather*/}
-          <Route path="/manage-profile" element={<ManageProfile />} />
-          <Route path="/weather-board" element={<WeatherBoard />} />
+            <Route path="/guardian-access" element={<GuardianAccess />} />
+            <Route path="/manage-profile" element={<ManageProfile />} />
+            <Route path="/weather-board" element={<WeatherBoard />} />
+            <Route path="/settings" element={<Setting />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
