@@ -28,17 +28,17 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { username, password } = formData;
 
     // Show password required indicator when Sign In is clicked and username has value
-    if (formData.username.trim()) {
+    if (username.trim()) {
       setShowPasswordRequired(true);
     }
 
     // Validation
     const newErrors = {};
-    if (!formData.username.trim())
-      newErrors.username = "This field is required";
-    if (!formData.password) newErrors.password = "This field is required";
+    if (!username.trim()) newErrors.username = "This field is required";
+    if (!password) newErrors.password = "This field is required";
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -46,14 +46,18 @@ const Login = () => {
 
     setLoading(true);
     try {
-      if (formData.username === "admin" && formData.password === "admin") {
-        login("admin");
-        setShowLoginModal(true);
+      console.log(import.meta.env.VITE_DEV);
+      if (
+        import.meta.env.VITE_DEV &&
+        username === "admin" &&
+        password === "admin"
+      ) {
+        localStorage.setItem("access_token", "DEV_ADMIN_TOKEN");
         navigate("/dashboard");
         return;
       }
 
-      const response = await loginApi(formData.username, formData.password);
+      const response = await loginApi(username, password);
 
       localStorage.setItem("access_token", response.data.access_token);
 
