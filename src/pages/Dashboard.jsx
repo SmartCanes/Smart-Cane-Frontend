@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import Header from "@/ui/Header";
-import DashboardSide from "@/ui/DashboardSide";
 import LiveMap from "@/ui/components/LiveMap";
 import RecentAlerts from "@/ui/components/RecentAlert";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
@@ -115,9 +114,6 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen">
       <EmergencyOverlay emergency={emergency} />
-      {/* Sidebar */}
-      <DashboardSide />
-
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
@@ -148,7 +144,7 @@ const Dashboard = () => {
           <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
             <div className="flex flex-col gap-8">
               {/* Map Container */}
-              <div className="bg-white rounded-2xl shadow-sm overflow-hidden w-full">
+              <div className="bg-white rounded-2xl shadow-sm overflow-hidden w-full border border-[#F3F4F6]">
                 {/* Map Header */}
                 <div className="px-6 py-4 border-b border-gray-100">
                   <div className="flex items-center justify-between">
