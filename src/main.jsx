@@ -15,12 +15,14 @@ import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
 import ActivityReport from "./ui/components/ActivityReport.jsx";
 import Setting from "./ui/Setting";
 
-//Weather Board Import
 import WeatherBoard from "./ui/WeatherBoard.jsx";
 import ScannerCamera from "./auth/Scanner";
 import ManageProfile from "./ui/ManageProfile.jsx";
 import GuardianAccess from "./ui/components/GuardianAccess.jsx";
+import ManageProfile from "./ui/components/ManageProfile.jsx";
 import DashboardLayout from "./layout/DashboardLayout";
+import GuardianAccess from "./pages/GuardianAccess";
+import WeatherBoard from "./pages/WeatherBoard";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

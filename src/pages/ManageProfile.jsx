@@ -106,9 +106,8 @@ const ManageProfile = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-poppins">
+    <div className="flex min-h-[calc(100vh-var(--header-height))] bg-gray-50 font-poppins">
       <div className="flex-1 flex flex-col pb-16 md:pb-0">
-        <Header />
         <main className="p-4 md:p-8 flex-1">
           {/* UPDATED TABS SECTION - Exact match to GuardianAccess */}
           <div className="flex items-center gap-6 md:gap-10 mb-6 md:mb-8 overflow-x-auto">
