@@ -7,7 +7,12 @@ const Welcome = () => {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate("/login");
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    } else {
+      navigate("/login");
+    }
   };
 
   return (
