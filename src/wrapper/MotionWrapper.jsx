@@ -230,6 +230,8 @@ export const HoverNavEffect = ({
   children,
   className = "",
   distance = 5,
+  stiffness = 300,
+  damping = 20,
   direction = "up"
 }) => {
   const motionProps = {};
@@ -244,8 +246,8 @@ export const HoverNavEffect = ({
       whileHover={motionProps}
       transition={{
         type: "spring",
-        stiffness: 300,
-        damping: 20
+        stiffness: stiffness,
+        damping: damping
       }}
       className={`inline-block cursor-pointer ${className}`}
     >

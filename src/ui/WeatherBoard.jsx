@@ -4,7 +4,6 @@ import { fetchFullWeatherForecast } from "@/api/WeatherService";
 
 // 👇 FIX 1: Import Components (Para mawala ang "DashboardSide is not defined")
 import Header from "./Header";
-import DashboardSide from "./DashboardSide";
 import SimulationPanel from "./components/SimulationPanel"; // Siguraduhing nagawa mo na ito
 
 // 👇 FIX 2: Import Notification Manager
@@ -88,9 +87,6 @@ const WeatherBoard = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* 1. SIDEBAR */}
-      <DashboardSide />
-
       {/* 2. MAIN SECTION */}
       <div className="flex-1 flex flex-col">
         {/* 3. HEADER */}

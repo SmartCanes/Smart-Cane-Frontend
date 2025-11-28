@@ -1,8 +1,53 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
 import { BlinkingIcon, HoverNavEffect } from "@/wrapper/MotionWrapper";
 import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "framer-motion";
+
+const MenuButton = memo(({ item, isActive, onNavigate }) => (
+  <HoverNavEffect
+    delay={0.1}
+    direction="right"
+    distance={20}
+    damping={50}
+    initial={false}
+    className="w-full"
+  >
+    <AnimatePresence mode="wait">
+      <motion.button
+        key={item.id} // ensures exit/enter triggers properly
+        onClick={() => onNavigate(item.path)}
+        initial={{
+          marginLeft: 0,
+          backgroundColor: "rgba(255,255,255,0)",
+          color: "#ffffffcc"
+        }}
+        animate={{
+          marginLeft: isActive ? 16 : 0,
+          backgroundColor: isActive ? "#ffffff" : "rgba(255,255,255,0)",
+          color: isActive ? "#000000" : "#ffffffcc"
+        }}
+        exit={{
+          marginLeft: 0,
+          backgroundColor: "rgba(255,255,255,0)",
+          color: "#ffffffcc"
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30
+        }}
+        className="w-full h-18 rounded-l-full"
+      >
+        <div className="flex items-center gap-4 px-6 py-3">
+          <Icon icon={item.icon} className="w-6 h-6 flex-shrink-0 text-base" />
+          <span>{item.label}</span>
+        </div>
+      </motion.button>
+    </AnimatePresence>
+  </HoverNavEffect>
+));
 
 const DashboardSide = ({ className = "" }) => {
   const navigate = useNavigate();
@@ -47,10 +92,13 @@ const DashboardSide = ({ className = "" }) => {
     }
   ];
 
-  const handleNavigation = (path) => {
-    navigate(path);
-    setIsMobileMenuOpen(false);
-  };
+  const handleNavigation = useCallback(
+    (path) => {
+      navigate(path);
+      setIsMobileMenuOpen(false);
+    },
+    [navigate]
+  );
 
   return (
     <>
@@ -98,33 +146,16 @@ const DashboardSide = ({ className = "" }) => {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 px-4 py-6 overflow-y-auto">
-          <ul className="space-y-10">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-
-              return (
-                <HoverNavEffect
-                  delay={0.1}
-                  direction="right"
-                  key={item.id}
-                  className={`w-full`}
-                >
-                  <button
-                    onClick={() => handleNavigation(item.path)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-poppins text-base ${
-                      isActive
-                        ? "bg-white/10 text-white font-medium"
-                        : "text-white/80 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <Icon icon={item.icon} className="w-6 h-6 flex-shrink-0" />
-                    {/* Text */}
-                    <span>{item.label}</span>
-                  </button>
-                </HoverNavEffect>
-              );
-            })}
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden">
+          <ul className="">
+            {menuItems.map((item) => (
+              <MenuButton
+                key={item.id}
+                item={item}
+                isActive={location.pathname === item.path}
+                onNavigate={handleNavigation}
+              />
+            ))}
           </ul>
         </nav>
       </aside>
