@@ -82,7 +82,7 @@ const Login = () => {
     <div className="min-h-dv w-full flex flex-col sm:flex-row">
       <SidebarContent />
       <div className="w-full h-dvh sm:flex-1 sm:min-h-screen relative bg-[#FDFCFA] px-6 sm:px-10">
-        <Link to="/">
+        {/* <Link to="/">
           <div className="sm:hidden py-4 flex gap-2 absolute top-0 left-4">
             <img
               src="src/assets/images/smartcane-logo-blue.png"
@@ -90,7 +90,10 @@ const Login = () => {
               className="object-contain w-[45px]"
             />
           </div>
-        </Link>
+        </Link> */}
+        <div className="absolute top-0 left-0 bg-primary-100 rounded-b-[30%] h-48 w-full sm:hidden flex justify-center items-center">
+          <h1 className="font-gabriela text-8xl text-[#FDFCFA]">iCane</h1>
+        </div>
 
         <div className="h-screen flex flex-col items-center justify-center">
           <form
@@ -99,12 +102,8 @@ const Login = () => {
             noValidate
           >
             <div className="flex flex-col items-center text-center mb-10 space-y-6 sm:space-y-3">
-              <h1 className="font-poppins text-center text-5xl sm:text-h1 font-bold text-[#1C253C]">
-                Welcome!
-              </h1>
-              <p className="font-poppins text-[#1C253C] text-center text-paragraph">
-                Enter your credentials below to access your dashboard and saved
-                features.
+              <p className="font-poppins text-[#1C253C] text-center text-paragraph text-2xl">
+                Login to your Account
               </p>
             </div>
 
