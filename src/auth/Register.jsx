@@ -9,8 +9,10 @@ import EmailValidationModal from "../ui/components/EmailValidationModal";
 import {
   checkCredentialsApi,
   registerApi,
+  sendOTPApi,
   verifyOTPApi
 } from "@/api/authService";
+import Loader from "@/ui/components/Loader";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -226,7 +228,7 @@ const Register = () => {
     setOtpError("");
 
     try {
-      await sendOtp(formData.email);
+      await sendOTPApi(formData.email);
 
       setOtpSent(true);
       setCountdown(60); // 60 seconds countdown
@@ -355,8 +357,7 @@ const Register = () => {
           contact_number: formData.contactNumber
         };
 
-        await backendApi.post("/auth/check-credentials", checkPayload);
-
+        await checkCredentialsApi(checkPayload);
         // Email and contact number are available, send OTP and proceed to step 3
         await sendOtp();
         setStep(3);
