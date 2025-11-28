@@ -21,8 +21,8 @@ import ManageProfile from "./ui/ManageProfile.jsx";
 import GuardianAccess from "./ui/components/GuardianAccess.jsx";
 import ManageProfile from "./ui/components/ManageProfile.jsx";
 import DashboardLayout from "./layout/DashboardLayout";
-import GuardianAccess from "./pages/GuardianAccess";
 import WeatherBoard from "./pages/WeatherBoard";
+import ManageProfile from "./pages/ManageProfiles";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -45,6 +45,7 @@ createRoot(document.getElementById("root")).render(
 
             <Route path="/guardian-access" element={<GuardianAccess />} />
             <Route path="/manage-profile" element={<ManageProfile />} />
+            {/* <Route path="/manage-profile" element={<ManageProfile />} /> */}
             <Route path="/weather-board" element={<WeatherBoard />} />
             <Route path="/settings" element={<Setting />} />
           </Route>
