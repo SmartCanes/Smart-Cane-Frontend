@@ -6,8 +6,12 @@ import SelectField from "../ui/components/SelectField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import EmailValidationModal from "../ui/components/EmailValidationModal";
-import Loader from "../ui/components/Loader";
-import { backendApi } from "@/api/http";
+import AutoSkeleton from "@/ui/components/AutoSkeleton";
+import {
+  checkCredentialsApi,
+  registerApi,
+  verifyOTPApi
+} from "@/api/authService";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -223,9 +227,7 @@ const Register = () => {
     setOtpError("");
 
     try {
-      await backendApi.post("/auth/send-otp", {
-        email: formData.email
-      });
+      await sendOtp(formData.email);
 
       setOtpSent(true);
       setCountdown(60); // 60 seconds countdown
@@ -320,7 +322,7 @@ const Register = () => {
           username: formData.username
         };
 
-        await backendApi.post("/auth/check-credentials", checkPayload);
+        await checkCredentialsApi(checkPayload);
 
         // Username is available, proceed to step 2
         setStep(2);
@@ -401,12 +403,8 @@ const Register = () => {
           return;
         }
 
-        const verifyResponse = await backendApi.post("/auth/verify-otp", {
-          email: formData.email,
-          otp_code: otpCode
-        });
+        const verifyResponse = await verifyOTPApi(formData.email, otpCode);
 
-        // OTP verified successfully, now register the user
         const payload = {
           username: formData.username,
           password: formData.password,
@@ -420,7 +418,7 @@ const Register = () => {
           street_address: formData.streetAddress
         };
 
-        await backendApi.post("/auth/register", payload);
+        await registerApi(payload);
 
         setModalConfig({
           visible: true,

@@ -5,7 +5,7 @@ import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import { useUserStore } from "@/stores/useStore";
-import { backendApi } from "../api/http";
+import { loginApi } from "@/api/authService";
 
 const Login = () => {
   const { login, setShowLoginModal } = useUserStore();
@@ -53,26 +53,16 @@ const Login = () => {
         return;
       }
 
-      // Call backend login API
-      const response = await backendApi.post("/auth/login", {
-        username: formData.username,
-        password: formData.password
-      });
+      const response = await loginApi(formData.username, formData.password);
 
-      const token = response.data.access_token;
+      localStorage.setItem("access_token", response.data.access_token);
 
-      // Save JWT in localStorage
-      localStorage.setItem("token", token);
-
-      // Update your user store
-      login(formData.username);
+      login(response.data.guardian_id);
       setShowLoginModal(true);
 
-      // Redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      // Handle backend error message
       const msg = err.response?.data?.message || "Login failed";
       setErrors({
         general: msg,
