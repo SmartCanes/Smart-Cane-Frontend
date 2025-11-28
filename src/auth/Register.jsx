@@ -6,7 +6,6 @@ import SelectField from "../ui/components/SelectField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import EmailValidationModal from "../ui/components/EmailValidationModal";
-import AutoSkeleton from "@/ui/components/AutoSkeleton";
 import {
   checkCredentialsApi,
   registerApi,
