@@ -502,7 +502,7 @@ const Register = () => {
         </div>
       )}
       <div className="relative flex flex-col w-full sm:flex-1 min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
-        <Link to="/">
+        {/* <Link to="/">
           <div className="sm:hidden py-4 flex gap-2 absolute top-0 left-4">
             <img
               src="src/assets/images/smartcane-logo-blue.png"
@@ -510,7 +510,10 @@ const Register = () => {
               className="object-contain w-[45px]"
             />
           </div>
-        </Link>
+        </Link> */}
+        <div className="absolute top-0 left-0 bg-primary-100 rounded-b-[30%] h-48 w-full sm:hidden flex justify-center items-center">
+          <h1 className="font-gabriela text-8xl text-[#FDFCFA]">iCane</h1>
+        </div>
         <div className="flex-1 flex justify-center items-center pt-24 pb-5 sm:pt-0 sm:pb-0">
           <form
             className="w-full max-w-md sm:max-w-none lg:max-w-lg"
@@ -521,9 +524,9 @@ const Register = () => {
               <h1 className="font-poppins text-5xl sm:text-h1 font-bold text-[#1C253C] mb-4">
                 {step === 3 ? "Email Verification" : "Welcome"}
               </h1>
-              <p className="font-poppins text-[#1C253C] text-paragraph">
+              <p className="font-poppins text-[#1C253C] text-paragraph mt-15 text-1xl">
                 {step === 1 ? (
-                  "Start your journey to safer and smarter mobility by signing up."
+                  "Create your account to get started with iCane."
                 ) : step === 2 ? (
                   "Start your journey to safer and smarter mobility by signing up."
                 ) : (
