@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import "leaflet/dist/leaflet.css";
 
-// Mga Pages at Components
 import Welcome from "./pages/Welcome.jsx";
 import GuestPage from "./pages/GuestPage.jsx";
 import Login from "./auth/Login.jsx";
@@ -12,17 +11,13 @@ import Register from "./auth/Register.jsx";
 import ForgotPassword from "./auth/FogotPassword.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
-import ActivityReport from "./ui/components/ActivityReport.jsx";
-import Setting from "./ui/Setting";
+import Setting from "./pages/Setting";
 
-import WeatherBoard from "./ui/WeatherBoard.jsx";
-import ScannerCamera from "./auth/Scanner";
-import ManageProfile from "./ui/ManageProfile.jsx";
-import GuardianAccess from "./ui/components/GuardianAccess.jsx";
-import ManageProfile from "./ui/components/ManageProfile.jsx";
+import ManageProfile from "./pages/ManageProfile.jsx";
 import DashboardLayout from "./layout/DashboardLayout";
 import WeatherBoard from "./pages/WeatherBoard";
-import ManageProfile from "./pages/ManageProfiles";
+import ActivityReport from "./pages/ActivityReport";
+import ScannerCamera from "./auth/Scanner";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -43,7 +38,6 @@ createRoot(document.getElementById("root")).render(
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/activity-report" element={<ActivityReport />} />
 
-            <Route path="/guardian-access" element={<GuardianAccess />} />
             <Route path="/manage-profile" element={<ManageProfile />} />
             {/* <Route path="/manage-profile" element={<ManageProfile />} /> */}
             <Route path="/weather-board" element={<WeatherBoard />} />
