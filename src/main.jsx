@@ -37,9 +37,7 @@ createRoot(document.getElementById("root")).render(
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/activity-report" element={<ActivityReport />} />
-
             <Route path="/manage-profile" element={<ManageProfile />} />
-            {/* <Route path="/manage-profile" element={<ManageProfile />} /> */}
             <Route path="/weather-board" element={<WeatherBoard />} />
             <Route path="/settings" element={<Setting />} />
           </Route>
