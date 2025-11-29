@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
-import startingPointPin from "../../assets/images/startingPointPin.svg";
 import destinationPin from "../../assets/images/destinationPin.svg";
 import { getLocation } from "@/api/locationsApi";
 
@@ -86,26 +85,26 @@ function WalkingDirections({
 
   return (
     <section className="font-poppins bg-white rounded-3xl shadow-sm p-5 w-full">
-          <header className="flex items-center justify-between mb-5">
-            {/* Left walking icon */}
-            <div className="w-12 flex items-center justify-start">
-              <Icon
-                icon="fa6-solid:person-walking"
-                className="text-2xl text-gray-800"
-                aria-hidden
-              />
-            </div>
+      <header className="flex items-center justify-between mb-5">
+        {/* Left walking icon */}
+        <div className="w-12 flex items-center justify-start">
+          <Icon
+            icon="fa6-solid:person-walking"
+            className="text-2xl text-gray-800"
+            aria-hidden
+          />
+        </div>
 
-            {/* Centered title */}
-            <div className="flex-1 text-center">
-              <h3 className="text-xl font-semibold text-gray-900 font-poppins">
-                {title}
-              </h3>
-            </div>
+        {/* Centered title */}
+        <div className="flex-1 text-center">
+          <h3 className="text-xl font-semibold text-gray-900 font-poppins">
+            {title}
+          </h3>
+        </div>
 
-            {/* Right placeholder to balance layout */}
-            <div className="w-12" />
-          </header>
+        {/* Right placeholder to balance layout */}
+        <div className="w-12" />
+      </header>
 
       <div className="space-y-4">
         <div className="flex items-start gap-4">
@@ -132,7 +131,10 @@ function WalkingDirections({
             {fields.map((field) => (
               <label
                 key={field.key}
-                className={inputWrapperBase + " flex items-center justify-between rounded-2xl relative"}
+                className={
+                  inputWrapperBase +
+                  " flex items-center justify-between rounded-2xl relative"
+                }
               >
                 <div className="flex-1">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-semibold">
@@ -150,7 +152,10 @@ function WalkingDirections({
                     className="w-full bg-transparent border-none outline-none text-sm font-medium text-gray-800 placeholder:text-gray-400"
                   />
                 </div>
-                <Icon icon="mdi:magnify" className="text-xl text-gray-400 ml-3" />
+                <Icon
+                  icon="mdi:magnify"
+                  className="text-xl text-gray-400 ml-3"
+                />
 
                 {activeField === field.key && searchResults.length > 0 && (
                   <div className="absolute top-full left-0 w-full mt-1 overflow-hidden rounded-b-2xl bg-white shadow-md pointer-events-auto z-20">
@@ -171,7 +176,9 @@ function WalkingDirections({
                             {result.properties.name}
                           </p>
                           <p className="font-poppins text-xs text-gray-500">
-                            {result.properties.city || result.properties.state || "Philippines"}
+                            {result.properties.city ||
+                              result.properties.state ||
+                              "Philippines"}
                           </p>
                         </div>
                       </div>
@@ -190,7 +197,12 @@ function WalkingDirections({
               className="w-10 h-10 rounded-2xl text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors"
               aria-label="Swap locations"
             >
-              <Icon icon="akar-icons:arrow-up-down" width="24" height="24" style={{ color: "#000" }} />
+              <Icon
+                icon="akar-icons:arrow-up-down"
+                width="24"
+                height="24"
+                style={{ color: "#000" }}
+              />
             </button>
           </div>
         </div>
@@ -198,7 +210,9 @@ function WalkingDirections({
 
       {/* Recent Destination Section */}
       <div className="mt-6 pt-4 border-t border-gray-100">
-        <h4 className="text-sm font-medium text-gray-600 mb-3 font-poppins">Recent Destination</h4>
+        <h4 className="text-sm font-medium text-gray-600 mb-3 font-poppins">
+          Recent Destination
+        </h4>
         <div className="h-48 bg-gray-50 rounded-2xl w-full"></div>
       </div>
     </section>

@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import Header from "@/ui/Header";
 import LiveMap from "@/ui/components/LiveMap";
 import RecentAlerts from "@/ui/components/RecentAlert";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
 import SendNote from "@/ui/components/SendNote";
 import { motion, useAnimation } from "framer-motion";
-// import { fetchRoute } from "@/api/GraphHopperService";
 import { useUserStore } from "@/stores/useStore";
 import Toast from "@/ui/components/Toast";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
@@ -17,7 +15,6 @@ const Dashboard = () => {
     showLoginModal,
     connectWs,
     emergency,
-    connectionStatus,
     isMapLoading,
     caneLocation,
     guardianLocation,
@@ -25,7 +22,6 @@ const Dashboard = () => {
     setGuardianLocation,
     setIsMapLoading
   } = useUserStore();
-
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("track");
   const [startPoint, setStartPoint] = useState("");
@@ -202,49 +198,48 @@ const Dashboard = () => {
                   <span>Last updated: 2 minutes ago</span>
                 </div>
 
-                  <div className="flex items-center gap-2 text-gray-800 font-poppins text-xs font-medium">
-                    <Icon icon="flowbite:map-pin-solid" />
-                    <span>SM City Novaliches</span>
-                  </div>
+                <div className="flex items-center gap-2 text-gray-800 font-poppins text-xs font-medium">
+                  <Icon icon="flowbite:map-pin-solid" />
+                  <span>SM City Novaliches</span>
                 </div>
               </div>
-              <div className="grid gap-8 lg:grid-cols-2">
-                <GuardianNetwork />
-                <RecentAlerts />
-              </div>
             </div>
-
-            <div className="flex flex-col gap-8 w-full lg:max-w-[340px]">
-              <WalkingDirections
-                startValue={startPoint}
-                destinationValue={destinationPoint}
-                onStartChange={setStartPoint}
-                onDestinationChange={setDestinationPoint}
-                onSwapLocations={handleSwapLocations}
-                // onRequestDirections={handleRequestDirections}
-                helperText="Preview walking routes customized for your cane"
-              />
-              <SendNote />
-              {showModal && (
-                <Toast
-                  message="You have successfully logged into your account."
-                  type="success"
-                  position="top-right"
-                  onClose={() => setShowModal(false)}
-                />
-              )}
-              {emergency && (
-                <Toast
-                  message="Emergency Alert! Please check the live location immediately."
-                  type="error"
-                  position="bottom-right"
-                />
-              )}
+            <div className="grid gap-8 lg:grid-cols-2">
+              <GuardianNetwork />
+              <RecentAlerts />
             </div>
           </div>
-        </motion.main>
-      </div>
-    </div>
+
+          <div className="flex flex-col gap-8 w-full lg:max-w-[340px]">
+            <WalkingDirections
+              startValue={startPoint}
+              destinationValue={destinationPoint}
+              onStartChange={setStartPoint}
+              onDestinationChange={setDestinationPoint}
+              onSwapLocations={handleSwapLocations}
+              // onRequestDirections={handleRequestDirections}
+              helperText="Preview walking routes customized for your cane"
+            />
+            <SendNote />
+            {showModal && (
+              <Toast
+                message="You have successfully logged into your account."
+                type="success"
+                position="top-right"
+                onClose={() => setShowModal(false)}
+              />
+            )}
+            {emergency && (
+              <Toast
+                message="Emergency Alert! Please check the live location immediately."
+                type="error"
+                position="bottom-right"
+              />
+            )}
+          </div>
+        </div>
+      </motion.main>
+    </>
   );
 };
 
