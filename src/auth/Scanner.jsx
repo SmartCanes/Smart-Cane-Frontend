@@ -3,7 +3,7 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import SidebarContent from "@/ui/components/SidebarContent";
 import { Link } from "react-router-dom";
 
-const ScanQR = () => {
+const ScannerCamera = () => {
   const [paused, setPaused] = useState(false);
   const [hasCamera, setHasCamera] = useState(false);
   const [scannedCode, setScannedCode] = useState(null);
@@ -172,4 +172,4 @@ const ScanQR = () => {
   );
 };
 
-export default ScanQR;
+export default ScannerCamera;
