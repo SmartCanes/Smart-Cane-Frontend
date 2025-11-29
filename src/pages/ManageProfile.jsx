@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import { useNavigate } from "react-router-dom";
 import avatar from "@/assets/images/team-photo.png";
-import Modal from "@/ui/components/Modal";
+import Toast from "../ui/components/Toast";
+import Modal from "../ui/components/Modal";
 
-// ... (Keep GuardianInfo and GuardianCard components exactly as they were) ...
 const GuardianInfo = ({ label, value }) => (
   <div>
     <label className="text-xs text-gray-500 font-poppins">{label}</label>
@@ -52,31 +51,159 @@ const GuardianCard = ({ guardian, onDelete }) => (
   </div>
 );
 
+const ProfileInfo = ({ label, value, isEditing, onChange, name }) => {
+  const handlePhoneInput = (e) => {
+    if (name === "cellphone") {
+      const input = e.target.value.replace(/\D/g, ""); // Remove non-digits
+      if (input.length <= 11) {
+        onChange({ target: { name, value: input } });
+      }
+    } else {
+      onChange(e);
+    }
+  };
+
+  return (
+    <div>
+      <label className="text-sm text-gray-500 font-poppins">{label}</label>
+      {isEditing ? (
+        <input
+          type={name === "cellphone" ? "tel" : "text"}
+          name={name}
+          value={value}
+          onChange={handlePhoneInput}
+          maxLength={name === "cellphone" ? 11 : undefined}
+          placeholder={name === "cellphone" ? "09123456789" : ""}
+          className="mt-1 p-3 bg-white border border-gray-300 rounded-lg text-base text-gray-800 font-poppins w-full focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent"
+        />
+      ) : (
+        <div className="mt-1 p-3 bg-gray-100 rounded-lg text-base text-gray-800 font-poppins">
+          {value}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ManageProfile = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("guardian");
+  const [isEditing, setIsEditing] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+
+  // Guardian State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [deleteConfirm, setDeleteConfirm] = useState({
     show: false,
     guardianId: null
   });
 
-  const handleTabClick = (tab) => {
-    if (tab === "vip") {
-      navigate("/manage-profile");
-    } else {
-      setActiveTab(tab);
+  const [userProfile, setUserProfile] = useState({
+    name: "Alexa Rawles",
+    email: "alexarawles@gmail.com",
+    avatar: avatar,
+    fullName: "Alexa Rawles",
+    cellphone: "0912345678",
+    gender: "Female",
+    address: "683 Quirino Highway, Brgy San Bartolome, Novaliches",
+    condition: "Visually Impaired"
+  });
+
+  const guardians = [
+    {
+      id: 1,
+      name: "Juan Dela Cruz",
+      email: "sample@gmail.com",
+      avatar: avatar,
+      fullName: "Juan Dela Cruz",
+      cellphone: "0912345678",
+      gender: "Male",
+      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
+    },
+    {
+      id: 2,
+      name: "Juan Dela Cruz",
+      email: "sample@gmail.com",
+      avatar: avatar,
+      fullName: "Juan Dela Cruz",
+      cellphone: "0912345678",
+      gender: "Male",
+      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
+    },
+    {
+      id: 1,
+      name: "Juan Dela Cruz",
+      email: "sample@gmail.com",
+      avatar: avatar,
+      fullName: "Juan Dela Cruz",
+      cellphone: "0912345678",
+      gender: "Male",
+      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
+    },
+    {
+      id: 2,
+      name: "Juan Dela Cruz",
+      email: "sample@gmail.com",
+      avatar: avatar,
+      fullName: "Juan Dela Cruz",
+      cellphone: "0912345678",
+      gender: "Male",
+      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
     }
+  ];
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
   };
 
+  // VIP Profile Handlers
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setToast({
+      show: true,
+      type: "info",
+      message: "Edit mode enabled"
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    // Reset to original values if needed
+    setUserProfile({
+      name: "Alexa Rawles",
+      email: "alexarawles@gmail.com",
+      avatar: avatar,
+      fullName: "Alexa Rawles",
+      cellphone: "0912345678",
+      gender: "Female",
+      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches",
+      condition: "Visually Impaired"
+    });
+  };
+
+  const handleSaveChanges = () => {
+    setIsEditing(false);
+    setToast({
+      show: true,
+      type: "success",
+      message: "Profile updated successfully"
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUserProfile((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Guardian Handlers
   const handleDeleteClick = (guardianId) => {
     setDeleteConfirm({ show: true, guardianId });
   };
 
   const handleConfirmDelete = () => {
-    // Simulate deletion (replace with actual API call)
     setToast({
       show: true,
       type: "success",
@@ -101,7 +228,6 @@ const ManageProfile = () => {
       return;
     }
 
-    // Check if online
     if (!navigator.onLine) {
       setToast({
         show: true,
@@ -113,16 +239,6 @@ const ManageProfile = () => {
     }
 
     try {
-      // Simulate sending invitation (replace with actual API call)
-      // Example actual API call:
-      // const response = await fetch('/api/invite-guardian', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email })
-      // });
-      // if (!response.ok) throw new Error('Failed to send invitation');
-
-      // Simulate network request - REMOVE THIS when you have a real API
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       setToast({
@@ -143,33 +259,10 @@ const ManageProfile = () => {
     }
   };
 
-  const guardians = [
-    {
-      id: 1,
-      name: "Juan Dela Cruz",
-      email: "sample@gmail.com",
-      avatar: avatar,
-      fullName: "Juan Dela Cruz",
-      cellphone: "0912345678",
-      gender: "Male",
-      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
-    },
-    {
-      id: 2,
-      name: "Juan Dela Cruz",
-      email: "sample@gmail.com",
-      avatar: avatar,
-      fullName: "Juan Dela Cruz",
-      cellphone: "0912345678",
-      gender: "Male",
-      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
-    }
-  ];
-
   return (
-    <main className="flex-1 p-6 max-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] sm:max-h-[calc(100vh-var(--header-height))] overflow-y-auto">
+    <main className="max-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] sm:max-h-[calc(100vh-var(--header-height))] overflow-y-auto p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
-        {/* UPDATED TABS SECTION */}
+        {/* TABS SECTION */}
         <div className="flex items-center gap-6 md:gap-10 overflow-x-auto w-full md:w-auto">
           <button
             onClick={() => handleTabClick("guardian")}
@@ -200,6 +293,7 @@ const ManageProfile = () => {
           </button>
         </div>
 
+        {/* Add Guardian Button - Only show on Guardian Tab */}
         {activeTab === "guardian" && (
           <button
             onClick={() => setIsModalOpen(true)}
@@ -211,6 +305,17 @@ const ManageProfile = () => {
         )}
       </div>
 
+      {/* Toast Notification */}
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          position="top-right"
+          onClose={() => setToast({ show: false, type: "", message: "" })}
+        />
+      )}
+
+      {/* Delete Confirmation Toast */}
       {deleteConfirm.show && (
         <Modal
           isOpen={deleteConfirm.show}
@@ -222,6 +327,7 @@ const ManageProfile = () => {
           handleConfirm={handleConfirmDelete}
         ></Modal>
       )}
+
       {/* Add Guardian Modal */}
       {isModalOpen && (
         <Modal
@@ -261,7 +367,7 @@ const ManageProfile = () => {
             </button>
 
             <button
-              // onClick={handleSend}
+              onClick={handleSendInvitation}
               className="flex-1 px-4 py-2 bg-[#2ECC71] text-white rounded-lg hover:bg-green-600 transition font-bold"
             >
               Send Invite
@@ -270,7 +376,7 @@ const ManageProfile = () => {
         </Modal>
       )}
 
-      {/* Content */}
+      {/* Guardian Profile Content */}
       {activeTab === "guardian" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
           {guardians.map((guardian) => (
@@ -283,9 +389,96 @@ const ManageProfile = () => {
         </div>
       )}
 
+      {/* VIP Profile Content */}
       {activeTab === "vip" && (
-        <div className="text-center text-gray-500">
-          <p>VIP Profile content goes here.</p>
+        <div className="bg-white p-4 md:p-8 rounded-2xl shadow-md border border-gray-100">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-4 mb-6 md:mb-8">
+            <div className="flex items-center gap-3 md:gap-5">
+              <img
+                src={userProfile.avatar}
+                alt={userProfile.name}
+                className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover flex-shrink-0"
+              />
+              <div>
+                <h3 className="font-bold text-xl md:text-2xl text-gray-800">
+                  {userProfile.name}
+                </h3>
+                <p className="text-sm md:text-base text-gray-500 break-all">
+                  {userProfile.email}
+                </p>
+              </div>
+            </div>
+            {!isEditing ? (
+              <button
+                onClick={handleEditClick}
+                className="w-full md:w-auto bg-card-100 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 transition-colors"
+              >
+                Edit
+              </button>
+            ) : (
+              <div className="flex gap-3 w-full md:w-auto">
+                <button
+                  onClick={handleCancelEdit}
+                  className="flex-1 md:flex-initial px-4 md:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-[#FF0033] hover:text-white transition-colors font-poppins font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveChanges}
+                  className="flex-1 md:flex-initial px-4 md:px-6 py-2 bg-[#2ECC71] text-white rounded-lg hover:bg-green-600 transition-colors font-poppins font-bold"
+                >
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-8 gap-y-4 md:gap-y-6">
+            <ProfileInfo
+              label="Full Name"
+              value={userProfile.fullName}
+              isEditing={isEditing}
+              onChange={handleInputChange}
+              name="fullName"
+            />
+            <ProfileInfo
+              label="Cellphone Number"
+              value={userProfile.cellphone}
+              isEditing={isEditing}
+              onChange={handleInputChange}
+              name="cellphone"
+            />
+            <ProfileInfo
+              label="Gender"
+              value={userProfile.gender}
+              isEditing={isEditing}
+              onChange={handleInputChange}
+              name="gender"
+            />
+            <ProfileInfo
+              label="Email Address"
+              value={userProfile.email}
+              isEditing={isEditing}
+              onChange={handleInputChange}
+              name="email"
+            />
+            <div className="md:col-span-2">
+              <ProfileInfo
+                label="Address"
+                value={userProfile.address}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+                name="address"
+              />
+            </div>
+            <ProfileInfo
+              label="Condition"
+              value={userProfile.condition}
+              isEditing={isEditing}
+              onChange={handleInputChange}
+              name="condition"
+            />
+          </div>
         </div>
       )}
     </main>
