@@ -8,6 +8,7 @@ import { useUserStore } from "@/stores/useStore";
 import { loginApi } from "@/api/authService";
 
 const Login = () => {
+  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const { login, setShowLoginModal } = useUserStore();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -46,12 +47,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      console.log(import.meta.env.VITE_DEV);
-      if (
-        import.meta.env.VITE_DEV &&
-        username === "admin" &&
-        password === "admin"
-      ) {
+      if (isDev && username === "admin" && password === "admin") {
         localStorage.setItem("access_token", "DEV_ADMIN_TOKEN");
         navigate("/dashboard");
         return;
