@@ -90,7 +90,7 @@ const Header = () => {
             className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center font-poppins font-semibold text-lg transition-colors duration-200"
             aria-label="User menu"
           >
-            {user ?? user.userName.charAt(0).toUpperCase()}
+            {user ? user.userName.charAt(0).toUpperCase() : "Z"}
           </button>
 
           {/* Dropdown Menu */}
