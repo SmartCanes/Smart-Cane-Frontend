@@ -15,6 +15,7 @@ import {
 import Loader from "@/ui/components/Loader";
 
 const Register = () => {
+  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1 = Basic Info, 2 = Address Info, 3 = OTP Verification
   const [modalConfig, setModalConfig] = useState({
@@ -299,7 +300,7 @@ const Register = () => {
     // Validate current step
     const stepErrors = validateStep(step);
 
-    if (Object.keys(stepErrors).length > 0) {
+    if (!isDev && Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
 
       // Scroll to first error
@@ -315,6 +316,10 @@ const Register = () => {
     }
 
     if (step === 1) {
+      if (isDev) {
+        setStep(2);
+        return;
+      }
       // Check username availability before proceeding to step 2
       setIsSubmitting(true);
 
@@ -348,6 +353,10 @@ const Register = () => {
         setIsSubmitting(false);
       }
     } else if (step === 2) {
+      if (isDev) {
+        setStep(3);
+        return;
+      }
       // Check email and contact number availability before proceeding to verification
       setIsSubmitting(true);
 
@@ -389,6 +398,14 @@ const Register = () => {
         setIsSubmitting(false);
       }
     } else {
+      if (isDev) {
+        setModalConfig({
+          visible: true,
+          type: "account-created",
+          position: "center"
+        });
+        return;
+      }
       // Step 3: Verify OTP and create account
       setIsSubmitting(true);
       setOtpError("");
@@ -798,7 +815,9 @@ const Register = () => {
               }
               type="submit"
               disabled={
-                isSubmitting || hasStepErrors() || (step === 3 && !otpSent)
+                isSubmitting ||
+                hasStepErrors() ||
+                (step === 3 && !otpSent && !isDev)
               }
             />
 
