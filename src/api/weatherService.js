@@ -98,7 +98,10 @@ export const fetchFullWeatherForecast = async () => {
     const formatTime = (isoString) => {
       if (!isoString) return "-----";
       const date = new Date(isoString);
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
     };
 
     const today = {
@@ -118,12 +121,12 @@ export const fetchFullWeatherForecast = async () => {
       const max = Math.round(data.daily.temperature_2m_max[index]);
       const min = Math.round(data.daily.temperature_2m_min[index]);
       const date = new Date(time);
-      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+      const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
 
       // Determine icon based on weather code
       let icon = "solar:sun-fog-bold-duotone"; // Default
       let color = "text-yellow-500";
-      
+
       if (RAIN_CODES.includes(code)) {
         icon = "solar:cloud-rain-bold-duotone";
         color = "text-blue-500";
@@ -141,7 +144,6 @@ export const fetchFullWeatherForecast = async () => {
     });
 
     return { tomorrow, today, weekly };
-
   } catch (error) {
     console.error("Forecast Error:", error);
     return null;
