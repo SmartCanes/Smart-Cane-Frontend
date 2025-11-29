@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
-import { fetchTomorrowForecast } from "@/api/weatherService";
 import SimulationPanel from "@/ui/components/SimulationPanel";
 
 // 👇 FIX 1: Import Components (Para mawala ang "DashboardSide is not defined")
 
 // 👇 FIX 2: Import Notification Manager
 import { triggerSmartCaneNotification } from "@/utils/NotificationManager";
+import { fetchFullWeatherForecast } from "@/api/weatherService";
 
 const WeatherBoard = () => {
   // 👇 FIX 3: Define States (Para mawala ang "setLoading is not defined")
@@ -18,7 +18,7 @@ const WeatherBoard = () => {
     const loadForecast = async () => {
       setLoading(true); // Ito ang hinahanap ng error mo kanina
 
-      const data = await fetchTomorrowForecast();
+      const data = await fetchFullWeatherForecast();
 
       if (isMounted && data) {
         setForecast(data);
@@ -76,7 +76,7 @@ const WeatherBoard = () => {
   }, [forecast]);
 
   return (
-    <main className="flex-1 overflow-y-auto bg-white relative flex flex-col min-h-[calc(100vh-var(--header-height))] p-6">
+    <main className="max-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] sm:max-h-[calc(100vh-var(--header-height))] overflow-y-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-gray-900 font-poppins mb-2">
           Weather Forecast
