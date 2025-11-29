@@ -4,6 +4,7 @@ import { HoverNavEffect } from "@/wrapper/MotionWrapper";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 
+// Component for Desktop Menu Items (Walang ginalaw dito sa logic)
 const MenuButton = memo(({ item, isActive, onNavigate }) => (
   <HoverNavEffect
     delay={0.1}
@@ -53,42 +54,69 @@ const DashboardSide = ({ className = "" }) => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const menuItems = [
+  // 1. DESKTOP MENU ITEMS
+  // Ito ang ORIGINAL na listahan. Hindi natin ito ginalaw para hindi magbago ang Desktop View.
+  const desktopMenuItems = [
     {
       id: "dashboard",
       label: "Dashboard",
-      labelMobile: "Dashboard",
       icon: "solar:widget-linear",
       path: "/dashboard"
     },
     {
       id: "activity-report",
       label: "Activity Reports",
-      labelMobile: "Activity",
       icon: "oui:nav-reports",
       path: "/activity-report"
     },
     {
       id: "weather-board",
       label: "Weather Board",
-      labelMobile: "Weather",
       icon: "solar:cloud-rain-outline",
       path: "/weather-board"
     },
     {
       id: "manage-profile",
       label: "Manage Profile",
-      labelMobile: "Profile",
       icon: "iconamoon:profile",
       path: "/manage-profile"
     },
     {
       id: "settings",
       label: "Settings",
-      labelMobile: "Settings",
       icon: "solar:settings-bold",
       path: "/settings"
     }
+  ];
+
+  // 2. MOBILE MENU ITEMS (Based on Figma)
+  // Ito ay bago at visible lang sa mobile. Dito natin pinalitan ang labels at icons.
+  const mobileMenuItems = [
+    {
+      id: "mobile-home",
+      label: "Home",           // Figma Label
+      icon: "solar:home-2-bold", // Figma Icon style
+      path: "/dashboard"       // Same functionality
+    },
+    {
+      id: "mobile-track",
+      label: "Track",          // Figma Label
+      icon: "solar:map-point-search-linear", // Figma Icon style
+      path: "/activity-report"
+    },
+    {
+      id: "mobile-notes",
+      label: "Notes",          // Figma Label
+      icon: "solar:document-add-linear", // Figma Icon style
+      path: "/notes"   // Separate Notes page
+    },
+    {
+      id: "mobile-guardian",
+      label: "Guardian",       // Figma Label
+      icon: "solar:shield-user-outline", // Figma Icon style
+      path: "/manage-profile"
+    }
+    // Note: Tinanggal ko ang Settings dito kasi 4 items lang ang nasa Figma screenshot
   ];
 
   const handleNavigation = useCallback(
@@ -101,22 +129,24 @@ const DashboardSide = ({ className = "" }) => {
 
   return (
     <>
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+      {/* --- MOBILE NAVIGATION (Visible only on Mobile) --- */}
+      {/* Pinalitan ang bg-white ng bg-primary-100 para maging dark blue gaya sa Figma */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-primary-100 border-t border-white/10 z-50">
         <div className="flex justify-around items-center h-[var(--mobile-nav-height)] px-2">
-          {menuItems.map((item) => (
+          {/* Ginagamit natin dito ang mobileMenuItems array */}
+          {mobileMenuItems.map((item) => (
             <HoverNavEffect delay={0.1} key={item.id}>
               <button
                 onClick={() => handleNavigation(item.path)}
                 className={`flex flex-col items-center justify-center flex-1 py-2 ${
                   location.pathname === item.path
-                    ? "text-card-100"
-                    : "text-gray-500"
+                    ? "text-white font-bold" // Active: White & Bold
+                    : "text-gray-400"        // Inactive: Grayish
                 }`}
               >
                 <Icon icon={item.icon} className="text-2xl" />
                 <span className="text-xs mt-1 font-poppins">
-                  {item.labelMobile}
+                  {item.label}
                 </span>
               </button>
             </HoverNavEffect>
@@ -124,13 +154,14 @@ const DashboardSide = ({ className = "" }) => {
         </div>
       </nav>
 
-      {/* Desktop Sidebar */}
+      {/* --- DESKTOP SIDEBAR (Visible only on Desktop) --- */}
       <aside
         className={`hidden md:flex w-60 min-h-[calc(100vh-var(--header-height))] bg-primary-100 flex-col ${className}`}
       >
         <nav className="flex-1 overflow-y-auto overflow-x-hidden">
           <ul className="">
-            {menuItems.map((item) => (
+            {/* Ginagamit natin dito ang desktopMenuItems array (ORIGINAL) */}
+            {desktopMenuItems.map((item) => (
               <MenuButton
                 key={item.id}
                 item={item}

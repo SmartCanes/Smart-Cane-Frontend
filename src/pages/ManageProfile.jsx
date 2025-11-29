@@ -260,63 +260,64 @@ const ManageProfile = () => {
   };
 
   return (
-    <main className="max-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] sm:max-h-[calc(100vh-var(--header-height))] overflow-y-auto p-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
-        {/* TABS SECTION */}
-        <div className="flex items-center gap-6 md:gap-10 overflow-x-auto w-full md:w-auto">
-          <button
-            onClick={() => handleTabClick("guardian")}
-            className={`relative pb-2 text-base md:text-lg whitespace-nowrap transition-colors duration-200 ${
-              activeTab === "guardian"
-                ? "text-slate-800 font-medium"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            Guardian Profile
-            {activeTab === "guardian" && (
-              <span className="absolute bottom-0 left-0 w-full h-[2px] bg-slate-900"></span>
-            )}
-          </button>
+    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-4 sm:p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
+      <div className="max-w-5xl mx-auto w-full space-y-6 sm:space-y-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
+          {/* TABS SECTION */}
+          <div className="flex items-center gap-6 md:gap-10 overflow-x-auto w-full md:w-auto">
+            <button
+              onClick={() => handleTabClick("guardian")}
+              className={`relative pb-2 text-base md:text-lg whitespace-nowrap transition-colors duration-200 ${
+                activeTab === "guardian"
+                  ? "text-slate-800 font-medium"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Guardian Profile
+              {activeTab === "guardian" && (
+                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-slate-900"></span>
+              )}
+            </button>
 
-          <button
-            onClick={() => handleTabClick("vip")}
-            className={`relative pb-2 text-base md:text-lg whitespace-nowrap transition-colors duration-200 ${
-              activeTab === "vip"
-                ? "text-slate-800 font-medium"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            VIP Profile
-            {activeTab === "vip" && (
-              <span className="absolute bottom-0 left-0 w-full h-[2px] bg-slate-900"></span>
-            )}
-          </button>
+            <button
+              onClick={() => handleTabClick("vip")}
+              className={`relative pb-2 text-base md:text-lg whitespace-nowrap transition-colors duration-200 ${
+                activeTab === "vip"
+                  ? "text-slate-800 font-medium"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              VIP Profile
+              {activeTab === "vip" && (
+                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-slate-900"></span>
+              )}
+            </button>
+          </div>
+
+          {/* Add Guardian Button - Only show on Guardian Tab */}
+          {activeTab === "guardian" && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="w-1/2 max-w-56 bg-[#2ECC71] flex justify-center items-center text-white font-bold py-2.5 md:px-6 rounded-lg hover:bg-green-600 transition-colors self-end font-poppins text-sm md:text-md gap-2"
+            >
+              <Icon icon="ph:user-plus-bold" className="w-5 h-5 mr-2" />
+              Invite
+            </button>
+          )}
         </div>
 
-        {/* Add Guardian Button - Only show on Guardian Tab */}
-        {activeTab === "guardian" && (
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-1/2 max-w-56 bg-[#2ECC71] flex justify-center items-center text-white font-bold py-2.5 md:px-6 rounded-lg hover:bg-green-600 transition-colors self-end font-poppins text-sm md:text-md gap-2"
-          >
-            <Icon icon="ph:user-plus-bold" className="w-5 h-5 mr-2" />
-            Invite
-          </button>
+        {/* Toast Notification */}
+        {toast.show && (
+          <Toast
+            type={toast.type}
+            message={toast.message}
+            position="top-right"
+            onClose={() => setToast({ show: false, type: "", message: "" })}
+          />
         )}
-      </div>
 
-      {/* Toast Notification */}
-      {toast.show && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          position="top-right"
-          onClose={() => setToast({ show: false, type: "", message: "" })}
-        />
-      )}
-
-      {/* Delete Confirmation Toast */}
-      {deleteConfirm.show && (
+        {/* Delete Confirmation Toast */}
+        {deleteConfirm.show && (
         <Modal
           isOpen={deleteConfirm.show}
           onClose={handleCancelDelete}
@@ -481,6 +482,7 @@ const ManageProfile = () => {
           </div>
         </div>
       )}
+      </div>
     </main>
   );
 };

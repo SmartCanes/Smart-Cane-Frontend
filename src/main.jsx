@@ -18,6 +18,7 @@ import DashboardLayout from "./layout/DashboardLayout";
 import WeatherBoard from "./pages/WeatherBoard";
 import ActivityReport from "./pages/ActivityReport";
 import ScannerCamera from "./auth/Scanner";
+import Notes from "./pages/Notes.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -37,11 +38,10 @@ createRoot(document.getElementById("root")).render(
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/activity-report" element={<ActivityReport />} />
-
             <Route path="/manage-profile" element={<ManageProfile />} />
-            {/* <Route path="/manage-profile" element={<ManageProfile />} /> */}
             <Route path="/weather-board" element={<WeatherBoard />} />
             <Route path="/settings" element={<Setting />} />
+            <Route path="/notes" element={<Notes />} />
           </Route>
         </Route>
       </Routes>

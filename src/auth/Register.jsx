@@ -5,6 +5,7 @@ import TextField from "../ui/components/TextField";
 import SelectField from "../ui/components/SelectField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
+import BackButton from "../ui/components/BackButton";
 import EmailValidationModal from "../ui/components/EmailValidationModal";
 import {
   checkCredentialsApi,
@@ -820,6 +821,11 @@ const Register = () => {
                 (step === 3 && !otpSent && !isDev)
               }
             />
+
+            {/* Back button for Step 2 and Step 3 */}
+            {(step === 2 || step === 3) && (
+              <BackButton onClick={() => setStep(step - 1)} />
+            )}
 
             <p className="font-poppins text-center text-[18px] mt-4">
               Already have an Account?{" "}

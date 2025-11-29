@@ -4,6 +4,7 @@ import TextField from "../ui/components/TextField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import ValidationModal from "../ui/components/ValidationModal";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1); // 1 = Enter Email, 2 = Change Password
@@ -169,13 +170,20 @@ const ForgotPassword = () => {
                   text="Submit"
                   type="submit"
                 />
+
+              
+                
               </div>
             )}
+
+            
           </form>
         </div>
       </div>
     </div>
   );
 };
+
+
 
 export default ForgotPassword;

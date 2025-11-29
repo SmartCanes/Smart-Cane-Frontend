@@ -31,12 +31,10 @@ const Login = () => {
     e.preventDefault();
     const { username, password } = formData;
 
-    // Show password required indicator when Sign In is clicked and username has value
     if (username.trim()) {
       setShowPasswordRequired(true);
     }
 
-    // Validation
     const newErrors = {};
     if (!username.trim()) newErrors.username = "This field is required";
     if (!password) newErrors.password = "This field is required";
@@ -54,12 +52,9 @@ const Login = () => {
       }
 
       const response = await loginApi(username, password);
-
       localStorage.setItem("access_token", response.data.access_token);
-
       login(response.data.guardian_id);
       setShowLoginModal(true);
-
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -75,89 +70,89 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-dv w-full flex flex-col sm:flex-row">
+    <div className="min-h-dvh w-full flex flex-col sm:flex-row">
       <SidebarContent />
-      <div className="w-full h-dvh sm:flex-1 sm:min-h-screen relative bg-[#FDFCFA] px-6 sm:px-10">
-        {/* <Link to="/">
-          <div className="sm:hidden py-4 flex gap-2 absolute top-0 left-4">
-            <img
-              src="src/assets/images/smartcane-logo-blue.png"
-              alt="Smart Cane Logo"
-              className="object-contain w-[45px]"
-            />
-          </div>
-        </Link> */}
-        <div className="absolute top-0 left-0 bg-primary-100 rounded-b-[30%] h-48 w-full sm:hidden flex justify-center items-center">
-          <h1 className="font-gabriela text-8xl text-[#FDFCFA]">iCane</h1>
+      
+      {/* Main Container */}
+      <div className="w-full min-h-dvh sm:flex-1 relative bg-white sm:bg-[#FDFCFA] px-6 sm:px-10 flex flex-col">
+        
+        {/* --- MOBILE CURVED HEADER (Figma Style) --- */}
+        <div className="absolute top-0 left-0 w-full bg-primary-100 h-[220px] rounded-b-[48px] sm:hidden flex justify-center items-center z-0">
+          <h1 className="font-gabriela text-6xl text-white tracking-wide">iCane</h1>
         </div>
 
-        <div className="h-screen flex flex-col items-center justify-center">
-          <form
-            className="w-full max-w-md sm:max-w-none lg:max-w-lg max-h-[70vh]"
-            onSubmit={handleSubmit}
-            noValidate
-          >
-            <div className="flex flex-col items-center text-center mb-10 space-y-6 sm:space-y-3">
-              <p className="font-poppins text-[#1C253C] text-center text-paragraph text-2xl">
-                Login to your Account
-              </p>
-            </div>
+        {/* --- FORM SECTION --- */}
+        <div className="flex-1 flex items-center justify-center pt-[240px] pb-8 sm:pt-0 sm:pb-0">
+          <div className="w-full max-w-md sm:max-w-none lg:max-w-lg">
+            <form
+              className="w-full"
+              onSubmit={handleSubmit}
+              noValidate
+            >
+              <div className="flex flex-col items-center text-center mb-6 sm:mb-10">
+                <p className="font-poppins text-[#1C253C] text-center font-medium text-lg sm:text-2xl">
+                  Login to your Account
+                </p>
+              </div>
 
-            {errors.general && (
-              <p className="font-poppins text-center text-[#CE4B34] mb-6">
-                {errors.general}
-              </p>
-            )}
+              {errors.general && (
+                <p className="font-poppins text-center text-[#CE4B34] mb-4 text-sm">
+                  {errors.general}
+                </p>
+              )}
 
-            <div className="space-y-4">
-              <TextField
-                className="font-poppins"
-                label="Username"
-                placeholder="Enter your username..."
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                error={errors.username}
-              />
+              <div className="space-y-4">
+                <TextField
+                  className="font-poppins"
+                  label="Username"
+                  placeholder="Enter your username..."
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  error={errors.username}
+                />
 
-              <PasswordField
-                className="font-poppins relative"
-                label="Password"
-                placeholder="Enter your password..."
-                name="password"
-                required={showPasswordRequired}
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                error={errors.password}
-                showErrorIcon={false}
-              />
+                <PasswordField
+                  className="font-poppins relative"
+                  label="Password"
+                  placeholder="Enter your password..."
+                  name="password"
+                  required={showPasswordRequired}
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  error={errors.password}
+                  showErrorIcon={false}
+                />
 
-              <Link
-                to="/forgot-password"
-                className="font-poppins block text-left hover:underline text-[16px] underline mt-2 w-fit"
-              >
-                Forgot password?
-              </Link>
+                <div className="w-full">
+                  <Link
+                    to="/forgot-password"
+                    className="font-poppins block text-left text-[#1C253C] hover:underline text-sm underline font-medium mt-1 w-fit"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
 
-              <PrimaryButton
-                className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
-                bgColor="bg-primary-100"
-                text={loading ? "Logging in..." : "Sign In"}
-                type="submit"
-              />
+                <PrimaryButton
+                  className="font-poppins w-full py-3.5 text-base font-medium mt-6"
+                  bgColor="bg-primary-100"
+                  text={loading ? "Logging in..." : "Sign in"}
+                  type="submit"
+                />
 
-              <p className="font-poppins text-center text-[18px] mt-4">
-                Didn't have an account?{" "}
-                <Link
-                  to="/register"
-                  className="font-poppins text-blue-500 hover:underline text-[18px]"
-                >
-                  Sign Up
-                </Link>
-              </p>
-            </div>
-          </form>
+                <p className="font-poppins text-center text-sm text-gray-600 mt-6">
+                  Didn't have an account?{" "}
+                  <Link
+                    to="/register"
+                    className="font-poppins text-blue-500 font-medium hover:underline"
+                  >
+                    Sign Up
+                  </Link>
+                </p>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
