@@ -36,10 +36,12 @@ const Welcome = () => {
         support — it's smart.
       </p>
       <PrimaryButton
-        className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:w-1/4 py-3 md:py-4 hover:bg-gray-400 hover:text-white hover:cursor-pointer text-lg md:text-[20px] z-10"
+        className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:w-1/4 py-3 md:py-4 text-lg md:text-[20px] "
         text="Get Started"
-        textColor="text-[#11285A]"
+        variant="primary"
         bgColor="bg-white"
+        textColor="text-[#1C253C]"
+        hoverColor="hover:bg-gray-200"
         onClick={handleGetStarted}
       />
     </div>
