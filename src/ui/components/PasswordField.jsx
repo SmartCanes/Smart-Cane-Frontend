@@ -1,5 +1,7 @@
 import { useState } from "react";
 import checkboxIcon from "@/assets/images/checkbox.png";
+import EyeOn from "@/assets/images/eye-on.svg";
+import EyeOff from "@/assets/images/eye-off.svg";
 
 const PasswordField = ({
   label,
@@ -13,7 +15,7 @@ const PasswordField = ({
   helperText = "",
   showValidationRules = false,
   inputClassName = "",
-  showErrorIcon = true,
+  showErrorIcon = false,
   ...rest
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -135,9 +137,11 @@ const PasswordField = ({
           onClick={togglePasswordVisibility}
           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
         >
-          <span className="material-symbols-outlined item-center py-2">
-            {showPassword ? "visibility_off" : "visibility"}
-          </span>
+          <img
+            src={showPassword ? EyeOff : EyeOn}
+            alt={showPassword ? "Hide password" : "Show password"}
+            className="item-center py-2 h-10 w-10"
+          />
         </button>
       </div>
       {hasError && errorHasContent && (
