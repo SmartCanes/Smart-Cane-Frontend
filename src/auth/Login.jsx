@@ -70,36 +70,37 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-dvh w-full flex flex-col sm:flex-row">
+    <div className="h-screen  w-full flex flex-col sm:flex-row">
       <SidebarContent />
-      
-      {/* Main Container */}
-      <div className="w-full min-h-dvh sm:flex-1 relative bg-white sm:bg-[#FDFCFA] px-6 sm:px-10 flex flex-col">
-        
-        {/* --- MOBILE CURVED HEADER (Figma Style) --- */}
-        <div className="absolute top-0 left-0 w-full bg-primary-100 h-[220px] rounded-b-[48px] sm:hidden flex justify-center items-center z-0">
-          <h1 className="font-gabriela text-6xl text-white tracking-wide">iCane</h1>
+      <div className="w-full sm:flex-1 relative bg-[#FDFCFA] px-6 sm:px-10">
+        <div className="absolute top-0 left-0 right-0 bg-primary-100 rounded-b-[30%] h-[15vh] sm:hidden flex justify-center items-center">
+          <Link to="/">
+            <h1 className="font-gabriela text-7xl text-[#FDFCFA]">iCane</h1>
+          </Link>
         </div>
 
-        {/* --- FORM SECTION --- */}
-        <div className="flex-1 flex items-center justify-center pt-[240px] pb-8 sm:pt-0 sm:pb-0">
-          <div className="w-full max-w-md sm:max-w-none lg:max-w-lg">
-            <form
-              className="w-full"
-              onSubmit={handleSubmit}
-              noValidate
-            >
-              <div className="flex flex-col items-center text-center mb-6 sm:mb-10">
-                <p className="font-poppins text-[#1C253C] text-center font-medium text-lg sm:text-2xl">
-                  Login to your Account
-                </p>
-              </div>
-
-              {errors.general && (
-                <p className="font-poppins text-center text-[#CE4B34] mb-4 text-sm">
-                  {errors.general}
-                </p>
-              )}
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <div className="flex flex-col gap-5 text-center mb-10">
+            <h1 className="hidden sm:block text-5xl sm:text-h1 font-bold text-[#1C253C]">
+              Welcome!
+            </h1>
+            <p className="hidden sm:block text-[#1C253C] text-paragraph text-1xl">
+              Ready to go? Log in and jump straight into your dashboard.
+            </p>
+            <p className="sm:hidden text-[#1C253C] text-paragraph text-2xl">
+              Login to your account
+            </p>
+          </div>
+          <form
+            className="w-full max-w-md sm:max-w-none lg:max-w-lg max-h-[70vh]"
+            onSubmit={handleSubmit}
+            noValidate
+          >
+            {errors.general && (
+              <p className="font-poppins text-center text-[#CE4B34] mb-6">
+                {errors.general}
+              </p>
+            )}
 
               <div className="space-y-4">
                 <TextField
