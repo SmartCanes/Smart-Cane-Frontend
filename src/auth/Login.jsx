@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import SidebarContent from "../ui/components/SidebarContent";
 import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
@@ -70,92 +69,78 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen  w-full flex flex-col sm:flex-row">
-      <SidebarContent />
-      <div className="w-full sm:flex-1 relative bg-[#FDFCFA] px-6 sm:px-10">
-        <div className="absolute top-0 left-0 right-0 bg-primary-100 rounded-b-[30%] h-[15vh] sm:hidden flex justify-center items-center">
-          <Link to="/">
-            <h1 className="font-gabriela text-7xl text-[#FDFCFA]">iCane</h1>
-          </Link>
-        </div>
-
-        <div className="min-h-screen flex flex-col items-center justify-center">
-          <div className="flex flex-col gap-5 text-center mb-10">
-            <h1 className="hidden sm:block text-5xl sm:text-h1 font-bold text-[#1C253C]">
-              Welcome!
-            </h1>
-            <p className="hidden sm:block text-[#1C253C] text-paragraph text-1xl">
-              Ready to go? Log in and jump straight into your dashboard.
-            </p>
-            <p className="sm:hidden text-[#1C253C] text-paragraph text-2xl">
-              Login to your account
-            </p>
-          </div>
-          <form
-            className="w-full max-w-md sm:max-w-none lg:max-w-lg max-h-[70vh]"
-            onSubmit={handleSubmit}
-            noValidate
-          >
-            {errors.general && (
-              <p className="font-poppins text-center text-[#CE4B34] mb-6">
-                {errors.general}
-              </p>
-            )}
-
-              <div className="space-y-4">
-                <TextField
-                  className="font-poppins"
-                  label="Username"
-                  placeholder="Enter your username..."
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  error={errors.username}
-                />
-
-                <PasswordField
-                  className="font-poppins relative"
-                  label="Password"
-                  placeholder="Enter your password..."
-                  name="password"
-                  required={showPasswordRequired}
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={errors.password}
-                  showErrorIcon={false}
-                />
-
-                <div className="w-full">
-                  <Link
-                    to="/forgot-password"
-                    className="font-poppins block text-left text-[#1C253C] hover:underline text-sm underline font-medium mt-1 w-fit"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <PrimaryButton
-                  className="font-poppins w-full py-3.5 text-base font-medium mt-6"
-                  bgColor="bg-primary-100"
-                  text={loading ? "Logging in..." : "Sign in"}
-                  type="submit"
-                />
-
-                <p className="font-poppins text-center text-sm text-gray-600 mt-6">
-                  Didn't have an account?{" "}
-                  <Link
-                    to="/register"
-                    className="font-poppins text-blue-500 font-medium hover:underline"
-                  >
-                    Sign Up
-                  </Link>
-                </p>
-              </div>
-            </form>
-          </div>
-        </div>
+    <div className="flex-1 flex flex-col items-center sm:justify-center gap-5 px-5 ">
+      <div className="flex flex-col gap-5 text-center">
+        <h1 className="hidden sm:block text-5xl sm:text-5xl lg:text-6xl font-bold text-[#1C253C]">
+          Welcome!
+        </h1>
+        <p className="hidden sm:block text-[#1C253C] text-paragraph text-1xl">
+          Ready to go? Log in and jump straight into your dashboard.
+        </p>
+        <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
+          Login to your account
+        </p>
       </div>
+      <form
+        className="w-full max-w-sm lg:max-w-md xl:max-w-xl"
+        onSubmit={handleSubmit}
+        noValidate
+      >
+        {errors.general && (
+          <p className="font-poppins text-center text-[#CE4B34] mb-6">
+            {errors.general}
+          </p>
+        )}
+
+        <div className="space-y-4">
+          <TextField
+            className="font-poppins"
+            label="Username"
+            placeholder="Enter your username..."
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            error={errors.username}
+          />
+
+          <PasswordField
+            className="font-poppins relative"
+            label="Password"
+            placeholder="Enter your password..."
+            name="password"
+            required={showPasswordRequired}
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            error={errors.password}
+            showErrorIcon={false}
+          />
+
+          <Link
+            to="/forgot-password"
+            className="font-poppins block text-left hover:underline text-[16px] underline mt-2 w-fit"
+          >
+            Forgot password?
+          </Link>
+
+          <PrimaryButton
+            className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
+            bgColor="bg-primary-100"
+            text={loading ? "Logging in..." : "Sign In"}
+            type="submit"
+          />
+
+          <p className="font-poppins text-center text-[18px] mt-4">
+            Didn't have an account?{" "}
+            <Link
+              to="/register"
+              className="font-poppins text-blue-500 hover:underline text-[18px]"
+            >
+              Sign Up
+            </Link>
+          </p>
+        </div>
+      </form>
     </div>
   );
 };
