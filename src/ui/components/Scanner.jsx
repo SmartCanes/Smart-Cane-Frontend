@@ -107,11 +107,8 @@ const ScannerCamera = ({ onScan, onClose }) => {
 
   return (
     <>
-      {hasCamera ? (
-        <div className="w-full max-w-xl h-full gap-5 flex flex-col">
-          {/* <h1 className="text-3xl font-semibold text-gray-800 text-center">
-            Scan To Continue
-          </h1> */}
+      <div className="w-full max-w-xl h-full gap-5 flex flex-col">
+        {hasCamera ? (
           <Scanner
             paused={paused}
             onScan={handleScan}
@@ -126,47 +123,48 @@ const ScannerCamera = ({ onScan, onClose }) => {
             }}
             videoConstraints={{ facingMode: "environment" }}
           />
-          <div className="flex items-center">
-            <div className="flex-grow h-px bg-gray-300"></div>
-            <span className="mx-3 text-gray-500 font-medium">or</span>
-            <div className="flex-grow h-px bg-gray-300"></div>
+        ) : (
+          <div className="text-gray-500 text-center h-full flex items-center justify-center">
+            No camera detected. Please use a device with a camera.
           </div>
+        )}
 
-          <div className="flex flex-col items-center gap-5">
-            <span className="mb-2 text-gray-700 font-medium">
-              Enter Serial Code
-            </span>
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-700 font-semibold">{PREFIX}</span>
-              {serial.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={inputRefs.current[index]}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  onFocus={() => setPaused(true)}
-                  onBlur={() => setPaused(false)}
-                  className="w-10 h-12 text-center border border-gray-300 rounded-md text-lg font-mono focus:border-blue-500 focus:outline-none"
-                />
-              ))}
-            </div>
-            <PrimaryButton
-              variant="primary"
-              text={loading ? "Pairing..." : "Pair"}
-              onClick={handleManualPair}
-              disabled={loading}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
-            />
-          </div>
+        <div className="flex items-center">
+          <div className="flex-grow h-px bg-gray-300"></div>
+          <span className="mx-3 text-gray-500 font-medium">or</span>
+          <div className="flex-grow h-px bg-gray-300"></div>
         </div>
-      ) : (
-        <p className="text-gray-500 text-center">
-          No camera detected. Please use a device with a camera.
-        </p>
-      )}
+
+        <div className="flex flex-col items-center gap-5">
+          <span className="mb-2 text-gray-700 font-medium">
+            Enter Serial Code
+          </span>
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-700 font-semibold">{PREFIX}</span>
+            {serial.map((digit, index) => (
+              <input
+                key={index}
+                ref={inputRefs.current[index]}
+                type="text"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                onFocus={() => setPaused(true)}
+                onBlur={() => setPaused(false)}
+                className="w-10 h-12 text-center border border-gray-300 rounded-md text-lg font-mono focus:border-blue-500 focus:outline-none"
+              />
+            ))}
+          </div>
+          <PrimaryButton
+            variant="primary"
+            text={loading ? "Pairing..." : "Pair"}
+            onClick={handleManualPair}
+            disabled={loading}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
+          />
+        </div>
+      </div>
 
       {/* {message && (
         <div className="mt-4 w-full max-w-md text-center">
