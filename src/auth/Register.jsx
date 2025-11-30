@@ -41,7 +41,7 @@ const provinces = [
 const Register = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const navigate = useNavigate();
-  const [step, setStep] = useState(2); // 1 = Basic Info, 2 = Address Info, 3 = OTP Verification, 4
+  const [step, setStep] = useState(1); // 1 = Basic Info, 2 = Address Info, 3 = OTP Verification, 4 - QR Scan
   const [modalConfig, setModalConfig] = useState({
     visible: false,
     type: null,
@@ -762,24 +762,37 @@ const Register = () => {
               </div>
             </div>
           )}
-
-          <PrimaryButton
-            className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
-            bgColor="bg-primary-100"
-            text={
-              isSubmitting
-                ? step === 3
-                  ? "Verifying..."
-                  : "Checking..."
-                : `${step === 3 ? "Verify & Create Account" : "Next"}`
-            }
-            type="submit"
-            disabled={
-              isSubmitting ||
-              hasStepErrors() ||
-              (step === 3 && !otpSent && !isDev)
-            }
-          />
+          <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
+            <PrimaryButton
+              className="w-full py-3 sm:py-4 text-md sm:text-md"
+              text={
+                isSubmitting
+                  ? step === 3
+                    ? "Verifying..."
+                    : "Checking..."
+                  : `${step === 3 ? "Create Account" : "Next"}`
+              }
+              type="submit"
+              disabled={
+                isSubmitting ||
+                hasStepErrors() ||
+                (step === 3 && !otpSent && !isDev)
+              }
+            />
+            {step > 1 && (
+              <PrimaryButton
+                className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
+                textColor="black"
+                bgColor="bg-white"
+                text="Back"
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  setStep(step - 1);
+                }}
+              />
+            )}
+          </div>
 
           <p className="font-poppins text-center text-[18px] mt-4">
             Already have an Account?{" "}
