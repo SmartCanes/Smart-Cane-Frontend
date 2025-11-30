@@ -28,18 +28,27 @@ const VARIANTS = {
     bg: "bg-transparent border border-primary-100",
     hover: "hover:bg-primary-100/10",
     text: "text-primary-100"
+  },
+  neutral: {
+    bg: "bg-gray-500",
+    hover: "hover:bg-gray-600",
+    text: "text-white"
   }
 };
 
 const PrimaryButton = ({
   text = "Button",
   variant = "primary",
+  bgColor,
+  textColor,
+  hoverColor,
   onClick,
   type = "button",
   className = "",
   disabled = false,
   ...props
 }) => {
+  // get variant defaults
   const style = VARIANTS[variant] || VARIANTS.primary;
 
   return (
@@ -48,13 +57,14 @@ const PrimaryButton = ({
       onClick={onClick}
       disabled={disabled}
       className={`
-        ${style.bg}
-        ${style.hover}
-        ${style.text}
-        px-6 py-2 rounded-[15px]
+        ${bgColor || style.bg} 
+        ${textColor || style.text} 
+        ${hoverColor || style.hover}
+        px-6 py-3 rounded-[15px]
         font-medium font-poppins
-        transition-colors duration-200
+        transition-all duration-200
         disabled:opacity-50 disabled:cursor-not-allowed
+        cursor-pointer
         ${className}
       `}
       {...props}
