@@ -2,31 +2,32 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { useUserStore } from "@/stores/useStore";
 import avatarPlaceholder from "@/assets/images/team-photo.png";
+import Toast from "@/ui/components/Toast";
 
 const ToggleItem = ({ icon, title, description, checked, onChange }) => (
-  <div className="flex items-center justify-between py-4">
-    <div className="flex items-center gap-4">
-      <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
-        <Icon icon={icon} className="text-2xl text-[#11285A]" />
+  <div className="flex items-start justify-between py-3 gap-3">
+    <div className="flex items-start gap-3 flex-1">
+      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#F0F4FF] flex items-center justify-center flex-shrink-0">
+        <Icon icon={icon} className="text-xl sm:text-2xl text-[#11285A]" />
       </div>
-      <div>
-        <h4 className="text-sm font-bold text-[#11285A] font-poppins">
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm sm:text-base font-semibold text-[#1F2937] font-poppins leading-tight">
           {title}
         </h4>
-        <p className="text-xs text-gray-500 font-poppins mt-0.5">
+        <p className="text-xs sm:text-sm text-[#6B7280] font-poppins mt-0.5 leading-relaxed">
           {description}
         </p>
       </div>
     </div>
     <button
       onClick={onChange}
-      className={`w-12 h-7 rounded-full p-1 transition-colors duration-200 ease-in-out ${
-        checked ? "bg-[#11285A]" : "bg-gray-200"
+      className={`relative inline-flex items-center h-6 w-11 sm:h-7 sm:w-12 rounded-full flex-shrink-0 transition-colors duration-200 ease-in-out focus:outline-none ${
+        checked ? "bg-[#11285A]" : "bg-[#E5E7EB]"
       }`}
     >
-      <div
-        className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-in-out ${
-          checked ? "translate-x-5" : "translate-x-0"
+      <span
+        className={`inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
+          checked ? "translate-x-6 sm:translate-x-6" : "translate-x-1"
         }`}
       />
     </button>
@@ -56,6 +57,20 @@ const Setting = () => {
     birthday: "1985-06-15"
   });
 
+  const [originalProfile, setOriginalProfile] = useState({
+    fullName: "Sarah Johnson",
+    email: "sarah.johnson@email.com",
+    phone: "0912345678",
+    birthday: "1985-06-15"
+  });
+
+  const [showToast, setShowToast] = useState(false);
+  const [toastConfig, setToastConfig] = useState({
+    message: "",
+    type: "info"
+  });
+  const [isEditMode, setIsEditMode] = useState(false);
+
   const toggleNotification = (key) => {
     setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -69,8 +84,38 @@ const Setting = () => {
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleEditProfile = () => {
+    setIsEditMode(true);
+    setToastConfig({ message: "Edit mode activated", type: "info" });
+    setShowToast(true);
+  };
+
+  const handleSaveProfile = () => {
+    setOriginalProfile(profile);
+    setIsEditMode(false);
+    setToastConfig({ message: "Profile saved successfully", type: "success" });
+    setShowToast(true);
+  };
+
+  const handleCancelEdit = () => {
+    setProfile(originalProfile);
+    setIsEditMode(false);
+    setToastConfig({ message: "Changes cancelled", type: "warning" });
+    setShowToast(true);
+  };
+
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-4 sm:p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
+      {showToast && (
+        <Toast
+          message={toastConfig.message}
+          type={toastConfig.type}
+          duration={3000}
+          position="top-right"
+          onClose={() => setShowToast(false)}
+        />
+      )}
+      
       <div className="w-full font-poppins max-w-3xl mx-auto space-y-6 md:space-y-8 md:max-w-5xl md:mx-0 md:pr-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -88,10 +133,32 @@ const Setting = () => {
               </div>
             </div>
 
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#11285A] text-[#11285A] text-sm font-semibold hover:bg-blue-50 transition-colors">
-              <Icon icon="solar:pen-bold" className="text-lg" />
-              Edit Profile
-            </button>
+            {!isEditMode ? (
+              <button 
+                onClick={handleEditProfile}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#11285A] text-[#11285A] text-sm font-semibold hover:bg-blue-50 transition-colors"
+              >
+                <Icon icon="solar:pen-bold" className="text-lg" />
+                Edit Profile
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleSaveProfile}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#11285A] text-white text-sm font-semibold hover:bg-[#0d1b3d] transition-colors"
+                >
+                  <Icon icon="solar:check-circle-bold" className="text-lg" />
+                  Save
+                </button>
+                <button 
+                  onClick={handleCancelEdit}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  <Icon icon="solar:close-circle-bold" className="text-lg" />
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 grid md:grid-cols-2 gap-5">
@@ -104,7 +171,10 @@ const Setting = () => {
                 name="fullName"
                 value={profile.fullName}
                 onChange={handleProfileChange}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent"
+                disabled={!isEditMode}
+                className={`w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent ${
+                  !isEditMode ? "bg-gray-100 cursor-not-allowed" : "bg-gray-50"
+                }`}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -116,7 +186,10 @@ const Setting = () => {
                 name="email"
                 value={profile.email}
                 onChange={handleProfileChange}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent"
+                disabled={!isEditMode}
+                className={`w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent ${
+                  !isEditMode ? "bg-gray-100 cursor-not-allowed" : "bg-gray-50"
+                }`}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -128,7 +201,10 @@ const Setting = () => {
                 name="phone"
                 value={profile.phone}
                 onChange={handleProfileChange}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent"
+                disabled={!isEditMode}
+                className={`w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent ${
+                  !isEditMode ? "bg-gray-100 cursor-not-allowed" : "bg-gray-50"
+                }`}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -140,7 +216,10 @@ const Setting = () => {
                 name="birthday"
                 value={profile.birthday}
                 onChange={handleProfileChange}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent"
+                disabled={!isEditMode}
+                className={`w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-card-100 focus:border-transparent ${
+                  !isEditMode ? "bg-gray-100 cursor-not-allowed" : "bg-gray-50"
+                }`}
               />
             </div>
           </div>
@@ -153,19 +232,19 @@ const Setting = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
           {/* Notification Preferences */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-            <div className="mb-8">
-              <h3 className="text-lg font-bold text-[#11285A]">
+          <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm border border-gray-100">
+            <div className="mb-6 sm:mb-8">
+              <h3 className="text-base sm:text-lg font-bold text-[#11285A]">
                 Notification Preferences
               </h3>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 Choose how you want to be notified
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <ToggleItem
                 icon="solar:bell-bold"
                 title="Push Notifications"
@@ -198,17 +277,17 @@ const Setting = () => {
           </div>
 
           {/* Privacy & Security */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-            <div className="mb-8">
-              <h3 className="text-lg font-bold text-[#11285A]">
+          <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm border border-gray-100">
+            <div className="mb-6 sm:mb-8">
+              <h3 className="text-base sm:text-lg font-bold text-[#11285A]">
                 Privacy & Security
               </h3>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 Control your data and security preferences
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <ToggleItem
                 icon="solar:map-point-bold"
                 title="Location Tracking"

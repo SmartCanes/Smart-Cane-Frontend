@@ -115,7 +115,18 @@ const DashboardSide = ({ className = "" }) => {
       label: "Guardian",       // Figma Label
       icon: "solar:shield-user-outline", // Figma Icon style
       path: "/manage-profile"
+    },
+
+    {
+      id: "mobile-weather",
+      label: "Weather",        // Figma Label
+      icon: "solar:cloud-sun-bold", // Figma Icon style
+      path: "/weather-board"
     }
+
+
+
+
     // Note: Tinanggal ko ang Settings dito kasi 4 items lang ang nasa Figma screenshot
   ];
 
