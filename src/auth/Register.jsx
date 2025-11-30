@@ -782,8 +782,7 @@ const Register = () => {
             {step > 1 && (
               <PrimaryButton
                 className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
-                textColor="black"
-                bgColor="bg-white"
+                textColor="text-black"
                 text="Back"
                 variant="outline"
                 type="button"
