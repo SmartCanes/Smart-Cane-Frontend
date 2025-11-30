@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import TextField from "../ui/components/TextField";
 import SelectField from "../ui/components/SelectField";
 import PasswordField from "../ui/components/PasswordField";
@@ -13,6 +13,8 @@ import {
   verifyOTPApi
 } from "@/api/authService";
 import Loader from "@/ui/components/Loader";
+import { useRegisterStore } from "@/stores/useRegisterStore";
+import ScannerCamera from "@/ui/components/Scanner";
 
 const barangays = [
   { value: "brgy1", label: "Barangay 1" },
@@ -40,50 +42,44 @@ const provinces = [
 
 const Register = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
+  const CONTACT_NUMBER_LENGTH = 11;
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1 = Basic Info, 2 = Address Info, 3 = OTP Verification, 4 - QR Scan
+  const {
+    step,
+    setStep,
+    formData,
+    updateForm,
+    otp,
+    updateOtp,
+    otpSent,
+    setOtpSent,
+    setDeviceSerial
+  } = useRegisterStore();
+
+  const [searchParams] = useSearchParams();
+  const [showScanner, setShowScanner] = useState(false);
   const [modalConfig, setModalConfig] = useState({
     visible: false,
     type: null,
     position: "center"
   });
-  const CONTACT_NUMBER_LENGTH = 11;
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]); // 6-digit OTP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otpError, setOtpError] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [errors, setErrors] = useState({});
-  const [showScanner, setShowScanner] = useState(false);
+  const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
+  const countdownRef = useRef(null);
 
-  // Form data state
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    streetAddress: "",
-    barangay: barangays[0].value,
-    city: cities[0].value,
-    province: provinces[0].value,
-    relationship: "",
-    email: "",
-    contactNumber: ""
-  });
+  useEffect(() => {
+    const serialFromUrl = searchParams.get("device_serial");
+    if (serialFromUrl) {
+      updateForm("deviceSerial", serialFromUrl);
+    } else {
+      setShowScanner(true);
+    }
+  }, []);
 
-  // OTP input refs
-  const otpRefs = [
-    React.useRef(),
-    React.useRef(),
-    React.useRef(),
-    React.useRef(),
-    React.useRef(),
-    React.useRef()
-  ];
-
-  // Validation functions
   const validateField = (name, value) => {
     switch (name) {
       case "firstName":
@@ -156,63 +152,41 @@ const Register = () => {
     }
   };
 
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (name, value) => {
+    if (
+      (name === "firstName" || name === "lastName") &&
+      value &&
+      !/^[a-zA-Z\s]*$/.test(value)
+    )
+      return;
 
-    // Restrict First Name and Last Name to letters and spaces only
-    if (name === "firstName" || name === "lastName") {
-      // Only allow letters and spaces, block numbers and special characters
-      if (value && !/^[a-zA-Z\s]*$/.test(value)) {
-        return; // Don't update if invalid characters are typed
-      }
-    }
-
-    // If updating contact number, allow digits only (strip non-numeric chars)
     const newValue =
       name === "contactNumber"
-        ? value.replace(/[^0-9]/g, "").slice(0, CONTACT_NUMBER_LENGTH)
+        ? value.replace(/\D/g, "").slice(0, CONTACT_NUMBER_LENGTH)
         : value;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: newValue
-    }));
+    updateForm(name, newValue);
 
-    // Validate field in real-time
-    const error = validateField(name, newValue);
+    // Clear error for the field
+    setErrors((prev) => ({ ...prev, [name]: "" }));
 
-    // Special handling for password fields - validate both when either changes
     if (name === "password" || name === "confirmPassword") {
-      const newErrors = { ...errors };
-
-      if (name === "password") {
-        // Validate the password field
-        newErrors.password = error;
-        // Also revalidate confirmPassword if it has a value
-        if (formData.confirmPassword) {
-          newErrors.confirmPassword =
-            formData.confirmPassword !== newValue
-              ? "Passwords don't match!"
-              : "";
-        }
-      } else if (name === "confirmPassword") {
-        // Validate confirmPassword
-        newErrors.confirmPassword = error;
-        // Also revalidate password if needed
-        if (formData.password) {
-          const passwordError = validateField("password", formData.password);
-          newErrors.password = passwordError;
-        }
+      if (formData.confirmPassword || formData.password) {
+        const passwordError = validateField("password", formData.password);
+        const confirmError = validateField(
+          "confirmPassword",
+          formData.confirmPassword
+        );
+        setErrors((prev) => ({
+          ...prev,
+          password: passwordError,
+          confirmPassword: confirmError
+        }));
       }
-
-      setErrors(newErrors);
-    } else {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: error
-      }));
     }
   };
+
+  const handleSelectChange = (name, value) => handleChange(name, value);
 
   const validateStep = (stepNumber) => {
     const newErrors = {};
@@ -248,43 +222,6 @@ const Register = () => {
     return newErrors;
   };
 
-  // Send OTP function
-  const sendOtp = async () => {
-    setIsSendingOtp(true);
-    setOtpError("");
-
-    try {
-      await sendOTPApi(formData.email);
-
-      setOtpSent(true);
-      setCountdown(60); // 60 seconds countdown
-
-      // Start countdown
-      const countdownInterval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(countdownInterval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } catch (error) {
-      console.error("Failed to send OTP:", error);
-      setOtpError("Failed to send OTP. Please try again.");
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  // Resend OTP function
-  const resendOtp = async () => {
-    if (countdown > 0) return;
-
-    await sendOtp();
-  };
-
-  // OTP input handlers
   const handleOtpChange = (index, value) => {
     if (value.length <= 1 && /^[0-9]*$/.test(value)) {
       const newOtp = [...otp];
@@ -457,7 +394,8 @@ const Register = () => {
           province: formData.province,
           city: formData.city,
           barangay: formData.barangay,
-          street_address: formData.streetAddress
+          street_address: formData.streetAddress,
+          device_serial_number: formData.deviceSerial
         };
 
         await registerApi(payload);
@@ -483,327 +421,369 @@ const Register = () => {
     }
   };
 
-  // Check if current step has any errors
-  const hasStepErrors = () => {
-    const stepErrors = validateStep(step);
-    return Object.keys(stepErrors).length > 0;
+  const hasStepErrors = () => Object.keys(validateStep(step)).length > 0;
+
+  const handleScan = (scannedCode) => {
+    setDeviceSerial(scannedCode);
+    setShowScanner(false);
   };
+
+  const sendOtp = async () => {
+    setIsSendingOtp(true);
+    setOtpError("");
+
+    try {
+      await sendOTPApi(formData.email);
+
+      setOtpSent(true);
+      setCountdown(60);
+
+      // Clear any existing interval
+      if (countdownRef.current) clearInterval(countdownRef.current);
+
+      countdownRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownRef.current);
+            countdownRef.current = null;
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("Failed to send OTP:", error);
+      setOtpError("Failed to send OTP. Please try again.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    if (countdown > 0 || isSendingOtp) return;
+    await sendOtp();
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, []);
 
   return (
     <>
-      <div className="flex-1 flex flex-col gap-5 justify-center items-center px-5 sm:min-h-screen sm:py-10 ">
-        <div className="text-center space-y-2">
-          <h1 className="hidden sm:block  text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
-            {step === 3 ? "Email Verification" : "Welcome"}
-          </h1>
-          <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
-            {step === 1 ? (
-              "Create your account to get started with iCane."
-            ) : step === 2 ? (
-              "Start your journey to safer and smarter mobility by signing up."
-            ) : (
-              <>
-                Enter the{" "}
-                <span className="font-bold">6-digit verification code</span> we
-                have sent to your email address.
-                <br />
-                <span className="text-sm text-gray-600">{formData.email}</span>
-              </>
-            )}
-          </p>
-          <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
-            Create your account
-          </p>
-        </div>
-
-        <form
-          className="w-full max-w-sm lg:max-w-md xl:max-w-xl"
-          onSubmit={handleNext}
-          noValidate
-        >
-          {/* Step 1: Basic Information */}
-          {step === 1 && (
-            <div className="space-y-3 sm:space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <TextField
-                  className="font-poppins"
-                  label={"First Name"}
-                  placeholder="First Name..."
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleFormChange}
-                  inputClassName="py-3"
-                  error={errors.firstName}
-                  required
-                />
-
-                <TextField
-                  className="font-poppins"
-                  label={"Last Name"}
-                  placeholder="Last Name..."
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleFormChange}
-                  inputClassName="py-3"
-                  error={errors.lastName}
-                  required
-                />
-              </div>
-
-              <TextField
-                className="font-poppins"
-                label={"Username"}
-                placeholder="Enter your username..."
-                name="username"
-                value={formData.username}
-                onChange={handleFormChange}
-                inputClassName="py-3"
-                error={errors.username}
-                required
-              />
-
-              <PasswordField
-                className="font-poppins"
-                label={"Password"}
-                placeholder="Enter your password..."
-                name="password"
-                value={formData.password}
-                onChange={handleFormChange}
-                error={errors.password}
-                showValidationRules
-                inputClassName="py-3"
-                required
-              />
-
-              <PasswordField
-                className="font-poppins"
-                label={"Re-enter Password"}
-                placeholder="Re-enter your password..."
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleFormChange}
-                error={errors.confirmPassword}
-                inputClassName="py-3"
-                required
-              />
+      {!showScanner && (
+        <div className="flex-1 flex flex-col gap-5 justify-center items-center px-5 sm:min-h-screen sm:py-10 ">
+          <>
+            <div className="text-center space-y-2">
+              <h1 className="hidden sm:block  text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
+                {step === 3 ? "Email Verification" : "Welcome"}
+              </h1>
+              <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
+                {step === 1 ? (
+                  "Create your account to get started with iCane."
+                ) : step === 2 ? (
+                  "Start your journey to safer and smarter mobility by signing up."
+                ) : (
+                  <>
+                    Enter the{" "}
+                    <span className="font-bold">6-digit verification code</span>{" "}
+                    we have sent to your email address.
+                    <br />
+                    <span className="text-sm text-gray-600">
+                      {formData.email}
+                    </span>
+                  </>
+                )}
+              </p>
+              <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
+                Create your account
+              </p>
             </div>
-          )}
 
-          {/* Step 2: Address Information */}
-          {step === 2 && (
-            <div className="space-y-4">
-              {/* Lot No./Bldg./Street and Province - Side by side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <TextField
-                  className="whitespace-nowrap "
-                  label={"Lot No./Bldg./Street"}
-                  placeholder="Enter your Lot No..."
-                  name="streetAddress"
-                  value={formData.streetAddress}
-                  onChange={handleFormChange}
-                  error={errors.streetAddress}
-                  required
-                />
+            <form
+              className="w-full max-w-sm lg:max-w-md xl:max-w-xl"
+              onSubmit={handleNext}
+              noValidate
+            >
+              {/* Step 1: Basic Information */}
+              {step === 1 && (
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <TextField
+                      className="font-poppins"
+                      label={"First Name"}
+                      placeholder="First Name..."
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={(e) =>
+                        handleChange("firstName", e.target.value)
+                      }
+                      inputClassName="py-3"
+                      error={errors.firstName}
+                      required
+                    />
 
-                <SelectField
-                  label={"Province"}
-                  placeholder="Province..."
-                  required
-                  options={provinces}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      province: e.target.value
-                    }));
-                    setErrors((prev) => ({ ...prev, province: "" }));
-                  }}
-                  value={formData.province}
-                  error={errors.province}
-                />
-              </div>
+                    <TextField
+                      className="font-poppins"
+                      label={"Last Name"}
+                      placeholder="Last Name..."
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => handleChange("lastName", e.target.value)}
+                      inputClassName="py-3"
+                      error={errors.lastName}
+                      required
+                    />
+                  </div>
 
-              {/* Barangay and City - Side by side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <SelectField
-                  className="font-poppins"
-                  label={"Barangay"}
-                  placeholder="Barangay..."
-                  required
-                  options={barangays}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      barangay: e.target.value
-                    }));
-                    setErrors((prev) => ({ ...prev, barangay: "" }));
-                  }}
-                  value={formData.barangay}
-                  error={errors.barangay}
-                />
-
-                <SelectField
-                  className="font-poppins "
-                  label={"City"}
-                  placeholder="City..."
-                  required
-                  options={cities}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      city: e.target.value
-                    }));
-                    setErrors((prev) => ({ ...prev, city: "" }));
-                  }}
-                  value={formData.city}
-                  error={errors.city}
-                />
-              </div>
-
-              {/* Relationship to the VIP - Full width */}
-              <SelectField
-                className="font-poppins py-[16px]"
-                label={"Relationship to the VIP"}
-                placeholder="Relationship..."
-                required
-                options={[
-                  { value: "Husband", label: "Husband" },
-                  { value: "Wife", label: "Wife" },
-                  { value: "Sibling", label: "Sibling" },
-                  { value: "Legal Guardian", label: "Legal Guardian" }
-                ]}
-                onChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    relationship: e.target.value
-                  }));
-                  setErrors((prev) => ({ ...prev, relationship: "" }));
-                }}
-                value={formData.relationship || ""}
-                error={errors.relationship}
-              />
-
-              {/* Contact Number - Full width */}
-              <TextField
-                className="font-poppins"
-                label={"Contact Number"}
-                placeholder="09XX XXX XXXX"
-                type="tel"
-                name="contactNumber"
-                value={formData.contactNumber}
-                onChange={handleFormChange}
-                inputMode="numeric"
-                maxLength={11}
-                error={errors.contactNumber}
-                required
-              />
-
-              {/* Email Address - Full width */}
-              <TextField
-                className="font-poppins"
-                label={"Email Address"}
-                placeholder="sample.email@gmail.com"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleFormChange}
-                error={errors.email}
-                required
-              />
-            </div>
-          )}
-
-          {/* Step 3: OTP Verification */}
-          {step === 3 && (
-            <div className="space-y-6">
-              {/* OTP Input Boxes */}
-              <div className="flex justify-center gap-3">
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    ref={otpRefs[index]}
-                    type="text"
-                    maxLength="1"
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
+                  <TextField
+                    className="font-poppins"
+                    label={"Username"}
+                    placeholder="Enter your username..."
+                    name="username"
+                    value={formData.username}
+                    onChange={(e) => handleChange("username", e.target.value)}
+                    inputClassName="py-3"
+                    error={errors.username}
+                    required
                   />
-                ))}
-              </div>
 
-              {/* OTP Error Message */}
-              {otpError && (
-                <div className="text-center">
-                  <p className="text-red-500 text-sm">{otpError}</p>
+                  <PasswordField
+                    className="font-poppins"
+                    label={"Password"}
+                    placeholder="Enter your password..."
+                    name="password"
+                    value={formData.password}
+                    onChange={(e) => handleChange("password", e.target.value)}
+                    error={errors.password}
+                    showValidationRules
+                    inputClassName="py-3"
+                    required
+                  />
+
+                  <PasswordField
+                    className="font-poppins"
+                    label={"Re-enter Password"}
+                    placeholder="Re-enter your password..."
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      handleChange("confirmPassword", e.target.value)
+                    }
+                    error={errors.confirmPassword}
+                    inputClassName="py-3"
+                    required
+                  />
                 </div>
               )}
 
-              {/* Resend OTP Link */}
-              <div className="text-center">
-                <p className="font-poppins text-[#1C253C] text-sm mb-2">
-                  Didn't receive the code?
-                </p>
-                <button
-                  type="button"
-                  onClick={resendOtp}
-                  disabled={countdown > 0 || isSendingOtp}
-                  className={`font-poppins text-primary-100 text-sm font-medium ${
-                    countdown > 0 || isSendingOtp
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:underline"
-                  }`}
-                >
-                  {isSendingOtp
-                    ? "Sending..."
-                    : countdown > 0
-                      ? `Resend in ${countdown}s`
-                      : "Resend Verification Code"}
-                </button>
-              </div>
-            </div>
-          )}
-          <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
-            <PrimaryButton
-              className="w-full py-3 sm:py-4 text-md sm:text-md"
-              text={
-                isSubmitting
-                  ? step === 3
-                    ? "Verifying..."
-                    : "Checking..."
-                  : `${step === 3 ? "Create Account" : "Next"}`
-              }
-              type="submit"
-              disabled={
-                isSubmitting ||
-                hasStepErrors() ||
-                (step === 3 && !otpSent && !isDev)
-              }
-            />
-            {step > 1 && (
-              <PrimaryButton
-                className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
-                textColor="text-black"
-                text="Back"
-                variant="outline"
-                type="button"
-                onClick={() => {
-                  setStep(step - 1);
-                }}
-              />
-            )}
-          </div>
+              {/* Step 2: Address Information */}
+              {step === 2 && (
+                <div className="space-y-4">
+                  {/* Lot No./Bldg./Street and Province - Side by side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <TextField
+                      className="whitespace-nowrap "
+                      label={"Lot No./Bldg./Street"}
+                      placeholder="Enter your Lot No..."
+                      name="streetAddress"
+                      value={formData.streetAddress}
+                      onChange={(e) =>
+                        handleChange("streetAddress", e.target.value)
+                      }
+                      error={errors.streetAddress}
+                      required
+                    />
 
-          <p className="font-poppins text-center text-[18px] mt-4">
-            Already have an Account?{" "}
-            <Link
-              to="/login"
-              className="font-poppins text-blue-500 hover:underline text-[18px]"
-            >
-              Sign In
-            </Link>
-          </p>
-        </form>
-      </div>
+                    <SelectField
+                      label={"Province"}
+                      placeholder="Province..."
+                      required
+                      options={provinces}
+                      onChange={(e) => {
+                        handleSelectChange("province", e.target.value);
+                      }}
+                      value={formData.province}
+                      error={errors.province}
+                    />
+                  </div>
+
+                  {/* Barangay and City - Side by side */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <SelectField
+                      className="font-poppins"
+                      label={"Barangay"}
+                      placeholder="Barangay..."
+                      required
+                      options={barangays}
+                      onChange={(e) => {
+                        handleSelectChange("barangay", e.target.value);
+                      }}
+                      value={formData.barangay}
+                      error={errors.barangay}
+                    />
+
+                    <SelectField
+                      className="font-poppins "
+                      label={"City"}
+                      placeholder="City..."
+                      required
+                      options={cities}
+                      onChange={(e) => {
+                        handleSelectChange("city", e.target.value);
+                      }}
+                      value={formData.city}
+                      error={errors.city}
+                    />
+                  </div>
+
+                  {/* Relationship to the VIP - Full width */}
+                  <SelectField
+                    className="font-poppins py-[16px]"
+                    label={"Relationship to the VIP"}
+                    placeholder="Relationship..."
+                    required
+                    options={[
+                      { value: "Husband", label: "Husband" },
+                      { value: "Wife", label: "Wife" },
+                      { value: "Sibling", label: "Sibling" },
+                      { value: "Legal Guardian", label: "Legal Guardian" }
+                    ]}
+                    onChange={(e) => {
+                      handleChange("relationship", e.target.value);
+                    }}
+                    value={formData.relationship || ""}
+                    error={errors.relationship}
+                  />
+
+                  {/* Contact Number - Full width */}
+                  <TextField
+                    className="font-poppins"
+                    label={"Contact Number"}
+                    placeholder="09XX XXX XXXX"
+                    type="tel"
+                    name="contactNumber"
+                    value={formData.contactNumber}
+                    onChange={(e) =>
+                      handleChange("contactNumber", e.target.value)
+                    }
+                    inputMode="numeric"
+                    maxLength={11}
+                    error={errors.contactNumber}
+                    required
+                  />
+
+                  {/* Email Address - Full width */}
+                  <TextField
+                    className="font-poppins"
+                    label={"Email Address"}
+                    placeholder="sample.email@gmail.com"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={(e) => handleChange("email", e.target.value)}
+                    error={errors.email}
+                    required
+                  />
+                </div>
+              )}
+
+              {/* Step 3: OTP Verification */}
+              {step === 3 && (
+                <div className="space-y-6">
+                  {/* OTP Input Boxes */}
+                  <div className="flex justify-center gap-3">
+                    {otp.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={otpRefs[index]}
+                        type="text"
+                        maxLength="1"
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
+                      />
+                    ))}
+                  </div>
+
+                  {/* OTP Error Message */}
+                  {otpError && (
+                    <div className="text-center">
+                      <p className="text-red-500 text-sm">{otpError}</p>
+                    </div>
+                  )}
+
+                  {/* Resend OTP Link */}
+                  <div className="text-center">
+                    <p className="font-poppins text-[#1C253C] text-sm mb-2">
+                      Didn't receive the code?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={resendOtp}
+                      disabled={countdown > 0 || isSendingOtp}
+                      className={`font-poppins text-primary-100 text-sm font-medium ${
+                        countdown > 0 || isSendingOtp
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:underline"
+                      }`}
+                    >
+                      {isSendingOtp
+                        ? "Sending..."
+                        : countdown > 0
+                          ? `Resend in ${countdown}s`
+                          : "Resend Verification Code"}
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
+                <PrimaryButton
+                  className="w-full py-3 sm:py-4 text-md sm:text-md"
+                  text={
+                    isSubmitting
+                      ? step === 3
+                        ? "Verifying..."
+                        : "Checking..."
+                      : `${step === 3 ? "Create Account" : "Next"}`
+                  }
+                  type="submit"
+                  disabled={
+                    isSubmitting ||
+                    hasStepErrors() ||
+                    (step === 3 && !otpSent && !isDev)
+                  }
+                />
+                {step > 1 && (
+                  <PrimaryButton
+                    className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
+                    textColor="text-black"
+                    text="Back"
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                      setStep(step - 1);
+                    }}
+                  />
+                )}
+              </div>
+
+              <p className="font-poppins text-center text-[18px] mt-4">
+                Already have an Account?{" "}
+                <Link
+                  to="/login"
+                  className="font-poppins text-blue-500 hover:underline text-[18px]"
+                >
+                  Sign In
+                </Link>
+              </p>
+            </form>
+          </>
+        </div>
+      )}
 
       {isSubmitting && (
         <div className="absolute inset-0 sm:inset-y-0 sm:left-0 w-full sm:w-1/2 flex items-center justify-center z-30">
@@ -819,6 +799,25 @@ const Register = () => {
           onAction={handleModalAction}
           email={modalConfig.email}
         />
+      )}
+
+      {showScanner && (
+        <div className="flex-1 flex flex-col items-center justify-center px-5 sm:min-h-screen sm:p-10">
+          <div className="text-center space-y-2 mb-5">
+            <h1 className="text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C] text-center">
+              Scan your iCane Device
+            </h1>
+            <p className="text-[#1C253C] text-paragraph text-1xl text-center">
+              Point your camera at the QR code on your iCane device to pair it
+              automatically.
+            </p>
+          </div>
+
+          <ScannerCamera
+            onClose={() => setShowScanner(false)}
+            onScan={handleScan}
+          />
+        </div>
       )}
     </>
   );
