@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import { useUserStore } from "@/stores/useStore";
 import avatarPlaceholder from "@/assets/images/team-photo.png";
 import Toast from "@/ui/components/Toast";
 
@@ -35,8 +34,6 @@ const ToggleItem = ({ icon, title, description, checked, onChange }) => (
 );
 
 const Setting = () => {
-  const { connectionStatus } = useUserStore();
-
   const [notifications, setNotifications] = useState({
     push: true,
     email: true,
@@ -115,7 +112,7 @@ const Setting = () => {
           onClose={() => setShowToast(false)}
         />
       )}
-      
+
       <div className="w-full font-poppins max-w-3xl mx-auto space-y-6 md:space-y-8 md:max-w-5xl md:mx-0 md:pr-6">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -134,7 +131,7 @@ const Setting = () => {
             </div>
 
             {!isEditMode ? (
-              <button 
+              <button
                 onClick={handleEditProfile}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#11285A] text-[#11285A] text-sm font-semibold hover:bg-blue-50 transition-colors"
               >
@@ -143,14 +140,14 @@ const Setting = () => {
               </button>
             ) : (
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={handleSaveProfile}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#11285A] text-white text-sm font-semibold hover:bg-[#0d1b3d] transition-colors"
                 >
                   <Icon icon="solar:check-circle-bold" className="text-lg" />
                   Save
                 </button>
-                <button 
+                <button
                   onClick={handleCancelEdit}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
                 >
