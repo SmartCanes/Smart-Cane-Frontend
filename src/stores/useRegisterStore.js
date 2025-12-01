@@ -1,0 +1,69 @@
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+
+export const useRegisterStore = create(
+  persist(
+    (set) => ({
+      formData: {
+        firstName: "",
+        lastName: "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+        streetAddress: "",
+        barangay: "",
+        city: "",
+        province: "",
+        relationship: "",
+        email: "",
+        contactNumber: "",
+        deviceSerial: ""
+      },
+      otp: ["", "", "", "", "", ""],
+      otpSent: false,
+      guardianId: null,
+      setGuardianId: (id) => set({ guardianId: id }),
+      updateForm: (field, value) =>
+        set((state) => ({
+          formData: { ...state.formData, [field]: value }
+        })),
+      updateOtp: (index, value) =>
+        set((state) => {
+          const newOtp = [...state.otp];
+          newOtp[index] = value;
+          return { otp: newOtp };
+        }),
+      setOtpSent: (sent) => set({ otpSent: sent }),
+      setDeviceSerial: (serial) =>
+        set((state) => ({
+          formData: { ...state.formData, deviceSerial: serial }
+        })),
+      clearStore: () =>
+        set({
+          formData: {
+            firstName: "",
+            lastName: "",
+            username: "",
+            password: "",
+            confirmPassword: "",
+            streetAddress: "",
+            barangay: "",
+            city: "",
+            province: "",
+            relationship: "",
+            email: "",
+            contactNumber: "",
+            deviceSerial: ""
+          },
+          otp: ["", "", "", "", "", ""],
+          otpSent: false,
+          guardianId: null
+        })
+    }),
+
+    {
+      name: "register-session",
+      storage: createJSONStorage(() => sessionStorage)
+    }
+  )
+);
