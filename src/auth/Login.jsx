@@ -3,12 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
-import { useUserStore } from "@/stores/useStore";
 import { loginApi } from "@/api/authService";
 
 const Login = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
-  const { login, setShowLoginModal } = useUserStore();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
@@ -16,7 +14,6 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [showPasswordRequired, setShowPasswordRequired] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,10 +27,6 @@ const Login = () => {
     e.preventDefault();
     const { username, password } = formData;
 
-    if (username.trim()) {
-      setShowPasswordRequired(true);
-    }
-
     const newErrors = {};
     if (!username.trim()) newErrors.username = "This field is required";
     if (!password) newErrors.password = "This field is required";
@@ -45,19 +38,27 @@ const Login = () => {
     setLoading(true);
     try {
       if (isDev && username === "admin" && password === "admin") {
-        localStorage.setItem("access_token", "DEV_ADMIN_TOKEN");
+        document.cookie =
+          "access_token=DEV_ACCESS_TOKEN; path=/; max-age=900; SameSite=None; Secure";
+        document.cookie =
+          "refresh_token=DEV_REFRESH_TOKEN; path=/; max-age=604800; SameSite=None; Secure";
         navigate("/dashboard");
         return;
       }
 
       const response = await loginApi(username, password);
-      localStorage.setItem("access_token", response.data.access_token);
-      login(response.data.guardian_id);
-      setShowLoginModal(true);
+
+      if (!response.success) {
+        throw new Error(response.message || "Login failed");
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      const msg = err.response?.data?.message || "Login failed";
+      console.error("Login error:", err);
+      console.error("Error response:", err.response?.data);
+      const msg = err.response?.data?.message || err.message || "Login failed";
       setErrors({
         general: msg,
         username: " ",
@@ -108,7 +109,6 @@ const Login = () => {
             label="Password"
             placeholder="Enter your password..."
             name="password"
-            required={showPasswordRequired}
             type="password"
             value={formData.password}
             onChange={handleChange}
