@@ -5,9 +5,7 @@ import RecentAlerts from "@/ui/components/RecentAlert";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
 import SendNote from "@/ui/components/SendNote";
-import { motion, useAnimation } from "framer-motion";
 import Toast from "@/ui/components/Toast";
-import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
 import { useRealtimeStore } from "@/stores/useStore";
 import { useLocation } from "react-router-dom";
 
@@ -33,7 +31,6 @@ const Dashboard = () => {
   // const [route, setRoute] = useState(null);
   const [destinationPoint, setDestinationPoint] = useState("");
   const [isMapLoading, setIsMapLoading] = useState(true);
-  const controls = useAnimation();
 
   const handleSwapLocations = () => {
     setStartPoint(destinationPoint);
@@ -58,25 +55,6 @@ const Dashboard = () => {
 
   //   console.log("Requesting directions", { startPoint, destinationPoint });
   // };
-
-  useEffect(() => {
-    if (emergency) {
-      controls.start({
-        backgroundColor: ["#ffffff", "#ff3232", "#ffffff"],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 0.8,
-          ease: "easeInOut"
-        }
-      });
-    } else {
-      controls.start({
-        backgroundColor: "#ffffff",
-        transition: { duration: 0.3 }
-      });
-    }
-  }, [emergency, controls]);
 
   useEffect(() => {
     connectWs();
@@ -109,7 +87,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const showModal = location.state?.showModal;
-    if (showModal) {
+    if (showModal && !emergency) {
       setToast({
         show: true,
         message: "You have successfully logged into your account.",
@@ -283,7 +261,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </motion.main>
+      </main>
     </>
   );
 };

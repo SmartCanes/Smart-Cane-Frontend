@@ -10,7 +10,7 @@ const EmergencyOverlay = ({ emergency }) => {
         opacity: [0, 1, 0],
         boxShadow: [
           "inset 0 0 0px rgba(255,0,0,0.8)",
-          "inset 0 0 60px rgba(255,0,0,0.8)",
+          "inset 0 0 180px rgba(255,0,0,0.8)",
           "inset 0 0 0px rgba(255,0,0,0.8)"
         ],
         // x: [-2, 2, -2],
