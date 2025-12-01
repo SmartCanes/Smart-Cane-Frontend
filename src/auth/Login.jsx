@@ -4,10 +4,12 @@ import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import { loginApi } from "@/api/authService";
+import { useUserStore } from "@/stores/useStore";
 
 const Login = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const navigate = useNavigate();
+  const { setUser } = useUserStore();
   const [formData, setFormData] = useState({
     username: "",
     password: ""
@@ -51,6 +53,8 @@ const Login = () => {
       if (!response.success) {
         throw new Error(response.message || "Login failed");
       }
+
+      setUser(response.data.user || response.data);
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
