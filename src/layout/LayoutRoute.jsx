@@ -1,62 +1,30 @@
 import { Outlet, Navigate, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { verifyTokenApi } from "@/api/authService";
 import SidebarContent from "@/ui/components/SidebarContent";
+import { verifyAuthApi } from "@/api/authService";
 
 const ProtectedLayout = () => {
   const navigate = useNavigate();
-  const [isTokenChecked, setIsTokenChecked] = useState(false);
-  const [isValidToken, setIsValidToken] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      navigate("/login", { replace: true });
-      return;
-    }
-
-    if (
-      (import.meta.env.VITE_ENV || "development") === "development" &&
-      token === "DEV_ADMIN_TOKEN"
-    ) {
-      setIsValidToken(true);
-      setIsTokenChecked(true);
-      return;
-    }
-
-    verifyTokenApi(token)
-      .then(() => {
-        setIsValidToken(true);
-      })
-      .catch(() => {
-        localStorage.removeItem("access_token");
+    const checkAuth = async () => {
+      try {
+        const response = await verifyAuthApi();
+        if (!response.data.token_valid) throw new Error("Invalid token");
+        setIsAuthChecked(true);
+      } catch (error) {
+        console.log("Auth check failed:", error);
         navigate("/login", { replace: true });
-      })
-      .finally(() => {
-        setIsTokenChecked(true);
-      });
+      }
+    };
+
+    checkAuth();
   }, [navigate]);
 
-  if (!isTokenChecked) {
+  if (!isAuthChecked) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "transparent"
-        }}
-      />
-    );
-  }
-
-  if (!isValidToken) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "transparent"
-        }}
-      />
+      <div style={{ minHeight: "100vh", background: "transparent" }}></div>
     );
   }
 
@@ -64,9 +32,25 @@ const ProtectedLayout = () => {
 };
 
 const PublicLayout = () => {
-  const token = localStorage.getItem("access_token");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  if (token) {
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await verifyAuthApi();
+
+        if (!response.data.token_valid) throw new Error("Invalid token");
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.log("Auth check failed:", error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -10,15 +10,14 @@ export const api = axios.create({
 
 export const backendApi = axios.create({
   baseURL: BASE_URL,
-  headers: { "Content-Type": "application/json" }
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true
 });
 
-backendApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+export const authCheckApi = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true
 });
 
 backendApi.interceptors.response.use(
@@ -29,19 +28,10 @@ backendApi.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const res = await backendApi.post(
-          "/refresh",
-          {},
-          { withCredentials: true }
-        );
-        const newAccessToken = res.data.access_token;
-
-        localStorage.setItem("access_token", newAccessToken);
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        await backendApi.post("/auth/refresh", {}, { withCredentials: true });
         return backendApi(originalRequest);
       } catch (err) {
-        localStorage.removeItem("access_token");
-        // window.location.href = "/login";
+        window.location.href = "/login";
         return Promise.reject(err);
       }
     }
