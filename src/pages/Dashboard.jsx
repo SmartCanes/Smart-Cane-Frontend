@@ -6,29 +6,28 @@ import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
 import SendNote from "@/ui/components/SendNote";
 import { motion, useAnimation } from "framer-motion";
-import { useUserStore } from "@/stores/useStore";
 import Toast from "@/ui/components/Toast";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
+import { useRealtimeStore } from "@/stores/useStore";
 
 import QuickActions from "@/ui/components/QuickActions";
 
 const Dashboard = () => {
+  // const { showLoginModal, setShowLoginModal } = useAuthStore();
   const {
-    showLoginModal,
     connectWs,
     emergency,
-    isMapLoading,
     caneLocation,
     guardianLocation,
-    setShowLoginModal,
-    setGuardianLocation,
-    setIsMapLoading
-  } = useUserStore();
+    setGuardianLocation
+  } = useRealtimeStore();
+
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("track");
   const [startPoint, setStartPoint] = useState("");
   // const [route, setRoute] = useState(null);
   const [destinationPoint, setDestinationPoint] = useState("");
+  const [isMapLoading, setIsMapLoading] = useState(true);
   const controls = useAnimation();
 
   const handleSwapLocations = () => {
@@ -103,11 +102,11 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!showLoginModal) return;
-    setShowModal(true);
-    setShowLoginModal(false);
-  }, [showLoginModal, setShowLoginModal]);
+  // useEffect(() => {
+  //   if (!showLoginModal) return;
+  //   setShowModal(true);
+  //   setShowLoginModal(false);
+  // }, [showLoginModal, setShowLoginModal]);
 
   return (
     <>
