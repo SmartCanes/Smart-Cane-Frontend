@@ -2,17 +2,33 @@ import { createRef, useEffect, useState, useRef } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { pairDevice } from "@/api/backendService";
 import PrimaryButton from "./PrimaryButton";
+import Toast from "./Toast";
+import { useRegisterStore } from "@/stores/useRegisterStore";
+import { useNavigate } from "react-router-dom";
+import ValidationModal from "./ValidationModal";
 
 const PREFIX = "SC-";
 const SERIAL_LENGTH = 6;
 
-const ScannerCamera = ({ onScan, onClose }) => {
+const ScannerCamera = ({ onScan }) => {
+  const navigate = useNavigate();
+  const guardianId = useRegisterStore((state) => state.guardianId);
+  const clearStore = useRegisterStore((state) => state.clearStore);
   const [paused, setPaused] = useState(false);
   const [hasCamera, setHasCamera] = useState(false);
   const [scannedCode, setScannedCode] = useState(null);
   const [serial, setSerial] = useState(Array(SERIAL_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [toast, setToast] = useState({
+    showToast: false,
+    message: "",
+    type: ""
+  });
+  const [modalConfig, setModalConfig] = useState({
+    visible: false,
+    type: null,
+    position: "center"
+  });
 
   const inputRefs = useRef([...Array(SERIAL_LENGTH)].map(() => createRef()));
 
@@ -26,15 +42,27 @@ const ScannerCamera = ({ onScan, onClose }) => {
   const handleScan = (detectedCodes) => {
     if (detectedCodes && detectedCodes.length > 0) {
       const code = detectedCodes[0].rawValue;
-      const parseCode = JSON.parse(code);
-      setScannedCode(parseCode);
-      handlePair(parseCode);
+
+      let device_serial = null;
+
+      try {
+        const url = new URL(code);
+        device_serial = url.searchParams.get("device_serial");
+      } catch (e) {
+        console.warn("Scanned code is not a URL");
+      }
+
+      if (!device_serial) {
+        console.error("No device_serial found in QR");
+        return;
+      }
+
+      setScannedCode(device_serial);
+
       if (onScan) {
-        try {
-          onScan(parseCode);
-        } catch (err) {
-          // ignore handler errors
-        }
+        onScan(device_serial);
+      } else {
+        handlePair(device_serial);
       }
     }
   };
@@ -84,15 +112,37 @@ const ScannerCamera = ({ onScan, onClose }) => {
   };
 
   const handlePair = async (code) => {
+    if (!guardianId) {
+      setToast({
+        showToast: true,
+        message: "Registration is not complete. Cannot pair device.",
+        type: "error"
+      });
+      return;
+    }
+
     try {
       setLoading(true);
-      setMessage("");
       setPaused(true);
-      const res = await pairDevice({ device_serial_number: code });
-      setMessage(`Device paired! ID: ${res.data.device_id}`);
+      const res = await pairDevice({
+        device_serial_number: code,
+        guardian_id: guardianId
+      });
+      if (!res.success) return;
+      clearStore();
+      setModalConfig({
+        visible: true,
+        type: "account-created",
+        position: "center",
+        title: "Device Paired",
+        message: "The device has been successfully paired. You can now log in."
+      });
     } catch (err) {
-      console.error(err);
-      setMessage(err.response?.data?.message || "Failed to pair device");
+      setToast({
+        showToast: true,
+        message: err.response?.data?.message || "Failed to pair device",
+        type: "error"
+      });
     } finally {
       setLoading(false);
       setPaused(false);
@@ -166,15 +216,25 @@ const ScannerCamera = ({ onScan, onClose }) => {
         </div>
       </div>
 
-      {/* {message && (
-        <div className="mt-4 w-full max-w-md text-center">
-          <p
-            className={`text-lg ${message.startsWith("✅") ? "text-green-600" : "text-red-600"}`}
-          >
-            {message}
-          </p>
-        </div>
-      )} */}
+      {toast.showToast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ ...toast, showToast: false })}
+        />
+      )}
+
+      {modalConfig.visible && (
+        <ValidationModal
+          type={modalConfig.type}
+          position={modalConfig.position}
+          onAction={() => {
+            if (modalConfig.type === "account-created") navigate("/login");
+            setModalConfig({ ...modalConfig, visible: false });
+          }}
+          email={modalConfig.email}
+        />
+      )}
 
       <style>
         {`

@@ -1,11 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import TextField from "../ui/components/TextField";
 import SelectField from "../ui/components/SelectField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
-import BackButton from "../ui/components/BackButton";
-import EmailValidationModal from "../ui/components/EmailValidationModal";
 import {
   checkCredentialsApi,
   registerApi,
@@ -15,6 +13,8 @@ import {
 import Loader from "@/ui/components/Loader";
 import { useRegisterStore } from "@/stores/useRegisterStore";
 import ScannerCamera from "@/ui/components/Scanner";
+import Toast from "@/ui/components/Toast";
+import ValidationModal from "@/ui/components/ValidationModal";
 
 const barangays = [
   { value: "brgy1", label: "Barangay 1" },
@@ -45,15 +45,15 @@ const Register = () => {
   const CONTACT_NUMBER_LENGTH = 11;
   const navigate = useNavigate();
   const {
-    step,
-    setStep,
     formData,
     updateForm,
     otp,
     updateOtp,
     otpSent,
+    setGuardianId,
     setOtpSent,
-    setDeviceSerial
+    setDeviceSerial,
+    deviceValidated
   } = useRegisterStore();
 
   const [searchParams] = useSearchParams();
@@ -63,6 +63,13 @@ const Register = () => {
     type: null,
     position: "center"
   });
+  const [toast, setToast] = useState({
+    showToast: false,
+    toastMessage: "",
+    toastType: ""
+  });
+  const [step, setStep] = useState(1);
+  const [toastShown, setToastShown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otpError, setOtpError] = useState("");
@@ -70,15 +77,6 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
   const countdownRef = useRef(null);
-
-  useEffect(() => {
-    const serialFromUrl = searchParams.get("device_serial");
-    if (serialFromUrl) {
-      updateForm("deviceSerial", serialFromUrl);
-    } else {
-      setShowScanner(true);
-    }
-  }, []);
 
   const validateField = (name, value) => {
     switch (name) {
@@ -224,12 +222,9 @@ const Register = () => {
 
   const handleOtpChange = (index, value) => {
     if (value.length <= 1 && /^[0-9]*$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
+      updateOtp(index, value);
       setOtpError("");
 
-      // Auto-focus next input
       if (value && index < 5) {
         otpRefs[index + 1].current?.focus();
       }
@@ -261,11 +256,8 @@ const Register = () => {
 
     // Validate current step
     const stepErrors = validateStep(step);
-
     if (!isDev && Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
-
-      // Scroll to first error
       const firstErrorField = Object.keys(stepErrors)[0];
       const errorElement = document.querySelector(
         `[name="${firstErrorField}"]`
@@ -277,156 +269,93 @@ const Register = () => {
       return;
     }
 
-    if (step === 1) {
-      if (isDev) {
-        setStep(2);
-        return;
-      }
-      // Check username availability before proceeding to step 2
-      setIsSubmitting(true);
-
-      try {
-        const checkPayload = {
-          username: formData.username
-        };
-
-        await checkCredentialsApi(checkPayload);
-
-        // Username is available, proceed to step 2
-        setStep(2);
-      } catch (error) {
-        console.error(error);
-        const errorMessage =
-          error.response?.data?.message || "Username check failed";
-
-        if (errorMessage.includes("Username")) {
-          setErrors((prev) => ({
-            ...prev,
-            username: "Username already taken"
-          }));
-          document
-            .querySelector('[name="username"]')
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
-          document.querySelector('[name="username"]')?.focus();
-        } else {
-          alert(errorMessage);
+    setIsSubmitting(true);
+    try {
+      switch (step) {
+        case 1: {
+          // Account Info
+          if (isDev) {
+            setStep(2);
+            break;
+          }
+          await checkCredentialsApi({ username: formData.username });
+          setStep(2);
+          break;
         }
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else if (step === 2) {
-      if (isDev) {
-        setStep(3);
-        return;
-      }
-      // Check email and contact number availability before proceeding to verification
-      setIsSubmitting(true);
 
-      try {
-        const checkPayload = {
-          email: formData.email,
-          contact_number: formData.contactNumber
-        };
-
-        await checkCredentialsApi(checkPayload);
-        // Email and contact number are available, send OTP and proceed to step 3
-        await sendOtp();
-        setStep(3);
-      } catch (error) {
-        console.error(error);
-        const errorMessage =
-          error.response?.data?.message || "Credential check failed";
-
-        // Parse which field is taken and show appropriate error
-        if (errorMessage.includes("Email")) {
-          setErrors((prev) => ({ ...prev, email: "Email already registered" }));
-          document
-            .querySelector('[name="email"]')
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
-          document.querySelector('[name="email"]')?.focus();
-        } else if (errorMessage.includes("Contact number")) {
-          setErrors((prev) => ({
-            ...prev,
-            contactNumber: "Contact number already registered"
-          }));
-          document
-            .querySelector('[name="contactNumber"]')
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
-          document.querySelector('[name="contactNumber"]')?.focus();
-        } else {
-          alert(errorMessage);
+        case 2: {
+          // Address / Contact Info
+          if (isDev) {
+            setStep(3);
+            break;
+          }
+          await checkCredentialsApi({
+            email: formData.email,
+            contact_number: formData.contactNumber
+          });
+          await sendOtp();
+          setStep(3);
+          break;
         }
-      } finally {
-        setIsSubmitting(false);
+
+        case 3: {
+          if (isDev) {
+            setShowScanner(true);
+            break;
+          }
+
+          const otpCode = otp.join("");
+          if (otpCode.length !== 6) {
+            setOtpError("Please enter the complete 6-digit OTP");
+            break;
+          }
+
+          await verifyOTPApi(formData.email, otpCode);
+
+          const accountPayload = {
+            username: formData.username,
+            password: formData.password,
+            guardian_name: formData.firstName + " " + formData.lastName,
+            email: formData.email,
+            contact_number: formData.contactNumber,
+            relationship_to_vip: formData.relationship,
+            province: formData.province,
+            city: formData.city,
+            barangay: formData.barangay,
+            street_address: formData.streetAddress
+          };
+
+          const { data } = await registerApi(accountPayload);
+          setGuardianId(data.guardian_id);
+          setShowScanner(true);
+          break;
+        }
+        default: {
+          console.warn("Unknown step:", step);
+          break;
+        }
       }
-    } else {
-      if (isDev) {
+    } catch (error) {
+      console.error(error);
+      const errorMessage =
+        error.response?.data?.message || "Something went wrong";
+
+      if (errorMessage.includes("OTP")) {
+        setOtpError(errorMessage);
+      } else {
         setModalConfig({
           visible: true,
-          type: "account-created",
-          position: "center"
+          type: "error",
+          position: "center",
+          message: errorMessage
         });
-        return;
       }
-      // Step 3: Verify OTP and create account
-      setIsSubmitting(true);
-      setOtpError("");
-
-      try {
-        // Verify OTP first
-        const otpCode = otp.join("");
-
-        if (otpCode.length !== 6) {
-          setOtpError("Please enter the complete 6-digit OTP");
-          setIsSubmitting(false);
-          return;
-        }
-
-        await verifyOTPApi(formData.email, otpCode);
-
-        const payload = {
-          username: formData.username,
-          password: formData.password,
-          guardian_name: formData.firstName + " " + formData.lastName,
-          email: formData.email,
-          contact_number: formData.contactNumber,
-          relationship_to_vip: formData.relationship,
-          province: formData.province,
-          city: formData.city,
-          barangay: formData.barangay,
-          street_address: formData.streetAddress,
-          device_serial_number: formData.deviceSerial
-        };
-
-        await registerApi(payload);
-
-        setModalConfig({
-          visible: true,
-          type: "account-created",
-          position: "center"
-        });
-      } catch (error) {
-        console.error(error);
-        const errorMessage =
-          error.response?.data?.message || "Registration failed";
-
-        if (errorMessage.includes("OTP")) {
-          setOtpError(errorMessage);
-        } else {
-          alert(errorMessage);
-        }
-      } finally {
-        setIsSubmitting(false);
-      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const hasStepErrors = () => Object.keys(validateStep(step)).length > 0;
-
-  const handleScan = (scannedCode) => {
-    setDeviceSerial(scannedCode);
-    setShowScanner(false);
-  };
 
   const sendOtp = async () => {
     setIsSendingOtp(true);
@@ -464,7 +393,6 @@ const Register = () => {
     await sendOtp();
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
@@ -740,36 +668,39 @@ const Register = () => {
                   </div>
                 </div>
               )}
-              <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
-                <PrimaryButton
-                  className="w-full py-3 sm:py-4 text-md sm:text-md"
-                  text={
-                    isSubmitting
-                      ? step === 3
-                        ? "Verifying..."
-                        : "Checking..."
-                      : `${step === 3 ? "Create Account" : "Next"}`
-                  }
-                  type="submit"
-                  disabled={
-                    isSubmitting ||
-                    hasStepErrors() ||
-                    (step === 3 && !otpSent && !isDev)
-                  }
-                />
-                {step > 1 && (
+
+              {step <= 3 && (
+                <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
                   <PrimaryButton
-                    className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
-                    textColor="text-black"
-                    text="Back"
-                    variant="outline"
-                    type="button"
-                    onClick={() => {
-                      setStep(step - 1);
-                    }}
+                    className="w-full py-3 sm:py-4 text-md sm:text-md"
+                    text={
+                      isSubmitting
+                        ? step === 3
+                          ? "Verifying..."
+                          : "Checking..."
+                        : `${step === 3 ? "Create Account" : "Next"}`
+                    }
+                    type="submit"
+                    disabled={
+                      isSubmitting ||
+                      hasStepErrors() ||
+                      (step === 3 && !otpSent && !isDev)
+                    }
                   />
-                )}
-              </div>
+                  {step > 1 && (
+                    <PrimaryButton
+                      className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
+                      textColor="text-black"
+                      text="Back"
+                      variant="outline"
+                      type="button"
+                      onClick={() => {
+                        setStep(step - 1);
+                      }}
+                    />
+                  )}
+                </div>
+              )}
 
               <p className="font-poppins text-center text-[18px] mt-4">
                 Already have an Account?{" "}
@@ -793,7 +724,7 @@ const Register = () => {
 
       {/* Email Verification Modal */}
       {modalConfig.visible && (
-        <EmailValidationModal
+        <ValidationModal
           type={modalConfig.type}
           position={modalConfig.position}
           onAction={handleModalAction}
@@ -813,11 +744,17 @@ const Register = () => {
             </p>
           </div>
 
-          <ScannerCamera
-            onClose={() => setShowScanner(false)}
-            onScan={handleScan}
-          />
+          <ScannerCamera onClose={() => setShowScanner(false)} />
         </div>
+      )}
+
+      {deviceValidated && !toastShown && toast.showToast && (
+        <Toast
+          position="bottom-right"
+          message={toast.toastMessage}
+          type={toast.toastType}
+          onClose={() => setToast({ ...toast, showToast: false })}
+        />
       )}
     </>
   );
