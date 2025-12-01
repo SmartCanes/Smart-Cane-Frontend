@@ -2,14 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import notifBell from "@/assets/images/notifbell.png";
 import { useNavigate } from "react-router-dom";
-import { useUserStore } from "@/stores/useStore";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
 import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 import { Link } from "react-router-dom";
+import { useRealtimeStore, useUserStore } from "@/stores/useStore";
+import { logoutApi } from "@/api/authService";
 
 const Header = () => {
-  const { connectionStatus, user, logout } = useUserStore();
-  const { notificationCount, setNotificationCount } = useState(0);
+  const { user, clearUser } = useUserStore();
+  const { connectionStatus } = useRealtimeStore();
+  const [notificationCount, setNotificationCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -31,10 +33,18 @@ const Header = () => {
 
   const handleNotificationClick = () => {};
 
-  const handleLogoutClick = () => {
+  const handleLogoutClick = async () => {
     setIsDropdownOpen(false);
-    logout();
-    navigate("/");
+    try {
+      const response = await logoutApi();
+      if (response.success) {
+        clearUser();
+        navigate("/login");
+      }
+    } catch (error) {
+      clearUser();
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -86,7 +96,7 @@ const Header = () => {
             className="w-9 h-9 sm:w-10 sm:h-10 bg-white hover:bg-gray-100 text-primary-100 rounded-full flex items-center justify-center font-poppins font-semibold text-sm sm:text-base transition-colors duration-200"
             aria-label="User menu"
           >
-            {user ? user.userName.charAt(0).toUpperCase() : "Z"}
+            {user ? user.username.charAt(0).toUpperCase() : "Z"}
           </button>
 
           {/* Dropdown Menu */}
