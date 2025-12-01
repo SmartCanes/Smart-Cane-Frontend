@@ -4,12 +4,25 @@ import SidebarContent from "@/ui/components/SidebarContent";
 import { verifyAuthApi } from "@/api/authService";
 
 const ProtectedLayout = () => {
+  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const navigate = useNavigate();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        if (isDev) {
+          const cookies = document.cookie.split(";").reduce((acc, cookie) => {
+            const [key, value] = cookie.trim().split("=");
+            acc[key] = value;
+            return acc;
+          }, {});
+
+          if (cookies.access_token === "DEV_ACCESS_TOKEN") {
+            setIsAuthChecked(true);
+            return;
+          }
+        }
         const response = await verifyAuthApi();
         if (!response.data.token_valid) throw new Error("Invalid token");
         setIsAuthChecked(true);
@@ -20,7 +33,7 @@ const ProtectedLayout = () => {
     };
 
     checkAuth();
-  }, [navigate]);
+  }, [navigate, isDev]);
 
   if (!isAuthChecked) {
     return (
