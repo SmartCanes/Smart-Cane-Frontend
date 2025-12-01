@@ -10,7 +10,7 @@ import { logoutApi } from "@/api/authService";
 
 const Header = () => {
   const { user, clearUser } = useUserStore();
-  const { connectionStatus } = useRealtimeStore();
+  const { connectionStatus, disconnectWs } = useRealtimeStore();
   const [notificationCount, setNotificationCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -39,10 +39,10 @@ const Header = () => {
       const response = await logoutApi();
       if (response.success) {
         clearUser();
+        disconnectWs();
         navigate("/login");
       }
     } catch (error) {
-      clearUser();
       console.error("Logout failed:", error);
     }
   };

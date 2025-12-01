@@ -79,5 +79,9 @@ export const useRealtimeStore = create((set, get) => ({
       resetHeartbeat();
     });
   },
-  setGuardianLocation: (loc) => set({ guardianLocation: loc })
+  setGuardianLocation: (loc) => set({ guardianLocation: loc }),
+  disconnectWs: () => {
+    wsApi.disconnect();
+    set({ _wsConnected: false, connectionStatus: false });
+  }
 }));
