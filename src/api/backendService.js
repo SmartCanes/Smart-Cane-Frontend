@@ -19,3 +19,8 @@ export const getVIPById = (id) =>
 
 export const createVIP = (payload) =>
   handleRequest(() => backendApi.post("/vip", payload));
+
+// Device
+
+export const pairDevice = (payload) =>
+  handleRequest(() => backendApi.post("/device/pair", payload));
