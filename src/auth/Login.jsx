@@ -55,10 +55,13 @@ const Login = () => {
       }
 
       setUser(response.data.user || response.data);
-
       await new Promise((resolve) => setTimeout(resolve, 300));
-
-      navigate("/dashboard");
+      navigate("/dashboard", {
+        state: {
+          showModal: true
+        },
+        replace: true
+      });
     } catch (err) {
       console.error("Login error:", err);
       console.error("Error response:", err.response?.data);

@@ -9,11 +9,11 @@ import { motion, useAnimation } from "framer-motion";
 import Toast from "@/ui/components/Toast";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
 import { useRealtimeStore } from "@/stores/useStore";
+import { useLocation } from "react-router-dom";
 
 import QuickActions from "@/ui/components/QuickActions";
 
 const Dashboard = () => {
-  // const { showLoginModal, setShowLoginModal } = useAuthStore();
   const {
     connectWs,
     emergency,
@@ -21,8 +21,13 @@ const Dashboard = () => {
     guardianLocation,
     setGuardianLocation
   } = useRealtimeStore();
-
-  const [showModal, setShowModal] = useState(false);
+  const location = useLocation();
+  const [toast, setToast] = useState({
+    message: "",
+    type: "",
+    position: "",
+    show: false
+  });
   const [activeTab, setActiveTab] = useState("track");
   const [startPoint, setStartPoint] = useState("");
   // const [route, setRoute] = useState(null);
@@ -102,11 +107,28 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // useEffect(() => {
-  //   if (!showLoginModal) return;
-  //   setShowModal(true);
-  //   setShowLoginModal(false);
-  // }, [showLoginModal, setShowLoginModal]);
+  useEffect(() => {
+    const showModal = location.state?.showModal;
+    if (showModal) {
+      setToast({
+        show: true,
+        message: "You have successfully logged into your account.",
+        type: "success",
+        position: "top-right"
+      });
+
+      window.history.replaceState({}, document.title);
+
+      const timer = setTimeout(() => {
+        setToast((prev) => ({ ...prev, show: false }));
+      }, 3000);
+
+      return () => {
+        clearTimeout(timer);
+        setToast((prev) => ({ ...prev, show: false }));
+      };
+    }
+  }, [location]);
 
   return (
     <>
@@ -243,12 +265,12 @@ const Dashboard = () => {
                 />
               </div>
               <SendNote />
-              {showModal && (
+              {toast.show && (
                 <Toast
-                  message="You have successfully logged into your account."
-                  type="success"
-                  position="top-right"
-                  onClose={() => setShowModal(false)}
+                  message={toast.message}
+                  type={toast.type}
+                  position={toast.position}
+                  onClose={() => setToast((prev) => ({ ...prev, show: false }))}
                 />
               )}
               {emergency && (
