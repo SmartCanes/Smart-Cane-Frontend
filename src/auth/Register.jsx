@@ -336,11 +336,33 @@ const Register = () => {
         }
       }
     } catch (error) {
-      console.error(error);
       const errorMessage =
-        error.response?.data?.message || "Something went wrong";
-
-      if (errorMessage.includes("OTP")) {
+        error.response?.data?.message || error.message || "Login failed";
+      if (errorMessage.includes("Username")) {
+        setErrors((prev) => ({
+          ...prev,
+          username: "Username already taken"
+        }));
+        document
+          .querySelector('[name="username"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        document.querySelector('[name="username"]')?.focus();
+      } else if (errorMessage.includes("Email")) {
+        setErrors((prev) => ({ ...prev, email: "Email already registered" }));
+        document
+          .querySelector('[name="email"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        document.querySelector('[name="email"]')?.focus();
+      } else if (errorMessage.includes("Contact number")) {
+        setErrors((prev) => ({
+          ...prev,
+          contactNumber: "Contact number is already registered"
+        }));
+        document
+          .querySelector('[name="contactNumber"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        document.querySelector('[name="contactNumber"]')?.focus();
+      } else if (errorMessage.includes("OTP")) {
         setOtpError(errorMessage);
       } else {
         setModalConfig({
