@@ -90,12 +90,11 @@ const DashboardSide = ({ className = "" }) => {
   ];
 
   // 2. MOBILE MENU ITEMS (Based on Figma)
-  // Ito ay bago at visible lang sa mobile. Dito natin pinalitan ang labels at icons.
   const mobileMenuItems = [
     {
       id: "mobile-home",
       label: "Home",          
-      icon: "solar:home-2-bold", 
+      icon: "material-symbols:home-rounded", 
       path: "/dashboard"       
     },
     {
@@ -107,19 +106,20 @@ const DashboardSide = ({ className = "" }) => {
     {
       id: "mobile-notes",
       label: "Notes",         
-      icon: "solar:document-add-linear", 
+      icon: "material-symbols-light:add-notes-outline-rounded", 
       path: "/notes"   
     },
     {
       id: "mobile-guardian",
       label: "Guardian",       
       icon: "solar:shield-user-outline", 
+      path: "/manage-profile"
     },
 
     {
       id: "mobile-weather",
       label: "Weather",        
-      icon: "solar:cloud-sun-bold", 
+      icon: "material-symbols-light:weather-hail", 
       path: "/weather-board"
     }
 
@@ -144,10 +144,10 @@ const DashboardSide = ({ className = "" }) => {
             <HoverNavEffect delay={0.1} key={item.id}>
               <button
                 onClick={() => handleNavigation(item.path)}
-                className={`flex flex-col items-center justify-center flex-1 py-2 ${
+                className={`flex flex-col items-center justify-center w-16 py-3 transition-all duration-300 ${
                   location.pathname === item.path
-                    ? "text-white font-bold" // Active: White & Bold
-                    : "text-gray-400"        // Inactive: Grayish
+                    ? "bg-white text-primary-100 font-bold shadow-md" // Active: White BG, Dark Text
+                    : "text-gray-400 hover:text-white"        // Inactive: Grayish
                 }`}
               >
                 <Icon icon={item.icon} className="text-2xl" />
