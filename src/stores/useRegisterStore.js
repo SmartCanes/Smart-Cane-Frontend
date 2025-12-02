@@ -20,7 +20,6 @@ export const useRegisterStore = create(
         deviceSerial: ""
       },
       step: 1,
-      otp: ["", "", "", "", "", ""],
       otpSent: false,
       guardianId: null,
       setGuardianId: (id) => set({ guardianId: id }),
@@ -29,12 +28,6 @@ export const useRegisterStore = create(
         set((state) => ({
           formData: { ...state.formData, [field]: value }
         })),
-      updateOtp: (index, value) =>
-        set((state) => {
-          const newOtp = [...state.otp];
-          newOtp[index] = value;
-          return { otp: newOtp };
-        }),
       setOtpSent: (sent) => set({ otpSent: sent }),
       setDeviceSerial: (serial) =>
         set((state) => ({
