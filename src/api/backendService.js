@@ -21,6 +21,10 @@ export const createVIP = (payload) =>
   handleRequest(() => backendApi.post("/vip", payload));
 
 // Device
-
 export const pairDevice = (payload) =>
   handleRequest(() => backendApi.post("/device/pair", payload));
+
+export const validateDeviceSerial = (serial_number) =>
+  handleRequest(() =>
+    backendApi.get(`/device/validate?device_serial=${serial_number}`)
+  );
