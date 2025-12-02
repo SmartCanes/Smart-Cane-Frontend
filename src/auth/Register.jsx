@@ -156,15 +156,17 @@ const Register = () => {
 
     updateForm(name, newValue);
 
-    // Clear error for the field
     setErrors((prev) => ({ ...prev, [name]: "" }));
 
     if (name === "password" || name === "confirmPassword") {
       if (formData.confirmPassword || formData.password) {
-        const passwordError = validateField("password", formData.password);
+        const passwordError = validateField(
+          "password",
+          name === "password" ? newValue : formData.password
+        );
         const confirmError = validateField(
           "confirmPassword",
-          formData.confirmPassword
+          name === "confirmPassword" ? newValue : formData.confirmPassword
         );
         setErrors((prev) => ({
           ...prev,
@@ -172,6 +174,10 @@ const Register = () => {
           confirmPassword: confirmError
         }));
       }
+    }
+    if (name === "contactNumber") {
+      const error = validateField(name, newValue);
+      setErrors((prev) => ({ ...prev, [name]: error }));
     }
   };
 
@@ -651,6 +657,7 @@ const Register = () => {
                         type="text"
                         maxLength="1"
                         value={digit}
+                        inputMode="numeric"
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
