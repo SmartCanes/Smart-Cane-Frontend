@@ -5,7 +5,7 @@ import PrimaryButton from "./PrimaryButton";
 import Toast from "./Toast";
 import { useRegisterStore } from "@/stores/useRegisterStore";
 import { useNavigate } from "react-router-dom";
-import ValidationModal from "./ValidationModal";
+import Modal from "./Modal";
 
 const PREFIX = "SC-";
 const SERIAL_LENGTH = 6;
@@ -16,7 +16,6 @@ const ScannerCamera = ({ onScan }) => {
   const clearStore = useRegisterStore((state) => state.clearStore);
   const [paused, setPaused] = useState(false);
   const [hasCamera, setHasCamera] = useState(false);
-  const [scannedCode, setScannedCode] = useState(null);
   const [serial, setSerial] = useState(Array(SERIAL_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({
@@ -25,9 +24,13 @@ const ScannerCamera = ({ onScan }) => {
     type: ""
   });
   const [modalConfig, setModalConfig] = useState({
-    visible: false,
-    type: null,
-    position: "center"
+    isOpen: false,
+    variant: "",
+    title: "",
+    message: "",
+    actionText: "",
+    onAction: null,
+    onClose: null
   });
 
   const inputRefs = useRef([...Array(SERIAL_LENGTH)].map(() => createRef()));
@@ -47,17 +50,15 @@ const ScannerCamera = ({ onScan }) => {
 
       try {
         const url = new URL(code);
-        device_serial = url.searchParams.get("device_serial");
+        device_serial = url.searchParams.get("device_serial").slice(3);
       } catch (e) {
-        console.warn("Scanned code is not a URL");
+        console.warn("Scanned code is not a URL" + e);
       }
 
       if (!device_serial) {
-        console.error("No device_serial found in QR");
+        console.error("No device_serial found in QR" + code);
         return;
       }
-
-      setScannedCode(device_serial);
 
       if (onScan) {
         onScan(device_serial);
@@ -112,6 +113,21 @@ const ScannerCamera = ({ onScan }) => {
   };
 
   const handlePair = async (code) => {
+    const isDev = (import.meta.env.VITE_ENV || "development") === "development";
+    if (isDev && code === "SC-000000") {
+      clearStore();
+      setModalConfig({
+        isOpen: true,
+        variant: "banner",
+        title: "Device Paired!",
+        message: "You can now continue to login and start using your account.",
+        actionText: "Proceed to Login",
+        onAction: () => navigate("/login"),
+        onClose: () => navigate("/login")
+      });
+      return;
+    }
+
     if (!guardianId) {
       setToast({
         showToast: true,
@@ -131,12 +147,14 @@ const ScannerCamera = ({ onScan }) => {
       if (!res.success) return;
       clearStore();
       setModalConfig({
-        visible: true,
-        type: "account-created",
-        position: "center",
-        title: "Device Paired",
-        message: "The device has been successfully paired. You can now log in."
+        isOpen: true,
+        variant: "banner",
+        title: "Pairing Successful",
+        message: "You can now continue to login and start using your account.",
+        actionText: "Proceed to Login",
+        onAction: () => navigate("/login")
       });
+      navigate("/login");
     } catch (err) {
       setToast({
         showToast: true,
@@ -151,7 +169,6 @@ const ScannerCamera = ({ onScan }) => {
 
   const handleManualPair = () => {
     const code = PREFIX + serial.join("");
-    setScannedCode(code);
     handlePair(code);
   };
 
@@ -185,12 +202,14 @@ const ScannerCamera = ({ onScan }) => {
           <div className="flex-grow h-px bg-gray-300"></div>
         </div>
 
-        <div className="flex flex-col items-center gap-5">
+        <div className="w-full max-w-sm mx-auto flex flex-col items-center gap-5">
           <span className="mb-2 text-gray-700 font-medium">
             Enter Serial Code
           </span>
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-700 font-semibold">{PREFIX}</span>
+          <div className="grid grid-cols-7 gap-2 sm:gap-3 w-full items-center">
+            <span className="text-gray-700 font-semibold sm:text-xl md:text-2xl w-full">
+              {PREFIX}
+            </span>
             {serial.map((digit, index) => (
               <input
                 key={index}
@@ -198,11 +217,12 @@ const ScannerCamera = ({ onScan }) => {
                 type="text"
                 maxLength={1}
                 value={digit}
+                inputMode="numeric"
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onFocus={() => setPaused(true)}
                 onBlur={() => setPaused(false)}
-                className="w-10 h-12 text-center border border-gray-300 rounded-md text-lg font-mono focus:border-blue-500 focus:outline-none"
+                className="h-12 w-full text-center border border-gray-300 rounded-md text-lg font-mono focus:border-blue-500 focus:outline-none"
               />
             ))}
           </div>
@@ -210,7 +230,7 @@ const ScannerCamera = ({ onScan }) => {
             variant="primary"
             text={loading ? "Pairing..." : "Pair"}
             onClick={handleManualPair}
-            disabled={loading}
+            disabled={loading || toast.showToast || serial.includes("")}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
           />
         </div>
@@ -224,18 +244,15 @@ const ScannerCamera = ({ onScan }) => {
         />
       )}
 
-      {modalConfig.visible && (
-        <ValidationModal
-          type={modalConfig.type}
-          position={modalConfig.position}
-          onAction={() => {
-            if (modalConfig.type === "account-created") navigate("/login");
-            setModalConfig({ ...modalConfig, visible: false });
-          }}
-          email={modalConfig.email}
-        />
-      )}
-
+      <Modal
+        isOpen={modalConfig.isOpen}
+        onClose={modalConfig.onClose}
+        variant={modalConfig.variant}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        actionText={modalConfig.actionText}
+        onAction={modalConfig.onAction}
+      />
       <style>
         {`
           @keyframes scan {
