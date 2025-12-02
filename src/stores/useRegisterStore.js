@@ -22,6 +22,12 @@ export const useRegisterStore = create(
       step: 1,
       otpSent: false,
       guardianId: null,
+      deviceValidated: {
+        validated: false,
+        serial: null,
+        status: null
+      },
+
       setGuardianId: (id) => set({ guardianId: id }),
       setStep: (step) => set({ step }),
       updateForm: (field, value) =>
@@ -33,6 +39,27 @@ export const useRegisterStore = create(
         set((state) => ({
           formData: { ...state.formData, deviceSerial: serial }
         })),
+
+      setDeviceValidated: (deviceData) =>
+        set({
+          deviceValidated: {
+            validated: deviceData.validated,
+            serial: deviceData.serial,
+            status: deviceData.status,
+            validatedAt: new Date().toISOString()
+          }
+        }),
+
+      clearDeviceValidated: () =>
+        set({
+          deviceValidated: {
+            validated: false,
+            serial: null,
+            status: null,
+            validatedAt: null
+          }
+        }),
+
       clearStore: () =>
         set({
           formData: {
@@ -49,6 +76,12 @@ export const useRegisterStore = create(
             email: "",
             contactNumber: "",
             deviceSerial: ""
+          },
+          deviceValidated: {
+            validated: false,
+            serial: null,
+            status: null,
+            validatedAt: null
           },
           otp: ["", "", "", "", "", ""],
           otpSent: false,

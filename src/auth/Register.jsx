@@ -14,6 +14,7 @@ import Loader from "@/ui/components/Loader";
 import { useRegisterStore } from "@/stores/useRegisterStore";
 import ScannerCamera from "@/ui/components/Scanner";
 import Modal from "@/ui/components/Modal";
+import { pairDevice, validateDeviceSerial } from "@/api/backendService";
 
 const barangays = [
   { value: "brgy1", label: "Barangay 1" },
@@ -42,16 +43,19 @@ const provinces = [
 const Register = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const CONTACT_NUMBER_LENGTH = 11;
+  const navigate = useNavigate();
   const {
     step,
     setStep,
     formData,
     updateForm,
-    otp,
-    updateOtp,
     otpSent,
     setGuardianId,
-    setOtpSent
+    setOtpSent,
+    deviceValidated,
+    setDeviceValidated,
+    clearDeviceValidated,
+    clearStore
   } = useRegisterStore();
 
   const [showScanner, setShowScanner] = useState(false);
@@ -59,10 +63,12 @@ const Register = () => {
     isOpen: false,
     type: null,
     message: "",
-    modalType: null
+    modalType: null,
+    onAction: null
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpError, setOtpError] = useState("");
   const [countdown, setCountdown] = useState(0);
   const [errors, setErrors] = useState({});
@@ -219,7 +225,9 @@ const Register = () => {
 
   const handleOtpChange = (index, value) => {
     if (value.length <= 1 && /^[0-9]*$/.test(value)) {
-      updateOtp(index, value);
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
       setOtpError("");
 
       if (value && index < 5) {
@@ -238,7 +246,8 @@ const Register = () => {
   const handleNext = async (e) => {
     e.preventDefault();
 
-    // Validate current step
+    setOtp(["", "", "", "", "", ""]);
+
     const stepErrors = validateStep(step);
     if (!isDev && Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
@@ -286,6 +295,8 @@ const Register = () => {
           if (isDev) {
             setModalConfig({
               isOpen: true,
+              onClose: () =>
+                setModalConfig((prev) => ({ ...prev, isOpen: false })),
               variant: "banner",
               title: "Account Created!",
               message:
@@ -318,14 +329,53 @@ const Register = () => {
 
           const { data } = await registerApi(accountPayload);
           setGuardianId(data.guardian_id);
-          setModalConfig({
-            isOpen: true,
-            variant: "banner",
-            title: "Account Created!",
-            message:
-              "Account successfully created. Please pair your device to proceed."
-          });
-          setShowScanner(true);
+
+          if (deviceValidated.status === "ok" && deviceValidated.serial) {
+            try {
+              const res = await pairDevice({
+                device_serial_number: deviceValidated.serial,
+                guardian_id: data.guardian_id
+              });
+
+              if (res.success) {
+                setModalConfig({
+                  isOpen: true,
+                  onClose: () =>
+                    setModalConfig((prev) => ({ ...prev, isOpen: false })),
+                  variant: "banner",
+                  title: "Setup Complete!",
+                  message:
+                    "Your account has been created and device paired successfully.",
+                  actionText: "Go to Login",
+                  onAction: () => navigate("/login")
+                });
+                clearDeviceValidated();
+                clearStore();
+              }
+            } catch {
+              setModalConfig({
+                isOpen: true,
+                onClose: () =>
+                  setModalConfig((prev) => ({ ...prev, isOpen: false })),
+                variant: "banner",
+                title: "Account Created!",
+                message:
+                  "Account created successfully. Please manually pair your device."
+              });
+              setShowScanner(true);
+            }
+          } else {
+            setModalConfig({
+              isOpen: true,
+              onClose: () =>
+                setModalConfig((prev) => ({ ...prev, isOpen: false })),
+              variant: "banner",
+              title: "Account Created!",
+              message:
+                "Account successfully created. Please pair your device to proceed."
+            });
+            setShowScanner(true);
+          }
           break;
         }
         default: {
@@ -412,6 +462,57 @@ const Register = () => {
     if (countdown > 0 || isSendingOtp) return;
     await sendOtp();
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const deviceSerial = params.get("device_serial");
+
+    if (!deviceSerial || deviceValidated.validated) return;
+
+    const validate = async () => {
+      try {
+        const { data } = await validateDeviceSerial(deviceSerial);
+        setDeviceValidated({
+          validated: data.reason === "ok",
+          serial: deviceSerial,
+          status: data.reason
+        });
+        setModalConfig({
+          isOpen: true,
+          variant: "banner",
+          position: "center",
+          onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+          title:
+            data.reason === "ok"
+              ? "Device Verified"
+              : data.reason === "already_paired"
+                ? "Device Already Paired"
+                : "Device Not Found",
+          message:
+            data.reason === "ok"
+              ? "Your device has been successfully verified and is ready to be paired. Register your account to continue."
+              : data.reason === "already_paired"
+                ? "This device is already linked to another account. If you believe this is a mistake, please contact support."
+                : "We couldn’t locate a device with this serial code. Please check and try again."
+        });
+        window.history.replaceState({}, "", window.location.pathname);
+      } catch (error) {
+        setModalConfig({
+          isOpen: true,
+          variant: "banner",
+          position: "center",
+          title: "Invalid Device",
+          message: error.message || "Invalid device. Please try again."
+        });
+      }
+    };
+
+    validate();
+
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [deviceValidated.validated, setDeviceValidated]);
 
   useEffect(() => {
     return () => {
@@ -762,21 +863,20 @@ const Register = () => {
             </p>
           </div>
 
-          <ScannerCamera onClose={() => setShowScanner(false)} />
+          <ScannerCamera />
         </div>
       )}
 
       <Modal
         isOpen={modalConfig.isOpen}
-        onClose={() => {
-          setModalConfig({ ...modalConfig, isOpen: false });
-        }}
+        onClose={modalConfig.onClose}
         modalType={modalConfig.type}
         position={modalConfig.position}
         actionText={modalConfig.actionText}
         title={modalConfig.title}
         message={modalConfig.message}
         variant={modalConfig.variant}
+        onAction={modalConfig.onAction}
       />
     </>
   );
