@@ -404,7 +404,7 @@ const Register = () => {
       }, 1000);
     } catch (error) {
       console.error("Failed to send OTP:", error);
-      setOtpError("Failed to send OTP. Please try again.");
+      setOtpError(error.message || "Failed to send OTP. Please try again.");
     } finally {
       setIsSendingOtp(false);
     }
@@ -424,9 +424,9 @@ const Register = () => {
   return (
     <>
       {!showScanner && (
-        <div className="flex-1 flex flex-col gap-5 justify-center items-center px-5 sm:min-h-screen sm:py-10 ">
+        <div className="flex-1 flex flex-col gap-5 sm:justify-center items-center px-5 sm:min-h-screen sm:py-10 ">
           <>
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-2 ">
               <h1 className="hidden sm:block  text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
                 {step === 3 ? "Email Verification" : "Welcome"}
               </h1>
@@ -450,6 +450,13 @@ const Register = () => {
               <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
                 Create your account
               </p>
+              {step === 3 && (
+                <p className="sm:hidden font-poppins text-[#1C253C] text-paragraph text-sm">
+                  Enter the{" "}
+                  <span className="font-bold">6-digit verification code</span>{" "}
+                  code we have sent to your email address.
+                </p>
+              )}
             </div>
 
             <form
