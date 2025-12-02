@@ -19,10 +19,12 @@ export const useRegisterStore = create(
         contactNumber: "",
         deviceSerial: ""
       },
+      step: 1,
       otp: ["", "", "", "", "", ""],
       otpSent: false,
       guardianId: null,
       setGuardianId: (id) => set({ guardianId: id }),
+      setStep: (step) => set({ step }),
       updateForm: (field, value) =>
         set((state) => ({
           formData: { ...state.formData, [field]: value }

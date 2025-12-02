@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import TextField from "../ui/components/TextField";
 import SelectField from "../ui/components/SelectField";
 import PasswordField from "../ui/components/PasswordField";
@@ -13,8 +13,7 @@ import {
 import Loader from "@/ui/components/Loader";
 import { useRegisterStore } from "@/stores/useRegisterStore";
 import ScannerCamera from "@/ui/components/Scanner";
-import Toast from "@/ui/components/Toast";
-import ValidationModal from "@/ui/components/ValidationModal";
+import Modal from "@/ui/components/Modal";
 
 const barangays = [
   { value: "brgy1", label: "Barangay 1" },
@@ -43,33 +42,25 @@ const provinces = [
 const Register = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const CONTACT_NUMBER_LENGTH = 11;
-  const navigate = useNavigate();
   const {
+    step,
+    setStep,
     formData,
     updateForm,
     otp,
     updateOtp,
     otpSent,
     setGuardianId,
-    setOtpSent,
-    setDeviceSerial,
-    deviceValidated
+    setOtpSent
   } = useRegisterStore();
 
-  const [searchParams] = useSearchParams();
   const [showScanner, setShowScanner] = useState(false);
   const [modalConfig, setModalConfig] = useState({
-    visible: false,
+    isOpen: false,
     type: null,
-    position: "center"
+    message: "",
+    modalType: null
   });
-  const [toast, setToast] = useState({
-    showToast: false,
-    toastMessage: "",
-    toastType: ""
-  });
-  const [step, setStep] = useState(1);
-  const [toastShown, setToastShown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otpError, setOtpError] = useState("");
@@ -238,19 +229,6 @@ const Register = () => {
     }
   };
 
-  const hideModal = () => {
-    setModalConfig({ visible: false, type: null, position: "center" });
-  };
-
-  const handleModalAction = () => {
-    if (modalConfig.type === "account-created") {
-      navigate("/login");
-    } else if (modalConfig.type === "verification-success") {
-      hideModal();
-    }
-    hideModal();
-  };
-
   const handleNext = async (e) => {
     e.preventDefault();
 
@@ -300,6 +278,13 @@ const Register = () => {
 
         case 3: {
           if (isDev) {
+            setModalConfig({
+              isOpen: true,
+              variant: "banner",
+              title: "Account Created!",
+              message:
+                "Account successfully created. Please pair your device to proceed."
+            });
             setShowScanner(true);
             break;
           }
@@ -327,6 +312,13 @@ const Register = () => {
 
           const { data } = await registerApi(accountPayload);
           setGuardianId(data.guardian_id);
+          setModalConfig({
+            isOpen: true,
+            variant: "banner",
+            title: "Account Created!",
+            message:
+              "Account successfully created. Please pair your device to proceed."
+          });
           setShowScanner(true);
           break;
         }
@@ -366,7 +358,7 @@ const Register = () => {
         setOtpError(errorMessage);
       } else {
         setModalConfig({
-          visible: true,
+          isOpen: true,
           type: "error",
           position: "center",
           message: errorMessage
@@ -465,7 +457,7 @@ const Register = () => {
               noValidate
             >
               {/* Step 1: Basic Information */}
-              {step === 1 && (
+              {step === 1 && !showScanner && (
                 <div className="space-y-3 sm:space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <TextField
@@ -537,7 +529,7 @@ const Register = () => {
               )}
 
               {/* Step 2: Address Information */}
-              {step === 2 && (
+              {step === 2 && !showScanner && (
                 <div className="space-y-4">
                   {/* Lot No./Bldg./Street and Province - Side by side */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -648,7 +640,7 @@ const Register = () => {
               )}
 
               {/* Step 3: OTP Verification */}
-              {step === 3 && (
+              {step === 3 && !showScanner && (
                 <div className="space-y-6">
                   {/* OTP Input Boxes */}
                   <div className="flex justify-center gap-3">
@@ -751,16 +743,6 @@ const Register = () => {
         </div>
       )}
 
-      {/* Email Verification Modal */}
-      {modalConfig.visible && (
-        <ValidationModal
-          type={modalConfig.type}
-          position={modalConfig.position}
-          onAction={handleModalAction}
-          email={modalConfig.email}
-        />
-      )}
-
       {showScanner && (
         <div className="flex-1 flex flex-col items-center justify-center px-5 sm:min-h-screen sm:p-10">
           <div className="text-center space-y-2 mb-5">
@@ -777,14 +759,18 @@ const Register = () => {
         </div>
       )}
 
-      {deviceValidated && !toastShown && toast.showToast && (
-        <Toast
-          position="bottom-right"
-          message={toast.toastMessage}
-          type={toast.toastType}
-          onClose={() => setToast({ ...toast, showToast: false })}
-        />
-      )}
+      <Modal
+        isOpen={modalConfig.isOpen}
+        onClose={() => {
+          setModalConfig({ ...modalConfig, isOpen: false });
+        }}
+        modalType={modalConfig.type}
+        position={modalConfig.position}
+        actionText={modalConfig.actionText}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        variant={modalConfig.variant}
+      />
     </>
   );
 };
