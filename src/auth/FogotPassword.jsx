@@ -3,12 +3,17 @@ import PasswordField from "../ui/components/PasswordField";
 import TextField from "../ui/components/TextField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import ValidationModal from "../ui/components/ValidationModal";
+import BackButton from "../ui/components/BackButton";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const ForgotPassword = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1 = Enter Email, 2 = Change Password
   const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState("verification-code");
+  const [modalPosition, setModalPosition] = useState("top-center");
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [formData, setFormData] = useState({
@@ -17,6 +22,7 @@ const ForgotPassword = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isAnimationDone, setIsAnimationDone] = useState(false);
 
   const VALID_EMAIL = "admin@gmail.com";
 
@@ -58,6 +64,8 @@ const ForgotPassword = () => {
         return;
       }
 
+      setModalType("verification-code");
+      setModalPosition("top-center");
       setShowModal(true);
       // Auto-hide modal and move to step 2 after 4 seconds
       setTimeout(() => {
@@ -76,44 +84,62 @@ const ForgotPassword = () => {
         setErrors((prev) => ({ ...prev, ...step2Errors }));
         return;
       }
-      console.log("Password changed");
+      setModalType("password-updated");
+      setModalPosition("center");
+      setShowModal(true);
     }
   };
 
+  const goToLogin = () => navigate("/login");
+  const handleModalAction = () => {
+    setShowModal(false);
+    goToLogin();
+  };
+
   return (
-    <div className="relative w-full min-h-screen flex flex-col lg:flex-row">
-      <SidebarContent className="order-2 lg:order-1 lg:w-1/2" />
+    <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
+      <SidebarContent onAnimationComplete={() => setIsAnimationDone(true)} />
 
       {/* Verification Code Modal */}
       {showModal && (
         <ValidationModal
-          type="verification-code"
+          type={modalType}
           email={userEmail}
-          position="top-center"
+          position={modalPosition}
+          onAction={modalType === "password-updated" ? handleModalAction : undefined}
         />
       )}
 
-      <div className="order-1 lg:order-2 w-full lg:w-1/2 h-full flex flex-col items-center justify-center bg-[#FDFCFA] py-12 px-6 sm:px-10">
-        <div className="w-full max-w-md lg:max-w-lg flex flex-col items-center text-center">
-          <h1 className="font-poppins text-4xl sm:text-5xl lg:text-[64px] font-bold text-[#1C253C] mb-6">
-            {step === 1 ? "Forgot Password" : "Change Password"}
-          </h1>
+      <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
+        <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[40px] sm:pt-0 pb-8 sm:pb-0">
+          <motion.form
+            initial={{ opacity: 0, y: 50 }}
+            animate={isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+            transition={{ duration: 0.6 }}
+            className="w-full max-w-md sm:max-w-none lg:max-w-lg"
+            onSubmit={handleNext}
+            noValidate
+          >
+            <div className="w-full flex flex-col items-center text-center mb-6 sm:mb-10">
+              <h1 className="font-poppins text-4xl sm:text-5xl lg:text-[64px] font-bold text-[#1C253C] mb-6">
+                {step === 1 ? "Forgot Password" : "Change Password"}
+              </h1>
 
-          <div className="mb-10">
-            <p className="font-poppins text-[#1C253C] text-paragraph">
-              {step === 1 ? (
-                "Enter your email address and we'll send you a code to reset your password."
-              ) : (
-                <>
-                  We've sent an code to your
-                  <br />
-                  afri*********@gmail.com
-                </>
-              )}
-            </p>
-          </div>
+              <div className="mb-4 sm:mb-6">
+                <p className="font-poppins text-[#1C253C] text-paragraph">
+                  {step === 1 ? (
+                    "Enter your email address and we'll send you a code to reset your password."
+                  ) : (
+                    <>
+                      We've sent an code to your
+                      <br />
+                      afri*********@gmail.com
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
 
-          <form className="w-full text-left" onSubmit={handleNext} noValidate>
             {/* Step 1: Enter Email */}
             {step === 1 && (
               <div className="space-y-4">
@@ -135,6 +161,9 @@ const ForgotPassword = () => {
                   text="Send Code"
                   type="submit"
                 />
+                <div className="flex justify-center mt-3">
+                  <BackButton onClick={goToLogin} className="sm:w-auto" />
+                </div>
               </div>
             )}
 
@@ -170,14 +199,13 @@ const ForgotPassword = () => {
                   text="Submit"
                   type="submit"
                 />
-
-              
-                
+                <div className="flex justify-center mt-3">
+                  <BackButton onClick={goToLogin} className="sm:w-auto" />
+                </div>
               </div>
             )}
 
-            
-          </form>
+          </motion.form>
         </div>
       </div>
     </div>

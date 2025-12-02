@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import SidebarContent from "../ui/components/SidebarContent";
+import { motion } from "framer-motion";
+import SidebarContent from "../ui/components/SidebarContent"; // Ito na yung updated file
 import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
@@ -11,10 +12,11 @@ const Login = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const { login, setShowLoginModal } = useUserStore();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: "",
-    password: ""
-  });
+
+  // State para malaman kung tapos na ang animation ng SidebarContent
+  const [isAnimationDone, setIsAnimationDone] = useState(false);
+
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPasswordRequired, setShowPasswordRequired] = useState(false);
@@ -30,11 +32,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { username, password } = formData;
-
-    if (username.trim()) {
-      setShowPasswordRequired(true);
-    }
-
+    if (username.trim()) setShowPasswordRequired(true);
+    // ... (Validation Logic Here) ...
     const newErrors = {};
     if (!username.trim()) newErrors.username = "This field is required";
     if (!password) newErrors.password = "This field is required";
@@ -50,48 +49,45 @@ const Login = () => {
         navigate("/dashboard");
         return;
       }
-
       const response = await loginApi(username, password);
       localStorage.setItem("access_token", response.data.access_token);
       login(response.data.guardian_id);
       setShowLoginModal(true);
       navigate("/dashboard");
     } catch (err) {
-      console.error(err);
       const msg = err.response?.data?.message || "Login failed";
-      setErrors({
-        general: msg,
-        username: " ",
-        password: " "
-      });
+      setErrors({ general: msg, username: " ", password: " " });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-dvh w-full flex flex-col sm:flex-row">
-      <SidebarContent />
+    <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
       
-      {/* Main Container */}
-      <div className="w-full min-h-dvh sm:flex-1 relative bg-white sm:bg-[#FDFCFA] px-6 sm:px-10 flex flex-col">
-        
-        {/* --- MOBILE CURVED HEADER (Figma Style) --- */}
-        <div className="absolute top-0 left-0 w-full bg-primary-100 h-[220px] rounded-b-[48px] sm:hidden flex justify-center items-center z-0">
-          <h1 className="font-gabriela text-6xl text-white tracking-wide">iCane</h1>
-        </div>
+      {/* SIDEBAR SECTION ANIMATION
+      */}
+      <SidebarContent onAnimationComplete={() => setIsAnimationDone(true)} />
 
-        {/* --- FORM SECTION --- */}
-        <div className="flex-1 flex items-center justify-center pt-[240px] pb-8 sm:pt-0 sm:pb-0">
-          <div className="w-full max-w-md sm:max-w-none lg:max-w-lg">
-            <form
-              className="w-full"
-              onSubmit={handleSubmit}
-              noValidate
-            >
+      {/* FORM SECTION */}
+      <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
+        
+        {/* Ilalabas lang ang form pag tapos na ang transition ng Sidebar */}
+        <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0">
+          <motion.form
+            initial={{ opacity: 0, y: 50 }}
+            animate={isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+            transition={{ duration: 0.6 }}
+            className="w-full max-w-md sm:max-w-none lg:max-w-lg"
+            onSubmit={handleSubmit}
+            noValidate
+          >
               <div className="flex flex-col items-center text-center mb-6 sm:mb-10">
-                <p className="font-poppins text-[#1C253C] text-center font-medium text-lg sm:text-2xl">
-                  Login to your Account
+                <h1 className="font-poppins text-5xl sm:text-h1 font-bold text-[#1C253C] mb-2">
+                  Welcome!
+                </h1>
+                <p className="font-poppins text-[#1C253C] text-center font-medium text-sm sm:text-lg sm:w-2/3">
+                  Enter your credentials below to access your dashboard and saved features.
                 </p>
               </div>
 
@@ -151,8 +147,7 @@ const Login = () => {
                   </Link>
                 </p>
               </div>
-            </form>
-          </div>
+          </motion.form>
         </div>
       </div>
     </div>

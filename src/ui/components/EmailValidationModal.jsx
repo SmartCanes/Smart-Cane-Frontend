@@ -126,6 +126,19 @@ const ValidationModal = ({
           buttonText: "Continue",
           showButton: true
         };
+      case "password-updated":
+        return {
+          title: "Password Updated!",
+          description: (
+            <>
+              Your password has been changed successfully.
+              <br />
+              Use your new credentials to sign in to your account.
+            </>
+          ),
+          buttonText: "Go to Login",
+          showButton: true
+        };
       default:
         return {
           title: "Notification",

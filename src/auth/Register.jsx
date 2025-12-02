@@ -14,6 +14,7 @@ import {
   verifyOTPApi
 } from "@/api/authService";
 import Loader from "@/ui/components/Loader";
+import { motion } from "framer-motion";
 
 const Register = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
@@ -24,6 +25,7 @@ const Register = () => {
     type: null,
     position: "center"
   });
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
 
   const CONTACT_NUMBER_LENGTH = 11;
   const [otp, setOtp] = useState(["", "", "", "", "", ""]); // 6-digit OTP
@@ -495,8 +497,8 @@ const Register = () => {
   const [barangays, setBarangays] = useState(dummyBarangays);
 
   return (
-    <div className="min-h-screen w-full flex flex-col sm:flex-row">
-      <SidebarContent />
+    <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
+      <SidebarContent onAnimationComplete={() => setIsAnimationComplete(true)} />
 
       {isSubmitting && (
         <div className="absolute inset-0 sm:inset-y-0 sm:left-0 w-full sm:w-1/2 flex items-center justify-center z-30">
@@ -519,46 +521,40 @@ const Register = () => {
           {/* Optional welcome message */}
         </div>
       )}
-      <div className="relative flex flex-col w-full sm:flex-1 min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
-        {/* <Link to="/">
-          <div className="sm:hidden py-4 flex gap-2 absolute top-0 left-4">
-            <img
-              src="src/assets/images/smartcane-logo-blue.png"
-              alt="Smart Cane Logo"
-              className="object-contain w-[45px]"
-            />
-          </div>
-        </Link> */}
-        <div className="absolute top-0 left-0 bg-primary-100 rounded-b-[30%] h-48 w-full sm:hidden flex justify-center items-center">
-          <h1 className="font-gabriela text-8xl text-[#FDFCFA]">iCane</h1>
-        </div>
-        <div className="flex-1 flex justify-center items-center pt-24 pb-5 sm:pt-0 sm:pb-0">
-          <form
+      <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
+
+        {/* Header and Text field in mobile view*/ }
+        <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[50px] sm:pt-0 pb-8 sm:pb-0">
+          <motion.form
+            initial={{ opacity: 0, y: 50 }}  
+            animate={isAnimationComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}  
+            transition={{ duration: 0.6 }} 
             className="w-full max-w-md sm:max-w-none lg:max-w-lg"
             onSubmit={handleNext}
             noValidate
           >
-            <div className="text-center mb-7 sm:mb-10">
-              <h1 className="font-poppins text-5xl sm:text-h1 font-bold text-[#1C253C] mb-4">
-                {step === 3 ? "Email Verification" : "Welcome"}
+            <div className="text-center mb-6 sm:mb-10">
+              <h1 className="font-poppins text-3xl sm:text-5xl md:text-h1 font-bold text-[#1C253C] mb-3 sm:mb-0">
+                {step === 3 ? "Email Verification" : ""}
               </h1>
-              <p className="font-poppins text-[#1C253C] text-paragraph mt-15 text-1xl">
+              <h2 className="font-poppins text-[#1C253C] mb-4 sm:mb-5 text-base sm:text-xl md:text-2xl font-medium px-2">
                 {step === 1 ? (
-                  "Create your account to get started with iCane."
+                  "Create your account to experience the iCane."
                 ) : step === 2 ? (
                   "Start your journey to safer and smarter mobility by signing up."
                 ) : (
                   <>
-                    Enter the{" "}
-                    <span className="font-bold">6-digit verification code</span>{" "}
-                    we have sent to your email address.
-                    <br />
-                    <span className="text-sm text-gray-600">
+                    <span className="block mb-2">
+                      Enter the{" "}
+                      <span className="font-bold">6-digit verification code</span>{" "}
+                      we have sent to your email address.
+                    </span>
+                    <span className="text-xs sm:text-sm text-gray-600 break-all">
                       {formData.email}
                     </span>
                   </>
                 )}
-              </p>
+              </h2>
             </div>
 
             {/* Step 1: Basic Information */}
@@ -633,7 +629,7 @@ const Register = () => {
             {step === 2 && (
               <div className="space-y-4">
                 {/* Lot No./Bldg./Street and Province - Side by side */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
                   <TextField
                     className="font-poppins"
                     label={"Lot No./Bldg./Street"}
@@ -656,7 +652,7 @@ const Register = () => {
                         ...prev,
                         province: e.target.value
                       }));
-                      setErrors((prev) => ({ ...prev, province: "" }));
+                      setErrors((prev) => ({ ...prev, province: "" })); 
                     }}
                     value={formData.province}
                     error={errors.province}
@@ -755,9 +751,9 @@ const Register = () => {
 
             {/* Step 3: OTP Verification */}
             {step === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* OTP Input Boxes */}
-                <div className="flex justify-center gap-3">
+                <div className="flex justify-center gap-2 sm:gap-3 px-2">
                   {otp.map((digit, index) => (
                     <input
                       key={index}
@@ -767,28 +763,28 @@ const Register = () => {
                       value={digit}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
+                      className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-center text-xl sm:text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none transition-all"
                     />
                   ))}
                 </div>
 
                 {/* OTP Error Message */}
                 {otpError && (
-                  <div className="text-center">
-                    <p className="text-red-500 text-sm">{otpError}</p>
+                  <div className="text-center px-4">
+                    <p className="text-red-500 text-xs sm:text-sm">{otpError}</p>
                   </div>
                 )}
 
                 {/* Resend OTP Link */}
-                <div className="text-center">
-                  <p className="font-poppins text-[#1C253C] text-sm mb-2">
+                <div className="text-center px-4">
+                  <p className="font-poppins text-[#1C253C] text-xs sm:text-sm mb-2">
                     Didn't receive the code?
                   </p>
                   <button
                     type="button"
                     onClick={resendOtp}
                     disabled={countdown > 0 || isSendingOtp}
-                    className={`font-poppins text-primary-100 text-sm font-medium ${
+                    className={`font-poppins text-primary-100 text-xs sm:text-sm font-medium ${
                       countdown > 0 || isSendingOtp
                         ? "opacity-50 cursor-not-allowed"
                         : "hover:underline"
@@ -805,7 +801,7 @@ const Register = () => {
             )}
 
             <PrimaryButton
-              className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
+              className="font-poppins w-full py-3 sm:py-4 text-base sm:text-[18px] font-medium mt-4 sm:mt-6"
               bgColor="bg-primary-100"
               text={
                 isSubmitting
@@ -827,16 +823,16 @@ const Register = () => {
               <BackButton onClick={() => setStep(step - 1)} />
             )}
 
-            <p className="font-poppins text-center text-[18px] mt-4">
+            <p className="font-poppins text-center text-sm sm:text-base md:text-[18px] mt-3 sm:mt-4 px-2">
               Already have an Account?{" "}
               <Link
                 to="/login"
-                className="font-poppins text-blue-500 hover:underline text-[18px]"
+                className="font-poppins text-blue-500 hover:underline"
               >
                 Sign In
               </Link>
             </p>
-          </form>
+          </motion.form>
         </div>
       </div>
     </div>
