@@ -159,7 +159,7 @@ export default function Modal({
 
           {variant === "banner" && (
             <motion.div
-              className="bg-white rounded-2xl shadow-xl w-full max-w-md min-h-[350px] flex flex-col"
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md min-h-fit flex flex-col"
               onClick={(e) => e.stopPropagation()}
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

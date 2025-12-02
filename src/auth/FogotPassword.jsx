@@ -2,9 +2,8 @@ import SidebarContent from "../ui/components/SidebarContent";
 import PasswordField from "../ui/components/PasswordField";
 import TextField from "../ui/components/TextField";
 import PrimaryButton from "../ui/components/PrimaryButton";
-import ValidationModal from "../ui/components/ValidationModal";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Modal from "@/ui/components/Modal";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1); // 1 = Enter Email, 2 = Change Password
@@ -85,13 +84,19 @@ const ForgotPassword = () => {
       <SidebarContent className="order-2 lg:order-1 lg:w-1/2" />
 
       {/* Verification Code Modal */}
-      {showModal && (
-        <ValidationModal
-          type="verification-code"
-          email={userEmail}
-          position="top-center"
-        />
-      )}
+
+      <Modal isOpen={showModal} variant="banner" title="Forgot Password">
+        <>
+          We've sent a <span className="font-bold">verification code</span> to
+          your email:
+          <br />
+          {userEmail ?? "********@gmail.com"}
+          <br />
+          <br />
+          Please check your <span className="font-bold">Inbox</span> or{" "}
+          <span className="font-bold">Spam</span> folder.
+        </>
+      </Modal>
 
       <div className="order-1 lg:order-2 w-full lg:w-1/2 h-full flex flex-col items-center justify-center bg-[#FDFCFA] py-12 px-6 sm:px-10">
         <div className="w-full max-w-md lg:max-w-lg flex flex-col items-center text-center">
@@ -170,20 +175,13 @@ const ForgotPassword = () => {
                   text="Submit"
                   type="submit"
                 />
-
-              
-                
               </div>
             )}
-
-            
           </form>
         </div>
       </div>
     </div>
   );
 };
-
-
 
 export default ForgotPassword;
