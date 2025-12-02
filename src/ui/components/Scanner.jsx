@@ -34,6 +34,9 @@ const ScannerCamera = ({ onScan }) => {
   });
 
   const inputRefs = useRef([...Array(SERIAL_LENGTH)].map(() => createRef()));
+  const [lastError, setLastError] = useState(null);
+  const lastScannedCodeRef = useRef(null);
+  const scanCooldownRef = useRef(false);
 
   useEffect(() => {
     navigator.mediaDevices
@@ -43,20 +46,59 @@ const ScannerCamera = ({ onScan }) => {
   }, []);
 
   const handleScan = (detectedCodes) => {
+    if (scanCooldownRef.current || paused) return;
+
     if (detectedCodes && detectedCodes.length > 0) {
       const code = detectedCodes[0].rawValue;
+
+      if (lastError?.code !== code) {
+        setLastError(null);
+      }
+
+      if (lastError?.code === code) {
+        console.log("Skipping previously failed code:", code);
+        return;
+      }
+
+      scanCooldownRef.current = true;
+      lastScannedCodeRef.current = code;
+
+      setPaused(true);
 
       let device_serial = null;
 
       try {
         const url = new URL(code);
-        device_serial = url.searchParams.get("device_serial").slice(3);
+        device_serial = url.searchParams.get("device_serial");
+        console.log("Scanned device serial:", device_serial);
       } catch (e) {
-        console.warn("Scanned code is not a URL" + e);
+        console.error("Error parsing QR code as URL:", e);
+        setToast({
+          showToast: true,
+          message: "Invalid QR code format",
+          type: "error"
+        });
+        setLastError({ code, message: "Invalid QR code format" });
+        setTimeout(() => {
+          scanCooldownRef.current = false;
+          setPaused(false);
+          setLastError(null);
+        }, 2000);
+        return;
       }
 
       if (!device_serial) {
-        console.error("No device_serial found in QR" + code);
+        setToast({
+          showToast: true,
+          message: "No device serial found in QR code",
+          type: "error"
+        });
+        setLastError({ code, message: "No device serial found" });
+        setTimeout(() => {
+          scanCooldownRef.current = false;
+          setPaused(false);
+          setLastError(null);
+        }, 2000);
         return;
       }
 
@@ -65,6 +107,10 @@ const ScannerCamera = ({ onScan }) => {
       } else {
         handlePair(device_serial);
       }
+
+      setTimeout(() => {
+        scanCooldownRef.current = false;
+      }, 5000);
     }
   };
 
@@ -118,12 +164,12 @@ const ScannerCamera = ({ onScan }) => {
       clearStore();
       setModalConfig({
         isOpen: true,
+        onClose: () => navigate("/login"),
         variant: "banner",
-        title: "Device Paired!",
+        title: "Paired Successfully",
         message: "You can now continue to login and start using your account.",
         actionText: "Proceed to Login",
-        onAction: () => navigate("/login"),
-        onClose: () => navigate("/login")
+        onAction: () => navigate("/login")
       });
       return;
     }
@@ -142,23 +188,24 @@ const ScannerCamera = ({ onScan }) => {
       setPaused(true);
       const res = await pairDevice({
         device_serial_number: code,
-        guardian_id: guardianId
+        guardian_id: guardianId || 0
       });
+
       if (!res.success) return;
       clearStore();
       setModalConfig({
         isOpen: true,
+        onClose: () => navigate("/login"),
         variant: "banner",
-        title: "Pairing Successful",
+        title: "Paired Successfully",
         message: "You can now continue to login and start using your account.",
         actionText: "Proceed to Login",
         onAction: () => navigate("/login")
       });
-      navigate("/login");
     } catch (err) {
       setToast({
         showToast: true,
-        message: err.response?.data?.message || "Failed to pair device",
+        message: err.message || "Failed to pair device",
         type: "error"
       });
     } finally {
