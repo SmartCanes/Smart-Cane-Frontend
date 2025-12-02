@@ -162,8 +162,10 @@ const Register = () => {
 
     updateForm(name, newValue);
 
+    // Clear error for this field
     setErrors((prev) => ({ ...prev, [name]: "" }));
 
+    // Your original validation logic (works without flickering)
     if (name === "password" || name === "confirmPassword") {
       if (formData.confirmPassword || formData.password) {
         const passwordError = validateField(
@@ -181,7 +183,16 @@ const Register = () => {
         }));
       }
     }
-    if (name === "contactNumber") {
+
+    // Add validation for ALL other fields
+    if (
+      name === "firstName" ||
+      name === "lastName" ||
+      name === "username" ||
+      name === "contactNumber" ||
+      name === "email" ||
+      name === "streetAddress"
+    ) {
       const error = validateField(name, newValue);
       setErrors((prev) => ({ ...prev, [name]: error }));
     }
@@ -416,6 +427,9 @@ const Register = () => {
         setModalConfig({
           isOpen: true,
           type: "error",
+          onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+          variant: "banner",
+          title: "Error",
           position: "center",
           message: errorMessage
         });
