@@ -13,6 +13,7 @@ export const useLoginStore = create(
       setCredentials: (username, password) => set({ username, password }),
       clearLoginStore: () =>
         set({
+          showScanner: false,
           guardianId: null,
           username: "",
           password: ""

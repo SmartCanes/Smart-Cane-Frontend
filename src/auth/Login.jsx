@@ -49,8 +49,8 @@ const Login = () => {
     e.preventDefault();
 
     const newErrors = {};
-    if (!username.trim()) newErrors.username = "This field is required";
-    if (!password) newErrors.password = "This field is required";
+    if (!username.trim()) newErrors.username = "Username is required";
+    if (!password) newErrors.password = "Password is required";
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
