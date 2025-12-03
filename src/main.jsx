@@ -12,13 +12,12 @@ import ForgotPassword from "./auth/FogotPassword.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
 import Setting from "./pages/Setting";
-
 import ManageProfile from "./pages/ManageProfile.jsx";
 import DashboardLayout from "./layout/DashboardLayout";
 import WeatherBoard from "./pages/WeatherBoard";
 import ActivityReport from "./pages/ActivityReport";
-import ScannerCamera from "./auth/Scanner";
 import Notes from "./pages/Notes.jsx";
+import ScannerCamera from "./ui/components/Scanner";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
