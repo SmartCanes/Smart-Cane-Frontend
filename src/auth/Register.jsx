@@ -55,7 +55,8 @@ const Register = () => {
     deviceValidated,
     setDeviceValidated,
     clearDeviceValidated,
-    clearStore
+    clearRegisterStore,
+    guardianId
   } = useRegisterStore();
 
   const [showScanner, setShowScanner] = useState(false);
@@ -362,7 +363,7 @@ const Register = () => {
                   onAction: () => navigate("/login")
                 });
                 clearDeviceValidated();
-                clearStore();
+                clearRegisterStore();
               }
             } catch {
               setModalConfig({
@@ -438,6 +439,24 @@ const Register = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOnScan = () => {
+    setModalConfig({
+      isOpen: true,
+      onClose: () => {
+        clearRegisterStore();
+        setModalConfig((prev) => ({ ...prev, isOpen: false }));
+      },
+      variant: "banner",
+      title: "Paired Successfully",
+      message: "You can now continue to login and start using your account.",
+      actionText: "Proceed to Login",
+      onAction: () => {
+        clearRegisterStore();
+        navigate("/login");
+      }
+    });
   };
 
   const hasStepErrors = () => Object.keys(validateStep(step)).length > 0;
@@ -878,7 +897,11 @@ const Register = () => {
             </p>
           </div>
 
-          <ScannerCamera />
+          <ScannerCamera
+            onSuccess={handleOnScan}
+            showOnSuccessToast={false}
+            guardianId={guardianId}
+          />
         </div>
       )}
 

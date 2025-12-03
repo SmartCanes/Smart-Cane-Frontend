@@ -3,17 +3,11 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import { pairDevice } from "@/api/backendService";
 import PrimaryButton from "./PrimaryButton";
 import Toast from "./Toast";
-import { useRegisterStore } from "@/stores/useRegisterStore";
-import { useNavigate } from "react-router-dom";
-import Modal from "./Modal";
 
 const PREFIX = "SC-";
 const SERIAL_LENGTH = 6;
 
-const ScannerCamera = ({ onScan }) => {
-  const navigate = useNavigate();
-  const guardianId = useRegisterStore((state) => state.guardianId);
-  const clearStore = useRegisterStore((state) => state.clearStore);
+const ScannerCamera = ({ onSuccess, showOnSuccessToast, guardianId }) => {
   const [paused, setPaused] = useState(false);
   const [hasCamera, setHasCamera] = useState(false);
   const [serial, setSerial] = useState(Array(SERIAL_LENGTH).fill(""));
@@ -22,15 +16,6 @@ const ScannerCamera = ({ onScan }) => {
     showToast: false,
     message: "",
     type: ""
-  });
-  const [modalConfig, setModalConfig] = useState({
-    isOpen: false,
-    variant: "",
-    title: "",
-    message: "",
-    actionText: "",
-    onAction: null,
-    onClose: null
   });
 
   const inputRefs = useRef([...Array(SERIAL_LENGTH)].map(() => createRef()));
@@ -102,11 +87,7 @@ const ScannerCamera = ({ onScan }) => {
         return;
       }
 
-      if (onScan) {
-        onScan(device_serial);
-      } else {
-        handlePair(device_serial);
-      }
+      handlePair(device_serial);
 
       setTimeout(() => {
         scanCooldownRef.current = false;
@@ -161,16 +142,7 @@ const ScannerCamera = ({ onScan }) => {
   const handlePair = async (code) => {
     const isDev = (import.meta.env.VITE_ENV || "development") === "development";
     if (isDev && code === "SC-000000") {
-      clearStore();
-      setModalConfig({
-        isOpen: true,
-        onClose: () => navigate("/login"),
-        variant: "banner",
-        title: "Paired Successfully",
-        message: "You can now continue to login and start using your account.",
-        actionText: "Proceed to Login",
-        onAction: () => navigate("/login")
-      });
+      onSuccess();
       return;
     }
 
@@ -192,16 +164,15 @@ const ScannerCamera = ({ onScan }) => {
       });
 
       if (!res.success) return;
-      clearStore();
-      setModalConfig({
-        isOpen: true,
-        onClose: () => navigate("/login"),
-        variant: "banner",
-        title: "Paired Successfully",
-        message: "You can now continue to login and start using your account.",
-        actionText: "Proceed to Login",
-        onAction: () => navigate("/login")
-      });
+
+      if (showOnSuccessToast) {
+        setToast({
+          showToast: true,
+          message: "Device paired successfully!",
+          type: "success"
+        });
+      }
+      onSuccess();
     } catch (err) {
       setToast({
         showToast: true,
@@ -291,15 +262,6 @@ const ScannerCamera = ({ onScan }) => {
         />
       )}
 
-      <Modal
-        isOpen={modalConfig.isOpen}
-        onClose={modalConfig.onClose}
-        variant={modalConfig.variant}
-        title={modalConfig.title}
-        message={modalConfig.message}
-        actionText={modalConfig.actionText}
-        onAction={modalConfig.onAction}
-      />
       <style>
         {`
           @keyframes scan {
