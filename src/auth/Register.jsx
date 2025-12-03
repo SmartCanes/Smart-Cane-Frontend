@@ -63,7 +63,6 @@ const Register = () => {
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     onClose: () => {},
-    type: null,
     message: "",
     modalType: null,
     onAction: null
@@ -908,7 +907,7 @@ const Register = () => {
       <Modal
         isOpen={modalConfig.isOpen}
         onClose={modalConfig.onClose}
-        modalType={modalConfig.type}
+        modalType={modalConfig.modalType}
         position={modalConfig.position}
         actionText={modalConfig.actionText}
         title={modalConfig.title}
