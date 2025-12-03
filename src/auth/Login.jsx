@@ -7,39 +7,34 @@ import { loginApi } from "@/api/authService";
 import { useUserStore } from "@/stores/useStore";
 import Modal from "@/ui/components/Modal";
 import ScannerCamera from "@/ui/components/Scanner";
-import { useLoginStore } from "@/stores/useLoginStore";
 
 const Login = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const navigate = useNavigate();
-  const { setUser, clearStore } = useUserStore();
-  const {
-    username,
-    password,
-    setCredentials,
-    clearLoginStore,
-    showScanner,
-    setShowScanner,
-    guardianId,
-    setGuardianId
-  } = useLoginStore();
-  const [modalConfig, setModalConfig] = useState({
-    isOpen: false,
-    onClose: () => {},
-    type: null,
-    message: "",
-    modalType: null,
-    onAction: null
+  const { setUser } = useUserStore();
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: ""
   });
+  const [guardianId, setGuardianId] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    variant: "banner",
+    title: "",
+    message: "",
+    actionText: "",
+    onAction: () => {}
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCredentials(
-      name === "username" ? value : username,
-      name === "password" ? value : password
-    );
+    setCredentials((prev) => ({
+      ...prev,
+      [name]: value
+    }));
     if (errors[name] || errors.general) {
       setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
     }
@@ -49,16 +44,20 @@ const Login = () => {
     e.preventDefault();
 
     const newErrors = {};
-    if (!username.trim()) newErrors.username = "Username is required";
-    if (!password) newErrors.password = "Password is required";
+    if (!credentials.username.trim())
+      newErrors.username = "Username is required";
+    if (!credentials.password) newErrors.password = "Password is required";
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    setLoading(true);
     try {
-      if (isDev && username === "admin" && password === "admin") {
+      if (
+        isDev &&
+        credentials.username === "admin" &&
+        credentials.password === "admin"
+      ) {
         document.cookie =
           "access_token=DEV_ACCESS_TOKEN; path=/; max-age=900; SameSite=None; Secure";
         document.cookie =
@@ -81,8 +80,10 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    const response = await loginApi(username, password);
+    setModalConfig((prev) => ({ ...prev, isOpen: false }));
+    setLoading(true);
 
+    const response = await loginApi(credentials.username, credentials.password);
     if (response.data.device_registered === false) {
       setGuardianId(response.data.guardian_id);
       setModalConfig({
@@ -99,7 +100,6 @@ const Login = () => {
 
     setUser(response.data.user || response.data);
     await new Promise((resolve) => setTimeout(resolve, 300));
-    clearLoginStore();
     navigate("/dashboard", {
       state: {
         showModal: true
@@ -111,10 +111,7 @@ const Login = () => {
   const handleOnScan = () => {
     setModalConfig({
       isOpen: true,
-      onClose: () => {
-        clearStore();
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
-      },
+      // onClose: () => handleLogin(),
       variant: "banner",
       title: "Paired Successfully",
       message:
@@ -156,7 +153,7 @@ const Login = () => {
                 label="Username"
                 placeholder="Enter your username..."
                 name="username"
-                value={username}
+                value={credentials.username}
                 onChange={handleChange}
                 error={errors.username}
               />
@@ -167,7 +164,7 @@ const Login = () => {
                 placeholder="Enter your password..."
                 name="password"
                 type="password"
-                value={password}
+                value={credentials.password}
                 onChange={handleChange}
                 error={errors.password}
                 showErrorIcon={false}
@@ -224,7 +221,7 @@ const Login = () => {
       <Modal
         isOpen={modalConfig.isOpen}
         onClose={modalConfig.onClose}
-        modalType={modalConfig.type}
+        modalType={modalConfig.modalType}
         position={modalConfig.position}
         actionText={modalConfig.actionText}
         title={modalConfig.title}
