@@ -56,10 +56,11 @@ const Register = () => {
     setDeviceValidated,
     clearDeviceValidated,
     clearRegisterStore,
-    guardianId
+    guardianId,
+    showScanner,
+    setShowScanner
   } = useRegisterStore();
 
-  const [showScanner, setShowScanner] = useState(false);
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     onClose: () => {},
@@ -485,7 +486,9 @@ const Register = () => {
       }, 1000);
     } catch (error) {
       console.error("Failed to send OTP:", error);
-      setOtpError(error.message || "Failed to send OTP. Please try again.");
+      setOtpError(
+        error.response?.data?.message || "Failed to send OTP. Please try again."
+      );
     } finally {
       setIsSendingOtp(false);
     }
