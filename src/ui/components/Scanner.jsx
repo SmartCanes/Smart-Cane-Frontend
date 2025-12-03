@@ -176,7 +176,7 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast, guardianId }) => {
     } catch (err) {
       setToast({
         showToast: true,
-        message: err.message || "Failed to pair device",
+        message: err.response?.data?.message || "Failed to pair device",
         type: "error"
       });
     } finally {

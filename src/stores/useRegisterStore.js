@@ -20,6 +20,7 @@ export const useRegisterStore = create(
         deviceSerial: ""
       },
       step: 1,
+      showScanner: false,
       otpSent: false,
       guardianId: null,
       deviceValidated: {
@@ -29,6 +30,7 @@ export const useRegisterStore = create(
       },
 
       setGuardianId: (id) => set({ guardianId: id }),
+      setShowScanner: (show) => set({ showScanner: show }),
       setStep: (step) => set({ step }),
       updateForm: (field, value) =>
         set((state) => ({
