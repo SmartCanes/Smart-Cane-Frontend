@@ -9,6 +9,7 @@ import { useRealtimeStore, useUserStore } from "@/stores/useStore";
 import { logoutApi } from "@/api/authService";
 
 const Header = () => {
+  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const { user, clearUser } = useUserStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const [notificationCount, setNotificationCount] = useState(0);
@@ -34,6 +35,11 @@ const Header = () => {
   const handleNotificationClick = () => {};
 
   const handleLogoutClick = async () => {
+    if (isDev) {
+      clearUser();
+      navigate("/login");
+      return;
+    }
     setIsDropdownOpen(false);
     try {
       const response = await logoutApi();
