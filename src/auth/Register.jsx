@@ -61,6 +61,7 @@ const Register = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
+    onClose: () => {},
     type: null,
     message: "",
     modalType: null,
