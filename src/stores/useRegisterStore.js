@@ -60,7 +60,7 @@ export const useRegisterStore = create(
           }
         }),
 
-      clearStore: () =>
+      clearRegisterStore: () =>
         set({
           formData: {
             firstName: "",
