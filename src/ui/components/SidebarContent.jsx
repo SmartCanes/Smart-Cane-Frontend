@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import SmartCaneLogo from "@/assets/images/smartcane-logo.png";
+import { useRegisterStore } from "@/stores/useRegisterStore";
 
 const SidebarContent = () => {
+  const { clearRegisterStore, clearDeviceValidated } = useRegisterStore();
   return (
     <>
       <div
@@ -18,6 +20,10 @@ const SidebarContent = () => {
               src={SmartCaneLogo}
               alt="Sidebar Image"
               className="w-[290px]"
+              onClick={() => {
+                clearDeviceValidated();
+                clearRegisterStore();
+              }}
             />
           </Link>
 

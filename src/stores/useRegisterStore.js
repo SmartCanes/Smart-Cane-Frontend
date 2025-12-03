@@ -87,7 +87,9 @@ export const useRegisterStore = create(
           },
           otp: ["", "", "", "", "", ""],
           otpSent: false,
-          guardianId: null
+          guardianId: null,
+          showScanner: false,
+          step: 1
         })
     }),
 
