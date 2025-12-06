@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PrimaryButton from "../ui/components/PrimaryButton.jsx";
 import smartcaneLogo from "../assets/images/smartcane-logo.png";
 import { BlinkingIcon } from "@/wrapper/MotionWrapper.jsx";
-import { motion, AnimatePresence } from "framer-motion"; // IMPORT THIS
 
-const Welcome = () => {
+const GetStarted = () => {
   const navigate = useNavigate();
 
   return (
@@ -35,6 +33,8 @@ const Welcome = () => {
           text="Sign In"
           textColor="text-[#11285A]"
           bgColor="bg-white"
+          hoverColor="bg-gray-200"
+          variant="neutral"
           onClick={() => navigate("/login")}
         />
         <PrimaryButton
@@ -42,6 +42,7 @@ const Welcome = () => {
           text="Create an account"
           textColor="text-[#11285A]"
           bgColor="bg-white"
+          hoverColor="bg-gray-200"
           onClick={() => navigate("/register")}
         />
       </div>
@@ -49,4 +50,4 @@ const Welcome = () => {
   );
 };
 
-export default Welcome;
+export default GetStarted;

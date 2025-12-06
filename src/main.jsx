@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import "leaflet/dist/leaflet.css";
 
-import Welcome from "./pages/Welcome.jsx";
 import GuestPage from "./pages/GuestPage.jsx";
 import Login from "./auth/Login.jsx";
 import Register from "./auth/Register.jsx";
@@ -18,13 +17,14 @@ import WeatherBoard from "./pages/WeatherBoard";
 import ActivityReport from "./pages/ActivityReport";
 import Notes from "./pages/Notes.jsx";
 import ScannerCamera from "./ui/components/Scanner";
+import GetStarted from "./pages/GetStarted.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<GuestPage />} />
-        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/get-started" element={<GetStarted />} />
 
         <Route element={<PublicLayout />}>
           <Route path="/login" element={<Login />} />
