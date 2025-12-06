@@ -7,7 +7,7 @@ import { useRegisterStore } from "@/stores/useRegisterStore";
 const SidebarContent = ({ onAnimationComplete, className = "" }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-  
+
   // Phase sequence: 'start' (Blue) -> 'white' (Expansion) -> 'final' (Header/Sidebar Reveal)
   const [animationPhase, setAnimationPhase] = useState("start");
 
@@ -20,13 +20,13 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
 
     // --- TIMING ADJUSTMENTS ---
     const timer1 = setTimeout(() => {
-      setAnimationPhase("white"); 
-    }, 1000); 
+      setAnimationPhase("white");
+    }, 1000);
 
     const timer2 = setTimeout(() => {
-      setAnimationPhase("final"); 
-      if (onAnimationComplete) onAnimationComplete(); 
-    }, 1800); 
+      setAnimationPhase("final");
+      if (onAnimationComplete) onAnimationComplete();
+    }, 1800);
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -89,11 +89,11 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
     <>
       {/* --- WHITE OVERLAY TRANSITION --- */}
       <motion.div
-        initial={{ clipPath: "circle(0% at 50% 90%)" }} 
+        initial={{ clipPath: "circle(0% at 50% 90%)" }}
         animate={
-          animationPhase === "start" 
-            ? { clipPath: "circle(0% at 50% 90%)" } 
-            : { clipPath: "circle(150% at 50% 90%)" } 
+          animationPhase === "start"
+            ? { clipPath: "circle(0% at 50% 90%)" }
+            : { clipPath: "circle(150% at 50% 90%)" }
         }
         transition={{ duration: 0.8, ease: "easeInOut" }}
         className={`fixed inset-0 ${isMobile ? "bg-primary-100" : "bg-[#FDFCFA]"} z-50 pointer-events-none`}
@@ -109,8 +109,8 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
               ? "mobileFinal"
               : "desktopFinal"
             : isMobile
-            ? "mobileStart"
-            : "desktopStart"
+              ? "mobileStart"
+              : "desktopStart"
         }
         variants={containerVariants}
         transition={{ duration: 0.8, ease: "circOut" }}
@@ -121,8 +121,8 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
           src={SmartCaneLogo}
           alt="Background Pattern"
           animate={
-            isMobile && animationPhase === "final" 
-              ? { opacity: 0 } 
+            isMobile && animationPhase === "final"
+              ? { opacity: 0 }
               : { opacity: 0.05 }
           }
           className="absolute pointer-events-none select-none w-[150%] sm:w-auto"
@@ -151,11 +151,12 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
           <motion.h1
             animate={
               isMobile && animationPhase === "final"
-               ? { fontSize: "2.5rem" } 
-               : {}
+                ? { fontSize: "2.5rem" }
+                : {}
             }
             style={{
-              lineHeight: isMobile && animationPhase === "final" ? "1" : "inherit"
+              lineHeight:
+                isMobile && animationPhase === "final" ? "1" : "inherit"
             }}
             className="font-gabriela text-6xl sm:text-h1 text-[#FDFCFA]"
           >

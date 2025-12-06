@@ -85,3 +85,16 @@ export const useRealtimeStore = create((set, get) => ({
     set({ _wsConnected: false, connectionStatus: false });
   }
 }));
+
+export const useUIStore = create(
+  persist(
+    (set) => ({
+      isAnimationDone: false,
+      setIsAnimationDone: () => set({ isAnimationDone: true })
+    }),
+    {
+      name: "ui-storage",
+      storage: createJSONStorage(() => sessionStorage)
+    }
+  )
+);

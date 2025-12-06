@@ -40,7 +40,7 @@ const provinces = [
   { value: "prov5", label: "Rizal" }
 ];
 import { motion } from "framer-motion";
-import SidebarContent from "@/ui/components/SidebarContent";
+import { useUIStore } from "@/stores/useStore";
 
 const Register = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
@@ -62,6 +62,7 @@ const Register = () => {
     showScanner,
     setShowScanner
   } = useRegisterStore();
+  const { isAnimationDone } = useUIStore();
 
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
@@ -70,7 +71,6 @@ const Register = () => {
     modalType: null,
     onAction: null
   });
-  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -562,355 +562,340 @@ const Register = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
-        <SidebarContent
-          onAnimationComplete={() => setIsAnimationComplete(true)}
-        />
-
-        {!showScanner && (
-          <>
-            <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
-              <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[50px] sm:pt-0 pb-8 sm:pb-0">
-                <div className="text-center mb-6 sm:mb-10">
-                  <h1 className="font-poppins text-3xl sm:text-5xl md:text-h1 font-bold text-[#1C253C] mb-3 sm:mb-0">
-                    {step === 3 ? "Email Verification" : ""}
-                  </h1>
-                  <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
-                    {step === 1 ? (
-                      "Create your account to experience the iCane."
-                    ) : step === 2 ? (
-                      "Start your journey to safer and smarter mobility by signing up."
-                    ) : (
-                      <>
-                        <span className="block mb-2">
-                          Enter the{" "}
-                          <span className="font-bold">
-                            6-digit verification code
-                          </span>{" "}
-                          we have sent to your email address.
-                        </span>
-                        <span className="text-xs sm:text-sm text-gray-600 break-all">
-                          {formData.email}
-                        </span>
-                      </>
-                    )}
-                  </p>
-                  <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
-                    Create your account
-                  </p>
-                  {step === 3 && (
-                    <p className="sm:hidden font-poppins text-[#1C253C] text-paragraph text-sm">
+      {!showScanner && (
+        <>
+          <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
+            <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[50px] sm:pt-0 pb-8 sm:pb-0">
+              <div className="text-center space-y-2 ">
+                <h1 className="hidden sm:block  text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
+                  {step === 3 ? "Email Verification" : "Welcome"}
+                </h1>
+                <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
+                  {step === 1 ? (
+                    "Create your account to get started with iCane."
+                  ) : step === 2 ? (
+                    "Start your journey to safer and smarter mobility by signing up."
+                  ) : (
+                    <>
                       Enter the{" "}
                       <span className="font-bold">
                         6-digit verification code
                       </span>{" "}
-                      code we have sent to your email address.
-                    </p>
+                      we have sent to your email address.
+                      <br />
+                      <span className="text-sm text-gray-600">
+                        {formData.email}
+                      </span>
+                    </>
                   )}
-                </div>
-                <motion.form
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={
-                    isAnimationComplete
-                      ? { opacity: 1, y: 0 }
-                      : { opacity: 0, y: 50 }
-                  }
-                  transition={{ duration: 0.6 }}
-                  className="w-full max-w-md sm:max-w-none lg:max-w-lg"
-                  onSubmit={handleNext}
-                  noValidate
-                >
-                  {/* Step 1: Basic Information */}
-                  {step === 1 && !showScanner && (
-                    <div className="space-y-3 sm:space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <TextField
-                          className="font-poppins"
-                          label={"First Name"}
-                          placeholder="First Name..."
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            handleChange("firstName", e.target.value)
-                          }
-                          inputClassName="py-3"
-                          error={errors.firstName}
-                          required
-                        />
-
-                        <TextField
-                          className="font-poppins"
-                          label={"Last Name"}
-                          placeholder="Last Name..."
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            handleChange("lastName", e.target.value)
-                          }
-                          inputClassName="py-3"
-                          error={errors.lastName}
-                          required
-                        />
-                      </div>
-
-                      <TextField
-                        className="font-poppins"
-                        label={"Username"}
-                        placeholder="Enter your username..."
-                        name="username"
-                        value={formData.username}
-                        onChange={(e) =>
-                          handleChange("username", e.target.value)
-                        }
-                        inputClassName="py-3"
-                        error={errors.username}
-                        required
-                      />
-
-                      <PasswordField
-                        className="font-poppins"
-                        label={"Password"}
-                        placeholder="Enter your password..."
-                        name="password"
-                        value={formData.password}
-                        onChange={(e) =>
-                          handleChange("password", e.target.value)
-                        }
-                        error={errors.password}
-                        showValidationRules
-                        inputClassName="py-3"
-                        required
-                      />
-
-                      <PasswordField
-                        className="font-poppins"
-                        label={"Re-enter Password"}
-                        placeholder="Re-enter your password..."
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={(e) =>
-                          handleChange("confirmPassword", e.target.value)
-                        }
-                        error={errors.confirmPassword}
-                        inputClassName="py-3"
-                        required
-                      />
-                    </div>
-                  )}
-
-                  {/* Step 2: Address Information */}
-                  {step === 2 && !showScanner && (
-                    <div className="space-y-4">
-                      {/* Lot No./Bldg./Street and Province - Side by side */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <TextField
-                          className="whitespace-nowrap "
-                          label={"Lot No./Bldg./Street"}
-                          placeholder="Enter your Lot No..."
-                          name="streetAddress"
-                          value={formData.streetAddress}
-                          onChange={(e) =>
-                            handleChange("streetAddress", e.target.value)
-                          }
-                          error={errors.streetAddress}
-                          required
-                        />
-
-                        <SelectField
-                          label={"Province"}
-                          placeholder="Province..."
-                          required
-                          options={provinces}
-                          onChange={(e) => {
-                            handleSelectChange("province", e.target.value);
-                          }}
-                          value={formData.province}
-                          error={errors.province}
-                        />
-                      </div>
-
-                      {/* Barangay and City - Side by side */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <SelectField
-                          className="font-poppins"
-                          label={"Barangay"}
-                          placeholder="Barangay..."
-                          required
-                          options={barangays}
-                          onChange={(e) => {
-                            handleSelectChange("barangay", e.target.value);
-                          }}
-                          value={formData.barangay}
-                          error={errors.barangay}
-                        />
-
-                        <SelectField
-                          className="font-poppins "
-                          label={"City"}
-                          placeholder="City..."
-                          required
-                          options={cities}
-                          onChange={(e) => {
-                            handleSelectChange("city", e.target.value);
-                          }}
-                          value={formData.city}
-                          error={errors.city}
-                        />
-                      </div>
-
-                      {/* Relationship to the VIP - Full width */}
-                      <SelectField
-                        className="font-poppins py-[16px]"
-                        label={"Relationship to the VIP"}
-                        placeholder="Relationship..."
-                        required
-                        options={[
-                          { value: "Husband", label: "Husband" },
-                          { value: "Wife", label: "Wife" },
-                          { value: "Sibling", label: "Sibling" },
-                          { value: "Legal Guardian", label: "Legal Guardian" }
-                        ]}
-                        onChange={(e) => {
-                          handleChange("relationship", e.target.value);
-                        }}
-                        value={formData.relationship || ""}
-                        error={errors.relationship}
-                      />
-
-                      {/* Contact Number - Full width */}
-                      <TextField
-                        className="font-poppins"
-                        label={"Contact Number"}
-                        placeholder="09XX XXX XXXX"
-                        type="tel"
-                        name="contactNumber"
-                        value={formData.contactNumber}
-                        onChange={(e) =>
-                          handleChange("contactNumber", e.target.value)
-                        }
-                        inputMode="numeric"
-                        maxLength={11}
-                        error={errors.contactNumber}
-                        required
-                      />
-
-                      {/* Email Address - Full width */}
-                      <TextField
-                        className="font-poppins"
-                        label={"Email Address"}
-                        placeholder="sample.email@gmail.com"
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={(e) => handleChange("email", e.target.value)}
-                        error={errors.email}
-                        required
-                      />
-                    </div>
-                  )}
-
-                  {/* Step 3: OTP Verification */}
-                  {step === 3 && !showScanner && (
-                    <div className="space-y-6">
-                      {/* OTP Input Boxes */}
-                      <div className="flex justify-center gap-3">
-                        {otp.map((digit, index) => (
-                          <input
-                            key={index}
-                            ref={otpRefs[index]}
-                            type="text"
-                            maxLength="1"
-                            value={digit}
-                            inputMode="numeric"
-                            onChange={(e) =>
-                              handleOtpChange(index, e.target.value)
-                            }
-                            onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                            className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
-                          />
-                        ))}
-                      </div>
-
-                      {/* OTP Error Message */}
-                      {otpError && (
-                        <div className="text-center">
-                          <p className="text-red-500 text-sm">{otpError}</p>
-                        </div>
-                      )}
-
-                      {/* Resend OTP Link */}
-                      <div className="text-center">
-                        <p className="font-poppins text-[#1C253C] text-sm mb-2">
-                          Didn't receive the code?
-                        </p>
-                        <button
-                          type="button"
-                          onClick={resendOtp}
-                          disabled={countdown > 0 || isSendingOtp}
-                          className={`font-poppins text-primary-100 text-sm font-medium ${
-                            countdown > 0 || isSendingOtp
-                              ? "opacity-50 cursor-not-allowed"
-                              : "hover:underline"
-                          }`}
-                        >
-                          {isSendingOtp
-                            ? "Sending..."
-                            : countdown > 0
-                              ? `Resend in ${countdown}s`
-                              : "Resend Verification Code"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {step <= 3 && (
-                    <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
-                      <PrimaryButton
-                        className="w-full py-3 sm:py-4 text-md sm:text-md"
-                        text={
-                          isSubmitting
-                            ? step === 3
-                              ? "Verifying..."
-                              : "Checking..."
-                            : `${step === 3 ? "Create Account" : "Next"}`
-                        }
-                        type="submit"
-                        disabled={
-                          isSubmitting ||
-                          hasStepErrors() ||
-                          (step === 3 && !otpSent && !isDev)
-                        }
-                      />
-                      {step > 1 && (
-                        <PrimaryButton
-                          className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
-                          textColor="text-black"
-                          text="Back"
-                          variant="outline"
-                          type="button"
-                          onClick={() => {
-                            setStep(step - 1);
-                          }}
-                        />
-                      )}
-                    </div>
-                  )}
-
-                  <p className="font-poppins text-center text-[18px] mt-4">
-                    Already have an Account?{" "}
-                    <Link
-                      to="/login"
-                      className="font-poppins text-blue-500 hover:underline text-[18px]"
-                    >
-                      Sign In
-                    </Link>
+                </p>
+                <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
+                  Create your account
+                </p>
+                {step === 3 && (
+                  <p className="sm:hidden font-poppins text-[#1C253C] text-paragraph text-sm">
+                    Enter the{" "}
+                    <span className="font-bold">6-digit verification code</span>{" "}
+                    code we have sent to your email address.
                   </p>
-                </motion.form>
+                )}
               </div>
+              <motion.form
+                initial={{ opacity: 0, y: 50 }}
+                animate={
+                  isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                }
+                transition={{ duration: 0.6 }}
+                className="w-full max-w-md sm:max-w-none lg:max-w-lg"
+                onSubmit={handleNext}
+                noValidate
+              >
+                {/* Step 1: Basic Information */}
+                {step === 1 && !showScanner && (
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <TextField
+                        className="font-poppins"
+                        label={"First Name"}
+                        placeholder="First Name..."
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={(e) =>
+                          handleChange("firstName", e.target.value)
+                        }
+                        inputClassName="py-3"
+                        error={errors.firstName}
+                        required
+                      />
+
+                      <TextField
+                        className="font-poppins"
+                        label={"Last Name"}
+                        placeholder="Last Name..."
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={(e) =>
+                          handleChange("lastName", e.target.value)
+                        }
+                        inputClassName="py-3"
+                        error={errors.lastName}
+                        required
+                      />
+                    </div>
+
+                    <TextField
+                      className="font-poppins"
+                      label={"Username"}
+                      placeholder="Enter your username..."
+                      name="username"
+                      value={formData.username}
+                      onChange={(e) => handleChange("username", e.target.value)}
+                      inputClassName="py-3"
+                      error={errors.username}
+                      required
+                    />
+
+                    <PasswordField
+                      className="font-poppins"
+                      label={"Password"}
+                      placeholder="Enter your password..."
+                      name="password"
+                      value={formData.password}
+                      onChange={(e) => handleChange("password", e.target.value)}
+                      error={errors.password}
+                      showValidationRules
+                      inputClassName="py-3"
+                      required
+                    />
+
+                    <PasswordField
+                      className="font-poppins"
+                      label={"Re-enter Password"}
+                      placeholder="Re-enter your password..."
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        handleChange("confirmPassword", e.target.value)
+                      }
+                      error={errors.confirmPassword}
+                      inputClassName="py-3"
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Step 2: Address Information */}
+                {step === 2 && !showScanner && (
+                  <div className="space-y-4">
+                    {/* Lot No./Bldg./Street and Province - Side by side */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <TextField
+                        className="whitespace-nowrap "
+                        label={"Lot No./Bldg./Street"}
+                        placeholder="Enter your Lot No..."
+                        name="streetAddress"
+                        value={formData.streetAddress}
+                        onChange={(e) =>
+                          handleChange("streetAddress", e.target.value)
+                        }
+                        error={errors.streetAddress}
+                        required
+                      />
+
+                      <SelectField
+                        label={"Province"}
+                        placeholder="Province..."
+                        required
+                        options={provinces}
+                        onChange={(e) => {
+                          handleSelectChange("province", e.target.value);
+                        }}
+                        value={formData.province}
+                        error={errors.province}
+                      />
+                    </div>
+
+                    {/* Barangay and City - Side by side */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <SelectField
+                        className="font-poppins"
+                        label={"Barangay"}
+                        placeholder="Barangay..."
+                        required
+                        options={barangays}
+                        onChange={(e) => {
+                          handleSelectChange("barangay", e.target.value);
+                        }}
+                        value={formData.barangay}
+                        error={errors.barangay}
+                      />
+
+                      <SelectField
+                        className="font-poppins "
+                        label={"City"}
+                        placeholder="City..."
+                        required
+                        options={cities}
+                        onChange={(e) => {
+                          handleSelectChange("city", e.target.value);
+                        }}
+                        value={formData.city}
+                        error={errors.city}
+                      />
+                    </div>
+
+                    {/* Relationship to the VIP - Full width */}
+                    <SelectField
+                      className="font-poppins py-[16px]"
+                      label={"Relationship to the VIP"}
+                      placeholder="Relationship..."
+                      required
+                      options={[
+                        { value: "Husband", label: "Husband" },
+                        { value: "Wife", label: "Wife" },
+                        { value: "Sibling", label: "Sibling" },
+                        { value: "Legal Guardian", label: "Legal Guardian" }
+                      ]}
+                      onChange={(e) => {
+                        handleChange("relationship", e.target.value);
+                      }}
+                      value={formData.relationship || ""}
+                      error={errors.relationship}
+                    />
+
+                    {/* Contact Number - Full width */}
+                    <TextField
+                      className="font-poppins"
+                      label={"Contact Number"}
+                      placeholder="09XX XXX XXXX"
+                      type="tel"
+                      name="contactNumber"
+                      value={formData.contactNumber}
+                      onChange={(e) =>
+                        handleChange("contactNumber", e.target.value)
+                      }
+                      inputMode="numeric"
+                      maxLength={11}
+                      error={errors.contactNumber}
+                      required
+                    />
+
+                    {/* Email Address - Full width */}
+                    <TextField
+                      className="font-poppins"
+                      label={"Email Address"}
+                      placeholder="sample.email@gmail.com"
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={(e) => handleChange("email", e.target.value)}
+                      error={errors.email}
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Step 3: OTP Verification */}
+                {step === 3 && !showScanner && (
+                  <div className="space-y-6">
+                    {/* OTP Input Boxes */}
+                    <div className="flex justify-center gap-3">
+                      {otp.map((digit, index) => (
+                        <input
+                          key={index}
+                          ref={otpRefs[index]}
+                          type="text"
+                          maxLength="1"
+                          value={digit}
+                          inputMode="numeric"
+                          onChange={(e) =>
+                            handleOtpChange(index, e.target.value)
+                          }
+                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
+                        />
+                      ))}
+                    </div>
+
+                    {/* OTP Error Message */}
+                    {otpError && (
+                      <div className="text-center">
+                        <p className="text-red-500 text-sm">{otpError}</p>
+                      </div>
+                    )}
+
+                    {/* Resend OTP Link */}
+                    <div className="text-center">
+                      <p className="font-poppins text-[#1C253C] text-sm mb-2">
+                        Didn't receive the code?
+                      </p>
+                      <button
+                        type="button"
+                        onClick={resendOtp}
+                        disabled={countdown > 0 || isSendingOtp}
+                        className={`font-poppins text-primary-100 text-sm font-medium ${
+                          countdown > 0 || isSendingOtp
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:underline"
+                        }`}
+                      >
+                        {isSendingOtp
+                          ? "Sending..."
+                          : countdown > 0
+                            ? `Resend in ${countdown}s`
+                            : "Resend Verification Code"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {step <= 3 && (
+                  <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
+                    <PrimaryButton
+                      className="w-full py-3 sm:py-4 text-md sm:text-md"
+                      text={
+                        isSubmitting
+                          ? step === 3
+                            ? "Verifying..."
+                            : "Checking..."
+                          : `${step === 3 ? "Create Account" : "Next"}`
+                      }
+                      type="submit"
+                      disabled={
+                        isSubmitting ||
+                        hasStepErrors() ||
+                        (step === 3 && !otpSent && !isDev)
+                      }
+                    />
+                    {step > 1 && (
+                      <PrimaryButton
+                        className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
+                        textColor="text-black"
+                        text="Back"
+                        variant="outline"
+                        type="button"
+                        onClick={() => {
+                          setStep(step - 1);
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+
+                <p className="font-poppins text-center text-[18px] mt-4">
+                  Already have an Account?{" "}
+                  <Link
+                    to="/login"
+                    className="font-poppins text-blue-500 hover:underline text-[18px]"
+                  >
+                    Sign In
+                  </Link>
+                </p>
+              </motion.form>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
 
       {isSubmitting && (
         <div className="absolute inset-0 sm:inset-y-0 sm:left-0 w-full sm:w-1/2 flex items-center justify-center z-30">

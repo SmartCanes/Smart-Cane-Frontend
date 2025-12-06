@@ -1,7 +1,8 @@
-import { Outlet, Navigate, useNavigate, Link } from "react-router-dom";
+import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import SidebarContent from "@/ui/components/SidebarContent";
 import { verifyAuthApi } from "@/api/authService";
+import { useUIStore } from "@/stores/useStore";
 
 const ProtectedLayout = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
@@ -46,6 +47,7 @@ const ProtectedLayout = () => {
 
 const PublicLayout = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { setIsAnimationDone } = useUIStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -69,15 +71,18 @@ const PublicLayout = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-20 bg-primary-100 rounded-b-[30%] h-[20vh] sm:hidden flex justify-center items-center">
+      <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
+        <SidebarContent onAnimationComplete={() => setIsAnimationDone(true)} />
+        <Outlet />
+      </div>
+      {/* <div className="fixed top-0 left-0 right-0 z-20 bg-primary-100 rounded-b-[30%] h-[20vh] sm:hidden flex justify-center items-center">
         <Link to="/">
           <h1 className="font-gabriela text-7xl text-[#FDFCFA]">iCane</h1>
         </Link>
       </div>
       <main className="pt-[22vh] pb-8 sm:p-0 w-full flex flex-col sm:flex-row min-h-screen sm:min-h-0">
-        <SidebarContent />
-        <Outlet />
-      </main>
+        <SidebarContent /> */}
+      {/* </main> */}
     </>
   );
 };
