@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import SidebarContent from "../ui/components/SidebarContent"; // Ito na yung updated file
 import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
@@ -12,6 +14,9 @@ const Login = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
   const navigate = useNavigate();
   const { setUser } = useUserStore();
+
+  const [isAnimationDone, setIsAnimationDone] = useState(false);
+
   const [credentials, setCredentials] = useState({
     username: "",
     password: ""
@@ -124,77 +129,93 @@ const Login = () => {
   return (
     <>
       {!showScanner && (
-        <div className="flex-1 flex flex-col items-center sm:justify-center gap-5 px-5 ">
-          <div className="flex flex-col gap-5 text-center">
-            <h1 className="hidden sm:block text-5xl sm:text-5xl lg:text-6xl font-bold text-[#1C253C]">
-              Welcome!
-            </h1>
-            <p className="hidden sm:block text-[#1C253C] text-paragraph text-1xl">
-              Ready to go? Log in and jump straight into your dashboard.
-            </p>
-            <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
-              Login to your account
-            </p>
-          </div>
-          <form
-            className="w-full max-w-sm lg:max-w-md xl:max-w-xl"
-            onSubmit={handleSubmit}
-            noValidate
-          >
-            {errors.general && (
-              <p className="font-poppins text-center text-[#CE4B34] mb-6">
-                {errors.general}
-              </p>
-            )}
+        <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
+          {/* SIDEBAR SECTION ANIMATION
+           */}
+          <SidebarContent
+            onAnimationComplete={() => setIsAnimationDone(true)}
+          />
 
-            <div className="space-y-4">
-              <TextField
-                className="font-poppins"
-                label="Username"
-                placeholder="Enter your username..."
-                name="username"
-                value={credentials.username}
-                onChange={handleChange}
-                error={errors.username}
-              />
-
-              <PasswordField
-                className="font-poppins relative"
-                label="Password"
-                placeholder="Enter your password..."
-                name="password"
-                type="password"
-                value={credentials.password}
-                onChange={handleChange}
-                error={errors.password}
-                showErrorIcon={false}
-              />
-
-              <Link
-                to="/forgot-password"
-                className="font-poppins block text-left hover:underline text-[16px] underline mt-2 w-fit"
+          {/* FORM SECTION */}
+          <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
+            {/* Ilalabas lang ang form pag tapos na ang transition ng Sidebar */}
+            <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0">
+              <motion.form
+                initial={{ opacity: 0, y: 50 }}
+                animate={
+                  isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                }
+                transition={{ duration: 0.6 }}
+                className="w-full max-w-md sm:max-w-none lg:max-w-lg"
+                onSubmit={handleSubmit}
+                noValidate
               >
-                Forgot password?
-              </Link>
+                <div className="flex flex-col items-center text-center mb-6 sm:mb-10">
+                  <h1 className="font-poppins text-5xl sm:text-h1 font-bold text-[#1C253C] mb-2">
+                    Welcome!
+                  </h1>
+                  <p className="font-poppins text-[#1C253C] text-center font-medium text-sm sm:text-lg sm:w-2/3">
+                    Enter your credentials below to access your dashboard and
+                    saved features.
+                  </p>
+                </div>
 
-              <PrimaryButton
-                className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
-                bgColor="bg-primary-100"
-                text={loading ? "Logging in..." : "Sign In"}
-                type="submit"
-              />
+                {errors.general && (
+                  <p className="font-poppins text-center text-[#CE4B34] mb-4 text-sm">
+                    {errors.general}
+                  </p>
+                )}
 
-              <p className="font-poppins text-center text-[18px] mt-4">
-                Didn't have an account?{" "}
-                <Link
-                  to="/register"
-                  className="font-poppins text-blue-500 hover:underline text-[18px]"
-                >
-                  Sign Up
-                </Link>
-              </p>
+                <div className="space-y-4">
+                  <TextField
+                    className="font-poppins"
+                    label="Username"
+                    placeholder="Enter your username..."
+                    name="username"
+                    value={credentials.username}
+                    onChange={handleChange}
+                    error={errors.username}
+                  />
+
+                  <PasswordField
+                    className="font-poppins relative"
+                    label="Password"
+                    placeholder="Enter your password..."
+                    name="password"
+                    type="password"
+                    value={credentials.password}
+                    onChange={handleChange}
+                    error={errors.password}
+                    showErrorIcon={false}
+                  />
+
+                  <Link
+                    to="/forgot-password"
+                    className="font-poppins block text-left hover:underline text-[16px] underline mt-2 w-fit"
+                  >
+                    Forgot password?
+                  </Link>
+
+                  <PrimaryButton
+                    className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
+                    bgColor="bg-primary-100"
+                    text={loading ? "Logging in..." : "Sign In"}
+                    type="submit"
+                  />
+
+                  <p className="font-poppins text-center text-[18px] mt-4">
+                    Didn't have an account?{" "}
+                    <Link
+                      to="/register"
+                      className="font-poppins text-blue-500 hover:underline text-[18px]"
+                    >
+                      Sign Up
+                    </Link>
+                  </p>
+                </div>
+              </motion.form>
             </div>
-          </form>
+          </div>
         </div>
       )}
 

@@ -90,44 +90,39 @@ const DashboardSide = ({ className = "" }) => {
   ];
 
   // 2. MOBILE MENU ITEMS (Based on Figma)
-  // Ito ay bago at visible lang sa mobile. Dito natin pinalitan ang labels at icons.
   const mobileMenuItems = [
     {
       id: "mobile-home",
-      label: "Home",           // Figma Label
-      icon: "solar:home-2-bold", // Figma Icon style
-      path: "/dashboard"       // Same functionality
+      label: "Home",          
+      icon: "material-symbols:home-rounded", 
+      path: "/dashboard"       
     },
     {
       id: "mobile-track",
-      label: "Track",          // Figma Label
-      icon: "solar:map-point-search-linear", // Figma Icon style
+      label: "Track",          
+      icon: "solar:map-point-search-linear", 
       path: "/activity-report"
     },
     {
       id: "mobile-notes",
-      label: "Notes",          // Figma Label
-      icon: "solar:document-add-linear", // Figma Icon style
-      path: "/notes"   // Separate Notes page
+      label: "Notes",         
+      icon: "material-symbols-light:add-notes-outline-rounded", 
+      path: "/notes"   
     },
     {
       id: "mobile-guardian",
-      label: "Guardian",       // Figma Label
-      icon: "solar:shield-user-outline", // Figma Icon style
+      label: "Guardian",       
+      icon: "solar:shield-user-outline", 
       path: "/manage-profile"
     },
 
     {
       id: "mobile-weather",
-      label: "Weather",        // Figma Label
-      icon: "solar:cloud-sun-bold", // Figma Icon style
+      label: "Weather",        
+      icon: "material-symbols-light:weather-hail", 
       path: "/weather-board"
     }
 
-
-
-
-    // Note: Tinanggal ko ang Settings dito kasi 4 items lang ang nasa Figma screenshot
   ];
 
   const handleNavigation = useCallback(
@@ -141,18 +136,18 @@ const DashboardSide = ({ className = "" }) => {
   return (
     <>
       {/* --- MOBILE NAVIGATION (Visible only on Mobile) --- */}
-      {/* Pinalitan ang bg-white ng bg-primary-100 para maging dark blue gaya sa Figma */}
+     
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-primary-100 border-t border-white/10 z-50">
         <div className="flex justify-around items-center h-[var(--mobile-nav-height)] px-2">
-          {/* Ginagamit natin dito ang mobileMenuItems array */}
+          {/* mobileMenuItems array */}
           {mobileMenuItems.map((item) => (
             <HoverNavEffect delay={0.1} key={item.id}>
               <button
                 onClick={() => handleNavigation(item.path)}
-                className={`flex flex-col items-center justify-center flex-1 py-2 ${
+                className={`flex flex-col items-center justify-center w-16 py-3 transition-all duration-300 ${
                   location.pathname === item.path
-                    ? "text-white font-bold" // Active: White & Bold
-                    : "text-gray-400"        // Inactive: Grayish
+                    ? "bg-white text-primary-100 font-bold shadow-md" // Active: White BG, Dark Text
+                    : "text-gray-400 hover:text-white"        // Inactive: Grayish
                 }`}
               >
                 <Icon icon={item.icon} className="text-2xl" />
@@ -171,7 +166,7 @@ const DashboardSide = ({ className = "" }) => {
       >
         <nav className="flex-1 overflow-y-auto overflow-x-hidden">
           <ul className="">
-            {/* Ginagamit natin dito ang desktopMenuItems array (ORIGINAL) */}
+            {/*  desktopMenuItems array (ORIGINAL) */}
             {desktopMenuItems.map((item) => (
               <MenuButton
                 key={item.id}

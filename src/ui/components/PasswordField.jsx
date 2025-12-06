@@ -97,7 +97,7 @@ const PasswordField = ({
       {label && (
         <label
           htmlFor={name}
-          className="font-poppins font-medium mt-2 text-[16px] align-center"
+          className="font-poppins font-medium mt-2 mb-2 text-[16px] align-center"
           style={{ color: labelColor }}
         >
           {label}
