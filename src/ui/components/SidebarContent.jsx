@@ -84,7 +84,7 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
   return (
     <>
       {/* --- CIRCLE OVERLAY TRANSITION --- */}
-      {animationPhase === "white" && (
+      {isMobile && animationPhase === "white" && (
         <motion.div
           initial={{ clipPath: "circle(0px at 50% 50%)" }}
           animate={{
@@ -96,6 +96,7 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
         />
       )}
 
+      {/* Mobile Header */}
       <motion.div
         animate={animationPhase === "final" ? "mobileFinal" : "mobileStart"}
         variants={containerVariants}
@@ -127,39 +128,35 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
           className={`bg-primary-100 flex flex-col items-center justify-center relative overflow-hidden sm:min-h-screen z-40 ${className}`}
         >
           {/* Background Pattern */}
-          {!isMobile && (
-            <motion.img
-              src={SmartCaneLogo}
-              alt="Background Pattern"
-              animate={
-                isMobile && animationPhase !== "start"
-                  ? { opacity: 0 }
-                  : { opacity: 0.05 }
-              }
-              className="absolute pointer-events-none select-none w-[150%] sm:w-auto"
-            />
-          )}
+          <motion.img
+            src={SmartCaneLogo}
+            alt="Background Pattern"
+            animate={
+              isMobile && animationPhase !== "start"
+                ? { opacity: 0 }
+                : { opacity: 0.05 }
+            }
+            className="absolute pointer-events-none select-none w-[80%] max-w-[55rem]"
+          />
 
           {/* Content Container */}
           <motion.div
             animate={{ y: 0, scale: 1 }}
             className="z-10 flex flex-col items-center gap-y-4 sm:gap-y-12 px-4 text-center absolute top-1/2 -translate-y-1/2 w-full"
           >
-            {isMobile && (
-              <Link to="/">
-                {/* Logo */}
-                <motion.img
-                  src={SmartCaneLogo}
-                  alt="Smart Cane Logo"
-                  animate={
-                    isMobile && animationPhase === "final"
-                      ? { opacity: 0, height: 0, marginBottom: 0 }
-                      : { opacity: 1, width: "220px", height: "auto" }
-                  }
-                  className="w-[120px] sm:w-[220px] md:w-[290px] mx-auto"
-                />
-              </Link>
-            )}
+            <Link to="/">
+              {/* Logo */}
+              <motion.img
+                src={SmartCaneLogo}
+                alt="Smart Cane Logo"
+                animate={
+                  isMobile && animationPhase === "final"
+                    ? { opacity: 0, height: 0, marginBottom: 0 }
+                    : { opacity: 1, width: "220px", height: "auto" }
+                }
+                className="w-[120px] sm:w-[220px] md:w-[290px] mx-auto"
+              />
+            </Link>
 
             {/* Text: iCane */}
             <motion.h1
