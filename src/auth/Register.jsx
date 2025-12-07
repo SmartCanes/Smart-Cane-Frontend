@@ -435,9 +435,10 @@ const Register = () => {
           type: "error",
           onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
           variant: "banner",
-          title: "Error",
+          title: "Network Error",
           position: "center",
-          message: errorMessage
+          message:
+            "We’re having trouble connecting to the server. Please check your internet connection and try again. If the problem persists, try refreshing the page or contacting support."
         });
       }
     } finally {
