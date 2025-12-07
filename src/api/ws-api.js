@@ -29,6 +29,13 @@ class SocketAPI {
     });
   }
 
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+  }
+
   on(event, callback) {
     if (!this.socket) this.connect();
     this.socket.on(event, callback);

@@ -3,17 +3,8 @@ import PrimaryButton from "../ui/components/PrimaryButton.jsx";
 import smartcaneLogo from "../assets/images/smartcane-logo.png";
 import { BlinkingIcon } from "@/wrapper/MotionWrapper.jsx";
 
-const Welcome = () => {
+const GetStarted = () => {
   const navigate = useNavigate();
-
-  const handleGetStarted = () => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      navigate("/dashboard", { replace: true });
-    } else {
-      navigate("/login");
-    }
-  };
 
   return (
     <div className="bg-[#11285A] min-h-screen h-full w-full flex items-center justify-center flex-col relative font-poppins px-4 py-8 overflow-hidden">
@@ -35,15 +26,28 @@ const Welcome = () => {
         Bringing independence closer through a cane that's more than just
         support — it's smart.
       </p>
-      <PrimaryButton
-        className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:w-1/4 py-3 md:py-4 hover:bg-gray-400 hover:text-white hover:cursor-pointer text-lg md:text-[20px] z-10"
-        text="Get Started"
-        textColor="text-[#11285A]"
-        bgColor="bg-white"
-        onClick={handleGetStarted}
-      />
+
+      <div className="w-full flex flex-col items-center gap-4 z-10">
+        <PrimaryButton
+          className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:w-1/4 py-3 md:py-4 hover:bg-gray-200 transition-colors text-lg md:text-[20px]"
+          text="Sign In"
+          textColor="text-[#11285A]"
+          bgColor="bg-white"
+          hoverColor="bg-gray-200"
+          variant="neutral"
+          onClick={() => navigate("/login")}
+        />
+        <PrimaryButton
+          className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:w-1/4 py-3 md:py-4 hover:bg-gray-200 transition-colors text-lg md:text-[20px]"
+          text="Create an account"
+          textColor="text-[#11285A]"
+          bgColor="bg-white"
+          hoverColor="bg-gray-200"
+          onClick={() => navigate("/register")}
+        />
+      </div>
     </div>
   );
 };
 
-export default Welcome;
+export default GetStarted;

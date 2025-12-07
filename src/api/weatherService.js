@@ -75,6 +75,23 @@ export const fetchFullWeatherForecast = async () => {
       return "Overcast";
     };
 
+    let recommendation = "";
+    if (!canGoOutside) {
+      recommendation = "Heavy rain or showers expected tomorrow. Better to stay indoors.";
+    } else {
+      // 0 = Clear sky, 1 = Mainly clear
+      if (tomCode === 0 || tomCode === 1) {
+        recommendation = "It will be sunny tomorrow. Don't forget to bring an umbrella and stay hydrated.";
+      } 
+      // 2 = Partly cloudy, 3 = Overcast
+      else if (tomCode === 2 || tomCode === 3) {
+        recommendation = "It will be cloudy tomorrow. A good day for a walk.";
+      } 
+      else {
+        recommendation = "Tomorrow looks safe for a walk. Use your iCane as usual.";
+      }
+    }
+
     const tomorrow = {
       date: tomDate,
       tempMax: tomTempMax,
@@ -82,9 +99,8 @@ export const fetchFullWeatherForecast = async () => {
       precipProbability: tomPrecip,
       description: getWeatherDesc(tomCode),
       canGoOutside,
-      recommendation: canGoOutside
-        ? "Tomorrow looks safe for a walk. Use your iCane as usual."
-        : "Heavy rain or showers expected tomorrow. Better to stay indoors."
+      recommendation,
+      weatherCode: tomCode // Add this to help with icon selection in UI
     };
 
     // --- 2. Today's Weather Details ---

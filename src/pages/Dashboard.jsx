@@ -5,30 +5,34 @@ import RecentAlerts from "@/ui/components/RecentAlert";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import WalkingDirections from "@/ui/components/WalkingDirections";
 import SendNote from "@/ui/components/SendNote";
-import { motion, useAnimation } from "framer-motion";
-import { useUserStore } from "@/stores/useStore";
 import Toast from "@/ui/components/Toast";
-import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
+import { useRealtimeStore } from "@/stores/useStore";
+import { useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 
 import QuickActions from "@/ui/components/QuickActions";
+import { useAnimation } from "framer-motion";
 
 const Dashboard = () => {
   const {
-    showLoginModal,
     connectWs,
     emergency,
-    isMapLoading,
     caneLocation,
     guardianLocation,
-    setShowLoginModal,
-    setGuardianLocation,
-    setIsMapLoading
-  } = useUserStore();
-  const [showModal, setShowModal] = useState(false);
+    setGuardianLocation
+  } = useRealtimeStore();
+  const location = useLocation();
+  const [toast, setToast] = useState({
+    message: "",
+    type: "",
+    position: "",
+    show: false
+  });
   const [activeTab, setActiveTab] = useState("track");
   const [startPoint, setStartPoint] = useState("");
   // const [route, setRoute] = useState(null);
   const [destinationPoint, setDestinationPoint] = useState("");
+  const [isMapLoading, setIsMapLoading] = useState(true);
   const controls = useAnimation();
 
   const handleSwapLocations = () => {
@@ -54,25 +58,6 @@ const Dashboard = () => {
 
   //   console.log("Requesting directions", { startPoint, destinationPoint });
   // };
-
-  useEffect(() => {
-    if (emergency) {
-      controls.start({
-        backgroundColor: ["#ffffff", "#ff3232", "#ffffff"],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 0.8,
-          ease: "easeInOut"
-        }
-      });
-    } else {
-      controls.start({
-        backgroundColor: "#ffffff",
-        transition: { duration: 0.3 }
-      });
-    }
-  }, [emergency, controls]);
 
   useEffect(() => {
     connectWs();
@@ -104,14 +89,30 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (!showLoginModal) return;
-    setShowModal(true);
-    setShowLoginModal(false);
-  }, [showLoginModal, setShowLoginModal]);
+    const showModal = location.state?.showModal;
+    if (showModal && !emergency) {
+      setToast({
+        show: true,
+        message: "You have successfully logged into your account.",
+        type: "success",
+        position: "top-right"
+      });
+
+      window.history.replaceState({}, document.title);
+
+      const timer = setTimeout(() => {
+        setToast((prev) => ({ ...prev, show: false }));
+      }, 3000);
+
+      return () => {
+        clearTimeout(timer);
+        setToast((prev) => ({ ...prev, show: false }));
+      };
+    }
+  }, [location]);
 
   return (
     <>
-      <EmergencyOverlay emergency={emergency} />
       <motion.main
         className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-4 sm:p-5 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6"
         initial={{ backgroundColor: "#ffffff" }}
@@ -244,12 +245,12 @@ const Dashboard = () => {
                 />
               </div>
               <SendNote />
-              {showModal && (
+              {toast.show && (
                 <Toast
-                  message="You have successfully logged into your account."
-                  type="success"
-                  position="top-right"
-                  onClose={() => setShowModal(false)}
+                  message={toast.message}
+                  type={toast.type}
+                  position={toast.position}
+                  onClose={() => setToast((prev) => ({ ...prev, show: false }))}
                 />
               )}
               {emergency && (

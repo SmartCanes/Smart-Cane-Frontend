@@ -1,27 +1,43 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import SidebarContent from "../ui/components/SidebarContent";
+import { motion } from "framer-motion";
 import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
-import { useUserStore } from "@/stores/useStore";
 import { loginApi } from "@/api/authService";
+import { useUIStore, useUserStore } from "@/stores/useStore";
+import Modal from "@/ui/components/Modal";
+import ScannerCamera from "@/ui/components/Scanner";
 
 const Login = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
-  const { login, setShowLoginModal } = useUserStore();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const { setUser } = useUserStore();
+  const { isAnimationDone } = useUIStore();
+
+  const [credentials, setCredentials] = useState({
     username: "",
     password: ""
   });
+  const [guardianId, setGuardianId] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [showPasswordRequired, setShowPasswordRequired] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    variant: "banner",
+    title: "",
+    message: "",
+    actionText: "",
+    onAction: () => {}
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setCredentials((prev) => ({
+      ...prev,
+      [name]: value
+    }));
     if (errors[name] || errors.general) {
       setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
     }
@@ -29,36 +45,33 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { username, password } = formData;
-
-    if (username.trim()) {
-      setShowPasswordRequired(true);
-    }
 
     const newErrors = {};
-    if (!username.trim()) newErrors.username = "This field is required";
-    if (!password) newErrors.password = "This field is required";
+    if (!credentials.username.trim())
+      newErrors.username = "Username is required";
+    if (!credentials.password) newErrors.password = "Password is required";
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    setLoading(true);
     try {
-      if (isDev && username === "admin" && password === "admin") {
-        localStorage.setItem("access_token", "DEV_ADMIN_TOKEN");
+      if (
+        isDev &&
+        credentials.username === "admin" &&
+        credentials.password === "admin"
+      ) {
+        document.cookie =
+          "access_token=DEV_ACCESS_TOKEN; path=/; max-age=900; SameSite=None; Secure";
+        document.cookie =
+          "refresh_token=DEV_REFRESH_TOKEN; path=/; max-age=604800; SameSite=None; Secure";
         navigate("/dashboard");
         return;
       }
 
-      const response = await loginApi(username, password);
-      localStorage.setItem("access_token", response.data.access_token);
-      login(response.data.guardian_id);
-      setShowLoginModal(true);
-      navigate("/dashboard");
+      await handleLogin();
     } catch (err) {
-      console.error(err);
-      const msg = err.response?.data?.message || "Login failed";
+      const msg = err.response?.data?.message || err.message || "Login failed";
       setErrors({
         general: msg,
         username: " ",
@@ -69,32 +82,81 @@ const Login = () => {
     }
   };
 
-  return (
-    <div className="min-h-dvh w-full flex flex-col sm:flex-row">
-      <SidebarContent />
-      
-      {/* Main Container */}
-      <div className="w-full min-h-dvh sm:flex-1 relative bg-white sm:bg-[#FDFCFA] px-6 sm:px-10 flex flex-col">
-        
-        {/* --- MOBILE CURVED HEADER (Figma Style) --- */}
-        <div className="absolute top-0 left-0 w-full bg-primary-100 h-[220px] rounded-b-[48px] sm:hidden flex justify-center items-center z-0">
-          <h1 className="font-gabriela text-6xl text-white tracking-wide">iCane</h1>
-        </div>
+  const handleLogin = async () => {
+    setModalConfig((prev) => ({ ...prev, isOpen: false }));
+    setLoading(true);
 
-        {/* --- FORM SECTION --- */}
-        <div className="flex-1 flex items-center justify-center pt-[240px] pb-8 sm:pt-0 sm:pb-0">
-          <div className="w-full max-w-md sm:max-w-none lg:max-w-lg">
-            <form
-              className="w-full"
+    const response = await loginApi(credentials.username, credentials.password);
+    if (response.data.device_registered === false) {
+      setGuardianId(response.data.guardian_id);
+      setModalConfig({
+        isOpen: true,
+        variant: "banner",
+        title: "No Valid Device",
+        message:
+          "It seems like you don't have a paired iCane device. Please pair your device to continue.",
+        onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false }))
+      });
+      setShowScanner(true);
+      return;
+    }
+
+    setUser(response.data.user || response.data);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    navigate("/dashboard", {
+      state: {
+        showModal: true
+      },
+      replace: true
+    });
+  };
+
+  const handleOnScan = () => {
+    setModalConfig({
+      isOpen: true,
+      // onClose: () => handleLogin(),
+      variant: "banner",
+      title: "Paired Successfully",
+      message:
+        "You can now continue to dashboard and start using your account.",
+      actionText: "Proceed to Dashboard",
+      onAction: () => handleLogin()
+    });
+  };
+
+  return (
+    <>
+      <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
+        {!showScanner && (
+          <motion.div
+            initial={{ opacity: 0, x: 100 }}
+            animate={
+              isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
+            }
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6"
+          >
+            <div className="flex flex-col gap-5 text-center">
+              <h1 className="hidden sm:block text-5xl sm:text-5xl lg:text-6xl font-bold text-[#1C253C]">
+                Welcome!
+              </h1>
+              <p className="hidden sm:block text-[#1C253C] text-paragraph text-1xl">
+                Ready to go? Log in and jump straight into your dashboard.
+              </p>
+              <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
+                Login to your account
+              </p>
+            </div>
+            <motion.form
+              initial={{ opacity: 0, y: 50 }}
+              animate={
+                isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+              }
+              transition={{ duration: 0.6 }}
+              className="w-full max-w-md sm:max-w-none lg:max-w-lg"
               onSubmit={handleSubmit}
               noValidate
             >
-              <div className="flex flex-col items-center text-center mb-6 sm:mb-10">
-                <p className="font-poppins text-[#1C253C] text-center font-medium text-lg sm:text-2xl">
-                  Login to your Account
-                </p>
-              </div>
-
               {errors.general && (
                 <p className="font-poppins text-center text-[#CE4B34] mb-4 text-sm">
                   {errors.general}
@@ -107,7 +169,7 @@ const Login = () => {
                   label="Username"
                   placeholder="Enter your username..."
                   name="username"
-                  value={formData.username}
+                  value={credentials.username}
                   onChange={handleChange}
                   error={errors.username}
                 />
@@ -117,45 +179,73 @@ const Login = () => {
                   label="Password"
                   placeholder="Enter your password..."
                   name="password"
-                  required={showPasswordRequired}
                   type="password"
-                  value={formData.password}
+                  value={credentials.password}
                   onChange={handleChange}
                   error={errors.password}
                   showErrorIcon={false}
                 />
 
-                <div className="w-full">
-                  <Link
-                    to="/forgot-password"
-                    className="font-poppins block text-left text-[#1C253C] hover:underline text-sm underline font-medium mt-1 w-fit"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <Link
+                  to="/forgot-password"
+                  className="font-poppins block text-left hover:underline text-[16px] underline mt-2 w-fit"
+                >
+                  Forgot password?
+                </Link>
 
                 <PrimaryButton
-                  className="font-poppins w-full py-3.5 text-base font-medium mt-6"
+                  className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
                   bgColor="bg-primary-100"
-                  text={loading ? "Logging in..." : "Sign in"}
+                  text={loading ? "Logging in..." : "Sign In"}
                   type="submit"
                 />
 
-                <p className="font-poppins text-center text-sm text-gray-600 mt-6">
+                <p className="font-poppins text-center text-[18px] mt-4">
                   Didn't have an account?{" "}
                   <Link
                     to="/register"
-                    className="font-poppins text-blue-500 font-medium hover:underline"
+                    className="font-poppins text-blue-500 hover:underline text-[18px] text-nowrap"
                   >
                     Sign Up
                   </Link>
                 </p>
               </div>
-            </form>
+            </motion.form>
+          </motion.div>
+        )}
+        {showScanner && (
+          <div className="flex flex-col gap-7 sm:justify-center items-center pt-[30px] sm:pt-5 pb-8 sm:pb-5 px-6">
+            <div className="space-y-2">
+              <h1 className="text-4xl sm:text-3xl lg:text-4xl font-bold text-[#1C253C] text-center">
+                Scan your iCane Device
+              </h1>
+              <p className="text-[#1C253C] text-paragraph text-1xl text-center">
+                Point your camera at the QR code on your iCane device to pair it
+                automatically.
+              </p>
+            </div>
+
+            <ScannerCamera
+              onSuccess={handleOnScan}
+              showOnSuccessToast={false}
+              guardianId={guardianId}
+            />
           </div>
-        </div>
+        )}
       </div>
-    </div>
+
+      <Modal
+        isOpen={modalConfig.isOpen}
+        onClose={modalConfig.onClose}
+        modalType={modalConfig.modalType}
+        position={modalConfig.position}
+        actionText={modalConfig.actionText}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        variant={modalConfig.variant}
+        onAction={modalConfig.onAction}
+      />
+    </>
   );
 };
 

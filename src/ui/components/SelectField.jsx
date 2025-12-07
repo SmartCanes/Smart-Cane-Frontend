@@ -95,7 +95,7 @@ const SelectField = ({
             border rounded-[15px]
             flex items-center justify-between
             focus:outline-none focus:ring-2
-            transition-all duration-200
+            transition-all duration-200 whitespace-nowrap overflow-hidden
             ${
               disabled
                 ? "bg-gray-100 cursor-not-allowed"
