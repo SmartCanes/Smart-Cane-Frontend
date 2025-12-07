@@ -127,9 +127,20 @@ const Login = () => {
   return (
     <>
       {!showScanner && (
-        <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
+        <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA]">
           {/* Ilalabas lang ang form pag tapos na ang transition ng Sidebar */}
-          <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0">
+          <div className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6 ">
+            <div className="flex flex-col gap-5 text-center">
+              <h1 className="hidden sm:block text-5xl sm:text-5xl lg:text-6xl font-bold text-[#1C253C]">
+                Welcome!
+              </h1>
+              <p className="hidden sm:block text-[#1C253C] text-paragraph text-1xl">
+                Ready to go? Log in and jump straight into your dashboard.
+              </p>
+              <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
+                Login to your account
+              </p>
+            </div>
             <motion.form
               initial={{ opacity: 0, y: 50 }}
               animate={
@@ -140,16 +151,6 @@ const Login = () => {
               onSubmit={handleSubmit}
               noValidate
             >
-              <div className="flex flex-col items-center text-center mb-6 sm:mb-10">
-                <h1 className="font-poppins text-5xl sm:text-h1 font-bold text-[#1C253C] mb-2">
-                  Welcome!
-                </h1>
-                <p className="font-poppins text-[#1C253C] text-center font-medium text-sm sm:text-lg sm:w-2/3">
-                  Enter your credentials below to access your dashboard and
-                  saved features.
-                </p>
-              </div>
-
               {errors.general && (
                 <p className="font-poppins text-center text-[#CE4B34] mb-4 text-sm">
                   {errors.general}
@@ -197,7 +198,7 @@ const Login = () => {
                   Didn't have an account?{" "}
                   <Link
                     to="/register"
-                    className="font-poppins text-blue-500 hover:underline text-[18px]"
+                    className="font-poppins text-blue-500 hover:underline text-[18px] text-nowrap"
                   >
                     Sign Up
                   </Link>
