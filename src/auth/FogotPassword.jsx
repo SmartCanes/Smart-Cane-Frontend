@@ -1,12 +1,11 @@
-import SidebarContent from "../ui/components/SidebarContent";
 import PasswordField from "../ui/components/PasswordField";
 import TextField from "../ui/components/TextField";
 import PrimaryButton from "../ui/components/PrimaryButton";
-import BackButton from "../ui/components/BackButton";
 import { useState } from "react";
 import Modal from "@/ui/components/Modal";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useUIStore } from "@/stores/useStore";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -20,8 +19,7 @@ const ForgotPassword = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [isAnimationDone, setIsAnimationDone] = useState(false);
-
+  const { isAnimationDone } = useUIStore();
   const VALID_EMAIL = "admin@gmail.com";
 
   const handleChange = (e) => {
@@ -84,26 +82,17 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
-      <SidebarContent onAnimationComplete={() => setIsAnimationDone(true)} />
-
+    <>
       {/* Verification Code Modal */}
-
-      <Modal isOpen={showModal} variant="banner" title="Forgot Password">
-        <>
-          We've sent a <span className="font-bold">verification code</span> to
-          your email:
-          <br />
-          {userEmail ?? "********@gmail.com"}
-          <br />
-          <br />
-          Please check your <span className="font-bold">Inbox</span> or{" "}
-          <span className="font-bold">Spam</span> folder.
-        </>
-      </Modal>
-
-      <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
-        <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[40px] sm:pt-0 pb-8 sm:pb-0">
+      <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, x: 100 }}
+          animate={
+            isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
+          }
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6"
+        >
           <motion.form
             initial={{ opacity: 0, y: 50 }}
             animate={
@@ -156,9 +145,13 @@ const ForgotPassword = () => {
                   type="submit"
                 />
                 <div className="flex justify-center mt-3">
-                  <BackButton
+                  <PrimaryButton
+                    className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
+                    textColor="text-black"
+                    text="Back"
+                    variant="outline"
+                    type="button"
                     onClick={() => navigate("/login")}
-                    className="sm:w-auto"
                   />
                 </div>
               </div>
@@ -196,18 +189,38 @@ const ForgotPassword = () => {
                   text="Submit"
                   type="submit"
                 />
-                <div className="flex justify-center mt-3">
-                  <BackButton
-                    onClick={() => navigate("/login")}
-                    className="sm:w-auto"
-                  />
-                </div>
+                <PrimaryButton
+                  className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
+                  textColor="text-black"
+                  text="Back"
+                  variant="outline"
+                  type="button"
+                  onClick={() => navigate("/login")}
+                />
               </div>
             )}
           </motion.form>
-        </div>
+        </motion.div>
       </div>
-    </div>
+
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        variant="banner"
+        title="Forgot Password"
+      >
+        <>
+          We've sent a <span className="font-bold">verification code</span> to
+          your email:
+          <br />
+          {userEmail ?? "********@gmail.com"}
+          <br />
+          <br />
+          Please check your <span className="font-bold">Inbox</span> or{" "}
+          <span className="font-bold">Spam</span> folder.
+        </>
+      </Modal>
+    </>
   );
 };
 

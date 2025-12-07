@@ -564,8 +564,15 @@ const Register = () => {
     <>
       {!showScanner && (
         <>
-          <div className="relative flex flex-col w-full sm:w-1/2 sm:ml-[50%] min-h-screen bg-[#FDFCFA] px-6 sm:px-10">
-            <div className="flex-1 flex flex-col justify-start sm:justify-center items-center pt-[50px] sm:pt-0 pb-8 sm:pb-0">
+          <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, x: 100 }}
+              animate={
+                isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
+              }
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6"
+            >
               <div className="text-center space-y-2 ">
                 <h1 className="hidden sm:block  text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
                   {step === 3 ? "Email Verification" : "Welcome"}
@@ -613,7 +620,7 @@ const Register = () => {
                 {/* Step 1: Basic Information */}
                 {step === 1 && !showScanner && (
                   <div className="space-y-3 sm:space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       <TextField
                         className="font-poppins"
                         label={"First Name"}
@@ -892,7 +899,7 @@ const Register = () => {
                   </Link>
                 </p>
               </motion.form>
-            </div>
+            </motion.div>
           </div>
         </>
       )}

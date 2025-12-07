@@ -127,9 +127,15 @@ const Login = () => {
   return (
     <>
       {!showScanner && (
-        <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA]">
-          {/* Ilalabas lang ang form pag tapos na ang transition ng Sidebar */}
-          <div className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6">
+        <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, x: 100 }}
+            animate={
+              isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
+            }
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6"
+          >
             <div className="flex flex-col gap-5 text-center">
               <h1 className="hidden sm:block text-5xl sm:text-5xl lg:text-6xl font-bold text-[#1C253C]">
                 Welcome!
@@ -205,7 +211,7 @@ const Login = () => {
                 </p>
               </div>
             </motion.form>
-          </div>
+          </motion.div>
         </div>
       )}
 

@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import SmartCaneLogo from "@/assets/images/smartcane-logo.png";
 import { useRegisterStore } from "@/stores/useRegisterStore";
+import { useUIStore } from "@/stores/useStore";
 
 const SidebarContent = ({ onAnimationComplete, className = "" }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const { setIsAnimationDone } = useUIStore();
 
   // Phase sequence: 'start' (Blue) -> 'white' (Expansion) -> 'final' (Header/Sidebar Reveal)
   const [animationPhase, setAnimationPhase] = useState("start");
@@ -39,10 +41,6 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
     desktopStart: {
       width: "100%",
       height: viewportHeight,
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-      borderBottomLeftRadius: 0,
-      borderBottomRightRadius: 0,
       position: "fixed",
       left: 0,
       top: 0,
@@ -51,10 +49,6 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
     desktopFinal: {
       width: "50%",
       height: viewportHeight,
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-      borderBottomLeftRadius: 0,
-      borderBottomRightRadius: 0,
       position: "fixed",
       left: 0,
       top: 0,
@@ -78,6 +72,8 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
       zIndex: 0
     }
   };
+
+  const shouldAnimate = animationPhase === "final";
 
   const { clearRegisterStore, clearDeviceValidated } = useRegisterStore();
 
@@ -121,24 +117,31 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
 
       {(!isMobile || animationPhase !== "final") && (
         <motion.div
-          initial={"desktopStart"}
-          animate={animationPhase === "final" ? "desktopFinal" : "desktopStart"}
-          variants={containerVariants}
+          initial={{
+            width: "100%",
+            height: viewportHeight,
+            left: 0,
+            top: 0,
+            position: "fixed",
+            zIndex: 40
+          }}
+          animate={animationPhase === "final" ? { width: "50%" } : undefined}
           transition={{ duration: 0.8, ease: "circOut" }}
+          onAnimationComplete={() => setIsAnimationDone(true)}
           className={`bg-primary-100 flex flex-col items-center justify-center relative overflow-hidden sm:min-h-screen z-40 ${className}`}
         >
           {/* Background Pattern */}
           <motion.img
             src={SmartCaneLogo}
             alt="Background Pattern"
+            initial={{ opacity: 0.05 }}
             animate={
               isMobile && animationPhase !== "start"
                 ? { opacity: 0 }
                 : { opacity: 0.05 }
             }
-            className="absolute pointer-events-none select-none w-[80%] max-w-[55rem]"
+            className="absolute pointer-events-none select-none w-[80%] max-w-[48rem]"
           />
-
           {/* Content Container */}
           <motion.div
             animate={{ y: 0, scale: 1 }}

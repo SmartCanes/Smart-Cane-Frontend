@@ -16,7 +16,6 @@ import DashboardLayout from "./layout/DashboardLayout";
 import WeatherBoard from "./pages/WeatherBoard";
 import ActivityReport from "./pages/ActivityReport";
 import Notes from "./pages/Notes.jsx";
-import ScannerCamera from "./ui/components/Scanner";
 import GetStarted from "./pages/GetStarted.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -30,7 +29,6 @@ createRoot(document.getElementById("root")).render(
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/scan" element={<ScannerCamera />} />
         </Route>
 
         <Route element={<ProtectedLayout />}>
