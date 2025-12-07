@@ -84,15 +84,19 @@ const Register = () => {
   const validateField = (name, value) => {
     switch (name) {
       case "firstName":
-      case "lastName":
-        if (!value.trim()) return "This field is required";
+        if (!value.trim()) return "First Name is required";
         if (!/^[a-zA-Z\s]+$/.test(value))
           return "Should contain only letters and spaces";
         if (value.length < 2) return "Should be at least 2 characters long";
         return "";
-
+      case "lastName":
+        if (!value.trim()) return "Last Name is required";
+        if (!/^[a-zA-Z\s]+$/.test(value))
+          return "Should contain only letters and spaces";
+        if (value.length < 2) return "Should be at least 2 characters long";
+        return "";
       case "username": {
-        if (!value.trim()) return "This field is required";
+        if (!value.trim()) return "Username is required";
         if (value.length < 3)
           return "Username must be at least 3 characters long";
         if (!/^[a-zA-Z0-9_]+$/.test(value))
@@ -104,7 +108,7 @@ const Register = () => {
       }
 
       case "password":
-        if (!value) return "This field is required";
+        if (!value) return "Password is required";
         if (value.length < 8)
           return "Password must be at least 8 characters long";
         if (!/(?=.*[a-z])/.test(value))
@@ -118,23 +122,23 @@ const Register = () => {
         return "";
 
       case "confirmPassword":
-        if (!value) return "This field is required";
+        if (!value) return "Confirm Password is required";
         if (value !== formData.password) return "Passwords don't match!";
         return "";
 
       case "streetAddress":
-        if (!value.trim()) return "This field is required";
+        if (!value.trim()) return "Street Address is required";
         if (value.length < 5) return "Address should be more specific";
         return "";
 
       case "email":
-        if (!value.trim()) return "This field is required";
+        if (!value.trim()) return "Email is required";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
           return "Please enter a valid email address";
         return "";
 
       case "contactNumber":
-        if (!value) return "This field is required";
+        if (!value) return "Contact Number is required";
         if (value.length !== CONTACT_NUMBER_LENGTH)
           return `Contact number must be ${CONTACT_NUMBER_LENGTH} digits`;
         if (!/^09\d{9}$/.test(value))
