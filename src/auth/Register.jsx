@@ -563,9 +563,9 @@ const Register = () => {
 
   return (
     <>
-      {!showScanner && (
-        <>
-          <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
+      <>
+        <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
+          {!showScanner && (
             <motion.div
               initial={{ opacity: 0, x: 100 }}
               animate={
@@ -901,33 +901,33 @@ const Register = () => {
                 </p>
               </motion.form>
             </motion.div>
-          </div>
-        </>
-      )}
+          )}
+
+          {showScanner && (
+            <div className="flex flex-col gap-7 sm:justify-center items-center pt-[30px] sm:pt-5 pb-8 sm:pb-5 px-6">
+              <div className="space-y-2">
+                <h1 className="text-4xl sm:text-3xl lg:text-4xl font-bold text-[#1C253C] text-center">
+                  Scan your iCane Device
+                </h1>
+                <p className="text-[#1C253C] text-paragraph text-1xl text-center">
+                  Point your camera at the QR code on your iCane device to pair
+                  it automatically.
+                </p>
+              </div>
+
+              <ScannerCamera
+                onSuccess={handleOnScan}
+                showOnSuccessToast={false}
+                guardianId={guardianId}
+              />
+            </div>
+          )}
+        </div>
+      </>
 
       {isSubmitting && (
         <div className="absolute inset-0 sm:inset-y-0 sm:left-0 w-full sm:w-1/2 flex items-center justify-center z-30">
           <Loader size="large" color="#FDFCFA" />
-        </div>
-      )}
-
-      {showScanner && (
-        <div className="flex-1 flex flex-col items-center justify-center px-5 sm:min-h-screen sm:p-10">
-          <div className="text-center space-y-2 mb-5">
-            <h1 className="text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C] text-center">
-              Scan your iCane Device
-            </h1>
-            <p className="text-[#1C253C] text-paragraph text-1xl text-center">
-              Point your camera at the QR code on your iCane device to pair it
-              automatically.
-            </p>
-          </div>
-
-          <ScannerCamera
-            onSuccess={handleOnScan}
-            showOnSuccessToast={false}
-            guardianId={guardianId}
-          />
         </div>
       )}
 
