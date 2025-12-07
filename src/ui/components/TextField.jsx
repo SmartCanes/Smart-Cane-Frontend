@@ -72,11 +72,14 @@ const TextField = ({
         {...props}
       />
 
-      {hasError && errorHasContent && (
-        <p className="text-sm mt-1 ml-2" style={{ color: validationColor }}>
-          {typeof error === "string" ? error.trim() : error}
-        </p>
-      )}
+      <p
+        className={`text-[13px] mt-[4px] ml-2 min-h-[1.22rem] ${
+          hasError && errorHasContent ? "visible" : "invisible"
+        }`}
+        style={{ color: validationColor }}
+      >
+        {typeof error === "string" ? error.trim() : error || " "}
+      </p>
 
       {helperText && !error && (
         <p className="text-gray-500 text-sm mt-1">{helperText}</p>
