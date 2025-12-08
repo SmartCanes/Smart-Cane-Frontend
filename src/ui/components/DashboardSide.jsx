@@ -80,49 +80,48 @@ const DashboardSide = ({ className = "" }) => {
       label: "Manage Profile",
       icon: "iconamoon:profile",
       path: "/manage-profile"
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: "solar:settings-bold",
-      path: "/settings"
     }
+    // {
+    //   id: "settings",
+    //   label: "Settings",
+    //   icon: "solar:settings-bold",
+    //   path: "/settings"
+    // }
   ];
 
   // 2. MOBILE MENU ITEMS (Based on Figma)
   const mobileMenuItems = [
     {
       id: "mobile-home",
-      label: "Home",          
-      icon: "material-symbols:home-rounded", 
-      path: "/dashboard"       
+      label: "Home",
+      icon: "material-symbols:home-rounded",
+      path: "/dashboard"
     },
     {
       id: "mobile-track",
-      label: "Track",          
-      icon: "solar:map-point-search-linear", 
+      label: "Track",
+      icon: "solar:map-point-search-linear",
       path: "/activity-report"
     },
     {
       id: "mobile-notes",
-      label: "Notes",         
-      icon: "material-symbols-light:add-notes-outline-rounded", 
-      path: "/notes"   
+      label: "Notes",
+      icon: "material-symbols-light:add-notes-outline-rounded",
+      path: "/notes"
     },
     {
       id: "mobile-guardian",
-      label: "Guardian",       
-      icon: "solar:shield-user-outline", 
+      label: "Guardian",
+      icon: "solar:shield-user-outline",
       path: "/manage-profile"
     },
 
     {
       id: "mobile-weather",
-      label: "Weather",        
-      icon: "material-symbols-light:weather-hail", 
+      label: "Weather",
+      icon: "material-symbols-light:weather-hail",
       path: "/weather-board"
     }
-
   ];
 
   const handleNavigation = useCallback(
@@ -136,7 +135,7 @@ const DashboardSide = ({ className = "" }) => {
   return (
     <>
       {/* --- MOBILE NAVIGATION (Visible only on Mobile) --- */}
-     
+
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-primary-100 border-t border-white/10 z-50">
         <div className="flex justify-around items-center h-[var(--mobile-nav-height)] px-2">
           {/* mobileMenuItems array */}
@@ -147,13 +146,11 @@ const DashboardSide = ({ className = "" }) => {
                 className={`flex flex-col items-center justify-center w-16 py-3 transition-all duration-300 ${
                   location.pathname === item.path
                     ? "bg-white text-primary-100 font-bold shadow-md" // Active: White BG, Dark Text
-                    : "text-gray-400 hover:text-white"        // Inactive: Grayish
+                    : "text-gray-400 hover:text-white" // Inactive: Grayish
                 }`}
               >
                 <Icon icon={item.icon} className="text-2xl" />
-                <span className="text-xs mt-1 font-poppins">
-                  {item.label}
-                </span>
+                <span className="text-xs mt-1 font-poppins">{item.label}</span>
               </button>
             </HoverNavEffect>
           ))}

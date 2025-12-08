@@ -17,6 +17,7 @@ import WeatherBoard from "./pages/WeatherBoard";
 import ActivityReport from "./pages/ActivityReport";
 import Notes from "./pages/Notes.jsx";
 import GetStarted from "./pages/GetStarted.jsx";
+import { GuardianProfile } from "./pages/GuardianProfile";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -38,6 +39,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/manage-profile" element={<ManageProfile />} />
             <Route path="/weather-board" element={<WeatherBoard />} />
             <Route path="/settings" element={<Setting />} />
+            <Route path="/profile" element={<GuardianProfile />} />
             <Route path="/notes" element={<Notes />} />
           </Route>
         </Route>

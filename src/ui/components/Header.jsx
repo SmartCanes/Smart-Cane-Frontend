@@ -55,7 +55,7 @@ const Header = () => {
 
   return (
     <header
-      className={`w-full max-h-[var(--header-height)] bg-primary-100 flex items-center px-4 justify-between`}
+      className={`w-full max-h-[var(--header-height)] bg-primary-100 flex items-center px-5 sm:px-15 justify-between`}
     >
       <div className="h-[var(--header-height)] flex items-center justify-start ">
         <Link to="/dashboard">
@@ -118,21 +118,11 @@ const Header = () => {
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      navigate("/manage-profile");
+                      navigate("/profile");
                     }}
                     className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
                   >
-                    Manage Profile
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      // Assuming History maps to Activity Reports or a history page
-                      navigate("/activity-report");
-                    }}
-                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
-                  >
-                    History
+                    Profile
                   </button>
                   <button
                     onClick={() => {

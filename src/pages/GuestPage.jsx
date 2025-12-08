@@ -467,13 +467,13 @@ const GuestPage = () => {
         <div className="relative mx-auto max-w-5xl px-4 text-center text-white space-y-6 sm:px-6 z-10">
           <TextFade delay={0.3}>
             <h1 className="font-poppins text-3xl md:text-5xl lg:text-6xl font-semibold leading-tight">
-              The Smart Cane That Sees Ahead.
+              The iCane That Sees Ahead.
             </h1>
           </TextFade>
 
           <TextReveal delay={0.6}>
             <h2 className="font-poppins text-xl font-medium md:text-2xl lg:text-3xl text-white/90">
-              iCane: Redefining Mobility with AI-Powered Safety.
+              SmartCane: Redefining Mobility with AI-Powered Safety.
             </h2>
           </TextReveal>
 
@@ -652,9 +652,9 @@ const GuestPage = () => {
         </p>
 
         <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
-          The iCane Smart Cane uses smart sensors and simple feedback to guide
-          users and prevent obstacles. It’s built to be reliable, easy to use,
-          and supportive of greater independence.
+          The iCane uses smart sensors and simple feedback to guide users and
+          prevent obstacles. It’s built to be reliable, easy to use, and
+          supportive of greater independence.
         </p>
 
         <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm pb-16">

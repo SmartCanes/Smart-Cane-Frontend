@@ -3,44 +3,59 @@ import { handleRequest } from "./requestHandler.js";
 
 const BASE_URL = "https://psgc.gitlab.io/api";
 
-const mapOptions = (collection) =>
-  collection.map((item) => ({
+const mapOptions = (collection) => {
+  if (!Array.isArray(collection)) {
+    console.warn("mapOptions expects an array but got:", collection);
+    return [];
+  }
+  return collection.map((item) => ({
     value: item.code,
-    label: item.name
+    label: item.name,
+    ...item
   }));
+};
 
-export const getRegions = () =>
+export const fetchMetroManila = () =>
   handleRequest(async () => {
-    const data = await api.get(`${BASE_URL}/regions/`);
-    return mapOptions(data);
-  });
+    const NCR_REGION_CODE = "130000000";
 
-export const getProvincesByRegion = (regionCode) =>
-  handleRequest(async () => {
-    const data = await api.get(`${BASE_URL}/regions/${regionCode}/provinces/`);
-    return mapOptions(data);
-  });
-
-export const getCitiesByProvince = (provinceCode) =>
-  handleRequest(async () => {
-    const data = await api.get(
-      `${BASE_URL}/provinces/${provinceCode}/cities-municipalities/`
+    // Fetch cities/municipalities in NCR
+    const citiesRes = await api.get(
+      `${BASE_URL}/regions/${NCR_REGION_CODE}/provinces/`
     );
-    return mapOptions(data);
-  });
 
-export const getBarangaysByCity = (cityCode) =>
-  handleRequest(async () => {
-    const data = await api.get(
-      `${BASE_URL}/cities-municipalities/${cityCode}/barangays/`
+    // Provinces in NCR (usually just "Metro Manila" as a province)
+    const provinces = mapOptions(citiesRes.data);
+
+    // For each province, fetch its cities/municipalities
+    const citiesPromises = provinces.map((prov) =>
+      api.get(`${BASE_URL}/provinces/${prov.value}/cities-municipalities/`)
     );
-    return mapOptions(data);
+
+    const citiesResults = await Promise.all(citiesPromises);
+
+    const cities = citiesResults.flatMap((res) => mapOptions(res.data));
+
+    // Fetch barangays for all cities
+    const barangaysPromises = cities.map((city) =>
+      api.get(`${BASE_URL}/cities-municipalities/${city.value}/barangays/`)
+    );
+
+    const barangaysResults = await Promise.all(barangaysPromises);
+    const barangays = barangaysResults.flatMap((res) => mapOptions(res.data));
+
+    return {
+      region: { value: NCR_REGION_CODE, label: "National Capital Region (NCR)" },
+      provinces,
+      cities,
+      barangays
+    };
   });
 
 export const getLocation = (query) =>
   handleRequest(async () => {
-    const data = await api.get(
+    const res = await api.get(
       `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&bbox=116.87,4.59,126.6,21.21`
     );
-    return data;
+    return res;
   });

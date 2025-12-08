@@ -129,27 +129,27 @@ const ManageProfile = () => {
       cellphone: "0912345678",
       gender: "Male",
       address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
-    },
-    {
-      id: 1,
-      name: "Juan Dela Cruz",
-      email: "sample@gmail.com",
-      avatar: avatar,
-      fullName: "Juan Dela Cruz",
-      cellphone: "0912345678",
-      gender: "Male",
-      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
-    },
-    {
-      id: 2,
-      name: "Juan Dela Cruz",
-      email: "sample@gmail.com",
-      avatar: avatar,
-      fullName: "Juan Dela Cruz",
-      cellphone: "0912345678",
-      gender: "Male",
-      address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
     }
+    // {
+    //   id: 1,
+    //   name: "Juan Dela Cruz",
+    //   email: "sample@gmail.com",
+    //   avatar: avatar,
+    //   fullName: "Juan Dela Cruz",
+    //   cellphone: "0912345678",
+    //   gender: "Male",
+    //   address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
+    // },
+    // {
+    //   id: 2,
+    //   name: "Juan Dela Cruz",
+    //   email: "sample@gmail.com",
+    //   avatar: avatar,
+    //   fullName: "Juan Dela Cruz",
+    //   cellphone: "0912345678",
+    //   gender: "Male",
+    //   address: "683 Quirino Highway, Brgy San Bartolome, Novaliches"
+    // }
   ];
 
   const handleTabClick = (tab) => {
@@ -318,170 +318,174 @@ const ManageProfile = () => {
 
         {/* Delete Confirmation Toast */}
         {deleteConfirm.show && (
-        <Modal
-          isOpen={deleteConfirm.show}
-          onClose={handleCancelDelete}
-          title="Remove Guardian?"
-          modalType="error"
-          message="Are you sure you want to remove this guardian?"
-          handleCancel={handleCancelDelete}
-          handleConfirm={handleConfirmDelete}
-        ></Modal>
-      )}
+          <Modal
+            isOpen={deleteConfirm.show}
+            onClose={handleCancelDelete}
+            title="Remove Guardian?"
+            modalType="error"
+            message="Are you sure you want to remove this guardian?"
+            handleCancel={handleCancelDelete}
+            handleConfirm={handleConfirmDelete}
+          ></Modal>
+        )}
 
-      {/* Add Guardian Modal */}
-      {isModalOpen && (
-        <Modal
-          isOpen={open}
-          onClose={() => setIsModalOpen(false)}
-          title="Invite Guardian"
-          modalType="info"
-          footer={null} // optional
-        >
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Guardian Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter email"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2ECC71] mb-4"
-          />
-
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Custom Message (optional)
-          </label>
-          <textarea
-            // value={message}
-            // onChange={(e) => setMessage(e.target.value)}
-            placeholder="Write a message..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2ECC71] mb-4"
-          />
-
-          <div className="flex gap-3 mt-2">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleSendInvitation}
-              className="flex-1 px-4 py-2 bg-[#2ECC71] text-white rounded-lg hover:bg-green-600 transition font-bold"
-            >
-              Send Invite
-            </button>
-          </div>
-        </Modal>
-      )}
-
-      {/* Guardian Profile Content */}
-      {activeTab === "guardian" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
-          {guardians.map((guardian) => (
-            <GuardianCard
-              key={guardian.id}
-              guardian={guardian}
-              onDelete={handleDeleteClick}
+        {/* Add Guardian Modal */}
+        {isModalOpen && (
+          <Modal
+            isOpen={open}
+            onClose={() => setIsModalOpen(false)}
+            title="Invite Guardian"
+            modalType="info"
+            footer={null} // optional
+          >
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Guardian Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter email"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2ECC71] mb-4"
             />
-          ))}
-        </div>
-      )}
 
-      {/* VIP Profile Content */}
-      {activeTab === "vip" && (
-        <div className="bg-white p-4 md:p-8 rounded-2xl shadow-md border border-gray-100">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-4 mb-6 md:mb-8">
-            <div className="flex items-center gap-3 md:gap-5">
-              <img
-                src={userProfile.avatar}
-                alt={userProfile.name}
-                className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover flex-shrink-0"
-              />
-              <div>
-                <h3 className="font-bold text-xl md:text-2xl text-gray-800">
-                  {userProfile.name}
-                </h3>
-                <p className="text-sm md:text-base text-gray-500 break-all">
-                  {userProfile.email}
-                </p>
-              </div>
-            </div>
-            {!isEditing ? (
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Custom Message (optional)
+            </label>
+            <textarea
+              // value={message}
+              // onChange={(e) => setMessage(e.target.value)}
+              placeholder="Write a message..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2ECC71] mb-4"
+            />
+
+            <div className="flex gap-3 mt-2">
               <button
-                onClick={handleEditClick}
-                className="w-full md:w-auto bg-card-100 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 transition-colors"
+                onClick={() => setIsModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition"
               >
-                Edit
+                Cancel
               </button>
+
+              <button
+                onClick={handleSendInvitation}
+                className="flex-1 px-4 py-2 bg-[#2ECC71] text-white rounded-lg hover:bg-green-600 transition font-bold"
+              >
+                Send Invite
+              </button>
+            </div>
+          </Modal>
+        )}
+
+        {/* Guardian Profile Content */}
+        {activeTab === "guardian" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 ">
+            {guardians.length > 0 ? (
+              guardians.map((guardian) => (
+                <GuardianCard
+                  key={guardian.id}
+                  guardian={guardian}
+                  onDelete={handleDeleteClick}
+                />
+              ))
             ) : (
-              <div className="flex gap-3 w-full md:w-auto">
-                <button
-                  onClick={handleCancelEdit}
-                  className="flex-1 md:flex-initial px-4 md:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-[#FF0033] hover:text-white transition-colors font-poppins font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveChanges}
-                  className="flex-1 md:flex-initial px-4 md:px-6 py-2 bg-[#2ECC71] text-white rounded-lg hover:bg-green-600 transition-colors font-poppins font-bold"
-                >
-                  Save
-                </button>
-              </div>
+              <p className="">No Guardians Available</p>
             )}
           </div>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-8 gap-y-4 md:gap-y-6">
-            <ProfileInfo
-              label="Full Name"
-              value={userProfile.fullName}
-              isEditing={isEditing}
-              onChange={handleInputChange}
-              name="fullName"
-            />
-            <ProfileInfo
-              label="Cellphone Number"
-              value={userProfile.cellphone}
-              isEditing={isEditing}
-              onChange={handleInputChange}
-              name="cellphone"
-            />
-            <ProfileInfo
-              label="Gender"
-              value={userProfile.gender}
-              isEditing={isEditing}
-              onChange={handleInputChange}
-              name="gender"
-            />
-            <ProfileInfo
-              label="Email Address"
-              value={userProfile.email}
-              isEditing={isEditing}
-              onChange={handleInputChange}
-              name="email"
-            />
-            <div className="md:col-span-2">
+        {/* VIP Profile Content */}
+        {activeTab === "vip" && (
+          <div className="bg-white p-4 md:p-8 rounded-2xl shadow-md border border-gray-100">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-4 mb-6 md:mb-8">
+              <div className="flex items-center gap-3 md:gap-5">
+                <img
+                  src={userProfile.avatar}
+                  alt={userProfile.name}
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover flex-shrink-0"
+                />
+                <div>
+                  <h3 className="font-bold text-xl md:text-2xl text-gray-800">
+                    {userProfile.name}
+                  </h3>
+                  <p className="text-sm md:text-base text-gray-500 break-all">
+                    {userProfile.email}
+                  </p>
+                </div>
+              </div>
+              {!isEditing ? (
+                <button
+                  onClick={handleEditClick}
+                  className="w-full md:w-auto bg-card-100 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 transition-colors"
+                >
+                  Edit
+                </button>
+              ) : (
+                <div className="flex gap-3 w-full md:w-auto">
+                  <button
+                    onClick={handleCancelEdit}
+                    className="flex-1 md:flex-initial px-4 md:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-[#FF0033] hover:text-white transition-colors font-poppins font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveChanges}
+                    className="flex-1 md:flex-initial px-4 md:px-6 py-2 bg-[#2ECC71] text-white rounded-lg hover:bg-green-600 transition-colors font-poppins font-bold"
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-8 gap-y-4 md:gap-y-6">
               <ProfileInfo
-                label="Address"
-                value={userProfile.address}
+                label="Full Name"
+                value={userProfile.fullName}
                 isEditing={isEditing}
                 onChange={handleInputChange}
-                name="address"
+                name="fullName"
+              />
+              <ProfileInfo
+                label="Cellphone Number"
+                value={userProfile.cellphone}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+                name="cellphone"
+              />
+              <ProfileInfo
+                label="Gender"
+                value={userProfile.gender}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+                name="gender"
+              />
+              <ProfileInfo
+                label="Email Address"
+                value={userProfile.email}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+                name="email"
+              />
+              <div className="md:col-span-2">
+                <ProfileInfo
+                  label="Address"
+                  value={userProfile.address}
+                  isEditing={isEditing}
+                  onChange={handleInputChange}
+                  name="address"
+                />
+              </div>
+              <ProfileInfo
+                label="Condition"
+                value={userProfile.condition}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+                name="condition"
               />
             </div>
-            <ProfileInfo
-              label="Condition"
-              value={userProfile.condition}
-              isEditing={isEditing}
-              onChange={handleInputChange}
-              name="condition"
-            />
           </div>
-        </div>
-      )}
+        )}
       </div>
     </main>
   );

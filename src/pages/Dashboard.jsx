@@ -166,7 +166,7 @@ const Dashboard = () => {
                         Track Live
                       </button>
 
-                      <button
+                      {/* <button
                         onClick={() => setActiveTab("history")}
                         className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-poppins font-medium text-xs sm:text-sm flex items-center gap-2 transition-all ${
                           activeTab === "history"
@@ -176,7 +176,7 @@ const Dashboard = () => {
                         style={historyButtonStyle}
                       >
                         History
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </div>
