@@ -1,15 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
-import SimulationPanel from "@/ui/components/SimulationPanel";
 
-// 👇 FIX 1: Import Components (Para mawala ang "DashboardSide is not defined")
-
-// 👇 FIX 2: Import Notification Manager
-import { triggerSmartCaneNotification } from "@/utils/NotificationManager";
 import { fetchFullWeatherForecast } from "@/api/weatherService";
 
 const WeatherBoard = () => {
-  // 👇 FIX 3: Define States (Para mawala ang "setLoading is not defined")
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -17,7 +11,7 @@ const WeatherBoard = () => {
   useEffect(() => {
     let isMounted = true;
     const loadForecast = async () => {
-      setLoading(true); // Ito ang hinahanap ng error mo kanina
+      setLoading(true);
 
       const data = await fetchFullWeatherForecast();
 
@@ -26,10 +20,10 @@ const WeatherBoard = () => {
         setLoading(false);
 
         if (!data.canGoOutside) {
-          triggerSmartCaneNotification(
-            "WEATHER",
-            `Warning: ${data.recommendation}`
-          );
+          // triggerSmartCaneNotification(
+          //   "WEATHER",
+          //   `Warning: ${data.recommendation}`
+          // );
         }
       }
     };
@@ -97,12 +91,12 @@ const WeatherBoard = () => {
 
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="mx-auto space-y-6 min-h-full">
         <div>
-          <h1 className="text-2xl font-bold text-[#11285A] font-poppins mb-1">
+          <h1 className="text-2xl font-bold text-[#11285A] mb-1">
             Weather Forecast
           </h1>
-          <div className="flex items-center gap-2 text-gray-500 text-sm font-poppins">
+          <div className="flex items-center gap-2 text-gray-500 text-sm">
             <Icon icon="carbon:location-filled" />
             <span>Assisi St., Novaliches (Synchronized)</span>
           </div>
@@ -114,9 +108,7 @@ const WeatherBoard = () => {
               icon="eos-icons:loading"
               className="text-4xl text-primary-100 animate-spin"
             />
-            <p className="text-gray-400 font-poppins text-sm">
-              Checking forecast...
-            </p>
+            <p className="text-gray-400 text-sm">Checking forecast...</p>
           </div>
         ) : forecast ? (
           <div className="flex flex-col gap-6">
@@ -139,7 +131,7 @@ const WeatherBoard = () => {
                 <h2 className="text-2xl font-bold text-white mb-1">
                   {visuals.buttonLabel}
                 </h2>
-                <p className="text-white/80 font-poppins text-xs leading-relaxed">
+                <p className="text-white/80 text-xs leading-relaxed">
                   {forecast.recommendation}
                 </p>
               </div>
@@ -166,7 +158,7 @@ const WeatherBoard = () => {
                 <h2 className={`text-3xl font-bold mb-2 ${visuals.titleColor}`}>
                   {visuals.buttonLabel}
                 </h2>
-                <p className="text-gray-600 font-poppins text-sm md:text-base">
+                <p className="text-gray-600 text-sm md:text-base">
                   {forecast.recommendation}
                 </p>
               </div>
@@ -175,7 +167,7 @@ const WeatherBoard = () => {
             {/* DATE SELECTOR */}
             <div
               onClick={() => setIsCalendarOpen(true)}
-              className="cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm"
+              className="cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm max-w-fit"
             >
               <Icon
                 icon="solar:calendar-linear"
@@ -254,7 +246,7 @@ const WeatherBoard = () => {
           </div>
         )}
         {/* SIMULATION PANEL */}
-        <SimulationPanel />
+        {/* <SimulationPanel /> */}
       </div>
 
       <CalendarOverlay
@@ -290,7 +282,7 @@ const CalendarOverlay = ({ isOpen, onClose }) => {
       cells.push(
         <div
           key={`prev-${d}`}
-          className="h-14 flex items-center justify-center text-gray-400 font-poppins bg-white"
+          className="h-14 flex items-center justify-center text-gray-400 bg-white"
         >
           {d}
         </div>
@@ -306,7 +298,7 @@ const CalendarOverlay = ({ isOpen, onClose }) => {
       cells.push(
         <div
           key={`curr-${i}`}
-          className={`h-14 flex items-center justify-center font-poppins text-sm font-medium transition-colors
+          className={`h-14 flex items-center justify-center text-sm font-medium transition-colors
           ${isToday ? "bg-[#4B5EAA] text-white" : "bg-white text-gray-700 hover:bg-gray-50"}
         `}
         >
@@ -322,7 +314,7 @@ const CalendarOverlay = ({ isOpen, onClose }) => {
       cells.push(
         <div
           key={`next-${i}`}
-          className="h-14 flex items-center justify-center text-gray-300 font-poppins bg-gray-50/50"
+          className="h-14 flex items-center justify-center text-gray-300 bg-gray-50/50"
         >
           {i}
         </div>
@@ -342,7 +334,7 @@ const CalendarOverlay = ({ isOpen, onClose }) => {
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-8 px-2">
-          <h2 className="text-2xl font-bold text-gray-900 font-poppins">
+          <h2 className="text-2xl font-bold text-gray-900">
             {currentMonth.toLocaleDateString("en-US", {
               month: "long",
               year: "numeric"
@@ -369,7 +361,7 @@ const CalendarOverlay = ({ isOpen, onClose }) => {
           {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
             <div
               key={d}
-              className="text-center font-bold text-gray-900 font-poppins text-sm py-2"
+              className="text-center font-bold text-gray-900 text-sm py-2"
             >
               {d}
             </div>
