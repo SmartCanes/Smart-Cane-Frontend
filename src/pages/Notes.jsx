@@ -19,59 +19,51 @@ const Notes = () => {
   };
 
   return (
-    <div className="min-h-screen w-full font-poppins">
-      
-      {/* ================= MOBILE VIEW (Sheet Style) ================= */}
-      <div className="md:hidden min-h-[calc(100vh-var(--header-height))] bg-primary-100 flex flex-col pt-4">
-        
-        {/* Ito yung White Sheet na may Curve sa taas */}
-        <div className="flex-1 bg-white w-full rounded-t-[3rem] px-6 pt-10 pb-20 shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1)] flex flex-col">
-          
-          {/* Header Title inside Sheet */}
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-[#11285A] mb-1">Send Note</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Compose and send a message to your contacts
-            </p>
-            <div className="w-full h-[1px] bg-gray-100"></div>
-          </div>
+    <>
+      <div className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
+        <div className="mb-6">
+          <h3 className="text-xl font-bold text-[#11285A] mb-1">Send Note</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            Compose and send a message to your contacts
+          </p>
+          <div className="w-full h-[1px] bg-gray-100"></div>
+        </div>
 
-          {/* Textarea */}
-          <div className="mb-4 flex-1">
-            <label className="block text-sm font-bold text-[#11285A] mb-3">
-              Message
-            </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value.slice(0, maxCharacters))}
-              placeholder="Type your message here..."
-              className="w-full h-64 p-4 border border-gray-200 bg-white rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-100/50 focus:border-primary-100 text-sm text-gray-700 placeholder-gray-300 shadow-sm transition-all"
-            />
-             <div className="text-right mt-2">
-                <span className="text-xs text-gray-400 font-medium">
-                  {message.length} / {maxCharacters} characters
-                </span>
-             </div>
+        {/* Textarea */}
+        <div className="mb-4 flex-1">
+          <label className="block text-sm font-bold text-[#11285A] mb-3">
+            Message
+          </label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value.slice(0, maxCharacters))}
+            placeholder="Type your message here..."
+            className="w-full h-64 p-4 border border-gray-200 bg-white rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-100/50 focus:border-primary-100 text-sm text-gray-700 placeholder-gray-300 shadow-sm transition-all"
+          />
+          <div className="text-right mt-2">
+            <span className="text-xs text-gray-400 font-medium">
+              {message.length} / {maxCharacters} characters
+            </span>
           </div>
+        </div>
 
-          {/* Buttons Footer */}
-          <div className="flex items-center justify-between gap-4 mt-auto">
-            <button
-              onClick={handleCancel}
-              className="px-6 py-3 rounded-xl text-sm font-semibold text-[#11285A] hover:bg-gray-50 transition-colors flex-1"
-            >
-              Cancel
-            </button>
-            
-            <button 
-              onClick={handleSend}
-              disabled={!message.trim()}
-              className="flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold text-white bg-[#11285A] hover:bg-[#1e3a7a] transition-colors shadow-lg shadow-blue-900/20 flex-[2] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Icon icon="material-symbols:send-rounded" className="text-lg" />
-              Send
-            </button>
-          </div>
+        {/* Buttons Footer */}
+        <div className="flex items-center justify-between gap-4 mt-auto">
+          <button
+            onClick={handleCancel}
+            className="px-6 py-3 rounded-xl text-sm font-semibold text-[#11285A] hover:bg-gray-50 transition-colors flex-1"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={handleSend}
+            disabled={!message.trim()}
+            className="flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold text-white bg-[#11285A] hover:bg-[#1e3a7a] transition-colors shadow-lg shadow-blue-900/20 flex-[2] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Icon icon="material-symbols:send-rounded" className="text-lg" />
+            Send
+          </button>
         </div>
       </div>
 
@@ -118,7 +110,7 @@ const Notes = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
