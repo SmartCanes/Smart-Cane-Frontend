@@ -23,6 +23,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [retryAfter, setRetryAfter] = useState(0);
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     variant: "banner",
@@ -72,6 +73,13 @@ const Login = () => {
       await handleLogin();
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Login failed";
+      const retrySeconds = parseInt(msg.match(/(\d+)(?:s| seconds)/)?.[1]);
+
+      console.log(retrySeconds);
+      if (!isNaN(retrySeconds)) {
+        startCountdown(retrySeconds);
+      }
+
       setErrors({
         general: msg,
         username: " ",
@@ -124,6 +132,20 @@ const Login = () => {
     });
   };
 
+  const startCountdown = (seconds) => {
+    setRetryAfter(seconds);
+
+    const interval = setInterval(() => {
+      setRetryAfter((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   return (
     <>
       <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
@@ -159,7 +181,9 @@ const Login = () => {
             >
               {errors.general && (
                 <p className="font-poppins text-center text-[#CE4B34] mb-4 text-sm">
-                  {errors.general}
+                  {retryAfter > 0
+                    ? `Too many failed login attempts. Try again in ${retryAfter} seconds.`
+                    : errors.general}
                 </p>
               )}
 
@@ -172,6 +196,7 @@ const Login = () => {
                   value={credentials.username}
                   onChange={handleChange}
                   error={errors.username}
+                  disabled={retryAfter > 0}
                 />
 
                 <PasswordField
@@ -184,6 +209,7 @@ const Login = () => {
                   onChange={handleChange}
                   error={errors.password}
                   showErrorIcon={false}
+                  disabled={retryAfter > 0}
                 />
 
                 <Link
@@ -198,6 +224,7 @@ const Login = () => {
                   bgColor="bg-primary-100"
                   text={loading ? "Logging in..." : "Sign In"}
                   type="submit"
+                  disabled={retryAfter > 0 || loading}
                 />
 
                 <p className="font-poppins text-center text-[18px] mt-4">
