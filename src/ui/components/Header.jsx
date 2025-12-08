@@ -2,14 +2,17 @@ import { useState, useRef, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import notifBell from "@/assets/images/notifbell.png";
 import { useNavigate } from "react-router-dom";
-import { useUserStore } from "@/stores/useStore";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
 import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 import { Link } from "react-router-dom";
+import { useRealtimeStore, useUserStore } from "@/stores/useStore";
+import { logoutApi } from "@/api/authService";
 
 const Header = () => {
-  const { connectionStatus, user, logout } = useUserStore();
-  const { notificationCount, setNotificationCount } = useState(0);
+  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
+  const { user, clearUser } = useUserStore();
+  const { connectionStatus, disconnectWs } = useRealtimeStore();
+  const [notificationCount, setNotificationCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -31,10 +34,23 @@ const Header = () => {
 
   const handleNotificationClick = () => {};
 
-  const handleLogoutClick = () => {
+  const handleLogoutClick = async () => {
+    if (isDev) {
+      clearUser();
+      navigate("/login");
+      return;
+    }
     setIsDropdownOpen(false);
-    logout();
-    navigate("/");
+    try {
+      const response = await logoutApi();
+      if (response.success) {
+        clearUser();
+        disconnectWs();
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -56,29 +72,25 @@ const Header = () => {
         </Link>
       </div>
       {/* Right Section: Online Badge, Notification, User Avatar */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         {/* Online Status Badge */}
         <div
           className={
-            "flex items-center gap-2 text-white px-4 py-1.5 rounded-md font-poppins text-sm font-medium " +
-            (connectionStatus ? "bg-green-500" : "bg-gray-500")
+            "flex items-center gap-1.5 text-white px-3 py-1 rounded-full font-poppins text-xs font-medium " +
+            (connectionStatus ? "bg-[#55B938]" : "bg-gray-500")
           }
         >
-          <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+          <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
           {connectionStatus ? "Online" : "Offline"}
         </div>
         <button
           onClick={handleNotificationClick}
-          className="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors duration-200"
+          className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors duration-200"
           aria-label="Notifications"
         >
-          <img
-            src={notifBell}
-            alt="Notifications"
-            className="w-6 h-6 object-contain"
-          />
+          <Icon icon="ph:bell" className="w-6 h-6" />
           {notificationCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-poppins font-semibold w-5 h-5 flex items-center justify-center rounded-full">
+            <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100">
               {notificationCount > 9 ? "9+" : notificationCount}
             </span>
           )}
@@ -87,10 +99,10 @@ const Header = () => {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center font-poppins font-semibold text-lg transition-colors duration-200"
+            className="w-9 h-9 sm:w-10 sm:h-10 bg-white hover:bg-gray-100 text-primary-100 rounded-full flex items-center justify-center font-poppins font-semibold text-sm sm:text-base transition-colors duration-200"
             aria-label="User menu"
           >
-            {user ? user.userName.charAt(0).toUpperCase() : "Z"}
+            {user ? user.username.charAt(0).toUpperCase() : "Z"}
           </button>
 
           {/* Dropdown Menu */}
@@ -102,23 +114,40 @@ const Header = () => {
                 <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white"></div>
 
                 {/* Ito 'yung bagong container na nagse-center ng lahat */}
-                <div className="p-6 flex flex-col items-center gap-4">
-                  {/* Profile Button (Ginawa nating text na lang 'yung itsura) */}
+                <div className="py-2 flex flex-col w-full">
                   <button
-                    onClick={handleProfileClick}
-                    className="w-full px-4 py-2 text-center font-poppins text-lg font-semibold text-gray-800 hover:bg-gray-50 transition-colors duration-200 rounded-lg"
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate("/manage-profile");
+                    }}
+                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
                   >
-                    Profile
+                    Manage Profile
                   </button>
-
-                  {/* Log Out Button (Pill-shaped) */}
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      // Assuming History maps to Activity Reports or a history page
+                      navigate("/activity-report");
+                    }}
+                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
+                  >
+                    History
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate("/settings");
+                    }}
+                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
+                  >
+                    Settings
+                  </button>
                   <button
                     onClick={handleLogoutClick}
-                    className="flex items-center justify-center gap-2 px-6 py-3 font-poppins text-base transition-colors duration-200 rounded-full"
-                    style={{ backgroundColor: "#F3C8C8", color: "#CE4B34" }}
+                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <Icon icon="ic:baseline-logout" className="text-xl" />
-                    <span className="font-medium">Log Out</span>
+                    Logout
                   </button>
                 </div>
               </div>

@@ -121,7 +121,7 @@ function LiveMap({
 
   return (
     <div className="relative w-full h-full">
-      <div className="absolute top-4 left-4 z-20 w-[260px]">
+      <div className="absolute top-4 left-4 right-4 sm:right-auto z-20 sm:w-[260px]">
         <div className="relative">
           <input
             type="text"
@@ -134,7 +134,7 @@ function LiveMap({
           />
           <Icon
             icon="mdi:magnify"
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg pointer-events-none"
           />
 
           {searchQuery && (

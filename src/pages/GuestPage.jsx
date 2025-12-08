@@ -444,7 +444,7 @@ const GuestPage = () => {
           </nav>
 
           <button
-            onClick={() => navigate("/welcome")}
+            onClick={() => navigate("/get-started")}
             className="flex items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f] sm:px-10 sm:py-3.5"
           >
             Log In

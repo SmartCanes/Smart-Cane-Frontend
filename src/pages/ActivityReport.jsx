@@ -98,37 +98,37 @@ const ActivityReport = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
-    <main className="max-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] sm:max-h-[calc(100vh-var(--header-height))] overflow-y-auto p-6">
-      <div className="w-full font-poppins">
+    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-4 sm:p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
+      <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
         {/* Header Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-[#11285A] mb-1">
+        <div className="mb-4 md:mb-8">
+          <h2 className="text-xl md:text-2xl font-bold text-[#11285A] mb-1">
             Activity Reports
           </h2>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-xs md:text-sm">
             Monitor and track all user activities in your system
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="bg-white rounded-t-2xl p-6 border-b border-gray-100">
+        <div className="bg-white rounded-t-2xl p-4 md:p-6 border-b border-gray-100">
           <div className="relative max-w-xl">
             <Icon
               icon="ph:magnifying-glass"
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl"
+              className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg md:text-xl"
             />
             <input
               type="text"
-              placeholder="Search activities by user, action, or description..."
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-gray-600 placeholder-gray-400"
+              placeholder="Search activities..."
+              className="w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-gray-600 placeholder-gray-400"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
-        {/* Table Section */}
-        <div className="bg-white rounded-b-2xl shadow-sm overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden md:block bg-white rounded-b-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
               <thead>
@@ -214,6 +214,75 @@ const ActivityReport = () => {
                 125
               </button>
               <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50">
+                <Icon icon="ph:caret-right" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden bg-white rounded-b-2xl shadow-sm overflow-hidden">
+          <div className="divide-y divide-gray-100">
+            {activities.map((activity) => (
+              <div key={activity.id} className="p-4 hover:bg-gray-50 transition-colors">
+                {/* User Info */}
+                <div className="flex items-center gap-3 mb-3">
+                  <img
+                    src={activity.user.avatar}
+                    alt={activity.user.name}
+                    className="w-12 h-12 rounded-full object-cover bg-gray-200 flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-gray-900 truncate">
+                      {activity.user.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {activity.user.email}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Activity Type Badge */}
+                <div className="mb-2 inline-block">
+                  <ActivityActions type={activity.type} />
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+                  {activity.description}
+                </p>
+
+                {/* Timestamp */}
+                <p className="text-xs text-gray-400 font-medium">
+                  {activity.timestamp}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t border-gray-100 bg-gray-50">
+            <p className="text-xs text-gray-500">
+              Showing 1-10 of 1,247
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                <Icon icon="ph:caret-left" />
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#11285A] text-white font-medium text-xs">
+                1
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 font-medium text-xs">
+                2
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 font-medium text-xs">
+                3
+              </button>
+              <span className="text-gray-400 text-xs px-0.5">...</span>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 font-medium text-xs">
+                125
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
                 <Icon icon="ph:caret-right" />
               </button>
             </div>

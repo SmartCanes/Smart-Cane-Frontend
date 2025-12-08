@@ -4,6 +4,7 @@ import { HoverNavEffect } from "@/wrapper/MotionWrapper";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 
+// Component for Desktop Menu Items (Walang ginalaw dito sa logic)
 const MenuButton = memo(({ item, isActive, onNavigate }) => (
   <HoverNavEffect
     delay={0.1}
@@ -53,42 +54,75 @@ const DashboardSide = ({ className = "" }) => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const menuItems = [
+  // 1. DESKTOP MENU ITEMS
+  // Ito ang ORIGINAL na listahan. Hindi natin ito ginalaw para hindi magbago ang Desktop View.
+  const desktopMenuItems = [
     {
       id: "dashboard",
       label: "Dashboard",
-      labelMobile: "Dashboard",
       icon: "solar:widget-linear",
       path: "/dashboard"
     },
     {
       id: "activity-report",
       label: "Activity Reports",
-      labelMobile: "Activity",
       icon: "oui:nav-reports",
       path: "/activity-report"
     },
     {
       id: "weather-board",
       label: "Weather Board",
-      labelMobile: "Weather",
       icon: "solar:cloud-rain-outline",
       path: "/weather-board"
     },
     {
       id: "manage-profile",
       label: "Manage Profile",
-      labelMobile: "Profile",
       icon: "iconamoon:profile",
       path: "/manage-profile"
     },
     {
       id: "settings",
       label: "Settings",
-      labelMobile: "Settings",
       icon: "solar:settings-bold",
       path: "/settings"
     }
+  ];
+
+  // 2. MOBILE MENU ITEMS (Based on Figma)
+  const mobileMenuItems = [
+    {
+      id: "mobile-home",
+      label: "Home",          
+      icon: "material-symbols:home-rounded", 
+      path: "/dashboard"       
+    },
+    {
+      id: "mobile-track",
+      label: "Track",          
+      icon: "solar:map-point-search-linear", 
+      path: "/activity-report"
+    },
+    {
+      id: "mobile-notes",
+      label: "Notes",         
+      icon: "material-symbols-light:add-notes-outline-rounded", 
+      path: "/notes"   
+    },
+    {
+      id: "mobile-guardian",
+      label: "Guardian",       
+      icon: "solar:shield-user-outline", 
+      path: "/manage-profile"
+    },
+
+    {
+      id: "mobile-weather",
+      label: "Weather",        
+      icon: "material-symbols-light:weather-hail", 
+      path: "/weather-board"
+    }
+
   ];
 
   const handleNavigation = useCallback(
@@ -101,22 +135,24 @@ const DashboardSide = ({ className = "" }) => {
 
   return (
     <>
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+      {/* --- MOBILE NAVIGATION (Visible only on Mobile) --- */}
+     
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-primary-100 border-t border-white/10 z-50">
         <div className="flex justify-around items-center h-[var(--mobile-nav-height)] px-2">
-          {menuItems.map((item) => (
+          {/* mobileMenuItems array */}
+          {mobileMenuItems.map((item) => (
             <HoverNavEffect delay={0.1} key={item.id}>
               <button
                 onClick={() => handleNavigation(item.path)}
-                className={`flex flex-col items-center justify-center flex-1 py-2 ${
+                className={`flex flex-col items-center justify-center w-16 py-3 transition-all duration-300 ${
                   location.pathname === item.path
-                    ? "text-card-100"
-                    : "text-gray-500"
+                    ? "bg-white text-primary-100 font-bold shadow-md" // Active: White BG, Dark Text
+                    : "text-gray-400 hover:text-white"        // Inactive: Grayish
                 }`}
               >
                 <Icon icon={item.icon} className="text-2xl" />
                 <span className="text-xs mt-1 font-poppins">
-                  {item.labelMobile}
+                  {item.label}
                 </span>
               </button>
             </HoverNavEffect>
@@ -124,13 +160,14 @@ const DashboardSide = ({ className = "" }) => {
         </div>
       </nav>
 
-      {/* Desktop Sidebar */}
+      {/* --- DESKTOP SIDEBAR (Visible only on Desktop) --- */}
       <aside
         className={`hidden md:flex w-60 min-h-[calc(100vh-var(--header-height))] bg-primary-100 flex-col ${className}`}
       >
         <nav className="flex-1 overflow-y-auto overflow-x-hidden">
           <ul className="">
-            {menuItems.map((item) => (
+            {/*  desktopMenuItems array (ORIGINAL) */}
+            {desktopMenuItems.map((item) => (
               <MenuButton
                 key={item.id}
                 item={item}
