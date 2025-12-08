@@ -80,6 +80,12 @@ const DashboardSide = ({ className = "" }) => {
       label: "Manage Profile",
       icon: "iconamoon:profile",
       path: "/manage-profile"
+    },
+    {
+      id: "components",
+      label: "Components",
+      icon: "fa6-brands:unity",
+      path: "/components"
     }
     // {
     //   id: "settings",
@@ -92,16 +98,10 @@ const DashboardSide = ({ className = "" }) => {
   // 2. MOBILE MENU ITEMS (Based on Figma)
   const mobileMenuItems = [
     {
-      id: "mobile-home",
-      label: "Home",
-      icon: "material-symbols:home-rounded",
-      path: "/dashboard"
-    },
-    {
-      id: "mobile-track",
-      label: "Track",
-      icon: "solar:map-point-search-linear",
-      path: "/activity-report"
+      id: "mobile-profile",
+      label: "Profile",
+      icon: "iconamoon:profile",
+      path: "/manage-profile"
     },
     {
       id: "mobile-notes",
@@ -110,12 +110,17 @@ const DashboardSide = ({ className = "" }) => {
       path: "/notes"
     },
     {
-      id: "mobile-guardian",
-      label: "Guardian",
-      icon: "solar:shield-user-outline",
-      path: "/manage-profile"
+      id: "mobile-home",
+      label: "Home",
+      icon: "material-symbols:home-rounded",
+      path: "/dashboard"
     },
-
+    {
+      id: "mobile-health",
+      label: "Health",
+      icon: "fa6-brands:unity",
+      path: "/components"
+    },
     {
       id: "mobile-weather",
       label: "Weather",

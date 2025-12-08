@@ -9,6 +9,8 @@ import Toast from "@/ui/components/Toast";
 import { useRealtimeStore } from "@/stores/useStore";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import UserStatus from "@/ui/components/UserStatus";
+import Loader from "@/ui/components/Loading";
 
 import QuickActions from "@/ui/components/QuickActions";
 import { useAnimation } from "framer-motion";
@@ -153,7 +155,7 @@ const Dashboard = () => {
                     </h3>
 
                     {/* Track Live / History Buttons */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                       <button
                         onClick={() => setActiveTab("track")}
                         className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-poppins font-medium text-xs sm:text-sm flex items-center gap-2 transition-all ${
@@ -165,6 +167,7 @@ const Dashboard = () => {
                         <Icon icon="ph:map-pin-fill" className="text-lg" />
                         Track Live
                       </button>
+                      <UserStatus />
 
                       {/* <button
                         onClick={() => setActiveTab("history")}
@@ -182,28 +185,18 @@ const Dashboard = () => {
                 </div>
 
                 {/* Map Area */}
-                <div className="w-full h-[350px] sm:h-[60vh]">
-                  {isMapLoading ? (
-                    <div className="flex items-center justify-center h-full bg-gray-100">
-                      <div className="text-center">
-                        <Icon
-                          icon="mdi:loading"
-                          className="text-4xl text-blue-600 animate-spin mb-2"
-                        />
-                        <p className="font-poppins text-gray-600">
-                          Loading map...
-                        </p>
-                      </div>
+                <div className="w-full h-[350px] sm:h-[60vh] relative rounded-2xl overflow-hidden">
+                  <LiveMap
+                    guardianPosition={guardianLocation || [14.721, 121.051]}
+                    canePosition={caneLocation}
+                    onSetDestination={setDestinationPoint}
+                    activeTab={activeTab}
+                  />
+
+                  {isMapLoading && (
+                    <div className="absolute inset-0 z-[50] flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
+                      <Loader />
                     </div>
-                  ) : (
-                    <LiveMap
-                      guardianPosition={guardianLocation}
-                      canePosition={caneLocation}
-                      onSetDestination={setDestinationPoint}
-                      // destPos={destinationPoint}
-                      // routePath={route}
-                      activeTab={activeTab}
-                    />
                   )}
                 </div>
 

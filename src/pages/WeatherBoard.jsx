@@ -19,10 +19,10 @@ const WeatherBoard = () => {
         setForecast(data);
         setLoading(false);
 
-        if (!data.canGoOutside) {
+        if (!data.tomorrow.canGoOutside) {
           // triggerSmartCaneNotification(
           //   "WEATHER",
-          //   `Warning: ${data.recommendation}`
+          //   `Warning: ${data.tomorrow.recommendation}`
           // );
         }
       }
@@ -35,8 +35,8 @@ const WeatherBoard = () => {
 
   // Format Date Logic
   const formattedDate = useMemo(() => {
-    if (!forecast?.date) return "";
-    const dateValue = new Date(forecast.date);
+    if (!forecast?.tomorrow?.date) return "";
+    const dateValue = new Date(forecast.tomorrow.date);
     return dateValue.toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
@@ -46,7 +46,7 @@ const WeatherBoard = () => {
 
   // Visuals Logic
   const visuals = useMemo(() => {
-    if (!forecast) return {};
+    if (!forecast?.tomorrow) return {};
 
     let mainIcon = "solar:sun-fog-bold-duotone";
     let buttonLabel = "Safe to Walk";
@@ -55,7 +55,7 @@ const WeatherBoard = () => {
     let borderColor = "border-emerald-100";
     let titleColor = "text-emerald-700";
 
-    if (!forecast.canGoOutside) {
+    if (!forecast.tomorrow.canGoOutside) {
       mainIcon = "solar:cloud-rain-bold-duotone";
       buttonLabel = "Stay Indoors";
       iconColor = "text-orange-500";
@@ -64,11 +64,11 @@ const WeatherBoard = () => {
       titleColor = "text-orange-700";
     } else {
       // 0, 1: Sunny
-      if (forecast.weatherCode === 0 || forecast.weatherCode === 1) {
+      if (forecast.tomorrow.weatherCode === 0 || forecast.tomorrow.weatherCode === 1) {
         mainIcon = "solar:sun-bold-duotone";
       }
       // 2, 3: Cloudy
-      else if (forecast.weatherCode === 2 || forecast.weatherCode === 3) {
+      else if (forecast.tomorrow.weatherCode === 2 || forecast.tomorrow.weatherCode === 3) {
         mainIcon = "solar:cloud-bold-duotone";
       }
     }
@@ -113,26 +113,26 @@ const WeatherBoard = () => {
         ) : forecast ? (
           <div className="flex flex-col gap-6">
             {/* MOBILE RECOMMENDATION CARD */}
-            <div className="md:hidden bg-[#11285A] rounded-[2rem] p-6 flex flex-row items-center gap-5 shadow-lg relative overflow-hidden">
-              <div className="w-24 h-24 min-w-[6rem] rounded-full bg-white flex items-center justify-center shadow-md z-10">
+            <div className="md:hidden bg-[#11285A] rounded-[2rem] p-5 flex flex-row items-center gap-4 shadow-lg relative overflow-hidden">
+              <div className="w-20 h-20 min-w-[5rem] rounded-full bg-white flex items-center justify-center shadow-md z-10">
                 <Icon
                   icon={visuals.mainIcon}
-                  className="text-5xl text-[#11285A]"
+                  className="text-4xl text-[#11285A]"
                 />
               </div>
 
-              <div className="flex-1 z-10">
-                <div className="inline-block bg-white rounded-lg px-3 py-1 mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#11285A]">
+              <div className="flex-1 z-10 min-w-0">
+                <div className="inline-block bg-white rounded-lg px-3 py-1 mb-2 max-w-full">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#11285A] whitespace-nowrap block overflow-hidden text-ellipsis">
                     TOMORROW{" "}
                     {formattedDate ? `• ${formattedDate.toUpperCase()}` : ""}
                   </span>
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-1">
+                <h2 className="text-2xl font-bold text-white mb-1 truncate">
                   {visuals.buttonLabel}
                 </h2>
-                <p className="text-white/80 text-xs leading-relaxed">
-                  {forecast.recommendation}
+                <p className="text-white/80 text-xs leading-relaxed line-clamp-2">
+                  {forecast.tomorrow.recommendation}
                 </p>
               </div>
             </div>
@@ -152,14 +152,14 @@ const WeatherBoard = () => {
                     className={`px-3 py-1 rounded-full bg-white text-xs font-bold uppercase tracking-wider shadow-sm ${visuals.titleColor}`}
                   >
                     TOMORROW{" "}
-                    {formattedDate ? `• ${formattedDate.toUpperCase()}` : ""}
+                    {formattedDate ? `- ${formattedDate.toUpperCase()}` : ""}
                   </span>
                 </div>
                 <h2 className={`text-3xl font-bold mb-2 ${visuals.titleColor}`}>
                   {visuals.buttonLabel}
                 </h2>
                 <p className="text-gray-600 text-sm md:text-base">
-                  {forecast.recommendation}
+                  {forecast.tomorrow.recommendation}
                 </p>
               </div>
             </div>
@@ -189,55 +189,102 @@ const WeatherBoard = () => {
             </div>
 
             {/* DETAILS GRID */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                <Icon
-                  icon="solar:thermometer-bold"
-                  className="text-2xl text-red-400"
-                />
-                <span className="text-gray-400 text-xs uppercase tracking-wide">
-                  Max
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <span className="text-gray-800 text-xs font-bold">
+                  Sunrise:
                 </span>
-                <span className="text-xl font-bold text-gray-700">
-                  {forecast.tempMax}°C
+                <span className="text-sm text-gray-500">
+                  {forecast.today.sunrise}
                 </span>
               </div>
-              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                <Icon
-                  icon="solar:thermometer-bold"
-                  className="text-2xl text-blue-400"
-                />
-                <span className="text-gray-400 text-xs uppercase tracking-wide">
-                  Min
+              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <span className="text-gray-800 text-xs font-bold">
+                  Sunset:
                 </span>
-                <span className="text-xl font-bold text-gray-700">
-                  {forecast.tempMin}°C
+                <span className="text-sm text-gray-500">
+                  {forecast.today.sunset}
                 </span>
               </div>
-              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                <Icon
-                  icon="carbon:rain-drop"
-                  className="text-2xl text-blue-500"
-                />
-                <span className="text-gray-400 text-xs uppercase tracking-wide">
-                  Rain
+              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <span className="text-gray-800 text-xs font-bold">
+                  Humidity:
                 </span>
-                <span className="text-xl font-bold text-gray-700">
-                  {forecast.precipProbability}%
+                <span className="text-sm text-gray-500">
+                  {forecast.today.humidity}
                 </span>
               </div>
-              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 border border-gray-100">
-                <Icon
-                  icon="fluent:weather-partly-cloudy-day-24-regular"
-                  className="text-2xl text-yellow-500"
-                />
-                <span className="text-gray-400 text-xs uppercase tracking-wide">
-                  Sky
+              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <span className="text-gray-800 text-xs font-bold">
+                  Wind:
                 </span>
-                <span className="text-lg font-bold text-gray-700 whitespace-nowrap">
-                  {forecast.description}
+                <span className="text-sm text-gray-500">
+                  {forecast.today.wind}
                 </span>
               </div>
+              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <span className="text-gray-800 text-xs font-bold">
+                  Feels Like:
+                </span>
+                <span className="text-sm text-gray-500">
+                  {forecast.today.feelsLike}
+                </span>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <span className="text-gray-800 text-xs font-bold">
+                  Pressure:
+                </span>
+                <span className="text-sm text-gray-500">
+                  {forecast.today.pressure}
+                </span>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <span className="text-gray-800 text-xs font-bold">
+                  Visibility:
+                </span>
+                <span className="text-sm text-gray-500">
+                  {forecast.today.visibility}
+                </span>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <span className="text-gray-800 text-xs font-bold">
+                  UV Index:
+                </span>
+                <span className="text-sm text-gray-500">
+                  {forecast.today.uvIndex}
+                </span>
+              </div>
+            </div>
+
+            {/* WEEKLY FORECAST HEADER */}
+            <div>
+              <h3 className="text-lg font-bold text-[#11285A]">
+                Weekly Forecast
+              </h3>
+              <p className="text-xs text-gray-500">
+                Here are the summary of the whole weather this week
+              </p>
+            </div>
+
+            {/* WEEKLY FORECAST GRID */}
+            <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
+              {forecast.weekly.map((day, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 border border-gray-100"
+                >
+                  <span className="text-xs font-bold text-[#11285A]">
+                    {day.day}
+                  </span>
+                  <Icon
+                    icon={day.icon}
+                    className={`text-2xl ${day.color}`}
+                  />
+                  <span className="text-xs text-gray-500">
+                    {day.temp}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         ) : (

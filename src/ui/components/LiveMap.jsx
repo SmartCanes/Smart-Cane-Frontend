@@ -11,6 +11,7 @@ import {
 import { Icon } from "@iconify/react";
 import L from "leaflet";
 import CustomZoomControl from "./CustomZoomControl";
+import Loader from "./Loading";
 import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
 
@@ -70,6 +71,7 @@ function LiveMap({
   const [searchResults, setSearchResults] = useState([]);
   const [clickMenuPos, setClickMenuPos] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -83,11 +85,14 @@ function LiveMap({
     }
 
     const delay = setTimeout(async () => {
+      setIsLoading(true);
       try {
         const data = await getLocation(searchQuery);
         setSearchResults(data.features);
       } catch (err) {
         console.error(err);
+      } finally {
+        setIsLoading(false);
       }
     }, 300);
 
@@ -162,6 +167,8 @@ function LiveMap({
                   />
                 </div>
 
+                
+
                 <div>
                   <p className="font-poppins font-medium text-sm text-gray-800">
                     {result.properties.name}
@@ -177,6 +184,12 @@ function LiveMap({
           </div>
         )}
       </div>
+
+      {isLoading && (
+        <div className="absolute inset-0 z-[15] flex items-center justify-center bg-gray-50/90 backdrop-blur-[1px] rounded-2xl">
+          <Loader />
+        </div>
+      )}
 
       <MapContainer
         center={guardianPosition}

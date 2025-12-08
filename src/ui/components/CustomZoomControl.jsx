@@ -24,6 +24,15 @@ function CustomZoomControl({ guardianPosition }) {
         className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-gray-700 hover:bg-gray-100"
         title="Center on current location"
       >
+        <Icon icon="streamline-plump:user-pin-remix" className="w-6 h-6" />
+      </button>
+
+   {/* Bagong Focus on user na button */}
+      <button
+        onClick={focusOnUser}
+        className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-gray-700 hover:bg-gray-100"
+        title="Center on current location"
+      >
         <Icon icon="mdi:crosshairs-gps" className="w-6 h-6" />
       </button>
 

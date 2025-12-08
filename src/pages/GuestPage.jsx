@@ -223,21 +223,127 @@ const featureCards = rawFeatureCards.filter((card, index, arr) => {
 
 const faqs = [
   {
-    question: "How do I use iCane?",
-    answer: "iCane uses AI sensors to detect obstacles and guide you safely."
+    question: "What is a SmartCane?",
+    answer: "The SmartCane (iCane) is an advanced walking cane designed for visually impaired individuals. It uses IoT technology, AI-based visual recognition, and route navigation to help users travel safely and independently. The cane can detect obstacles, identify objects, guide the user to destinations, and send alerts to guardians in case of emergencies."
   },
   {
-    question: "How do I charge iCane?",
-    answer: "Simply connect the provided charger to the charging port."
+    question: "How to sign up?",
+    answer: "To create an account, go to www.smartcane.com. Click “Sign Up” and fill out the required information such as your name, email, and password. After submitting, verify your email if required. Once done, you can now log in and start using the SmartCane services. The process is simple and designed to guide beginners step-by-step."
   },
   {
-    question: "Can I connect iCane to my phone?",
-    answer: "Yes, iCane can connect via Bluetooth to our companion app."
+    question: "How to log in?",
+    answer: "Visit www.smartcane.com and click “Log In”. Enter your registered email and password. After logging in successfully, you will be taken to your dashboard, where you can access your SmartCane data, settings, and connected devices."
   },
+{
+    question: "How to use the SmartCane Website?",
+    answer: `Once logged in, the website dashboard will show key features such as:
+      <ul style="margin-top: 10px; margin-bottom: 10px; padding-left: 20px;">
+        <li><strong>User Profile</strong> – update your information</li>
+        <li><strong>SmartCane Status</strong> – check battery, location, and alerts</li>
+        <li><strong>Navigation Tools</strong> – set destinations or routes</li>
+        <li><strong>Notifications</strong> – view recent alerts, warnings, or updates</li>
+        <li><strong>Guardian & VIP Management</strong> – add or manage users</li>
+      </ul>
+      All menus are labeled clearly so users can easily explore each feature.`
+  },
+
   {
-    question: "How do I use iCane?",
-    answer: "iCane uses AI sensors to detect obstacles and guide you safely."
+    question: "How to use the SmartCane Application?",
+    answer: `Download and open the iCane mobile app.
+ Sign in using your account. The app allows you to:
+      <ul style="margin-top: 10px; margin-bottom: 10px; padding-left: 20px;">
+        <li>Track the real-time location of the SmartCane</li>
+        <li>Receive emergency alerts</li>
+        <li>View obstacle and route updates</li>
+        <li>Manage guardians or VIP users</li>
+        <li>Adjust cane settings (volume, sensitivity, alerts)</li>
+      </ul>
+      The app is designed with a simple layout to help both new and experienced users.`
+  },
+
+  {
+    question: "How to add a guardian?",
+    answer: `On the website or app, go to “Guardian Management”.
+ Click “Add Guardian”, then enter the guardian’s name, phone number, and email address.
+ Once added, the guardian will receive notifications and alerts whenever the visually impaired person needs assistance.`
+  },
+
+  {
+    question: "How to add a VIP (Visually Impaired Person)?",
+    answer: `Go to “VIP Management” on the website or mobile app.
+ Click “Add VIP” and input their details such as name, age, contact information, and SmartCane ID.
+ After saving, the VIP will be linked to your account, allowing you to monitor their cane’s status and receive alerts.`
+  },
+
+  {
+    question: "How do I charge the SmartCane?",
+    answer: `The SmartCane comes with a USB charging cable. Simply connect the cable to the charging port on the cane and plug it into a power source. The LED indicator will show the charging status. A full charge usually takes 2–3 hours.`
+  },
+
+    {
+    question: "How long does the battery last?",
+    answer: `Under normal use, the SmartCane's battery lasts 8–12 hours. Battery life may vary depending on how often obstacle detection, GPS, and AI recognition features are used.`
+  },
+
+    {
+    question: "What happens if the SmartCane detects an obstacle?",
+    answer: `When an obstacle is detected, the cane provides vibration feedback, beeping sounds, or voice alerts depending on your settings. This helps the user avoid hazards like walls, steps, or objects in their path.`
+  },
+
+    {
+    question: "What if I forget my password?",
+    answer: `Go to the login page on www.smartcane.com and click “Forgot Password”.
+ Enter your email address and follow the instructions to reset your password.`
+  },
+
+  {
+    question: "How does the emergency alert (SOS) work?",
+    answer: `The SmartCane has a built-in emergency trigger. When activated, it sends an alert to registered guardians, showing the VIP’s exact location. The guardian will receive the alert through the iCane mobile app.`
+  },
+  
+  {
+    question: "Can multiple guardians be added for one VIP?",
+    answer: `Yes. You can add multiple guardians in the Guardian Management section. Each guardian will receive notifications and emergency alerts.`
+  },
+
+  {
+    question: "Can I track the location of the SmartCane?",
+    answer: `Yes. The SmartCane’s real-time GPS location can be viewed using the mobile app or the website dashboard. This helps guardians ensure the safety of the VIP at all times.`
+  },
+
+  {
+    question: "Does the SmartCane work without an internet connection?",
+    answer: `Basic features like vibration and obstacle detection will still work.
+ However, advanced features, such as AI recognition, route navigation, and GPS tracking, require an internet connection.`
+  },
+
+  {
+    question: "How do I update the SmartCane firmware?",
+    answer: `Firmware updates will be shown on the mobile app. Simply click “Update Now” when a new version is available to keep the SmartCane running smoothly.`
+  },
+
+  {
+    question: "Is the SmartCane water-resistant?",
+    answer: `The SmartCane is designed to be water-resistant, meaning it can handle light rain or splashes. However, avoid submerging it in water.`
+  },
+
+  {
+    question: "Who should use the SmartCane?",
+    answer: `The SmartCane is ideal for visually impaired individuals(VIPs), seniors who need assistance walking, or anyone who wants enhanced mobility and safety features.`
+  },
+
+    {
+    question: "Can I customize the alerts and settings?",
+    answer: `Yes. The iCane app allows you to adjust:
+      <ul style="margin-top: 10px; margin-bottom: 10px; padding-left: 20px;">
+        <li>Vibration strength</li>
+        <li>Voice volume</li>
+        <li>Emergency contact list</li>
+      </ul>`
   }
+
+
+
 ];
 
 const GuestPage = () => {
@@ -697,7 +803,7 @@ const GuestPage = () => {
 
       <div
         id="contact"
-        className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16"
+        className="relative mx-auto flex w-full items-center justify-center py-12 md:py-12"
       >
         {/* Section divider for Contact Us */}
 
@@ -709,7 +815,7 @@ const GuestPage = () => {
       </div>
 
       <FadeIn delay={0.2}>
-        <p className="mx-auto mt-14 px-4 max-w-7xl text-center text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] font-poppins">
+        <p className="mx-auto mt-1 px-4 max-w-7xl text-center text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] font-poppins">
           <strong className="text-card-100">Welcome to iCane</strong> — we’re
           here to help.
         </p>
