@@ -57,7 +57,7 @@ export const useRealtimeStore = create((set, get) => ({
 
     wsApi.on("connect", () => {
       console.log("WebSocket connected:", wsApi.socket?.id);
-      set({ _wsConnected: true, connectionStatus: true });
+      set({ _wsConnected: true });
       resetHeartbeat();
     });
 
