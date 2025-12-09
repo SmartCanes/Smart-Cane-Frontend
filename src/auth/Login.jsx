@@ -75,7 +75,6 @@ const Login = () => {
       const msg = err.response?.data?.message || err.message || "Login failed";
       const retrySeconds = parseInt(msg.match(/(\d+)(?:s| seconds)/)?.[1]);
 
-      console.log(retrySeconds);
       if (!isNaN(retrySeconds)) {
         startCountdown(retrySeconds);
       }
@@ -139,6 +138,7 @@ const Login = () => {
       setRetryAfter((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
+          setErrors((prevErrors) => ({ ...prevErrors, general: "" }));
           return 0;
         }
         return prev - 1;
