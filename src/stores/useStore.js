@@ -108,7 +108,12 @@ export const useUIStore = create(
   persist(
     (set) => ({
       isAnimationDone: false,
-      setIsAnimationDone: () => set({ isAnimationDone: true })
+      setIsAnimationDone: () => set({ isAnimationDone: true }),
+
+      // ✅ Added only what ForgotPassword needs (no other changes)
+      error: null,
+      setError: (msg) => set({ error: msg }),
+      clearError: () => set({ error: null })
     }),
     {
       name: "ui-storage",
@@ -116,3 +121,5 @@ export const useUIStore = create(
     }
   )
 );
+
+

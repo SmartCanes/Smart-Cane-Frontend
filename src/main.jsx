@@ -1,3 +1,7 @@
+import axios from "axios";
+axios.defaults.withCredentials = true;
+
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -19,6 +23,7 @@ import Notes from "./pages/Notes.jsx";
 import GetStarted from "./pages/GetStarted.jsx";
 import { GuardianProfile } from "./pages/GuardianProfile";
 import HealthStatus from "./pages/Health-Status.jsx";
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
