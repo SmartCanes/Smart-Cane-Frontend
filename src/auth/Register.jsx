@@ -15,30 +15,6 @@ import { useRegisterStore } from "@/stores/useRegisterStore";
 import ScannerCamera from "@/ui/components/Scanner";
 import Modal from "@/ui/components/Modal";
 import { pairDevice, validateDeviceSerial } from "@/api/backendService";
-
-const barangays = [
-  { value: "brgy1", label: "Barangay 1" },
-  { value: "brgy2", label: "Barangay 2" },
-  { value: "brgy3", label: "Barangay 3" },
-  { value: "brgy4", label: "Barangay 4" },
-  { value: "brgy5", label: "Barangay 5" }
-];
-
-const cities = [
-  { value: "city1", label: "Manila" },
-  { value: "city2", label: "Quezon City" },
-  { value: "city3", label: "Makati" },
-  { value: "city4", label: "Pasig" },
-  { value: "city5", label: "Taguig" }
-];
-
-const provinces = [
-  { value: "prov1", label: "Metro Manila" },
-  { value: "prov2", label: "Bulacan" },
-  { value: "prov3", label: "Cavite" },
-  { value: "prov4", label: "Laguna" },
-  { value: "prov5", label: "Rizal" }
-];
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
 
@@ -99,16 +75,19 @@ const Register = () => {
         if (value.length > 50) return "Should not exceed 50 characters";
         return "";
 
-      case "username":
+      case "username": {
         if (!value.trim()) return "Username is required";
         if (value.length < 3)
           return "Username must be at least 3 characters long";
         if (value.length > 20) return "Username must not exceed 20 characters";
         if (!/^[a-zA-Z0-9_]+$/.test(value))
           return "Username can only contain letters, numbers, and underscores";
+
         const letterCount = (value.match(/[a-zA-Z]/g) || []).length;
         if (letterCount < 3) return "Username must contain at least 3 letters";
+
         return "";
+      }
 
       case "password":
         if (!value) return "Password is required";
@@ -152,10 +131,10 @@ const Register = () => {
           return "Contact number must start with 09 and contain 11 digits";
         return "";
 
+      case "village":
       case "province":
       case "city":
       case "barangay":
-      case "relationship":
         if (!value) return "This field is required";
         if (value.length > 50)
           return "This field should not exceed 50 characters";
@@ -240,7 +219,6 @@ const Register = () => {
         "province",
         "barangay",
         "city",
-        "relationship",
         "contactNumber",
         "email"
       ];
@@ -350,10 +328,10 @@ const Register = () => {
             guardian_name: formData.firstName + " " + formData.lastName,
             email: formData.email,
             contact_number: formData.contactNumber,
-            relationship_to_vip: formData.relationship,
-            province: formData.province,
-            city: formData.city,
-            barangay: formData.barangay,
+            province: "Metro Manila",
+            village: "Saint Francis",
+            city: "Quezon City",
+            barangay: "San Bartolome",
             street_address: formData.streetAddress
           };
 
@@ -569,6 +547,12 @@ const Register = () => {
   }, [deviceValidated.validated, setDeviceValidated]);
 
   useEffect(() => {
+    // const loadAll = async () => {
+    //   const data = await fetchLocationOptions();
+    //   console.log(data);
+    //   setLocationOptions(data);
+    // };
+    // loadAll();
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
@@ -733,11 +717,14 @@ const Register = () => {
                         label={"Province"}
                         placeholder="Province..."
                         required
-                        options={provinces}
                         onChange={(e) => {
                           handleSelectChange("province", e.target.value);
                         }}
-                        value={formData.province}
+                        options={[
+                          { value: "Metro Manila", label: "Metro Manila" }
+                        ]}
+                        value={"Metro Manila"}
+                        disabled
                         error={errors.province}
                       />
                     </div>
@@ -745,34 +732,57 @@ const Register = () => {
                     {/* Barangay and City - Side by side */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <SelectField
-                        className="font-poppins"
-                        label={"Barangay"}
-                        placeholder="Barangay..."
-                        required
-                        options={barangays}
-                        onChange={(e) => {
-                          handleSelectChange("barangay", e.target.value);
-                        }}
-                        value={formData.barangay}
-                        error={errors.barangay}
-                      />
-
-                      <SelectField
                         className="font-poppins "
                         label={"City"}
                         placeholder="City..."
                         required
-                        options={cities}
                         onChange={(e) => {
-                          handleSelectChange("city", e.target.value);
+                          handleSelectChange("barangay", e.target.value);
                         }}
-                        value={formData.city}
                         error={errors.city}
+                        options={[
+                          { value: "Quezon City", label: "Quezon City" }
+                        ]}
+                        value="Quezon City"
+                        disabled
+                      />
+                      <SelectField
+                        className="font-poppins"
+                        label={"Barangay"}
+                        placeholder="Barangay..."
+                        required
+                        disabled
+                        onChange={(e) => {
+                          handleSelectChange("barangay", e.target.value);
+                        }}
+                        options={[
+                          { value: "San Bartolome", label: "San Bartolome" }
+                        ]}
+                        value={"San Bartolome"}
+                        error={errors.barangay}
                       />
                     </div>
 
-                    {/* Relationship to the VIP - Full width */}
                     <SelectField
+                      label={"Village"}
+                      placeholder="Village..."
+                      required
+                      onChange={(e) => {
+                        handleSelectChange("barangay", e.target.value);
+                      }}
+                      options={[
+                        {
+                          value: "Saint Francis Village",
+                          label: "Saint Francis Village"
+                        }
+                      ]}
+                      value={"Saint Francis Village"}
+                      disabled
+                      error={errors.barangay}
+                    />
+
+                    {/* Relationship to the VIP - Full width */}
+                    {/* <SelectField
                       className="font-poppins py-[16px]"
                       label={"Relationship to the VIP"}
                       placeholder="Relationship..."
@@ -788,7 +798,7 @@ const Register = () => {
                       }}
                       value={formData.relationship || ""}
                       error={errors.relationship}
-                    />
+                    /> */}
 
                     {/* Contact Number - Full width */}
                     <TextField

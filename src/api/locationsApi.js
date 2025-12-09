@@ -2,58 +2,74 @@ import { api } from "./index.js";
 import { handleRequest } from "./requestHandler.js";
 
 const BASE_URL = "https://psgc.gitlab.io/api";
+const LOCAL_STORAGE_KEY = "locationData";
 
-const mapOptions = (collection) => {
-  if (!Array.isArray(collection)) {
-    console.warn("mapOptions expects an array but got:", collection);
-    return [];
+export const fetchLocationOptions = async () => {
+  const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (cached) {
+    return JSON.parse(cached);
   }
-  return collection.map((item) => ({
-    value: item.code,
-    label: item.name,
-    ...item
-  }));
-};
 
-export const fetchMetroManila = () =>
-  handleRequest(async () => {
+  try {
     const NCR_REGION_CODE = "130000000";
-
-    // Fetch cities/municipalities in NCR
     const citiesRes = await api.get(
-      `${BASE_URL}/regions/${NCR_REGION_CODE}/provinces/`
+      `${BASE_URL}/regions/${NCR_REGION_CODE}/cities/`
     );
+    const cities = Array.isArray(citiesRes.data)
+      ? citiesRes.data
+      : citiesRes.data.data;
 
-    // Provinces in NCR (usually just "Metro Manila" as a province)
-    const provinces = mapOptions(citiesRes.data);
+    // Fetch barangays for each city
+    const barangayRequests = cities.map((city) => {
+      const cityCode = city.code || city.cityCode;
+      return api.get(`${BASE_URL}/cities/${cityCode}/barangays/`);
+    });
 
-    // For each province, fetch its cities/municipalities
-    const citiesPromises = provinces.map((prov) =>
-      api.get(`${BASE_URL}/provinces/${prov.value}/cities-municipalities/`)
-    );
+    const barangaysResponses = await Promise.all(barangayRequests);
 
-    const citiesResults = await Promise.all(citiesPromises);
+    const grouped = cities.map((city, index) => {
+      const cityCode = city.code || city.cityCode;
+      const cityName = city.name || city.cityName;
 
-    const cities = citiesResults.flatMap((res) => mapOptions(res.data));
+      const barangaysArray = Array.isArray(barangaysResponses[index].data)
+        ? barangaysResponses[index].data
+        : barangaysResponses[index].data.data;
 
-    // Fetch barangays for all cities
-    const barangaysPromises = cities.map((city) =>
-      api.get(`${BASE_URL}/cities-municipalities/${city.value}/barangays/`)
-    );
+      return {
+        cityCode,
+        cityName,
+        barangays: barangaysArray.map((b) => ({
+          value: b.code,
+          label: b.name,
+          villages: []
+        }))
+      };
+    });
 
-    const barangaysResults = await Promise.all(barangaysPromises);
-    const barangays = barangaysResults.flatMap((res) => mapOptions(res.data));
-
-    return {
-      region: {
-        value: NCR_REGION_CODE,
-        label: "National Capital Region (NCR)"
+    const locationData = {
+      provinces: [
+        { value: NCR_REGION_CODE, label: "Metro Manila" }
+        // Add other provinces if needed
+      ],
+      citiesByProvince: {
+        [NCR_REGION_CODE]: grouped.map((c) => ({
+          value: c.cityCode,
+          label: c.cityName
+        }))
       },
-      provinces,
-      cities,
-      barangays
+      barangaysByCity: grouped.reduce((acc, c) => {
+        acc[c.cityCode] = c.barangays;
+        return acc;
+      }, {})
     };
-  });
+
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(locationData));
+    return locationData;
+  } catch (error) {
+    console.error("Failed to fetch locations:", error);
+    return { provinces: [], citiesByProvince: {}, barangaysByCity: {} };
+  }
+};
 
 export const getLocation = (query) =>
   handleRequest(async () => {
