@@ -1,52 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ComponentIcon from "@/assets/images/component-icon.svg";
+import { useRealtimeStore } from "@/stores/useStore";
 import { motion } from "framer-motion";
 
+const componentIdMap = {
+  1: "accelerometerStatus",
+  2: "infraredStatus",
+  3: "ultrasonicStatus",
+  4: "esp32Status",
+  5: "raspberryPiStatus",
+  6: "gpsStatus"
+};
 const componentsData = [
   {
     id: 1,
-    name: "IMU Sensor",
-    status: "Offline"
+    name: "MPU-6050 Accelerometer"
   },
   {
     id: 2,
-    name: "Time-of-Flight IR Distance Sensor",
-    status: "Online"
+    name: "Time-of-Flight IR Distance Sensor"
   },
   {
     id: 3,
-    name: "Waterproof Ultrasonic Sensor",
-    status: "Offline"
+    name: "Ultrasonic Sensor"
   },
   {
     id: 4,
-    name: "ESP32-WROOM-32D",
-    status: "Online"
+    name: "ESP32-WROOM-32D"
   },
   {
     id: 5,
-    name: "PI Camera 3 (CSI Interface)",
-    status: "Offline"
-  },
-  {
-    id: 6,
-    name: "Raspberry Pi 4 Model B",
-    status: "Online"
-  },
-  {
-    id: 7,
-    name: "ESP32-WROOM-32D",
-    status: "Offline"
+    name: "Raspberry Pi 4 Model B"
   }
 ];
 
-const ComponentCard = ({ component }) => {
-  const isOnline = component.status === "Online";
-
+const ComponentCard = ({ component, status }) => {
   return (
     <div
       className={`rounded-lg shadow-sm border p-5 hover:shadow-md transition-shadow h-full md:min-h-[200px] flex flex-col ${
-        isOnline
+        status
           ? "bg-primary-100 border-primary-100"
           : "bg-white border-gray-200"
       }`}
@@ -56,14 +48,14 @@ const ComponentCard = ({ component }) => {
           <img
             src={ComponentIcon}
             alt="Component Icon"
-            className={`w-5 h-5 md:w-7 md:h-7 ${isOnline ? "brightness-0 invert" : ""}`}
+            className={`w-5 h-5 md:w-7 md:h-7 ${status ? "brightness-0 invert" : ""}`}
           />
         </div>
 
         <div className="flex-1 min-w-0">
           <h3
-            className={`font-poppins font-medium text-[10px] md:text-[20px] leading-tight ${
-              isOnline ? "text-white" : "text-gray-900"
+            className={`font-poppins font-medium text-md md:text-[20px] leading-tight ${
+              status ? "text-white" : "text-gray-900"
             }`}
           >
             {component.name}
@@ -73,19 +65,19 @@ const ComponentCard = ({ component }) => {
 
       <div
         className={`border-t border-dashed mb-3 mt-auto ${
-          isOnline ? "border-white/20" : "border-gray-300"
+          status ? "border-white/20" : "border-gray-300"
         }`}
       ></div>
 
       <div className="flex items-center gap-2">
         <span
-          className={`text-xs ${isOnline ? "text-green-400" : "text-gray-400"}`}
+          className={`text-sm ${status ? "text-green-400" : "text-gray-400"}`}
         >
           •
         </span>
         <span
-          className={`font-poppins text-xs ${
-            isOnline ? "text-green-400" : "text-gray-400"
+          className={`font-poppins text-sm ${
+            status ? "text-green-400" : "text-gray-400"
           }`}
         >
           {component.status}
@@ -96,7 +88,28 @@ const ComponentCard = ({ component }) => {
 };
 
 function HealthStatus() {
-  const [components] = useState(componentsData);
+  const [components, setComponents] = useState(componentsData);
+  const { componentHealth } = useRealtimeStore();
+
+  useEffect(() => {
+    console.log(componentHealth);
+    setComponents((prev) =>
+      prev.map((component) => {
+        const healthKey = componentIdMap[component.id];
+
+        if (!healthKey) {
+          return { ...component, status: "Unknown" };
+        }
+
+        const isOnline = Boolean(componentHealth[healthKey]);
+
+        return {
+          ...component,
+          status: isOnline ? "Online" : "Offline"
+        };
+      })
+    );
+  }, [componentHealth]);
 
   return (
     <motion.main
@@ -113,9 +126,14 @@ function HealthStatus() {
         Check the status of your device components.
       </p>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6  md:w-full mx-auto">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6  md:w-full mx-auto"></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 md:w-full h-full">
         {components.map((component) => (
-          <ComponentCard key={component.id} component={component} />
+          <ComponentCard
+            key={component.id}
+            component={component}
+            status={component.status === "Online"}
+          />
         ))}
       </div>
     </motion.main>

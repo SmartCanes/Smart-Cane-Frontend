@@ -30,13 +30,20 @@ export const useRealtimeStore = create((set, get) => ({
   emergency: false,
   caneLocation: null,
   guardianLocation: null,
+  componentHealth: {
+    gpsStatus: false,
+    ultrasonicStatus: false,
+    infraredStatus: false,
+    accelerometerStatus: false,
+    esp32Status: false,
+    raspberryPiStatus: false
+  },
   connectWs: () => {
-    wsApi.connect();
-
     wsApi.off("status");
     wsApi.off("location");
     wsApi.off("connect");
     wsApi.off("disconnect");
+    wsApi.connect();
 
     let heartbeatTimeout;
 
@@ -67,7 +74,19 @@ export const useRealtimeStore = create((set, get) => ({
     wsApi.on("status", (data) => {
       set({
         connectionStatus: data.status === "online",
-        emergency: data.emergency
+        emergency: data.emergency,
+        componentHealth: {
+          gpsStatus: Number(data.gpsStatus) === 2,
+          ultrasonicStatus:
+            data.ultrasonicStatus === true || data.ultrasonicStatus === "true",
+          infraredStatus:
+            data.infraredStatus === true || data.infraredStatus === "true",
+          accelerometerStatus:
+            data.mpuStatus === true || data.accelerometerStatus === "true",
+          esp32Status: data.status === "online",
+          raspberryPiStatus:
+            data.raspberryPiStatus === true || data.raspberryPiStatus === "true"
+        }
       });
       resetHeartbeat();
     });
