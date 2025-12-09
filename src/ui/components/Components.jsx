@@ -6,47 +6,47 @@ const componentsData = [
   {
     id: 1,
     name: "IMU Sensor",
-    status: "Disconnect"
+    status: "Offline"
   },
   {
     id: 2,
     name: "Time-of-Flight IR Distance Sensor",
-    status: "Connected"
+    status: "Online"
   },
   {
     id: 3,
     name: "Waterproof Ultrasonic Sensor",
-    status: "Disconnect"
+    status: "Offline"
   },
   {
     id: 4,
     name: "ESP32-WROOM-32D",
-    status: "Connected"
+    status: "Online"
   },
   {
     id: 5,
     name: "PI Camera 3 (CSI Interface)",
-    status: "Disconnect"
+    status: "Offline"
   },
   {
     id: 6,
     name: "Raspberry Pi 4 Model B",
-    status: "Connected"
+    status: "Online"
   },
   {
     id: 7,
     name: "ESP32-WROOM-32D",
-    status: "Disconnect"
+    status: "Offline"
   }
 ];
 
 const ComponentCard = ({ component }) => {
-  const isConnected = component.status === "Connected";
+  const isOnline = component.status === "Online";
 
   return (
     <div
-      className={`rounded-lg shadow-sm border p-5 hover:shadow-md transition-shadow h-full flex flex-col ${
-        isConnected
+      className={`rounded-lg shadow-sm border p-5 hover:shadow-md transition-shadow h-full md:min-h-[200px] flex flex-col ${
+        isOnline
           ? "bg-primary-100 border-primary-100"
           : "bg-white border-gray-200"
       }`}
@@ -56,14 +56,14 @@ const ComponentCard = ({ component }) => {
           <img
             src={ComponentIcon}
             alt="Component Icon"
-            className={`w-7 h-7 ${isConnected ? "brightness-0 invert" : ""}`}
+            className={`w-5 h-5 md:w-7 md:h-7 ${isOnline ? "brightness-0 invert" : ""}`}
           />
         </div>
 
         <div className="flex-1 min-w-0">
           <h3
-            className={`font-poppins font-medium text-sm leading-tight ${
-              isConnected ? "text-white" : "text-gray-900"
+            className={`font-poppins font-medium text-[10px] md:text-[20px] leading-tight ${
+              isOnline ? "text-white" : "text-gray-900"
             }`}
           >
             {component.name}
@@ -73,21 +73,21 @@ const ComponentCard = ({ component }) => {
 
       <div
         className={`border-t border-dashed mb-3 mt-auto ${
-          isConnected ? "border-white/20" : "border-gray-300"
+          isOnline ? "border-white/20" : "border-gray-300"
         }`}
       ></div>
 
       <div className="flex items-center gap-2">
         <span
           className={`text-xs ${
-            isConnected ? "text-green-400" : "text-gray-400"
+            isOnline ? "text-green-400" : "text-gray-400"
           }`}
         >
           •
         </span>
         <span
           className={`font-poppins text-xs ${
-            isConnected ? "text-green-400" : "text-gray-400"
+            isOnline ? "text-green-400" : "text-gray-400"
           }`}
         >
           {component.status}
@@ -107,11 +107,13 @@ function Components() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <h1 className="text-2xl font-bold font-poppins text-navy-900 mb-6 md:mb-11">
-        Health Status of Components
+      <h1 className="text-2xl font-bold text-primary-100 font-poppins text-navy-900 mb-2 md:mb-5">
+        Component Health Status
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto">
+      <p className="text-[14px] text-gray-600 mb-10 md:mb-20 md:hidden">Check the status of your device components.</p>
+
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6  md:w-full mx-auto">
         {components.map((component) => (
           <ComponentCard key={component.id} component={component} />
         ))}
