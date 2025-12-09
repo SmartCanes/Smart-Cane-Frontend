@@ -5,7 +5,6 @@ import { Icon } from "@iconify/react";
 import TextField from "@/ui/components/TextField";
 import SelectField from "@/ui/components/SelectField";
 import Toast from "@/ui/components/Toast";
-import { fetchMetroManila } from "@/api/locationsApi";
 
 const relationshipOptions = [
   { value: "Husband", label: "Husband" },
@@ -26,7 +25,8 @@ export const GuardianProfile = () => {
     province: user.province || "",
     city: user.city || "",
     barangay: user.barangay || "",
-    streetAddress: user.streetAddress || ""
+    village: user.village || "",
+    streetAddress: user.street_address || ""
   });
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -36,13 +36,6 @@ export const GuardianProfile = () => {
   });
 
   const [showToast, setShowToast] = useState(false);
-
-  const [options, setOptions] = useState({
-    regions: [],
-    provinces: [],
-    cities: [],
-    barangays: []
-  });
 
   const handleProfileChange = ({ target }) => {
     const { name, value } = target;
@@ -77,14 +70,18 @@ export const GuardianProfile = () => {
   //   (b) => b.city_code === profile.city
   // );
 
-  useEffect(() => {
-    const loadAll = async () => {
-      const allData = await fetchMetroManila();
-      console.log(allData);
-      setOptions(allData);
-    };
-    loadAll();
-  }, []);
+  // useEffect(() => {
+  //   const loadAll = async () => {
+  //     try {
+  //       const allData = await fetchLocations();
+  //       console.log(allData);
+  //       setOptions(allData);
+  //     } catch (error) {
+  //       console.error("Error fetching location data:", error);
+  //     }
+  //   };
+  //   loadAll();
+  // }, []);
 
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
@@ -174,19 +171,6 @@ export const GuardianProfile = () => {
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Relationship to VIP
-            </label>
-            <SelectField
-              placeholder="Relationship"
-              required
-              options={relationshipOptions}
-              onChange={handleProfileChange}
-              value={profile.relationship}
-              inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"}`}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               Lot No./Bldg./Street
             </label>
             <TextField
@@ -205,7 +189,7 @@ export const GuardianProfile = () => {
             <SelectField
               placeholder="Province"
               disabled={true}
-              options={[]}
+              options={[{ value: "Metro Manila", label: "Metro Manila" }]}
               onChange={handleProfileChange}
               value={profile.province}
             />
@@ -216,8 +200,8 @@ export const GuardianProfile = () => {
             </label>
             <SelectField
               placeholder="Barangay"
-              disabled={true}
-              options={[]}
+              disabled
+              options={[{ value: "San Bartolome", label: "San Bartolome" }]}
               onChange={handleProfileChange}
               value={profile.barangay}
             />
@@ -228,8 +212,8 @@ export const GuardianProfile = () => {
             </label>
             <SelectField
               placeholder="City"
-              options={[]}
-              disabled={true}
+              options={[{ value: "Quezon City", label: "Quezon City" }]}
+              disabled
               onChange={handleProfileChange}
               value={profile.city}
             />
