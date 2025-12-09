@@ -9,7 +9,7 @@ import { Outlet } from "react-router-dom";
 const ScrollContext = createContext();
 
 const DashboardLayout = () => {
-  const { emergency } = useRealtimeStore();
+  const { emergency, connectWs, disconnectWs } = useRealtimeStore();
   const [toast, setToast] = useState({
     message: "",
     type: "",
@@ -19,6 +19,13 @@ const DashboardLayout = () => {
   });
   const [showNav, setShowNav] = useState(true);
   const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    connectWs();
+    return () => {
+      disconnectWs();
+    };
+  }, []);
 
   useEffect(() => {
     if (emergency) {

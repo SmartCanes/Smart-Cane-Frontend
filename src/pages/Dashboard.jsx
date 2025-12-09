@@ -62,7 +62,6 @@ const Dashboard = () => {
   // };
 
   useEffect(() => {
-    connectWs();
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
