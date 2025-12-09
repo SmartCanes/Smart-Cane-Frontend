@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import SmartCaneLogo from "@/assets/images/smartcane-logo.png";
 import { useRegisterStore } from "@/stores/useRegisterStore";
 import { useUIStore } from "@/stores/useStore";
 
 const SidebarContent = ({ onAnimationComplete, className = "" }) => {
+  const navigate = useNavigate();
+  const { clearRegisterStore } = useRegisterStore();
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const { setIsAnimationDone } = useUIStore();
@@ -74,8 +77,6 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
   };
 
   const shouldAnimate = animationPhase === "final";
-
-  const { clearRegisterStore, clearDeviceValidated } = useRegisterStore();
 
   return (
     <>
@@ -147,19 +148,21 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
             animate={{ y: 0, scale: 1 }}
             className="z-10 flex flex-col items-center gap-y-4 sm:gap-y-12 px-4 text-center absolute top-1/2 -translate-y-1/2 w-full"
           >
-            <Link to="/">
-              {/* Logo */}
-              <motion.img
-                src={SmartCaneLogo}
-                alt="Smart Cane Logo"
-                animate={
-                  isMobile && animationPhase === "final"
-                    ? { opacity: 0, height: 0, marginBottom: 0 }
-                    : { opacity: 1, width: "220px", height: "auto" }
-                }
-                className="w-[120px] sm:w-[220px] md:w-[290px] mx-auto"
-              />
-            </Link>
+            {/* Logo */}
+            <motion.img
+              src={SmartCaneLogo}
+              alt="Smart Cane Logo"
+              animate={
+                isMobile && animationPhase === "final"
+                  ? { opacity: 0, height: 0, marginBottom: 0 }
+                  : { opacity: 1, width: "220px", height: "auto" }
+              }
+              onClick={() => {
+                clearRegisterStore();
+                navigate("/");
+              }}
+              className="w-[120px] sm:w-[220px] md:w-[290px] mx-auto"
+            />
 
             {/* Text: iCane */}
             <motion.h1
