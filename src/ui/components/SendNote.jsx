@@ -8,7 +8,9 @@ const SendNote = () => {
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 w-full font-poppins">
       <h3 className="text-xl font-semibold text-gray-900 mb-1">Send Note</h3>
-      <p className="text-sm text-gray-500 mb-6">Compose and send a message to your contacts</p>
+      <p className="text-sm text-gray-500 mb-6">
+        Compose and send a message to your contacts
+      </p>
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">

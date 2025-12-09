@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import notifBell from "@/assets/images/notifbell.png";
 import { useNavigate } from "react-router-dom";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
 import { BlinkingIcon } from "@/wrapper/MotionWrapper";

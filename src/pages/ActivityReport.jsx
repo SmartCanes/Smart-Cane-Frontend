@@ -224,7 +224,10 @@ const ActivityReport = () => {
         <div className="md:hidden bg-white rounded-b-2xl shadow-sm overflow-hidden">
           <div className="divide-y divide-gray-100">
             {activities.map((activity) => (
-              <div key={activity.id} className="p-4 hover:bg-gray-50 transition-colors">
+              <div
+                key={activity.id}
+                className="p-4 hover:bg-gray-50 transition-colors"
+              >
                 {/* User Info */}
                 <div className="flex items-center gap-3 mb-3">
                   <img
@@ -262,9 +265,7 @@ const ActivityReport = () => {
 
           {/* Mobile Pagination */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t border-gray-100 bg-gray-50">
-            <p className="text-xs text-gray-500">
-              Showing 1-10 of 1,247
-            </p>
+            <p className="text-xs text-gray-500">Showing 1-10 of 1,247</p>
             <div className="flex items-center gap-1.5">
               <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50">
                 <Icon icon="ph:caret-left" />

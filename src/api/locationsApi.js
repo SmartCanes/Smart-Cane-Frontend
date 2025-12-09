@@ -45,7 +45,10 @@ export const fetchMetroManila = () =>
     const barangays = barangaysResults.flatMap((res) => mapOptions(res.data));
 
     return {
-      region: { value: NCR_REGION_CODE, label: "National Capital Region (NCR)" },
+      region: {
+        value: NCR_REGION_CODE,
+        label: "National Capital Region (NCR)"
+      },
       provinces,
       cities,
       barangays
