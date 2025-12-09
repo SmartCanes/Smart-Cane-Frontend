@@ -196,6 +196,7 @@ const Login = () => {
                   value={credentials.username}
                   onChange={handleChange}
                   error={errors.username}
+                  maxLength={20}
                   disabled={retryAfter > 0}
                 />
 
@@ -209,6 +210,7 @@ const Login = () => {
                   onChange={handleChange}
                   error={errors.password}
                   showErrorIcon={false}
+                  maxLength={20}
                   disabled={retryAfter > 0}
                 />
 

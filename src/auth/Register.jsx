@@ -88,29 +88,33 @@ const Register = () => {
         if (!/^[a-zA-Z\s]+$/.test(value))
           return "Should contain only letters and spaces";
         if (value.length < 2) return "Should be at least 2 characters long";
+        if (value.length > 50) return "Should not exceed 50 characters";
         return "";
+
       case "lastName":
         if (!value.trim()) return "Last Name is required";
         if (!/^[a-zA-Z\s]+$/.test(value))
           return "Should contain only letters and spaces";
         if (value.length < 2) return "Should be at least 2 characters long";
+        if (value.length > 50) return "Should not exceed 50 characters";
         return "";
-      case "username": {
+
+      case "username":
         if (!value.trim()) return "Username is required";
         if (value.length < 3)
           return "Username must be at least 3 characters long";
+        if (value.length > 20) return "Username must not exceed 20 characters";
         if (!/^[a-zA-Z0-9_]+$/.test(value))
           return "Username can only contain letters, numbers, and underscores";
-        // Check if username contains at least 3 letters
         const letterCount = (value.match(/[a-zA-Z]/g) || []).length;
         if (letterCount < 3) return "Username must contain at least 3 letters";
         return "";
-      }
 
       case "password":
         if (!value) return "Password is required";
         if (value.length < 8)
           return "Password must be at least 8 characters long";
+        if (value.length > 64) return "Password must not exceed 64 characters";
         if (!/(?=.*[a-z])/.test(value))
           return "Password must contain at least one lowercase letter";
         if (!/(?=.*[A-Z])/.test(value))
@@ -129,10 +133,13 @@ const Register = () => {
       case "streetAddress":
         if (!value.trim()) return "Street Address is required";
         if (value.length < 5) return "Address should be more specific";
+        if (value.length > 100)
+          return "Address should not exceed 100 characters";
         return "";
 
       case "email":
         if (!value.trim()) return "Email is required";
+        if (value.length > 100) return "Email should not exceed 100 characters";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
           return "Please enter a valid email address";
         return "";
@@ -150,6 +157,8 @@ const Register = () => {
       case "barangay":
       case "relationship":
         if (!value) return "This field is required";
+        if (value.length > 50)
+          return "This field should not exceed 50 characters";
         return "";
 
       default:
@@ -637,6 +646,7 @@ const Register = () => {
                         }
                         inputClassName="py-3"
                         error={errors.firstName}
+                        maxLength={50}
                         required
                       />
 
@@ -651,6 +661,7 @@ const Register = () => {
                         }
                         inputClassName="py-3"
                         error={errors.lastName}
+                        maxLength={50}
                         required
                       />
                     </div>
@@ -664,6 +675,7 @@ const Register = () => {
                       onChange={(e) => handleChange("username", e.target.value)}
                       inputClassName="py-3"
                       error={errors.username}
+                      maxLength={20}
                       required
                     />
 
@@ -677,6 +689,7 @@ const Register = () => {
                       error={errors.password}
                       showValidationRules
                       inputClassName="py-3"
+                      maxLength={20}
                       required
                     />
 
@@ -691,6 +704,7 @@ const Register = () => {
                       }
                       error={errors.confirmPassword}
                       inputClassName="py-3"
+                      maxLength={20}
                       required
                     />
                   </div>
@@ -711,6 +725,7 @@ const Register = () => {
                           handleChange("streetAddress", e.target.value)
                         }
                         error={errors.streetAddress}
+                        maxLength={50}
                         required
                       />
 
@@ -802,6 +817,7 @@ const Register = () => {
                       value={formData.email}
                       onChange={(e) => handleChange("email", e.target.value)}
                       error={errors.email}
+                      maxLength={50}
                       required
                     />
                   </div>
