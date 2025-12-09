@@ -82,10 +82,10 @@ const DashboardSide = ({ className = "" }) => {
       path: "/manage-profile"
     },
     {
-      id: "components",
-      label: "Components",
+      id: "health",
+      label: "Health",
       icon: "fa6-brands:unity",
-      path: "/components"
+      path: "/health"
     }
     // {
     //   id: "settings",

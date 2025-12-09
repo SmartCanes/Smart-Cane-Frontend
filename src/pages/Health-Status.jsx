@@ -79,9 +79,7 @@ const ComponentCard = ({ component }) => {
 
       <div className="flex items-center gap-2">
         <span
-          className={`text-xs ${
-            isOnline ? "text-green-400" : "text-gray-400"
-          }`}
+          className={`text-xs ${isOnline ? "text-green-400" : "text-gray-400"}`}
         >
           •
         </span>
@@ -97,7 +95,7 @@ const ComponentCard = ({ component }) => {
   );
 };
 
-function Components() {
+function HealthStatus() {
   const [components] = useState(componentsData);
 
   return (
@@ -111,7 +109,9 @@ function Components() {
         Component Health Status
       </h1>
 
-      <p className="text-[14px] text-gray-600 mb-10 md:mb-20 md:hidden">Check the status of your device components.</p>
+      <p className="text-[14px] text-gray-600 mb-10 md:mb-20 md:hidden">
+        Check the status of your device components.
+      </p>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6  md:w-full mx-auto">
         {components.map((component) => (
@@ -122,4 +122,4 @@ function Components() {
   );
 }
 
-export default Components;
+export default HealthStatus;

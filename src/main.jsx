@@ -18,7 +18,7 @@ import ActivityReport from "./pages/ActivityReport";
 import Notes from "./pages/Notes.jsx";
 import GetStarted from "./pages/GetStarted.jsx";
 import { GuardianProfile } from "./pages/GuardianProfile";
-import Components from "./ui/components/Components.jsx";
+import HealthStatus from "./pages/Health-Status.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -42,7 +42,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/settings" element={<Setting />} />
             <Route path="/profile" element={<GuardianProfile />} />
             <Route path="/notes" element={<Notes />} />
-            <Route path="/components" element={<Components />} />
+            <Route path="/health" element={<HealthStatus />} />
           </Route>
         </Route>
       </Routes>
