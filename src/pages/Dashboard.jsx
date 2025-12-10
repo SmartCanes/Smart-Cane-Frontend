@@ -27,7 +27,6 @@ const Dashboard = () => {
   const [startPoint, setStartPoint] = useState("");
   // const [route, setRoute] = useState(null);
   const [destinationPoint, setDestinationPoint] = useState("");
-  const [isMapLoading, setIsMapLoading] = useState(true);
   const controls = useAnimation();
 
   const handleSwapLocations = () => {
@@ -60,13 +59,13 @@ const Dashboard = () => {
         const { latitude, longitude } = position.coords;
         setGuardianLocation([latitude, longitude]);
 
-        if (isMapLoading) {
-          setIsMapLoading(false);
-        }
+        // if (isMapLoading) {
+        //   setIsMapLoading(false);
+        // }
       },
       (error) => {
         console.error("Failed to get location:", error.message);
-        setIsMapLoading(false);
+        // setIsMapLoading(false);
       },
       {
         enableHighAccuracy: true,
@@ -203,12 +202,12 @@ const Dashboard = () => {
                     onSetDestination={setDestinationPoint}
                     activeTab={activeTab}
                   />
-
+                  {/* 
                   {isMapLoading && (
                     <div className="absolute inset-0 z-[50] flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
                       <Loader />
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Map footer info */}
