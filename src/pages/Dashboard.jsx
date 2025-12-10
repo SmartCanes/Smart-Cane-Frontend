@@ -212,7 +212,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Map footer info */}
-                <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-t border-gray-100">
+                {/* <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-t border-gray-100">
                   <div className="flex items-center gap-2 text-gray-600 font-poppins text-xs">
                     <Icon icon="tabler:clock-filled" />
                     <span>Last updated: 2 minutes ago</span>
@@ -222,7 +222,7 @@ const Dashboard = () => {
                     <Icon icon="flowbite:map-pin-solid" />
                     <span>SM City Novaliches</span>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {/* Mobile Only: Quick Actions */}

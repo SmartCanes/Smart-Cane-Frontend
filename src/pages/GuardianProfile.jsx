@@ -1,5 +1,5 @@
 import { useUserStore } from "@/stores/useStore";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import avatarPlaceholder from "@/assets/images/team-photo.png";
 import { Icon } from "@iconify/react";
 import TextField from "@/ui/components/TextField";

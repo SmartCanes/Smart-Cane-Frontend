@@ -167,8 +167,6 @@ function LiveMap({
                   />
                 </div>
 
-                
-
                 <div>
                   <p className="font-poppins font-medium text-sm text-gray-800">
                     {result.properties.name}
@@ -239,7 +237,10 @@ function LiveMap({
           guardianPosition={guardianPosition}
           destPos={destPos}
         />
-        <CustomZoomControl guardianPosition={guardianPosition} />
+        <CustomZoomControl
+          guardianPosition={guardianPosition}
+          canePosition={canePosition}
+        />
 
         <ClickHandler onClickMap={setClickMenuPos} />
       </MapContainer>
