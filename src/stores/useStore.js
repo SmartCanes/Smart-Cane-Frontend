@@ -81,8 +81,7 @@ export const useRealtimeStore = create((set, get) => ({
             data.ultrasonicStatus === true || data.ultrasonicStatus === "true",
           infraredStatus:
             data.infraredStatus === true || data.infraredStatus === "true",
-          accelerometerStatus:
-            data.mpuStatus === true || data.accelerometerStatus === "true",
+          mpuStatus: data.mpuStatus === true || data.mpuStatus === "true",
           esp32Status: data.status === "online",
           raspberryPiStatus:
             data.raspberryPiStatus === true || data.raspberryPiStatus === "true"

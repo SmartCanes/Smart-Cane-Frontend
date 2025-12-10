@@ -4,7 +4,7 @@ import { useRealtimeStore } from "@/stores/useStore";
 import { motion } from "framer-motion";
 
 const componentIdMap = {
-  1: "accelerometerStatus",
+  1: "mpuStatus",
   2: "infraredStatus",
   3: "ultrasonicStatus",
   4: "esp32Status",
