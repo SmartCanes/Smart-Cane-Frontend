@@ -9,20 +9,13 @@ import Toast from "@/ui/components/Toast";
 import { useRealtimeStore } from "@/stores/useStore";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import UserStatus from "@/ui/components/UserStatus";
 import Loader from "@/ui/components/Loading";
-
 import QuickActions from "@/ui/components/QuickActions";
 import { useAnimation } from "framer-motion";
 
 const Dashboard = () => {
-  const {
-    connectWs,
-    emergency,
-    caneLocation,
-    guardianLocation,
-    setGuardianLocation
-  } = useRealtimeStore();
+  const { emergency, caneLocation, guardianLocation, setGuardianLocation } =
+    useRealtimeStore();
   const location = useLocation();
   const [toast, setToast] = useState({
     message: "",
@@ -166,7 +159,26 @@ const Dashboard = () => {
                         <Icon icon="ph:map-pin-fill" className="text-lg" />
                         Track Live
                       </button>
-                      <UserStatus />
+                      {/* <div className="relative">
+                        <div className="flex  items-center bg-gray-50 rounded-full pr-5 shadow-sm border border-gray-200">
+                          <div className="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-lg font-medium h-fit">
+                              {"J"}
+                            </span>
+                          </div>
+                          <span className="ml-3 font-semibold text-gray-800 text-sm tracking-tight">
+                            {"Jay"}
+                          </span>
+                        </div>
+                        {online && (
+                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 ">
+                            <div className="bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border-2 border-white animate-pulse">
+                              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                              Online
+                            </div>
+                          </div>
+                        )}
+                      </div> */}
 
                       {/* <button
                         onClick={() => setActiveTab("history")}
