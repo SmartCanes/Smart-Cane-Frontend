@@ -131,14 +131,14 @@ const Register = () => {
           return "Contact number must start with 09 and contain 11 digits";
         return "";
 
-      case "village":
-      case "province":
-      case "city":
-      case "barangay":
-        if (!value) return "This field is required";
-        if (value.length > 50)
-          return "This field should not exceed 50 characters";
-        return "";
+      // case "village":
+      // case "province":
+      // case "city":
+      // case "barangay":
+      //   if (!value) return "This field is required";
+      //   if (value.length > 50)
+      //     return "This field should not exceed 50 characters";
+      //   return "";
 
       default:
         return "";
