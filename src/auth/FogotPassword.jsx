@@ -1,4 +1,3 @@
-// UI Components
 import PasswordField from "../ui/components/PasswordField";
 import TextField from "../ui/components/TextField";
 import PrimaryButton from "../ui/components/PrimaryButton";
@@ -6,51 +5,37 @@ import { useState, useRef, useEffect } from "react";
 import Modal from "@/ui/components/Modal";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-// Zustand Store
 import { useUIStore } from "@/stores/useStore";
-// Axios
-import axios from "axios";
-
-// API BASE URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import {
+  forgotPasswordApi,
+  forgotPasswordResetApi,
+  forgotPasswordVerifyApi
+} from "@/api/authService";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const { isAnimationDone } = useUIStore();
 
-  // Steps: 1 = enter email, 2 = enter OTP, 3 = reset password
   const [step, setStep] = useState(1);
 
-  // Modal
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [modalTitle, setModalTitle] = useState("");
 
-  // Email
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState("");
-
-  // OTP (6 digits)
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpError, setOtpError] = useState("");
 
-  // Password fields
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: ""
   });
   const [errors, setErrors] = useState({});
-
-  // Loading state
   const [isLoading, setIsLoading] = useState(false);
-
-  // OTP expiry
   const [otpExpiryTime, setOtpExpiryTime] = useState(null);
-
-  // OTP input refs
   const otpRefs = Array.from({ length: 6 }, () => useRef(null));
 
-  // Timer — checks OTP expiration
   useEffect(() => {
     if (step === 2 && otpExpiryTime) {
       const timer = setInterval(() => {
@@ -64,23 +49,42 @@ const ForgotPassword = () => {
     }
   }, [step, otpExpiryTime]);
 
-  // Update password fields
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+    // Special handling for password fields
+    if (name === "newPassword" || name === "confirmPassword") {
+      const passwordVal = name === "newPassword" ? value : formData.newPassword;
+      const confirmVal =
+        name === "confirmPassword" ? value : formData.confirmPassword;
+
+      const passwordError = validateField("password", passwordVal);
+      const confirmError = validateField(
+        "confirmPassword",
+        confirmVal,
+        { password: passwordVal } // pass latest password
+      );
+
+      setErrors((prev) => ({
+        ...prev,
+        newPassword: passwordError,
+        confirmPassword: confirmError
+      }));
+      return;
     }
+
+    // Validate other fields individually
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  // Update email
   const handleEmailChange = (e) => {
     setUserEmail(e.target.value);
     if (emailError) setEmailError("");
   };
 
-  // Handle OTP input
   const handleOtpChange = (index, value) => {
     if (!/^[0-9]?$/.test(value)) return;
 
@@ -90,13 +94,11 @@ const ForgotPassword = () => {
 
     if (otpError) setOtpError("");
 
-    // Auto focus next input
     if (value && index < 5) {
       otpRefs[index + 1].current.focus();
     }
   };
 
-  // Handle backspace navigation
   const handleOtpKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       otpRefs[index - 1].current.focus();
@@ -112,6 +114,33 @@ const ForgotPassword = () => {
     setTimeout(() => {
       setShowModal(false);
     }, duration);
+  };
+
+  const validateField = (name, value, formData) => {
+    switch (name) {
+      case "password":
+        if (!value) return "Password is required";
+        if (value.length < 8)
+          return "Password must be at least 8 characters long";
+        if (value.length > 64) return "Password must not exceed 64 characters";
+        if (!/(?=.*[a-z])/.test(value))
+          return "Password must contain at least one lowercase letter";
+        if (!/(?=.*[A-Z])/.test(value))
+          return "Password must contain at least one uppercase letter";
+        if (!/(?=.*\d)/.test(value))
+          return "Password must contain at least one number";
+        if (!/(?=.*[@$!%*?&])/.test(value))
+          return "Password must contain at least one special character (@$!%*?&)";
+        return "";
+
+      case "confirmPassword":
+        if (!value) return "Confirm Password is required";
+        if (value !== formData.password) return "Passwords don't match!";
+        return "";
+
+      default:
+        return "";
+    }
   };
 
   // Handle NEXT button (all 3 steps)
@@ -140,13 +169,12 @@ const ForgotPassword = () => {
         }
 
         // Use API_BASE_URL consistently
-        const response = await axios.post(
-          `${API_BASE_URL}/api/auth/forgot-password/request`,
-          { email: userEmail }
-        );
+
+        const response = await forgotPasswordApi(userEmail);
+        console.log("Request OTP response:", response);
 
         // Check if the response indicates success
-        if (response.status === 200 || response.data.message) {
+        if (response.status || response.message) {
           showModalWithTimeout(
             "Password Reset",
             `We've sent a verification code to your email: ${userEmail}`,
@@ -183,27 +211,13 @@ const ForgotPassword = () => {
           return;
         }
 
-        console.log("Verifying OTP:", {
-          email: userEmail,
-          otp_code: code,
-          api_url: `${API_BASE_URL}/api/auth/forgot-password/verify`
-        });
-
-        const response = await axios.post(
-          `${API_BASE_URL}/api/auth/forgot-password/verify`,
-          {
-            email: userEmail,
-            otp_code: code
-          }
-        );
-
-        console.log("Verification response:", response.data);
+        const response = await forgotPasswordVerifyApi(userEmail, code);
 
         // Handle both response formats
-        if (response.data.success || response.data.message === "OTP verified") {
+        if (response.success || response.message === "OTP verified") {
           setStep(3);
         } else {
-          setOtpError(response.data.message || "Invalid OTP");
+          setOtpError(response.message || "Invalid OTP");
         }
       }
 
@@ -231,17 +245,13 @@ const ForgotPassword = () => {
           return;
         }
 
-        // API CALL
-        const response = await axios.post(
-          `${API_BASE_URL}/api/auth/forgot-password/reset`,
-          {
-            email: userEmail,
-            new_password: formData.newPassword,
-            confirm_password: formData.confirmPassword
-          }
+        const response = await forgotPasswordResetApi(
+          userEmail,
+          formData.newPassword,
+          formData.confirmPassword
         );
 
-        if (response.status === 200 || response.data.message) {
+        if (response.status || response.message) {
           showModalWithTimeout(
             "Success",
             "Password successfully updated!",
@@ -259,6 +269,7 @@ const ForgotPassword = () => {
       if (step === 1) {
         setEmailError(
           error.response?.data?.message ||
+            error.message ||
             "Failed to send OTP. Please try again."
         );
       }
@@ -269,8 +280,8 @@ const ForgotPassword = () => {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
           setOtpError(
-            error.response.data?.message ||
-              error.response.data?.error ||
+            error.response?.data?.message ||
+              error.message ||
               "Invalid OTP. Please try again."
           );
         } else if (error.request) {
@@ -283,7 +294,10 @@ const ForgotPassword = () => {
       }
 
       if (step === 3) {
-        const msg = error.response?.data?.message || "Failed to reset password";
+        const msg =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to reset password";
 
         if (msg.includes("session expired")) {
           showModalWithTimeout(
@@ -311,12 +325,10 @@ const ForgotPassword = () => {
     try {
       setIsLoading(true);
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/forgot-password/request`,
-        { email: userEmail }
-      );
+      const response = await forgotPasswordApi(userEmail);
+      console.log("Resend OTP response:", response);
 
-      if (response.status === 200 || response.data.message) {
+      if (response.status || response.message) {
         setOtp(["", "", "", "", "", ""]);
         setOtpError("");
 
@@ -489,6 +501,7 @@ const ForgotPassword = () => {
                   error={errors.newPassword}
                   hint="Must be at least 6 characters"
                   required
+                  showValidationRules
                   disabled={isLoading}
                 />
 
