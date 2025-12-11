@@ -64,11 +64,17 @@ const WeatherBoard = () => {
       titleColor = "text-orange-700";
     } else {
       // 0, 1: Sunny
-      if (forecast.tomorrow.weatherCode === 0 || forecast.tomorrow.weatherCode === 1) {
+      if (
+        forecast.tomorrow.weatherCode === 0 ||
+        forecast.tomorrow.weatherCode === 1
+      ) {
         mainIcon = "solar:sun-bold-duotone";
       }
       // 2, 3: Cloudy
-      else if (forecast.tomorrow.weatherCode === 2 || forecast.tomorrow.weatherCode === 3) {
+      else if (
+        forecast.tomorrow.weatherCode === 2 ||
+        forecast.tomorrow.weatherCode === 3
+      ) {
         mainIcon = "solar:cloud-bold-duotone";
       }
     }
@@ -199,9 +205,7 @@ const WeatherBoard = () => {
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
-                <span className="text-gray-800 text-xs font-bold">
-                  Sunset:
-                </span>
+                <span className="text-gray-800 text-xs font-bold">Sunset:</span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.sunset}
                 </span>
@@ -215,9 +219,7 @@ const WeatherBoard = () => {
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
-                <span className="text-gray-800 text-xs font-bold">
-                  Wind:
-                </span>
+                <span className="text-gray-800 text-xs font-bold">Wind:</span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.wind}
                 </span>
@@ -276,13 +278,8 @@ const WeatherBoard = () => {
                   <span className="text-xs font-bold text-[#11285A]">
                     {day.day}
                   </span>
-                  <Icon
-                    icon={day.icon}
-                    className={`text-2xl ${day.color}`}
-                  />
-                  <span className="text-xs text-gray-500">
-                    {day.temp}
-                  </span>
+                  <Icon icon={day.icon} className={`text-2xl ${day.color}`} />
+                  <span className="text-xs text-gray-500">{day.temp}</span>
                 </div>
               ))}
             </div>

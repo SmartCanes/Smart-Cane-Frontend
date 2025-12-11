@@ -29,15 +29,15 @@ const FAQItem = ({ question, answer }) => {
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div 
-  className="
+            <div
+              className="
     mt-2 text-[12px] text-gray-600 text-left 
     [&_li]:mb-2 
     [&_ul]:list-disc [&_ul]:pl-5
     max-w-5xl
   "
-  dangerouslySetInnerHTML={{ __html: answer }}
-/>
+              dangerouslySetInnerHTML={{ __html: answer }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

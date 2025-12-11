@@ -37,7 +37,7 @@ const ForgotPassword = () => {
   // Password fields
   const [formData, setFormData] = useState({
     newPassword: "",
-    confirmPassword: "",
+    confirmPassword: ""
   });
   const [errors, setErrors] = useState({});
 
@@ -108,7 +108,7 @@ const ForgotPassword = () => {
     setModalTitle(title);
     setModalContent(content);
     setShowModal(true);
-    
+
     setTimeout(() => {
       setShowModal(false);
     }, duration);
@@ -193,7 +193,7 @@ const ForgotPassword = () => {
           `${API_BASE_URL}/api/auth/forgot-password/verify`,
           {
             email: userEmail,
-            otp_code: code,
+            otp_code: code
           }
         );
 
@@ -214,7 +214,8 @@ const ForgotPassword = () => {
         const stepErrors = {};
 
         if (!formData.newPassword) stepErrors.newPassword = REQUIRED_MSG;
-        if (!formData.confirmPassword) stepErrors.confirmPassword = REQUIRED_MSG;
+        if (!formData.confirmPassword)
+          stepErrors.confirmPassword = REQUIRED_MSG;
 
         if (formData.newPassword !== formData.confirmPassword) {
           stepErrors.confirmPassword = "Password doesn't match!";
@@ -236,7 +237,7 @@ const ForgotPassword = () => {
           {
             email: userEmail,
             new_password: formData.newPassword,
-            confirm_password: formData.confirmPassword,
+            confirm_password: formData.confirmPassword
           }
         );
 
@@ -268,9 +269,9 @@ const ForgotPassword = () => {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
           setOtpError(
-            error.response.data?.message || 
-            error.response.data?.error || 
-            "Invalid OTP. Please try again."
+            error.response.data?.message ||
+              error.response.data?.error ||
+              "Invalid OTP. Please try again."
           );
         } else if (error.request) {
           // The request was made but no response was received
@@ -342,9 +343,7 @@ const ForgotPassword = () => {
         <motion.div
           initial={{ opacity: 0, x: 100 }}
           animate={
-            isAnimationDone
-              ? { opacity: 1, x: 0 }
-              : { opacity: 0, x: 100 }
+            isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
           }
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6"
@@ -352,9 +351,7 @@ const ForgotPassword = () => {
           <motion.form
             initial={{ opacity: 0, y: 50 }}
             animate={
-              isAnimationDone
-                ? { opacity: 1, y: 0 }
-                : { opacity: 0, y: 50 }
+              isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
             }
             transition={{ duration: 0.6 }}
             className="w-full max-w-md sm:max-w-none lg:max-w-lg"
@@ -371,7 +368,8 @@ const ForgotPassword = () => {
 
               <div className="mb-4 sm:mb-6">
                 <p className="font-poppins text-[#1C253C] text-paragraph">
-                  {step === 1 && "Enter your email address and we'll send you a code."}
+                  {step === 1 &&
+                    "Enter your email address and we'll send you a code."}
 
                   {step === 2 && (
                     <>
@@ -437,9 +435,7 @@ const ForgotPassword = () => {
                       type="text"
                       maxLength="1"
                       value={digit}
-                      onChange={(e) =>
-                        handleOtpChange(index, e.target.value)
-                      }
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(index, e)}
                       className="w-12 h-12 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
                       disabled={isLoading}
@@ -448,9 +444,7 @@ const ForgotPassword = () => {
                 </div>
 
                 {otpError && (
-                  <p className="text-red-500 text-sm text-center">
-                    {otpError}
-                  </p>
+                  <p className="text-red-500 text-sm text-center">{otpError}</p>
                 )}
 
                 <div className="text-center text-sm text-gray-600">

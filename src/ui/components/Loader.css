@@ -15,7 +15,6 @@
   animation: bounce-dot 1.4s infinite ease-in-out both;
 }
 
-
 /* Loader.css */
 
 /* Ito ang magpapa-ikot sa ring */
@@ -27,12 +26,12 @@
 
 .map-loader-ring {
   /* Size ng spinner */
-  width: 64px; 
+  width: 64px;
   height: 64px;
   border-radius: 50%;
   /* Ang light gray na background ng ring */
-  border: 5px solid #e5e7eb; 
+  border: 5px solid #e5e7eb;
   /* Ang dark gray na umiikot (top part) */
-  border-top-color: #4b5563; 
+  border-top-color: #4b5563;
   animation: spin 1s linear infinite;
 }

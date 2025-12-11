@@ -9,7 +9,6 @@ import Toast from "@/ui/components/Toast";
 import { useRealtimeStore } from "@/stores/useStore";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import Loader from "@/ui/components/Loading";
 import QuickActions from "@/ui/components/QuickActions";
 import { useAnimation } from "framer-motion";
 

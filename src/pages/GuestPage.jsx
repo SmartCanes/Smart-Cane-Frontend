@@ -224,17 +224,20 @@ const featureCards = rawFeatureCards.filter((card, index, arr) => {
 const faqs = [
   {
     question: "What is a SmartCane?",
-    answer: "The SmartCane (iCane) is an advanced walking cane designed for visually impaired individuals. It uses IoT technology, AI-based visual recognition, and route navigation to help users travel safely and independently. The cane can detect obstacles, identify objects, guide the user to destinations, and send alerts to guardians in case of emergencies."
+    answer:
+      "The SmartCane (iCane) is an advanced walking cane designed for visually impaired individuals. It uses IoT technology, AI-based visual recognition, and route navigation to help users travel safely and independently. The cane can detect obstacles, identify objects, guide the user to destinations, and send alerts to guardians in case of emergencies."
   },
   {
     question: "How to sign up?",
-    answer: "To create an account, go to www.smartcane.com. Click “Sign Up” and fill out the required information such as your name, email, and password. After submitting, verify your email if required. Once done, you can now log in and start using the SmartCane services. The process is simple and designed to guide beginners step-by-step."
+    answer:
+      "To create an account, go to www.smartcane.com. Click “Sign Up” and fill out the required information such as your name, email, and password. After submitting, verify your email if required. Once done, you can now log in and start using the SmartCane services. The process is simple and designed to guide beginners step-by-step."
   },
   {
     question: "How to log in?",
-    answer: "Visit www.smartcane.com and click “Log In”. Enter your registered email and password. After logging in successfully, you will be taken to your dashboard, where you can access your SmartCane data, settings, and connected devices."
+    answer:
+      "Visit www.smartcane.com and click “Log In”. Enter your registered email and password. After logging in successfully, you will be taken to your dashboard, where you can access your SmartCane data, settings, and connected devices."
   },
-{
+  {
     question: "How to use the SmartCane Website?",
     answer: `Once logged in, the website dashboard will show key features such as:
       <ul style="margin-top: 10px; margin-bottom: 10px; padding-left: 20px;">
@@ -280,17 +283,17 @@ const faqs = [
     answer: `The SmartCane comes with a USB charging cable. Simply connect the cable to the charging port on the cane and plug it into a power source. The LED indicator will show the charging status. A full charge usually takes 2–3 hours.`
   },
 
-    {
+  {
     question: "How long does the battery last?",
     answer: `Under normal use, the SmartCane's battery lasts 8–12 hours. Battery life may vary depending on how often obstacle detection, GPS, and AI recognition features are used.`
   },
 
-    {
+  {
     question: "What happens if the SmartCane detects an obstacle?",
     answer: `When an obstacle is detected, the cane provides vibration feedback, beeping sounds, or voice alerts depending on your settings. This helps the user avoid hazards like walls, steps, or objects in their path.`
   },
 
-    {
+  {
     question: "What if I forget my password?",
     answer: `Go to the login page on www.smartcane.com and click “Forgot Password”.
  Enter your email address and follow the instructions to reset your password.`
@@ -300,7 +303,7 @@ const faqs = [
     question: "How does the emergency alert (SOS) work?",
     answer: `The SmartCane has a built-in emergency trigger. When activated, it sends an alert to registered guardians, showing the VIP’s exact location. The guardian will receive the alert through the iCane mobile app.`
   },
-  
+
   {
     question: "Can multiple guardians be added for one VIP?",
     answer: `Yes. You can add multiple guardians in the Guardian Management section. Each guardian will receive notifications and emergency alerts.`
@@ -332,7 +335,7 @@ const faqs = [
     answer: `The SmartCane is ideal for visually impaired individuals(VIPs), seniors who need assistance walking, or anyone who wants enhanced mobility and safety features.`
   },
 
-    {
+  {
     question: "Can I customize the alerts and settings?",
     answer: `Yes. The iCane app allows you to adjust:
       <ul style="margin-top: 10px; margin-bottom: 10px; padding-left: 20px;">
@@ -341,9 +344,6 @@ const faqs = [
         <li>Emergency contact list</li>
       </ul>`
   }
-
-
-
 ];
 
 const GuestPage = () => {

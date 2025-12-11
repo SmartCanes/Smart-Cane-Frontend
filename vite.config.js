@@ -18,11 +18,16 @@ export default defineConfig(({ mode }) => {
   // Create server config conditionally
   const serverConfig = {
     host: true,
-    port: 5173,
+    port: 5173
   };
 
   // Only add HTTPS if certificates exist
-  if (keyPath && certPath && fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+  if (
+    keyPath &&
+    certPath &&
+    fs.existsSync(keyPath) &&
+    fs.existsSync(certPath)
+  ) {
     serverConfig.https = {
       key: fs.readFileSync(keyPath),
       cert: fs.readFileSync(certPath)
@@ -30,7 +35,9 @@ export default defineConfig(({ mode }) => {
     console.log("✓ HTTPS enabled with provided certificates");
   } else {
     console.log("ℹ HTTPS not configured. Using HTTP.");
-    console.log("Set VITE_PRIVATE_CERTIFICATE_KEY and VITE_PUBLIC_CERTIFICATE_KEY in .env to enable HTTPS");
+    console.log(
+      "Set VITE_PRIVATE_CERTIFICATE_KEY and VITE_PUBLIC_CERTIFICATE_KEY in .env to enable HTTPS"
+    );
   }
 
   return {
