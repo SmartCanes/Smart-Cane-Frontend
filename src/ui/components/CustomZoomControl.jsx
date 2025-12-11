@@ -39,7 +39,7 @@ function CustomZoomControl({ guardianPosition, canePosition }) {
       className="absolute bottom-5 right-5 z-[1000] flex flex-col space-y-2"
     >
       <button
-        onClick={focusOnUser}
+        onClick={focusOnCane}
         className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-gray-700 hover:bg-gray-100 cursor-pointer"
         title="Center on current location"
       >
@@ -47,7 +47,7 @@ function CustomZoomControl({ guardianPosition, canePosition }) {
       </button>
 
       <button
-        onClick={focusOnCane}
+        onClick={focusOnUser}
         className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-gray-700 hover:bg-gray-100 cursor-pointer"
         title="Center on current location"
       >
