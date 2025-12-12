@@ -835,9 +835,13 @@ const GuestPage = () => {
           delay={0.6}
           className="flex flex-col items-center gap-3 sm:items-start"
         >
-          <h3 className="text-[14px] mt-1 font-semibold  text-card-100">Call Us</h3>
-          <p className="mt-2">We’re just a call away for any questions or support you need.</p>
-          
+          <h3 className="text-[14px] mt-1 font-semibold  text-card-100">
+            Call Us
+          </h3>
+          <p className="mt-2">
+            We’re just a call away for any questions or support you need.
+          </p>
+
           <div className="flex min-w-40 mt-3 items-center justify-start gap-3">
             <HoverIcon src={callIcon} alt="Call" size={10} />
             <p>09696273011</p>
@@ -850,7 +854,7 @@ const GuestPage = () => {
         >
           <h3 className="text-[14px] font-semibold  text-card-100">Email Us</h3>
           <p>Send us an email and we’ll get back to you as soon as possible.</p>
-          
+
           <div className="flex min-w-36 items-center justify-start gap-3">
             <a
               href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
@@ -971,7 +975,6 @@ const GuestPage = () => {
                   />
                 </a>
               </div>
-              
             </div>
           </div>
         </div>

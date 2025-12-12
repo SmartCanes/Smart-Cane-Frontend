@@ -1041,9 +1041,14 @@ const Register = () => {
             setStep(3);
           } catch (error) {
             const errorMessage =
-              error.response?.data?.message || error.message || "Validation failed";
+              error.response?.data?.message ||
+              error.message ||
+              "Validation failed";
             if (errorMessage.includes("Email")) {
-              setErrors((prev) => ({ ...prev, email: "Email already registered" }));
+              setErrors((prev) => ({
+                ...prev,
+                email: "Email already registered"
+              }));
               document
                 .querySelector('[name="email"]')
                 ?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1060,7 +1065,8 @@ const Register = () => {
             } else {
               setModalConfig({
                 isOpen: true,
-                onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+                onClose: () =>
+                  setModalConfig((prev) => ({ ...prev, isOpen: false })),
                 title: "Error",
                 message: errorMessage,
                 modalType: "error"
