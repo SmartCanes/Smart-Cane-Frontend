@@ -17,6 +17,7 @@ import Modal from "@/ui/components/Modal";
 import { pairDevice, validateDeviceSerial } from "@/api/backendService";
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Register = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
@@ -48,6 +49,8 @@ const Register = () => {
     onAction: null
   });
 
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const [captchaLoading, setCaptchaLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -253,6 +256,18 @@ const Register = () => {
 
   const handleNext = async (e) => {
     e.preventDefault();
+
+    if (step === 2 && !isDev) {
+      if (!captchaValue) {
+        setErrors((prev) => ({
+          ...prev,
+          captcha: "Please complete the CAPTCHA to continue"
+        }));
+        return;
+      }
+    }
+
+    setErrors((prev) => ({ ...prev, captcha: "" }));
 
     setOtp(["", "", "", "", "", ""]);
 
@@ -887,6 +902,31 @@ const Register = () => {
                   </div>
                 )}
 
+                {step === 2 && !showScanner && (
+                  <div className="captcha-container">
+                    {captchaLoading && (
+                      <p className="text-center text-gray-500 mb-2">
+                        Loading CAPTCHA...
+                      </p>
+                    )}
+
+                    <ReCAPTCHA
+                      sitekey={import.meta.env.VITE_CAPTCHA_KEY}
+                      onChange={(value) => {
+                        setCaptchaValue(value);
+                        if (errors.captcha)
+                          setErrors((prev) => ({ ...prev, captcha: "" }));
+                      }}
+                      asyncScriptOnLoad={() => setCaptchaLoading(false)}
+                    />
+                    {errors.captcha && (
+                      <p className="font-poppins text-[#CE4B34] text-sm mt-2">
+                        {errors.captcha}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {step <= 3 && (
                   <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
                     <PrimaryButton
@@ -899,11 +939,11 @@ const Register = () => {
                           : `${step === 3 ? "Create Account" : "Next"}`
                       }
                       type="submit"
-                      disabled={
-                        isSubmitting ||
-                        hasStepErrors() ||
-                        (step === 3 && !otpSent && !isDev)
-                      }
+                      // disabled={
+                      //   isSubmitting ||
+                      //   hasStepErrors() ||
+                      //   (step === 2 && !captchaValue && !isDev)
+                      // }
                     />
                     {step > 1 && (
                       <PrimaryButton
