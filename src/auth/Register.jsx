@@ -14,6 +14,7 @@ import Loader from "@/ui/components/Loader";
 import { useRegisterStore } from "@/stores/useRegisterStore";
 import ScannerCamera from "@/ui/components/Scanner";
 import Modal from "@/ui/components/Modal";
+import TermsAndConditions from "@/ui/components/TermsAndConditions";
 import { pairDevice, validateDeviceSerial } from "@/api/backendService";
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
@@ -48,6 +49,8 @@ const Register = () => {
     onAction: null
   });
 
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -286,6 +289,11 @@ const Register = () => {
 
         case 2: {
           // Address / Contact Info
+          if (!termsAccepted) {
+            setShowTermsModal(true);
+            setIsSubmitting(false);
+            return;
+          }
           if (isDev) {
             setStep(3);
             break;
@@ -971,6 +979,57 @@ const Register = () => {
         message={modalConfig.message}
         variant={modalConfig.variant}
         onAction={modalConfig.onAction}
+      />
+
+      <TermsAndConditions
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={async () => {
+          setTermsAccepted(true);
+          setShowTermsModal(false);
+          setIsSubmitting(true);
+          try {
+            if (isDev) {
+              setStep(3);
+              return;
+            }
+            await checkCredentialsApi({
+              email: formData.email,
+              contact_number: formData.contactNumber
+            });
+            await sendOtp();
+            setStep(3);
+          } catch (error) {
+            const errorMessage =
+              error.response?.data?.message || error.message || "Validation failed";
+            if (errorMessage.includes("Email")) {
+              setErrors((prev) => ({ ...prev, email: "Email already registered" }));
+              document
+                .querySelector('[name="email"]')
+                ?.scrollIntoView({ behavior: "smooth", block: "center" });
+              document.querySelector('[name="email"]')?.focus();
+            } else if (errorMessage.includes("Contact number")) {
+              setErrors((prev) => ({
+                ...prev,
+                contactNumber: "Contact number is already registered"
+              }));
+              document
+                .querySelector('[name="contactNumber"]')
+                ?.scrollIntoView({ behavior: "smooth", block: "center" });
+              document.querySelector('[name="contactNumber"]')?.focus();
+            } else {
+              setModalConfig({
+                isOpen: true,
+                onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+                title: "Error",
+                message: errorMessage,
+                modalType: "error"
+              });
+            }
+          } finally {
+            setIsSubmitting(false);
+          }
+        }}
       />
     </>
   );

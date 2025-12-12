@@ -835,11 +835,12 @@ const GuestPage = () => {
           delay={0.6}
           className="flex flex-col items-center gap-3 sm:items-start"
         >
-          <h3 className="text-[14px] font-semibold text-card-100">Call Us</h3>
-          <p>We’re just a call away for any questions or support you need.</p>
-          <div className="flex min-w-40 items-center justify-start gap-3">
+          <h3 className="text-[14px] mt-1 font-semibold  text-card-100">Call Us</h3>
+          <p className="mt-2">We’re just a call away for any questions or support you need.</p>
+          
+          <div className="flex min-w-40 mt-3 items-center justify-start gap-3">
             <HoverIcon src={callIcon} alt="Call" size={10} />
-            <p>09XXXXXXXXX</p>
+            <p>09696273011</p>
           </div>
         </SlideInFromLeft>
 
@@ -847,8 +848,9 @@ const GuestPage = () => {
           delay={0.6}
           className="flex flex-col items-center gap-3 sm:items-start"
         >
-          <h3 className="text-[14px] font-semibold text-card-100">Email Us</h3>
+          <h3 className="text-[14px] font-semibold  text-card-100">Email Us</h3>
           <p>Send us an email and we’ll get back to you as soon as possible.</p>
+          
           <div className="flex min-w-36 items-center justify-start gap-3">
             <a
               href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
@@ -916,7 +918,7 @@ const GuestPage = () => {
                 Contact Info
               </h4>
               <ul className="space-y-3 text-sm text-white/70">
-                <li>09XXXXXXXXX</li>
+                <li>09696273011</li>
                 <li>
                   <a
                     href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
@@ -969,12 +971,7 @@ const GuestPage = () => {
                   />
                 </a>
               </div>
-              <ScrollLink
-                targetId="contact"
-                className="text-white/70 hover:text-white transition-colors duration-200 block cursor-pointer"
-              >
-                <HoverNavEffect direction="right">FAQ</HoverNavEffect>
-              </ScrollLink>
+              
             </div>
           </div>
         </div>
@@ -982,7 +979,7 @@ const GuestPage = () => {
         <div className=" w-full h-[0.5px] bg-[#dfdfdf]" />
 
         <div className="pt-6 text-center text-xs tracking-[0.3em] pb-6 text-white/60">
-          © 2025 iCane · All Rights Reserved
+          © 2026 iCane · All Rights Reserved
         </div>
       </footer>
     </div>
