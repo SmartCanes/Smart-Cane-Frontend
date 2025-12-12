@@ -78,13 +78,13 @@ export const useRealtimeStore = create((set, get) => ({
         componentHealth: {
           gpsStatus: Number(data.gpsStatus) === 2,
           ultrasonicStatus:
-            data.ultrasonicStatus === true || data.ultrasonicStatus === "true",
+            data.ultrasonicStatus === true || data.ultrasonicStatus === "false",
           infraredStatus:
-            data.infraredStatus === true || data.infraredStatus === "true",
-          mpuStatus: data.mpuStatus === true || data.mpuStatus === "true",
+            data.infraredStatus === true || data.infraredStatus === "false",
+          mpuStatus: data.mpuStatus === true || data.mpuStatus === "false",
           esp32Status: data.status === "online",
           raspberryPiStatus:
-            data.raspberryPiStatus === true || data.raspberryPiStatus === "true"
+            data.raspberryPiStatus === true || data.raspberryPiStatus === "false"
         }
       });
       resetHeartbeat();

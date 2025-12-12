@@ -30,6 +30,10 @@ const componentsData = [
   },
   {
     id: 5,
+    name: "NEO-6M GPS Module"
+  },
+  {
+    id: 6,
     name: "Raspberry Pi 4 Model B"
   }
 ];
