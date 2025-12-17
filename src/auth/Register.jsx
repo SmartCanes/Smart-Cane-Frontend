@@ -17,7 +17,6 @@ import Modal from "@/ui/components/Modal";
 import { pairDevice, validateDeviceSerial } from "@/api/backendService";
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
-import ReCAPTCHA from "react-google-recaptcha";
 
 const Register = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
@@ -49,8 +48,6 @@ const Register = () => {
     onAction: null
   });
 
-  const [captchaValue, setCaptchaValue] = useState(null);
-  const [captchaLoading, setCaptchaLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -133,15 +130,6 @@ const Register = () => {
         if (!/^09\d{9}$/.test(value))
           return "Contact number must start with 09 and contain 11 digits";
         return "";
-
-      // case "village":
-      // case "province":
-      // case "city":
-      // case "barangay":
-      //   if (!value) return "This field is required";
-      //   if (value.length > 50)
-      //     return "This field should not exceed 50 characters";
-      //   return "";
 
       default:
         return "";
@@ -256,18 +244,6 @@ const Register = () => {
 
   const handleNext = async (e) => {
     e.preventDefault();
-
-    if (step === 2 && !isDev) {
-      if (!captchaValue) {
-        setErrors((prev) => ({
-          ...prev,
-          captcha: "Please complete the CAPTCHA to continue"
-        }));
-        return;
-      }
-    }
-
-    setErrors((prev) => ({ ...prev, captcha: "" }));
 
     setOtp(["", "", "", "", "", ""]);
 
@@ -444,7 +420,7 @@ const Register = () => {
           title: "Network Error",
           position: "center",
           message:
-            "We’re having trouble connecting to the server. Please check your internet connection and try again. If the problem persists, try refreshing the page or contacting support."
+            "We're having trouble connecting to the server. Please check your internet connection and try again. If the problem persists, try refreshing the page or contacting support."
         });
       }
     } finally {
@@ -540,7 +516,7 @@ const Register = () => {
               ? "Your device has been successfully verified and is ready to be paired. Register your account to continue."
               : data.reason === "already_paired"
                 ? "This device is already linked to another account. If you believe this is a mistake, please contact support."
-                : "We couldn’t locate a device with this serial code. Please check and try again."
+                : "We couldn't locate a device with this serial code. Please check and try again."
         });
         window.history.replaceState({}, "", window.location.pathname);
       } catch (error) {
@@ -562,12 +538,6 @@ const Register = () => {
   }, [deviceValidated.validated, setDeviceValidated]);
 
   useEffect(() => {
-    // const loadAll = async () => {
-    //   const data = await fetchLocationOptions();
-    //   console.log(data);
-    //   setLocationOptions(data);
-    // };
-    // loadAll();
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
@@ -796,25 +766,6 @@ const Register = () => {
                       error={errors.barangay}
                     />
 
-                    {/* Relationship to the VIP - Full width */}
-                    {/* <SelectField
-                      className="font-poppins py-[16px]"
-                      label={"Relationship to the VIP"}
-                      placeholder="Relationship..."
-                      required
-                      options={[
-                        { value: "Husband", label: "Husband" },
-                        { value: "Wife", label: "Wife" },
-                        { value: "Sibling", label: "Sibling" },
-                        { value: "Legal Guardian", label: "Legal Guardian" }
-                      ]}
-                      onChange={(e) => {
-                        handleChange("relationship", e.target.value);
-                      }}
-                      value={formData.relationship || ""}
-                      error={errors.relationship}
-                    /> */}
-
                     {/* Contact Number - Full width */}
                     <TextField
                       className="font-poppins"
@@ -902,31 +853,6 @@ const Register = () => {
                   </div>
                 )}
 
-                {step === 2 && !showScanner && (
-                  <div className="captcha-container">
-                    {captchaLoading && (
-                      <p className="text-center text-gray-500 mb-2">
-                        Loading CAPTCHA...
-                      </p>
-                    )}
-
-                    <ReCAPTCHA
-                      sitekey={import.meta.env.VITE_CAPTCHA_KEY}
-                      onChange={(value) => {
-                        setCaptchaValue(value);
-                        if (errors.captcha)
-                          setErrors((prev) => ({ ...prev, captcha: "" }));
-                      }}
-                      asyncScriptOnLoad={() => setCaptchaLoading(false)}
-                    />
-                    {errors.captcha && (
-                      <p className="font-poppins text-[#CE4B34] text-sm mt-2">
-                        {errors.captcha}
-                      </p>
-                    )}
-                  </div>
-                )}
-
                 {step <= 3 && (
                   <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
                     <PrimaryButton
@@ -939,11 +865,7 @@ const Register = () => {
                           : `${step === 3 ? "Create Account" : "Next"}`
                       }
                       type="submit"
-                      // disabled={
-                      //   isSubmitting ||
-                      //   hasStepErrors() ||
-                      //   (step === 2 && !captchaValue && !isDev)
-                      // }
+                      disabled={isSubmitting || hasStepErrors()}
                     />
                     {step > 1 && (
                       <PrimaryButton

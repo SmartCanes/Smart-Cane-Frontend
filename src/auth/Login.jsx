@@ -8,7 +8,7 @@ import { loginApi } from "@/api/authService";
 import { useUIStore, useUserStore } from "@/stores/useStore";
 import Modal from "@/ui/components/Modal";
 import ScannerCamera from "@/ui/components/Scanner";
-import ReCAPTCHA from "react-google-recaptcha";
+// import ReCAPTCHA from "react-google-recaptcha"; // Commented out for disabling
 
 const Login = () => {
   const isDev = (import.meta.env.VITE_ENV || "development") === "development";
@@ -24,8 +24,8 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null);
-  const [captchaLoading, setCaptchaLoading] = useState(true);
+  // const [captchaValue, setCaptchaValue] = useState(null); // Commented
+  // const [captchaLoading, setCaptchaLoading] = useState(true); // Commented
   const [retryAfter, setRetryAfter] = useState(0);
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
@@ -50,15 +50,15 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newErrors = {};
-    if (!credentials.username.trim())
-      newErrors.username = "Username is required";
-    if (!credentials.password) newErrors.password = "Password is required";
-    if (!captchaValue) newErrors.captcha = "Please complete the CAPTCHA";
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+    // const newErrors = {};
+    // if (!credentials.username.trim())
+    //   newErrors.username = "Username is required";
+    // if (!credentials.password) newErrors.password = "Password is required";
+    // if (!captchaValue) newErrors.captcha = "Please complete the CAPTCHA"; // Commented
+    // if (Object.keys(newErrors).length > 0) {
+    //   setErrors(newErrors);
+    //   return;
+    // }
 
     try {
       if (
@@ -151,22 +151,22 @@ const Login = () => {
   };
 
   useEffect(() => {
-    window.onloadCallback = () => {
-      setCaptchaLoading(false);
-      console.log("grecaptcha is ready!");
-    };
+    // window.onloadCallback = () => {
+    //   setCaptchaLoading(false);
+    //   console.log("grecaptcha is ready!");
+    // };
 
     // Dynamically create and append the script tag
-    const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/";
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
+    // const script = document.createElement("script");
+    // script.src = "https://www.google.com/recaptcha/";
+    // script.async = true;
+    // script.defer = true;
+    // document.head.appendChild(script);
 
-    return () => {
-      document.head.removeChild(script);
-      delete window.onloadCallback;
-    };
+    // return () => {
+    //   document.head.removeChild(script);
+    //   delete window.onloadCallback;
+    // };
   }, []);
 
   return (
@@ -244,6 +244,7 @@ const Login = () => {
                   Forgot password?
                 </Link>
 
+                {/* 
                 <div className="captcha-container">
                   {captchaLoading && (
                     <p className="text-center text-gray-500 mb-2">
@@ -267,13 +268,14 @@ const Login = () => {
                     {errors.captcha}
                   </p>
                 )}
+                */}
 
                 <PrimaryButton
                   className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
                   bgColor="bg-primary-100"
                   text={loading ? "Logging in..." : "Sign In"}
                   type="submit"
-                  disabled={retryAfter > 0 || loading || captchaLoading}
+                  disabled={retryAfter > 0 || loading /* || captchaLoading */} // commented captchaLoading
                 />
 
                 <p className="font-poppins text-center text-[18px] mt-4">
