@@ -137,15 +137,6 @@ const Register = () => {
           return "Contact number must start with 09 and contain 11 digits";
         return "";
 
-      // case "village":
-      // case "province":
-      // case "city":
-      // case "barangay":
-      //   if (!value) return "This field is required";
-      //   if (value.length > 50)
-      //     return "This field should not exceed 50 characters";
-      //   return "";
-
       default:
         return "";
     }
@@ -452,7 +443,7 @@ const Register = () => {
           title: "Network Error",
           position: "center",
           message:
-            "We’re having trouble connecting to the server. Please check your internet connection and try again. If the problem persists, try refreshing the page or contacting support."
+            "We're having trouble connecting to the server. Please check your internet connection and try again. If the problem persists, try refreshing the page or contacting support."
         });
       }
     } finally {
@@ -548,7 +539,7 @@ const Register = () => {
               ? "Your device has been successfully verified and is ready to be paired. Register your account to continue."
               : data.reason === "already_paired"
                 ? "This device is already linked to another account. If you believe this is a mistake, please contact support."
-                : "We couldn’t locate a device with this serial code. Please check and try again."
+                : "We couldn't locate a device with this serial code. Please check and try again."
         });
         window.history.replaceState({}, "", window.location.pathname);
       } catch (error) {
@@ -570,12 +561,6 @@ const Register = () => {
   }, [deviceValidated.validated, setDeviceValidated]);
 
   useEffect(() => {
-    // const loadAll = async () => {
-    //   const data = await fetchLocationOptions();
-    //   console.log(data);
-    //   setLocationOptions(data);
-    // };
-    // loadAll();
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
@@ -803,25 +788,6 @@ const Register = () => {
                       disabled
                       error={errors.barangay}
                     />
-
-                    {/* Relationship to the VIP - Full width */}
-                    {/* <SelectField
-                      className="font-poppins py-[16px]"
-                      label={"Relationship to the VIP"}
-                      placeholder="Relationship..."
-                      required
-                      options={[
-                        { value: "Husband", label: "Husband" },
-                        { value: "Wife", label: "Wife" },
-                        { value: "Sibling", label: "Sibling" },
-                        { value: "Legal Guardian", label: "Legal Guardian" }
-                      ]}
-                      onChange={(e) => {
-                        handleChange("relationship", e.target.value);
-                      }}
-                      value={formData.relationship || ""}
-                      error={errors.relationship}
-                    /> */}
 
                     {/* Contact Number - Full width */}
                     <TextField
