@@ -9,10 +9,10 @@ export const getGuardianById = (guardian_id) =>
   handleRequest(() => backendApi.get(`/guardian/${guardian_id}`));
 
 export const updateGuardian = (payload) =>
-  handleRequest(() => backendApi.put(`/guardian/profile/`, payload));
+  handleRequest(() => backendApi.put(`/guardian/profile`, payload));
 
 export const getMyProfile = () =>
-  handleRequest(() => backendApi.get("/guardian/profile/"));
+  handleRequest(() => backendApi.get("/guardian/profile"));
 
 // VIP
 export const getVIPs = () => handleRequest(() => backendApi.get("/vip"));
