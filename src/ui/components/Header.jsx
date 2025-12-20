@@ -8,7 +8,8 @@ import { useRealtimeStore, useUserStore } from "@/stores/useStore";
 import { logoutApi } from "@/api/authService";
 
 const Header = () => {
-  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
+  const isBackendEnabled =
+    (import.meta.env.BACKEND_ENABLED || "false") === "true";
   const { user, clearUser } = useUserStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const [notificationCount, setNotificationCount] = useState(0);
@@ -34,7 +35,7 @@ const Header = () => {
   const handleNotificationClick = () => {};
 
   const handleLogoutClick = async () => {
-    if (isDev) {
+    if (!isBackendEnabled) {
       clearUser();
       navigate("/login");
       return;

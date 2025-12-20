@@ -5,14 +5,15 @@ import { verifyAuthApi } from "@/api/authService";
 import { useUIStore } from "@/stores/useStore";
 
 const ProtectedLayout = () => {
-  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
+  const isBackendEnabled =
+    (import.meta.env.BACKEND_ENABLED || "false") === "true";
   const navigate = useNavigate();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        if (isDev) {
+        if (!isBackendEnabled) {
           const cookies = document.cookie.split(";").reduce((acc, cookie) => {
             const [key, value] = cookie.trim().split("=");
             acc[key] = value;
@@ -34,7 +35,7 @@ const ProtectedLayout = () => {
     };
 
     checkAuth();
-  }, [navigate, isDev]);
+  }, [navigate, isBackendEnabled]);
 
   if (!isAuthChecked) {
     return (

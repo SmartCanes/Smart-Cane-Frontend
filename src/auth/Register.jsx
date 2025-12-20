@@ -21,7 +21,8 @@ import { useUIStore } from "@/stores/useStore";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const Register = () => {
-  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
+  const isBackendEnabled =
+    (import.meta.env.BACKEND_ENABLED || "false") === "true";
   const CONTACT_NUMBER_LENGTH = 11;
   const navigate = useNavigate();
   const {
@@ -251,7 +252,7 @@ const Register = () => {
   const handleNext = async (e) => {
     e.preventDefault();
 
-    if (step === 2 && !isDev) {
+    if (step === 2 && isBackendEnabled) {
       if (!captchaValue) {
         setErrors((prev) => ({
           ...prev,
@@ -266,7 +267,7 @@ const Register = () => {
     setOtp(["", "", "", "", "", ""]);
 
     const stepErrors = validateStep(step);
-    if (!isDev && Object.keys(stepErrors).length > 0) {
+    if (isBackendEnabled && Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       const firstErrorField = Object.keys(stepErrors)[0];
       const errorElement = document.querySelector(
@@ -284,7 +285,7 @@ const Register = () => {
       switch (step) {
         case 1: {
           // Account Info
-          if (isDev) {
+          if (!isBackendEnabled) {
             setStep(2);
             break;
           }
@@ -300,7 +301,7 @@ const Register = () => {
             setIsSubmitting(false);
             return;
           }
-          if (isDev) {
+          if (!isBackendEnabled) {
             setStep(3);
             break;
           }
@@ -314,7 +315,7 @@ const Register = () => {
         }
 
         case 3: {
-          if (isDev) {
+          if (!isBackendEnabled) {
             setModalConfig({
               isOpen: true,
               onClose: () =>
@@ -916,7 +917,7 @@ const Register = () => {
                       // disabled={
                       //   isSubmitting ||
                       //   hasStepErrors() ||
-                      //   (step === 2 && !captchaValue && !isDev)
+                      //   (step === 2 && !captchaValue && !isBackendEnabled)
                       // }
                     />
                     {step > 1 && (
@@ -995,7 +996,7 @@ const Register = () => {
           setShowTermsModal(false);
           setIsSubmitting(true);
           try {
-            if (isDev) {
+            if (isBackendEnabled) {
               setStep(3);
               return;
             }

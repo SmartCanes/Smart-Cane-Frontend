@@ -11,7 +11,8 @@ import ScannerCamera from "@/ui/components/Scanner";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
-  const isDev = (import.meta.env.VITE_ENV || "development") === "development";
+  const isBackendEnabled =
+    (import.meta.env.BACKEND_ENABLED || "false") === "true";
   const navigate = useNavigate();
   const { setUser } = useUserStore();
   const { isAnimationDone } = useUIStore();
@@ -62,7 +63,7 @@ const Login = () => {
 
     try {
       if (
-        isDev &&
+        !isBackendEnabled &&
         credentials.username === "admin" &&
         credentials.password === "admin"
       ) {
