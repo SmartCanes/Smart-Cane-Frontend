@@ -58,9 +58,9 @@ const Login = () => {
       setUser({
         id: 1,
         username: "admin",
-        guardian_name: "Admin User",
+        guardianName: "Admin User",
         email: "admin@gmail.com",
-        contact_number: "09123456789"
+        contactNumber: "09123456789"
       });
       navigate("/dashboard");
       return;

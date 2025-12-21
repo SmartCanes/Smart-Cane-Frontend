@@ -19,7 +19,7 @@ const ProtectedLayout = () => {
         }
 
         const response = await verifyAuthApi();
-        if (!response.data.token_valid) {
+        if (!response.data.tokenValid) {
           throw new Error("Invalid token");
         }
         setIsAuthChecked(true);
@@ -54,7 +54,7 @@ const PublicLayout = () => {
         }
 
         const response = await verifyAuthApi();
-        if (response.data.token_valid) {
+        if (response.data.tokenValid) {
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
