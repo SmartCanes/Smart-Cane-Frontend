@@ -55,13 +55,6 @@ const Login = () => {
       credentials.username === "admin" &&
       credentials.password === "admin"
     ) {
-      setUser({
-        id: 1,
-        username: "admin",
-        guardianName: "Admin User",
-        email: "admin@gmail.com",
-        contactNumber: "09123456789"
-      });
       navigate("/dashboard");
       return;
     }
