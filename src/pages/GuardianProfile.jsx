@@ -39,7 +39,7 @@ export const GuardianProfile = () => {
   const [otpTimer, setOtpTimer] = useState(300); // 5 minutes in seconds
   const [canResendOTP, setCanResendOTP] = useState(false);
   const [otpError, setOtpError] = useState("");
-  const [originalEmail, setOriginalEmail] = useState(user.email);
+  const [originalEmail, setOriginalEmail] = useState(user?.email || "");
   const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
 
   const [profileImage, setProfileImage] = useState(avatarPlaceholder);
@@ -71,10 +71,10 @@ export const GuardianProfile = () => {
 
   // Initialize profile image from user data if available
   useEffect(() => {
-    if (user.guardianImageUrl) {
+    if (user?.guardianImageUrl) {
       setProfileImage(user.guardianImageUrl);
     }
-  }, [user.guardianImageUrl]);
+  }, [user?.guardianImageUrl]);
 
   const handleProfileChange = ({ target }) => {
     const { name, value } = target;
