@@ -436,7 +436,19 @@ const Register = () => {
         document.querySelector('[name="contactNumber"]')?.focus();
       } else if (errorMessage.includes("OTP")) {
         setOtpError(errorMessage);
+      } else if (error.response.data.error === 429) {
+        setModalConfig({
+          isOpen: true,
+          type: "error",
+          onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+          variant: "banner",
+          title: "Too Many Requests",
+          position: "center",
+          message:
+            "You have made too many requests in a short period. Please wait a while before trying again."
+        });
       } else {
+        console.log(error);
         setModalConfig({
           isOpen: true,
           type: "error",
