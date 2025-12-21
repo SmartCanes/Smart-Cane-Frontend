@@ -159,11 +159,23 @@ const Login = () => {
     script.defer = true;
     document.head.appendChild(script);
 
+    const firstInput = document.querySelector("input:not([disabled])");
+    firstInput?.focus();
+
     return () => {
       document.head.removeChild(script);
       delete window.onloadCallback;
     };
   }, []);
+
+  useEffect(() => {
+    const handleEnter = (e) => {
+      if (e.key === "Enter") handleSubmit(e);
+    };
+
+    window.addEventListener("keydown", handleEnter);
+    return () => window.removeEventListener("keydown", handleEnter);
+  }, [credentials, handleSubmit]);
 
   return (
     <>

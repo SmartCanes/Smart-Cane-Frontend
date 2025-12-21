@@ -561,10 +561,21 @@ const Register = () => {
   }, [deviceValidated.validated, setDeviceValidated]);
 
   useEffect(() => {
+    const firstInput = document.querySelector("input:not([disabled])");
+    firstInput?.focus();
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    const handleEnter = (e) => {
+      if (e.key === "Enter") handleNext(e);
+    };
+
+    window.addEventListener("keydown", handleEnter);
+    return () => window.removeEventListener("keydown", handleEnter);
+  }, [handleNext]);
 
   return (
     <>
