@@ -62,6 +62,8 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
   const countdownRef = useRef(null);
+  const firstNameRef = useRef(null);
+  const streetAddressRef = useRef(null);
 
   const validateField = (name, value) => {
     switch (name) {
@@ -561,12 +563,21 @@ const Register = () => {
   }, [deviceValidated.validated, setDeviceValidated]);
 
   useEffect(() => {
-    const firstInput = document.querySelector("input:not([disabled])");
-    firstInput?.focus();
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (showScanner) return;
+    const focusMap = {
+      1: firstNameRef,
+      2: streetAddressRef,
+      3: otpRefs[0]
+    };
+    const ref = focusMap[step];
+    ref?.current?.focus();
+  }, [step, showScanner]);
 
   return (
     <>
@@ -630,6 +641,7 @@ const Register = () => {
                   <div className="space-y-3 sm:space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       <TextField
+                        ref={firstNameRef}
                         className="font-poppins"
                         label={"First Name"}
                         placeholder="First Name..."
@@ -710,6 +722,7 @@ const Register = () => {
                     {/* Lot No./Bldg./Street and Province - Side by side */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <TextField
+                        ref={streetAddressRef}
                         className="whitespace-nowrap "
                         label={"Lot No./Bldg./Street"}
                         placeholder="Enter your Lot No..."
