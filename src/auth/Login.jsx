@@ -168,15 +168,6 @@ const Login = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const handleEnter = (e) => {
-      if (e.key === "Enter") handleSubmit(e);
-    };
-
-    window.addEventListener("keydown", handleEnter);
-    return () => window.removeEventListener("keydown", handleEnter);
-  }, [credentials, handleSubmit]);
-
   return (
     <>
       <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">

@@ -568,15 +568,6 @@ const Register = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const handleEnter = (e) => {
-      if (e.key === "Enter") handleNext(e);
-    };
-
-    window.addEventListener("keydown", handleEnter);
-    return () => window.removeEventListener("keydown", handleEnter);
-  }, [handleNext]);
-
   return (
     <>
       <>
