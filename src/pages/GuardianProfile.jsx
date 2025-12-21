@@ -7,23 +7,12 @@ import SelectField from "@/ui/components/SelectField";
 import Toast from "@/ui/components/Toast";
 import { updateGuardian } from "@/api/backendService.js";
 
-const relationshipOptions = [
-  { value: "Husband", label: "Husband" },
-  { value: "Wife", label: "Wife" },
-  { value: "Sibling", label: "Sibling" },
-  { value: "Legal Guardian", label: "Legal Guardian" },
-  { value: "Other", label: "Other" }
-];
-
-// Validation functions
 const validateName = (name) => {
-  // Allows letters, spaces, periods, commas, and suffixes like Jr, II, III, IV
   const nameRegex = /^[A-Za-z\s.,]+(?: (?:Jr\.?|Sr\.?|I{1,3}|IV))?$/i;
   return nameRegex.test(name.trim());
 };
 
 const validatePhone = (phone) => {
-  // Exactly 11 digits, only numbers
   const phoneRegex = /^\d{11}$/;
   return phoneRegex.test(phone.trim());
 };
@@ -36,27 +25,15 @@ const validateEmail = (email) => {
 export const GuardianProfile = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, setUser } = useUserStore();
-  const [profile, setProfile] = useState({
-    guardianName: user.guardian_name,
-    email: user.email,
-    phone: user.contact_number,
-    relationship: user.relationship,
-    region: user.region || "",
-    province: user.province || "",
-    city: user.city || "",
-    barangay: user.barangay || "",
-    village: user.village || "",
-    streetAddress: user.street_address || ""
-  });
+  const [profile, setProfile] = useState({ ...user });
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [toastConfig, setToastConfig] = useState({
+    show: false,
     message: "",
     type: "info"
   });
-  const [showToast, setShowToast] = useState(false);
 
-  // OTP State (Design only)
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpTimer, setOtpTimer] = useState(300); // 5 minutes in seconds
@@ -65,7 +42,6 @@ export const GuardianProfile = () => {
   const [originalEmail, setOriginalEmail] = useState(user.email);
   const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
 
-  // Profile Image State
   const [profileImage, setProfileImage] = useState(avatarPlaceholder);
   const [imageFile, setImageFile] = useState(null);
   const [imageError, setImageError] = useState("");
@@ -95,10 +71,10 @@ export const GuardianProfile = () => {
 
   // Initialize profile image from user data if available
   useEffect(() => {
-    if (user.profile_image) {
-      setProfileImage(user.profile_image);
+    if (user.guardianImageUrl) {
+      setProfileImage(user.guardianImageUrl);
     }
-  }, [user.profile_image]);
+  }, [user.guardianImageUrl]);
 
   const handleProfileChange = ({ target }) => {
     const { name, value } = target;
@@ -142,12 +118,11 @@ export const GuardianProfile = () => {
     setProfileImage(imageUrl);
     setImageFile(file);
 
-    // Show success message
     setToastConfig({
+      show: true,
       message: "Profile image uploaded successfully",
       type: "success"
     });
-    setShowToast(true);
   };
 
   const handleRemoveImage = () => {
@@ -158,10 +133,10 @@ export const GuardianProfile = () => {
     }
 
     setToastConfig({
+      show: true,
       message: "Profile image removed",
       type: "info"
     });
-    setShowToast(true);
   };
 
   const triggerFileInput = () => {
@@ -188,11 +163,11 @@ export const GuardianProfile = () => {
       isValid = false;
     }
 
-    if (!profile.phone.trim()) {
-      newErrors.phone = "Phone number is required";
+    if (!profile.contactNumber.trim()) {
+      newErrors.contactNumber = "Phone number is required";
       isValid = false;
-    } else if (!validatePhone(profile.phone)) {
-      newErrors.phone = "Phone number must be exactly 11 digits";
+    } else if (!validatePhone(profile.contactNumber)) {
+      newErrors.contactNumber = "Phone number must be exactly 11 digits";
       isValid = false;
     }
 
@@ -210,46 +185,46 @@ export const GuardianProfile = () => {
 
   const handleEditProfile = () => {
     setIsEditMode(true);
-    setToastConfig({ message: "Edit mode activated", type: "info" });
-    setShowToast(true);
+    setToastConfig({
+      show: true,
+      message: "Edit mode activated",
+      type: "info"
+    });
   };
 
   const handleSaveProfile = async () => {
-    // Validate form
     if (!validateForm()) {
       setToastConfig({
+        show: true,
         message: "Please fix validation errors before saving",
         type: "error"
       });
-      setShowToast(true);
       return;
     }
 
     if (!isBackendEnabled) {
-      // Backend disabled: just update local user store
       setUser((prev) => ({
         ...prev,
         guardianName: profile.guardianName,
         email: profile.email,
-        contact_number: profile.phone,
+        contactNumber: profile.phone,
         province: profile.province,
         city: profile.city,
         barangay: profile.barangay,
         village: profile.village,
-        street_address: profile.streetAddress,
-        profile_image: profileImage !== avatarPlaceholder ? profileImage : null
+        streetAddress: profile.streetAddress,
+        profileImage: profileImage !== avatarPlaceholder ? profileImage : null
       }));
 
       setIsEditMode(false);
       setToastConfig({
+        show: true,
         message: "Profile saved locally (backend disabled)",
         type: "success"
       });
-      setShowToast(true);
       return;
     }
 
-    // Check if email changed - show OTP modal (design only)
     if (profile.email !== originalEmail) {
       setIsVerifyingEmail(true);
       setShowOTPModal(true);
@@ -257,17 +232,16 @@ export const GuardianProfile = () => {
       return;
     }
 
-    // If no email change, save directly
     await saveProfileData();
   };
 
   // Simulate OTP send for design purposes
   const simulateOTPSend = () => {
     setToastConfig({
+      show: true,
       message: "OTP sent to your email (design demo)",
       type: "success"
     });
-    setShowToast(true);
     // Reset timer
     setOtpTimer(300);
     setCanResendOTP(false);
@@ -317,6 +291,7 @@ export const GuardianProfile = () => {
     if (otpCode === "123456") {
       // Demo success
       setToastConfig({
+        show: true,
         message: "Email verified successfully (demo)",
         type: "success"
       });
@@ -327,12 +302,12 @@ export const GuardianProfile = () => {
     } else {
       // For any other code, simulate success in demo
       setToastConfig({
+        show: true,
         message: "Email verified successfully (demo)",
         type: "success"
       });
     }
 
-    setShowToast(true);
     setShowOTPModal(false);
     setOriginalEmail(profile.email);
     setIsVerifyingEmail(false);
@@ -344,9 +319,9 @@ export const GuardianProfile = () => {
   const saveProfileData = async () => {
     try {
       const payload = {
-        guardian_name: profile.fullName,
+        guardian_name: profile.guardianName,
         email: profile.email,
-        contact_number: profile.phone,
+        contact_number: profile.contactNumber,
         province: profile.province,
         city: profile.city,
         barangay: profile.barangay,
@@ -354,39 +329,22 @@ export const GuardianProfile = () => {
         street_address: profile.streetAddress
       };
 
-      // If there's an image file, you would upload it here
-      // For now, we'll just save the other profile data
-      // In a real implementation, you would upload the image first
-      // and then include the image URL in the payload
       await updateGuardian(payload);
 
-      // Update the user store with the new data
-      setUser({
-        ...user,
-        guardian_name: profile.fullName,
-        email: profile.email,
-        contact_number: profile.phone,
-        province: profile.province,
-        city: profile.city,
-        barangay: profile.barangay,
-        village: profile.village,
-        street_address: profile.streetAddress
-        // In a real implementation, add: profile_image: uploadedImageUrl
-      });
-
+      setUser({ ...profile });
       setIsEditMode(false);
       setToastConfig({
+        show: true,
         message: "Profile saved successfully",
         type: "success"
       });
-      setShowToast(true);
     } catch (error) {
       console.error("Error saving profile:", error);
       setToastConfig({
+        show: true,
         message: "Failed to save profile. Please try again.",
         type: "error"
       });
-      setShowToast(true);
     }
   };
 
@@ -409,46 +367,31 @@ export const GuardianProfile = () => {
     setOtpError("");
 
     setToastConfig({
+      show: true,
       message: "Email verification cancelled",
       type: "warning"
     });
-    setShowToast(true);
   };
 
   const handleCancelEdit = () => {
-    // Reset profile to original user data
-    setProfile({
-      fullName: user.guardian_name,
-      email: user.email,
-      phone: user.contact_number,
-      relationship: user.relationship,
-      region: user.region || "",
-      province: user.province || "",
-      city: user.city || "",
-      barangay: user.barangay || "",
-      village: user.village || "",
-      streetAddress: user.street_address || ""
-    });
-
-    // Reset profile image
-    if (user.profile_image) {
-      setProfileImage(user.profile_image);
-    } else {
-      setProfileImage(avatarPlaceholder);
-    }
+    setProfile({ ...user });
+    setProfileImage(user.guardianImageUrl || avatarPlaceholder);
     setImageFile(null);
     setImageError("");
 
     // Reset errors
     setErrors({
-      fullName: "",
+      guardianName: "",
       email: "",
-      phone: ""
+      contactNumber: ""
     });
 
     setIsEditMode(false);
-    setToastConfig({ message: "Changes cancelled", type: "warning" });
-    setShowToast(true);
+    setToastConfig({
+      show: true,
+      message: "Changes cancelled",
+      type: "warning"
+    });
   };
 
   // Format timer display
@@ -466,12 +409,12 @@ export const GuardianProfile = () => {
             <div className="flex items-center gap-4">
               <img
                 src={profileImage}
-                alt={profile.fullName}
+                alt={profile.guardianName}
                 className="w-16 h-16 rounded-full object-cover"
               />
               <div>
                 <h3 className="text-lg font-semibold text-[#11285A]">
-                  {profile.fullName}
+                  {profile.guardianName}
                 </h3>
                 <p className="text-sm text-gray-500">{profile.email}</p>
               </div>
@@ -512,7 +455,7 @@ export const GuardianProfile = () => {
               </label>
               <TextField
                 type="text"
-                name="fullName"
+                name="guardianName"
                 value={profile.guardianName}
                 onChange={handleProfileChange}
                 disabled={!isEditMode}
@@ -548,20 +491,19 @@ export const GuardianProfile = () => {
               </label>
               <TextField
                 type="tel"
-                name="phone"
-                value={profile.phone}
+                name="contactNumber"
+                value={profile.contactNumber}
                 onChange={handleProfileChange}
                 disabled={!isEditMode}
                 maxLength="11"
-                inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.phone ? "border-red-500" : ""}`}
+                inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.contactNumber ? "border-red-500" : ""}`}
                 placeholder="11 digits only"
               />
-              {errors.phone && (
-                <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+              {errors.contactNumber && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.contactNumber}
+                </p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Must be exactly 11 digits
-              </p>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -707,13 +649,13 @@ export const GuardianProfile = () => {
             </div>
           </div>
 
-          {showToast && (
+          {toastConfig.show && (
             <Toast
               message={toastConfig.message}
               type={toastConfig.type}
               duration={3000}
               position="top-right"
-              onClose={() => setShowToast(false)}
+              onClose={() => (toastConfig.show = false)}
             />
           )}
         </div>
