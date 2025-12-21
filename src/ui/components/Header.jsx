@@ -55,28 +55,28 @@ const Header = () => {
   // Get profile image URL - check both possible field names
   const getProfileImageUrl = () => {
     if (!user) return null;
-    
+
     // Check for guardian_image_url (your GuardianProfile uses this)
     if (user.guardian_image_url) {
       // If it's just a relative path (like "profile_pics/filename.jpg"),
       // we need to prepend the base URL
       let imageUrl = user.guardian_image_url;
-      
+
       // Check if it's already a full URL
-      if (!imageUrl.startsWith('http') && !imageUrl.startsWith('blob:')) {
+      if (!imageUrl.startsWith("http") && !imageUrl.startsWith("blob:")) {
         // Prepend the base URL - use your backend URL
         const baseUrl = "http://localhost:5000/uploads/";
         imageUrl = baseUrl + imageUrl;
       }
-      
+
       return imageUrl;
     }
-    
+
     // Also check for profileImage if it exists
     if (user.profileImage) {
       return user.profileImage;
     }
-    
+
     return null;
   };
 
@@ -140,11 +140,14 @@ const Header = () => {
                   alt="Profile"
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.target.style.display = 'none';
+                    e.target.style.display = "none";
                     // Show the initial as fallback when image fails
-                    const fallbackElement = e.target.parentElement.querySelector('.profile-initial-fallback');
+                    const fallbackElement =
+                      e.target.parentElement.querySelector(
+                        ".profile-initial-fallback"
+                      );
                     if (fallbackElement) {
-                      fallbackElement.classList.remove('hidden');
+                      fallbackElement.classList.remove("hidden");
                     }
                   }}
                 />
