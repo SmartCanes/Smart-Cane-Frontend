@@ -21,8 +21,7 @@ import { useUIStore } from "@/stores/useStore";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const Register = () => {
-  const isBackendEnabled =
-    (import.meta.env.BACKEND_ENABLED || "false") === "true";
+  const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const CONTACT_NUMBER_LENGTH = 11;
   const navigate = useNavigate();
   const {

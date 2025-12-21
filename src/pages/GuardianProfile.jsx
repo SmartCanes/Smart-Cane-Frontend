@@ -34,9 +34,10 @@ const validateEmail = (email) => {
 };
 
 export const GuardianProfile = () => {
+  const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, setUser } = useUserStore();
   const [profile, setProfile] = useState({
-    fullName: user.guardian_name,
+    guardianName: user.guardian_name,
     email: user.email,
     phone: user.contact_number,
     relationship: user.relationship,
@@ -72,7 +73,7 @@ export const GuardianProfile = () => {
 
   // Validation Errors
   const [errors, setErrors] = useState({
-    fullName: "",
+    guardianName: "",
     email: "",
     phone: ""
   });
@@ -171,18 +172,18 @@ export const GuardianProfile = () => {
 
   const validateForm = () => {
     const newErrors = {
-      fullName: "",
+      guardianName: "",
       email: "",
       phone: ""
     };
 
     let isValid = true;
 
-    if (!profile.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
+    if (!profile.guardianName.trim()) {
+      newErrors.guardianName = "Full name is required";
       isValid = false;
-    } else if (!validateName(profile.fullName)) {
-      newErrors.fullName =
+    } else if (!validateName(profile.guardianName)) {
+      newErrors.guardianName =
         "Name can only contain letters, spaces, and suffixes like Jr, II, III, IV";
       isValid = false;
     }
@@ -219,6 +220,30 @@ export const GuardianProfile = () => {
       setToastConfig({
         message: "Please fix validation errors before saving",
         type: "error"
+      });
+      setShowToast(true);
+      return;
+    }
+
+    if (!isBackendEnabled) {
+      // Backend disabled: just update local user store
+      setUser((prev) => ({
+        ...prev,
+        guardianName: profile.guardianName,
+        email: profile.email,
+        contact_number: profile.phone,
+        province: profile.province,
+        city: profile.city,
+        barangay: profile.barangay,
+        village: profile.village,
+        street_address: profile.streetAddress,
+        profile_image: profileImage !== avatarPlaceholder ? profileImage : null
+      }));
+
+      setIsEditMode(false);
+      setToastConfig({
+        message: "Profile saved locally (backend disabled)",
+        type: "success"
       });
       setShowToast(true);
       return;
@@ -488,14 +513,16 @@ export const GuardianProfile = () => {
               <TextField
                 type="text"
                 name="fullName"
-                value={profile.fullName}
+                value={profile.guardianName}
                 onChange={handleProfileChange}
                 disabled={!isEditMode}
-                inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.fullName ? "border-red-500" : ""}`}
+                inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.guardianName ? "border-red-500" : ""}`}
                 placeholder="e.g., John Smith Jr"
               />
-              {errors.fullName && (
-                <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+              {errors.guardianName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.guardianName}
+                </p>
               )}
             </div>
             <div className="flex flex-col gap-2">

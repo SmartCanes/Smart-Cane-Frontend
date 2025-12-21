@@ -4,9 +4,9 @@ import SidebarContent from "@/ui/components/SidebarContent";
 import { verifyAuthApi } from "@/api/authService";
 import { useUIStore } from "@/stores/useStore";
 
+const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
+
 const ProtectedLayout = () => {
-  const isBackendEnabled =
-    (import.meta.env.BACKEND_ENABLED || "false") === "true";
   const navigate = useNavigate();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
@@ -14,19 +14,14 @@ const ProtectedLayout = () => {
     const checkAuth = async () => {
       try {
         if (!isBackendEnabled) {
-          const cookies = document.cookie.split(";").reduce((acc, cookie) => {
-            const [key, value] = cookie.trim().split("=");
-            acc[key] = value;
-            return acc;
-          }, {});
-
-          if (cookies.access_token === "DEV_ACCESS_TOKEN") {
-            setIsAuthChecked(true);
-            return;
-          }
+          setIsAuthChecked(true);
+          return;
         }
+
         const response = await verifyAuthApi();
-        if (!response.data.token_valid) throw new Error("Invalid token");
+        if (!response.data.token_valid) {
+          throw new Error("Invalid token");
+        }
         setIsAuthChecked(true);
       } catch (error) {
         console.log("Auth check failed:", error);
@@ -35,7 +30,7 @@ const ProtectedLayout = () => {
     };
 
     checkAuth();
-  }, [navigate, isBackendEnabled]);
+  }, [navigate]);
 
   if (!isAuthChecked) {
     return (
@@ -47,18 +42,24 @@ const ProtectedLayout = () => {
 };
 
 const PublicLayout = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const { setIsAnimationDone } = useUIStore();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await verifyAuthApi();
+        if (!isBackendEnabled) {
+          setIsAuthenticated(false);
+          return;
+        }
 
-        if (!response.data.token_valid) throw new Error("Invalid token");
-        setIsAuthenticated(true);
+        const response = await verifyAuthApi();
+        if (response.data.token_valid) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
       } catch (error) {
-        console.log("Auth check failed:", error);
         setIsAuthenticated(false);
       }
     };
@@ -66,25 +67,19 @@ const PublicLayout = () => {
     checkAuth();
   }, []);
 
+  if (isAuthenticated === null) {
+    return <div style={{ minHeight: "100vh", background: "transparent" }} />;
+  }
+
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
   return (
-    <>
-      <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
-        <SidebarContent onAnimationComplete={() => setIsAnimationDone(true)} />
-        <Outlet />
-      </div>
-      {/* <div className="fixed top-0 left-0 right-0 z-20 bg-primary-100 rounded-b-[30%] h-[20vh] sm:hidden flex justify-center items-center">
-        <Link to="/">
-          <h1 className="font-gabriela text-7xl text-[#FDFCFA]">iCane</h1>
-        </Link>
-      </div>
-      <main className="pt-[22vh] pb-8 sm:p-0 w-full flex flex-col sm:flex-row min-h-screen sm:min-h-0">
-        <SidebarContent /> */}
-      {/* </main> */}
-    </>
+    <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
+      <SidebarContent onAnimationComplete={() => setIsAnimationDone(true)} />
+      <Outlet />
+    </div>
   );
 };
 
