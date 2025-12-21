@@ -944,6 +944,7 @@ const Register = () => {
                         onClick={() => {
                           setStep(step - 1);
                         }}
+                        disabled={isSubmitting || isSendingOtp}
                       />
                     )}
                   </div>
