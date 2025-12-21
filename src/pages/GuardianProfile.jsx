@@ -5,11 +5,11 @@ import { Icon } from "@iconify/react";
 import TextField from "@/ui/components/TextField";
 import SelectField from "@/ui/components/SelectField";
 import Toast from "@/ui/components/Toast";
-import { 
+import {
   updateGuardian,
   uploadProfileImage,
   requestEmailChangeOTP,
-  verifyEmailChangeOTP 
+  verifyEmailChangeOTP
 } from "@/api/backendService.js";
 
 const relationshipOptions = [
@@ -36,13 +36,17 @@ const validateEmail = (email) => {
 };
 
 export const GuardianProfile = () => {
+  const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, setUser } = useUserStore();
-  
+
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <Icon icon="eos-icons:loading" className="w-12 h-12 text-[#11285A] mx-auto mb-4" />
+          <Icon
+            icon="eos-icons:loading"
+            className="w-12 h-12 text-[#11285A] mx-auto mb-4"
+          />
           <p className="text-gray-600">Loading profile...</p>
         </div>
       </div>
@@ -50,16 +54,16 @@ export const GuardianProfile = () => {
   }
 
   const [profile, setProfile] = useState({
-    fullName: user?.guardian_name || "",
-    email: user?.email || "",
-    phone: user?.contact_number || "",
-    relationship: user?.relationship || "",
-    region: user?.region || "",
-    province: user?.province || "",
-    city: user?.city || "",
-    barangay: user?.barangay || "",
-    village: user?.village || "",
-    streetAddress: user?.street_address || ""
+    guardianName: user.guardian_name,
+    email: user.email,
+    phone: user.contact_number,
+    relationship: user.relationship,
+    region: user.region || "",
+    province: user.province || "",
+    city: user.city || "",
+    barangay: user.barangay || "",
+    village: user.village || "",
+    streetAddress: user.street_address || ""
   });
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -86,7 +90,7 @@ export const GuardianProfile = () => {
   const fileInputRef = useRef(null);
 
   const [errors, setErrors] = useState({
-    fullName: "",
+    guardianName: "",
     email: "",
     phone: ""
   });
@@ -108,12 +112,14 @@ export const GuardianProfile = () => {
   useEffect(() => {
     if (user?.guardian_image_url) {
       let fullUrl = user.guardian_image_url;
-      
-      if (!user.guardian_image_url.startsWith('http') && 
-          !user.guardian_image_url.startsWith('blob:')) {
+
+      if (
+        !user.guardian_image_url.startsWith("http") &&
+        !user.guardian_image_url.startsWith("blob:")
+      ) {
         fullUrl = `http://localhost:5000/uploads/${user.guardian_image_url}`;
       }
-      
+
       setProfileImage(fullUrl);
     } else {
       setProfileImage(avatarPlaceholder);
@@ -185,18 +191,18 @@ export const GuardianProfile = () => {
 
   const validateForm = () => {
     const newErrors = {
-      fullName: "",
+      guardianName: "",
       email: "",
       phone: ""
     };
 
     let isValid = true;
 
-    if (!profile.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
+    if (!profile.guardianName.trim()) {
+      newErrors.guardianName = "Full name is required";
       isValid = false;
-    } else if (!validateName(profile.fullName)) {
-      newErrors.fullName =
+    } else if (!validateName(profile.guardianName)) {
+      newErrors.guardianName =
         "Name can only contain letters, spaces, and suffixes like Jr, II, III, IV";
       isValid = false;
     }
@@ -237,6 +243,30 @@ export const GuardianProfile = () => {
       return;
     }
 
+    if (!isBackendEnabled) {
+      setUser((prev) => ({
+        ...prev,
+        guardianName: profile.guardianName,
+        email: profile.email,
+        contact_number: profile.phone,
+        province: profile.province,
+        city: profile.city,
+        barangay: profile.barangay,
+        village: profile.village,
+        street_address: profile.streetAddress,
+        profile_image: profileImage !== avatarPlaceholder ? profileImage : null
+      }));
+
+      setIsEditMode(false);
+      setToastConfig({
+        message: "Profile saved locally (backend disabled)",
+        type: "success"
+      });
+      setShowToast(true);
+      return;
+    }
+
+    // Check if email changed - show OTP modal (design only)
     if (profile.email !== originalEmail) {
       setIsVerifyingEmail(true);
       await sendRealOTP();
@@ -250,19 +280,19 @@ export const GuardianProfile = () => {
     try {
       setIsSendingOTP(true);
       setOtpError("");
-      
+
       const response = await requestEmailChangeOTP(profile.email);
-      
+
       if (response.success) {
         setShowOTPModal(true);
         setOtpTimer(300);
         setCanResendOTP(false);
         setOtp(["", "", "", "", "", ""]);
-        
+
         setTimeout(() => {
           otpInputRefs.current[0]?.focus();
         }, 100);
-        
+
         setToastConfig({
           message: "OTP sent to your new email address",
           type: "success"
@@ -315,16 +345,16 @@ export const GuardianProfile = () => {
 
     try {
       setIsVerifyingOTP(true);
-      
+
       const response = await verifyEmailChangeOTP(profile.email, otpCode);
-      
+
       if (response.success) {
         setToastConfig({
           message: "Email verified successfully",
           type: "success"
         });
         setShowToast(true);
-        
+
         setShowOTPModal(false);
         setOriginalEmail(profile.email);
         setIsVerifyingEmail(false);
@@ -334,7 +364,7 @@ export const GuardianProfile = () => {
     } catch (error) {
       console.error("OTP verification failed:", error);
       setOtpError(error.message || "Invalid OTP code");
-      
+
       setToastConfig({
         message: "OTP verification failed",
         type: "error"
@@ -348,16 +378,16 @@ export const GuardianProfile = () => {
   const saveProfileData = async () => {
     try {
       let uploadedImageUrl = null;
-      
+
       if (imageFile) {
         try {
           setIsUploadingImage(true);
           const imageResponse = await uploadProfileImage(imageFile);
-          
+
           if (imageResponse.success) {
             uploadedImageUrl = imageResponse.data.image_url;
             setProfileImage(uploadedImageUrl);
-            
+
             setToastConfig({
               message: "Profile image uploaded successfully",
               type: "success"
@@ -367,7 +397,8 @@ export const GuardianProfile = () => {
         } catch (imageError) {
           console.error("Failed to upload image:", imageError);
           setToastConfig({
-            message: "Profile saved, but image upload failed. Please try uploading the image again.",
+            message:
+              "Profile saved, but image upload failed. Please try uploading the image again.",
             type: "warning"
           });
           setShowToast(true);
@@ -375,7 +406,7 @@ export const GuardianProfile = () => {
           setIsUploadingImage(false);
         }
       }
-      
+
       const payload = {
         guardian_name: profile.fullName,
         email: profile.email,
@@ -388,10 +419,10 @@ export const GuardianProfile = () => {
       };
 
       const response = await updateGuardian(payload);
-      
+
       if (response.success) {
         const finalImageUrl = uploadedImageUrl || profileImage;
-        
+
         setUser({
           ...user,
           guardian_name: profile.fullName,
@@ -408,7 +439,7 @@ export const GuardianProfile = () => {
 
         setIsEditMode(false);
         setImageFile(null);
-        
+
         setToastConfig({
           message: "Profile saved successfully",
           type: "success"
@@ -465,8 +496,10 @@ export const GuardianProfile = () => {
 
     if (user?.guardian_image_url) {
       let fullUrl = user.guardian_image_url;
-      if (!user.guardian_image_url.startsWith('http') && 
-          !user.guardian_image_url.startsWith('blob:')) {
+      if (
+        !user.guardian_image_url.startsWith("http") &&
+        !user.guardian_image_url.startsWith("blob:")
+      ) {
         fullUrl = `http://localhost:5000/uploads/${user.guardian_image_url}`;
       }
       setProfileImage(fullUrl);
@@ -528,14 +561,19 @@ export const GuardianProfile = () => {
                   disabled={isSendingOTP || isVerifyingOTP || isUploadingImage}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#11285A] text-white text-sm font-semibold hover:bg-[#0d1b3d] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  {(isSendingOTP || isVerifyingOTP || isUploadingImage) ? (
+                  {isSendingOTP || isVerifyingOTP || isUploadingImage ? (
                     <>
                       <Icon icon="eos-icons:loading" className="text-lg" />
-                      {isUploadingImage ? "Uploading Image..." : "Processing..."}
+                      {isUploadingImage
+                        ? "Uploading Image..."
+                        : "Processing..."}
                     </>
                   ) : (
                     <>
-                      <Icon icon="solar:check-circle-bold" className="text-lg" />
+                      <Icon
+                        icon="solar:check-circle-bold"
+                        className="text-lg"
+                      />
                       Save
                     </>
                   )}
@@ -559,14 +597,16 @@ export const GuardianProfile = () => {
               <TextField
                 type="text"
                 name="fullName"
-                value={profile.fullName}
+                value={profile.guardianName}
                 onChange={handleProfileChange}
                 disabled={!isEditMode}
-                inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.fullName ? "border-red-500" : ""}`}
+                inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.guardianName ? "border-red-500" : ""}`}
                 placeholder="e.g., John Smith Jr"
               />
-              {errors.fullName && (
-                <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+              {errors.guardianName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.guardianName}
+                </p>
               )}
             </div>
             <div className="flex flex-col gap-2">
@@ -653,7 +693,7 @@ export const GuardianProfile = () => {
                 value={profile.city}
               />
             </div>
-            
+
             <div className="flex flex-col gap-2 md:col-span-2">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="flex-shrink-0">
@@ -674,16 +714,19 @@ export const GuardianProfile = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex flex-col gap-2">
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-700">Profile Photo</h4>
+                      <h4 className="text-sm font-semibold text-gray-700">
+                        Profile Photo
+                      </h4>
                       <p className="text-xs text-gray-500 mt-1">
-                        Upload a profile image. Maximum file size: 2MB. Supported formats: JPG, PNG, GIF.
+                        Upload a profile image. Maximum file size: 2MB.
+                        Supported formats: JPG, PNG, GIF.
                       </p>
                     </div>
-                    
+
                     {isEditMode ? (
                       <div className="flex flex-col sm:flex-row gap-2 mt-2">
                         <div>
@@ -693,8 +736,13 @@ export const GuardianProfile = () => {
                             disabled={isUploadingImage}
                             className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
                           >
-                            <Icon icon="solar:upload-bold" className="w-4 h-4" />
-                            {isUploadingImage ? "Uploading..." : "Upload New Photo"}
+                            <Icon
+                              icon="solar:upload-bold"
+                              className="w-4 h-4"
+                            />
+                            {isUploadingImage
+                              ? "Uploading..."
+                              : "Upload New Photo"}
                           </button>
                           <input
                             ref={fileInputRef}
@@ -705,7 +753,7 @@ export const GuardianProfile = () => {
                             disabled={!isEditMode || isUploadingImage}
                           />
                         </div>
-                        
+
                         {profileImage !== avatarPlaceholder && (
                           <button
                             type="button"
@@ -713,7 +761,10 @@ export const GuardianProfile = () => {
                             disabled={isUploadingImage}
                             className="px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
                           >
-                            <Icon icon="solar:trash-bin-trash-bold" className="w-4 h-4" />
+                            <Icon
+                              icon="solar:trash-bin-trash-bold"
+                              className="w-4 h-4"
+                            />
                             Remove Photo
                           </button>
                         )}
@@ -723,14 +774,15 @@ export const GuardianProfile = () => {
                         Edit mode required to change profile photo
                       </p>
                     )}
-                    
+
                     {imageError && (
                       <p className="text-red-500 text-xs mt-1">{imageError}</p>
                     )}
-                    
+
                     {imageFile && (
                       <p className="text-xs text-gray-500 mt-1">
-                        Selected: {imageFile.name} ({(imageFile.size / 1024 / 1024).toFixed(2)} MB)
+                        Selected: {imageFile.name} (
+                        {(imageFile.size / 1024 / 1024).toFixed(2)} MB)
                       </p>
                     )}
                   </div>
@@ -738,7 +790,6 @@ export const GuardianProfile = () => {
               </div>
             </div>
           </div>
-          
 
           {showToast && (
             <Toast
@@ -756,7 +807,7 @@ export const GuardianProfile = () => {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           {/* Blurred background */}
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-          
+
           {/* Modal content */}
           <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-md relative z-10">
             <div className="space-y-6">

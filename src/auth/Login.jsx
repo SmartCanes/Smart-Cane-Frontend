@@ -11,8 +11,7 @@ import ScannerCamera from "@/ui/components/Scanner";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
-  const isBackendEnabled =
-    (import.meta.env.BACKEND_ENABLED || "false") === "true";
+  const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const navigate = useNavigate();
   const { setUser } = useUserStore();
   const { isAnimationDone } = useUIStore();
@@ -51,6 +50,22 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (
+      !isBackendEnabled &&
+      credentials.username === "admin" &&
+      credentials.password === "admin"
+    ) {
+      setUser({
+        id: 1,
+        username: "admin",
+        guardian_name: "Admin User",
+        email: "admin@gmail.com",
+        contact_number: "09123456789"
+      });
+      navigate("/dashboard");
+      return;
+    }
+
     const newErrors = {};
     if (!credentials.username.trim())
       newErrors.username = "Username is required";
@@ -62,19 +77,6 @@ const Login = () => {
     }
 
     try {
-      if (
-        !isBackendEnabled &&
-        credentials.username === "admin" &&
-        credentials.password === "admin"
-      ) {
-        document.cookie =
-          "access_token=DEV_ACCESS_TOKEN; path=/; max-age=900; SameSite=None; Secure";
-        document.cookie =
-          "refresh_token=DEV_REFRESH_TOKEN; path=/; max-age=604800; SameSite=None; Secure";
-        navigate("/dashboard");
-        return;
-      }
-
       await handleLogin();
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Login failed";
