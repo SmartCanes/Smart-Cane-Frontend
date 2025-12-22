@@ -14,7 +14,7 @@ import Loader from "@/ui/components/Loader";
 import { useRegisterStore } from "@/stores/useRegisterStore";
 import ScannerCamera from "@/ui/components/Scanner";
 import Modal from "@/ui/components/Modal";
-import TermsAndConditions from "@/ui/components/TermsAndConditions";
+import TermsAndConditions from "@/ui/components/TermsAndPrivacyModal";
 import { pairDevice, validateDeviceSerial } from "@/api/backendService";
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
@@ -50,6 +50,7 @@ const Register = () => {
   });
 
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [scrollTarget, setScrollTarget] = useState("terms");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [captchaValue, setCaptchaValue] = useState(null);
   const [captchaLoading, setCaptchaLoading] = useState(true);
@@ -297,6 +298,7 @@ const Register = () => {
         case 2: {
           // Address / Contact Info
           if (!termsAccepted) {
+            setScrollTarget("terms");
             setShowTermsModal(true);
             setIsSubmitting(false);
             return;
@@ -939,11 +941,7 @@ const Register = () => {
                           : `${step === 3 ? "Create Account" : "Next"}`
                       }
                       type="submit"
-                      // disabled={
-                      //   isSubmitting ||
-                      //   hasStepErrors() ||
-                      //   (step === 2 && !captchaValue && !isBackendEnabled)
-                      // }
+                      disabled={isSubmitting || hasStepErrors()}
                     />
                     {step > 1 && (
                       <PrimaryButton
@@ -960,17 +958,40 @@ const Register = () => {
                     )}
                   </div>
                 )}
-
-                <p className="font-poppins text-center text-[18px] mt-4">
-                  Already have an Account?{" "}
-                  <Link
-                    to="/login"
-                    className="font-poppins text-blue-500 hover:underline text-[18px]"
-                  >
-                    Sign In
-                  </Link>
-                </p>
               </motion.form>
+
+              <p className="text-center text-[18px]">
+                Already have an Account?{" "}
+                <Link
+                  to="/login"
+                  className="font-poppins text-blue-500 hover:underline text-[18px]"
+                >
+                  Sign In
+                </Link>
+              </p>
+
+              <p className="text-center text-[18px]">
+                By signing up I agree to the{" "}
+                <button
+                  onClick={() => {
+                    setShowTermsModal(true);
+                    setScrollTarget("terms");
+                  }}
+                  className="text-blue-500 hover:underline"
+                >
+                  Terms and Conditions
+                </button>{" "}
+                and{" "}
+                <button
+                  onClick={() => {
+                    setShowTermsModal(true);
+                    setScrollTarget("privacy");
+                  }}
+                  className="text-blue-500 hover:underline"
+                >
+                  Privacy Policy.
+                </button>
+              </p>
             </motion.div>
           )}
 
@@ -1015,59 +1036,17 @@ const Register = () => {
       />
 
       <TermsAndConditions
+        isChecked={termsAccepted}
+        setIsChecked={setTermsAccepted}
+        scrollTo={scrollTarget}
         isOpen={showTermsModal}
-        onClose={() => setShowTermsModal(false)}
-        onAccept={async () => {
+        onClose={() => {
+          setTermsAccepted(false);
+          setShowTermsModal(false);
+        }}
+        onAccept={() => {
           setTermsAccepted(true);
           setShowTermsModal(false);
-          setIsSubmitting(true);
-          try {
-            if (!isBackendEnabled) {
-              setStep(3);
-              return;
-            }
-            await checkCredentialsApi({
-              email: formData.email,
-              contact_number: formData.contactNumber
-            });
-            await sendOtp();
-            setStep(3);
-          } catch (error) {
-            const errorMessage =
-              error.response?.data?.message ||
-              error.message ||
-              "Validation failed";
-            if (errorMessage.includes("Email")) {
-              setErrors((prev) => ({
-                ...prev,
-                email: "Email already registered"
-              }));
-              document
-                .querySelector('[name="email"]')
-                ?.scrollIntoView({ behavior: "smooth", block: "center" });
-              document.querySelector('[name="email"]')?.focus();
-            } else if (errorMessage.includes("Contact number")) {
-              setErrors((prev) => ({
-                ...prev,
-                contactNumber: "Contact number is already registered"
-              }));
-              document
-                .querySelector('[name="contactNumber"]')
-                ?.scrollIntoView({ behavior: "smooth", block: "center" });
-              document.querySelector('[name="contactNumber"]')?.focus();
-            } else {
-              setModalConfig({
-                isOpen: true,
-                onClose: () =>
-                  setModalConfig((prev) => ({ ...prev, isOpen: false })),
-                title: "Error",
-                message: errorMessage,
-                modalType: "error"
-              });
-            }
-          } finally {
-            setIsSubmitting(false);
-          }
         }}
       />
     </>
