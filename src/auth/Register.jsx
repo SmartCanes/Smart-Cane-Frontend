@@ -353,13 +353,13 @@ const Register = () => {
           };
 
           const { data } = await registerApi(accountPayload);
-          setGuardianId(data.guardian_id);
+          setGuardianId(data.guardianId);
 
           if (deviceValidated.status === "ok" && deviceValidated.serial) {
             try {
               const res = await pairDevice({
                 device_serial_number: deviceValidated.serial,
-                guardian_id: data.guardian_id
+                guardian_id: data.guardianId
               });
 
               if (res.success) {

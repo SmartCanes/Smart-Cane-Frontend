@@ -94,8 +94,8 @@ const Login = () => {
     setLoading(true);
 
     const response = await loginApi(credentials.username, credentials.password);
-    if (response.data.device_registered === false) {
-      setGuardianId(response.data.guardian_id);
+    if (response.data.deviceRegistered === false) {
+      setGuardianId(response.data.guardianId);
       setModalConfig({
         isOpen: true,
         variant: "banner",
