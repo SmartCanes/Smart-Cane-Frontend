@@ -1023,7 +1023,7 @@ const Register = () => {
           setShowTermsModal(false);
           setIsSubmitting(true);
           try {
-            if (isBackendEnabled) {
+            if (!isBackendEnabled) {
               setStep(3);
               return;
             }
