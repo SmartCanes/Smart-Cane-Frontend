@@ -1,11 +1,16 @@
 import { useUserStore } from "@/stores/useStore";
 import { useState, useEffect, useRef } from "react";
-import avatarPlaceholder from "@/assets/images/team-photo.png";
+import avatarPlaceholder from "@/assets/images/default-profile.jpg";
 import { Icon } from "@iconify/react";
 import TextField from "@/ui/components/TextField";
 import SelectField from "@/ui/components/SelectField";
 import Toast from "@/ui/components/Toast";
-import { updateGuardian } from "@/api/backendService.js";
+import { 
+  updateGuardian,
+  uploadProfileImage,
+  requestEmailChangeOTP,
+  verifyEmailChangeOTP 
+} from "@/api/backendService.js";
 
 const relationshipOptions = [
   { value: "Husband", label: "Husband" },
@@ -15,15 +20,12 @@ const relationshipOptions = [
   { value: "Other", label: "Other" }
 ];
 
-// Validation functions
 const validateName = (name) => {
-  // Allows letters, spaces, periods, commas, and suffixes like Jr, II, III, IV
   const nameRegex = /^[A-Za-z\s.,]+(?: (?:Jr\.?|Sr\.?|I{1,3}|IV))?$/i;
   return nameRegex.test(name.trim());
 };
 
 const validatePhone = (phone) => {
-  // Exactly 11 digits, only numbers
   const phoneRegex = /^\d{11}$/;
   return phoneRegex.test(phone.trim());
 };
@@ -35,17 +37,29 @@ const validateEmail = (email) => {
 
 export const GuardianProfile = () => {
   const { user, setUser } = useUserStore();
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Icon icon="eos-icons:loading" className="w-12 h-12 text-[#11285A] mx-auto mb-4" />
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   const [profile, setProfile] = useState({
-    fullName: user.guardian_name,
-    email: user.email,
-    phone: user.contact_number,
-    relationship: user.relationship,
-    region: user.region || "",
-    province: user.province || "",
-    city: user.city || "",
-    barangay: user.barangay || "",
-    village: user.village || "",
-    streetAddress: user.street_address || ""
+    fullName: user?.guardian_name || "",
+    email: user?.email || "",
+    phone: user?.contact_number || "",
+    relationship: user?.relationship || "",
+    region: user?.region || "",
+    province: user?.province || "",
+    city: user?.city || "",
+    barangay: user?.barangay || "",
+    village: user?.village || "",
+    streetAddress: user?.street_address || ""
   });
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -55,22 +69,22 @@ export const GuardianProfile = () => {
   });
   const [showToast, setShowToast] = useState(false);
 
-  // OTP State (Design only)
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [otpTimer, setOtpTimer] = useState(300); // 5 minutes in seconds
+  const [otpTimer, setOtpTimer] = useState(300);
   const [canResendOTP, setCanResendOTP] = useState(false);
   const [otpError, setOtpError] = useState("");
-  const [originalEmail, setOriginalEmail] = useState(user.email);
+  const [originalEmail, setOriginalEmail] = useState(user?.email || "");
   const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const [isSendingOTP, setIsSendingOTP] = useState(false);
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
 
-  // Profile Image State
   const [profileImage, setProfileImage] = useState(avatarPlaceholder);
   const [imageFile, setImageFile] = useState(null);
   const [imageError, setImageError] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Validation Errors
   const [errors, setErrors] = useState({
     fullName: "",
     email: "",
@@ -79,7 +93,6 @@ export const GuardianProfile = () => {
 
   const otpInputRefs = useRef([]);
 
-  // OTP Timer (Design only)
   useEffect(() => {
     let timer;
     if (showOTPModal && otpTimer > 0) {
@@ -92,17 +105,24 @@ export const GuardianProfile = () => {
     return () => clearInterval(timer);
   }, [showOTPModal, otpTimer]);
 
-  // Initialize profile image from user data if available
   useEffect(() => {
-    if (user.profile_image) {
-      setProfileImage(user.profile_image);
+    if (user?.guardian_image_url) {
+      let fullUrl = user.guardian_image_url;
+      
+      if (!user.guardian_image_url.startsWith('http') && 
+          !user.guardian_image_url.startsWith('blob:')) {
+        fullUrl = `http://localhost:5000/uploads/${user.guardian_image_url}`;
+      }
+      
+      setProfileImage(fullUrl);
+    } else {
+      setProfileImage(avatarPlaceholder);
     }
-  }, [user.profile_image]);
+  }, [user?.guardian_image_url]);
 
   const handleProfileChange = ({ target }) => {
     const { name, value } = target;
 
-    // Auto-format phone number to only allow digits
     if (name === "phone") {
       const digitsOnly = value.replace(/\D/g, "");
       setProfile((prev) => ({ ...prev, [name]: digitsOnly }));
@@ -110,7 +130,6 @@ export const GuardianProfile = () => {
       setProfile((prev) => ({ ...prev, [name]: value }));
     }
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -120,14 +139,12 @@ export const GuardianProfile = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validate file size (2MB = 2 * 1024 * 1024 bytes)
-    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
       setImageError("Image must not exceed 2MB");
       return;
     }
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!validTypes.includes(file.type)) {
       setImageError("Please upload a valid image file (JPEG, PNG, GIF)");
@@ -135,15 +152,12 @@ export const GuardianProfile = () => {
     }
 
     setImageError("");
-
-    // Create a preview URL
     const imageUrl = URL.createObjectURL(file);
     setProfileImage(imageUrl);
     setImageFile(file);
 
-    // Show success message
     setToastConfig({
-      message: "Profile image uploaded successfully",
+      message: "Profile image selected. Click Save to upload.",
       type: "success"
     });
     setShowToast(true);
@@ -214,7 +228,6 @@ export const GuardianProfile = () => {
   };
 
   const handleSaveProfile = async () => {
-    // Validate form
     if (!validateForm()) {
       setToastConfig({
         message: "Please fix validation errors before saving",
@@ -224,49 +237,63 @@ export const GuardianProfile = () => {
       return;
     }
 
-    // Check if email changed - show OTP modal (design only)
     if (profile.email !== originalEmail) {
       setIsVerifyingEmail(true);
-      setShowOTPModal(true);
-      simulateOTPSend();
+      await sendRealOTP();
       return;
     }
 
-    // If no email change, save directly
     await saveProfileData();
   };
 
-  // Simulate OTP send for design purposes
-  const simulateOTPSend = () => {
-    setToastConfig({
-      message: "OTP sent to your email (design demo)",
-      type: "success"
-    });
-    setShowToast(true);
-    // Reset timer
-    setOtpTimer(300);
-    setCanResendOTP(false);
-    setOtpError("");
-    // Focus first OTP input
-    setTimeout(() => {
-      otpInputRefs.current[0]?.focus();
-    }, 100);
+  const sendRealOTP = async () => {
+    try {
+      setIsSendingOTP(true);
+      setOtpError("");
+      
+      const response = await requestEmailChangeOTP(profile.email);
+      
+      if (response.success) {
+        setShowOTPModal(true);
+        setOtpTimer(300);
+        setCanResendOTP(false);
+        setOtp(["", "", "", "", "", ""]);
+        
+        setTimeout(() => {
+          otpInputRefs.current[0]?.focus();
+        }, 100);
+        
+        setToastConfig({
+          message: "OTP sent to your new email address",
+          type: "success"
+        });
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error("Failed to send OTP:", error);
+      setOtpError(error.message || "Failed to send OTP");
+      setToastConfig({
+        message: "Failed to send OTP. Please try again.",
+        type: "error"
+      });
+      setShowToast(true);
+    } finally {
+      setIsSendingOTP(false);
+    }
   };
 
   const handleOTPChange = (index, value) => {
-    if (!/^\d?$/.test(value)) return; // Only allow single digit
+    if (!/^\d?$/.test(value)) return;
 
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
     setOtpError("");
 
-    // Auto-focus next input
     if (value && index < 5) {
       otpInputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all fields are filled
     if (newOtp.every((digit) => digit !== "") && index === 5) {
       handleVerifyOTP();
     }
@@ -274,12 +301,10 @@ export const GuardianProfile = () => {
 
   const handleOTPKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      // Move to previous input on backspace
       otpInputRefs.current[index - 1]?.focus();
     }
   };
 
-  // Simulate OTP verification for design
   const handleVerifyOTP = async () => {
     const otpCode = otp.join("");
 
@@ -288,36 +313,69 @@ export const GuardianProfile = () => {
       return;
     }
 
-    // For demo purposes, accept any 6-digit code
-    if (otpCode === "123456") {
-      // Demo success
+    try {
+      setIsVerifyingOTP(true);
+      
+      const response = await verifyEmailChangeOTP(profile.email, otpCode);
+      
+      if (response.success) {
+        setToastConfig({
+          message: "Email verified successfully",
+          type: "success"
+        });
+        setShowToast(true);
+        
+        setShowOTPModal(false);
+        setOriginalEmail(profile.email);
+        setIsVerifyingEmail(false);
+
+        await saveProfileData();
+      }
+    } catch (error) {
+      console.error("OTP verification failed:", error);
+      setOtpError(error.message || "Invalid OTP code");
+      
       setToastConfig({
-        message: "Email verified successfully (demo)",
-        type: "success"
+        message: "OTP verification failed",
+        type: "error"
       });
-    } else if (otpCode === "000000") {
-      // Demo failure
-      setOtpError("Invalid OTP code. Please try again.");
-      return;
-    } else {
-      // For any other code, simulate success in demo
-      setToastConfig({
-        message: "Email verified successfully (demo)",
-        type: "success"
-      });
+      setShowToast(true);
+    } finally {
+      setIsVerifyingOTP(false);
     }
-
-    setShowToast(true);
-    setShowOTPModal(false);
-    setOriginalEmail(profile.email);
-    setIsVerifyingEmail(false);
-
-    // Save profile after successful verification
-    await saveProfileData();
   };
 
   const saveProfileData = async () => {
     try {
+      let uploadedImageUrl = null;
+      
+      if (imageFile) {
+        try {
+          setIsUploadingImage(true);
+          const imageResponse = await uploadProfileImage(imageFile);
+          
+          if (imageResponse.success) {
+            uploadedImageUrl = imageResponse.data.image_url;
+            setProfileImage(uploadedImageUrl);
+            
+            setToastConfig({
+              message: "Profile image uploaded successfully",
+              type: "success"
+            });
+            setShowToast(true);
+          }
+        } catch (imageError) {
+          console.error("Failed to upload image:", imageError);
+          setToastConfig({
+            message: "Profile saved, but image upload failed. Please try uploading the image again.",
+            type: "warning"
+          });
+          setShowToast(true);
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
+      
       const payload = {
         guardian_name: profile.fullName,
         email: profile.email,
@@ -329,36 +387,38 @@ export const GuardianProfile = () => {
         street_address: profile.streetAddress
       };
 
-      // If there's an image file, you would upload it here
-      // For now, we'll just save the other profile data
-      // In a real implementation, you would upload the image first
-      // and then include the image URL in the payload
-      await updateGuardian(payload);
+      const response = await updateGuardian(payload);
+      
+      if (response.success) {
+        const finalImageUrl = uploadedImageUrl || profileImage;
+        
+        setUser({
+          ...user,
+          guardian_name: profile.fullName,
+          email: profile.email,
+          contact_number: profile.phone,
+          guardian_image_url: finalImageUrl,
+          avatar: finalImageUrl,
+          province: profile.province,
+          city: profile.city,
+          barangay: profile.barangay,
+          village: profile.village,
+          street_address: profile.streetAddress
+        });
 
-      // Update the user store with the new data
-      setUser({
-        ...user,
-        guardian_name: profile.fullName,
-        email: profile.email,
-        contact_number: profile.phone,
-        province: profile.province,
-        city: profile.city,
-        barangay: profile.barangay,
-        village: profile.village,
-        street_address: profile.streetAddress
-        // In a real implementation, add: profile_image: uploadedImageUrl
-      });
-
-      setIsEditMode(false);
-      setToastConfig({
-        message: "Profile saved successfully",
-        type: "success"
-      });
-      setShowToast(true);
+        setIsEditMode(false);
+        setImageFile(null);
+        
+        setToastConfig({
+          message: "Profile saved successfully",
+          type: "success"
+        });
+        setShowToast(true);
+      }
     } catch (error) {
       console.error("Error saving profile:", error);
       setToastConfig({
-        message: "Failed to save profile. Please try again.",
+        message: error.message || "Failed to save profile",
         type: "error"
       });
       setShowToast(true);
@@ -366,14 +426,11 @@ export const GuardianProfile = () => {
   };
 
   const handleResendOTP = async () => {
-    if (!canResendOTP) return;
-
-    // Simulate resending OTP
-    simulateOTPSend();
+    if (!canResendOTP || isSendingOTP) return;
+    await sendRealOTP();
   };
 
   const handleCancelOTP = () => {
-    // Reset email to original if OTP verification is cancelled
     if (isVerifyingEmail) {
       setProfile((prev) => ({ ...prev, email: originalEmail }));
       setIsVerifyingEmail(false);
@@ -382,6 +439,8 @@ export const GuardianProfile = () => {
     setOtp(["", "", "", "", "", ""]);
     setOtpTimer(300);
     setOtpError("");
+    setIsSendingOTP(false);
+    setIsVerifyingOTP(false);
 
     setToastConfig({
       message: "Email verification cancelled",
@@ -391,30 +450,33 @@ export const GuardianProfile = () => {
   };
 
   const handleCancelEdit = () => {
-    // Reset profile to original user data
     setProfile({
-      fullName: user.guardian_name,
-      email: user.email,
-      phone: user.contact_number,
-      relationship: user.relationship,
-      region: user.region || "",
-      province: user.province || "",
-      city: user.city || "",
-      barangay: user.barangay || "",
-      village: user.village || "",
-      streetAddress: user.street_address || ""
+      fullName: user?.guardian_name || "",
+      email: user?.email || "",
+      phone: user?.contact_number || "",
+      relationship: user?.relationship || "",
+      region: user?.region || "",
+      province: user?.province || "",
+      city: user?.city || "",
+      barangay: user?.barangay || "",
+      village: user?.village || "",
+      streetAddress: user?.street_address || ""
     });
 
-    // Reset profile image
-    if (user.profile_image) {
-      setProfileImage(user.profile_image);
+    if (user?.guardian_image_url) {
+      let fullUrl = user.guardian_image_url;
+      if (!user.guardian_image_url.startsWith('http') && 
+          !user.guardian_image_url.startsWith('blob:')) {
+        fullUrl = `http://localhost:5000/uploads/${user.guardian_image_url}`;
+      }
+      setProfileImage(fullUrl);
     } else {
       setProfileImage(avatarPlaceholder);
     }
     setImageFile(null);
     setImageError("");
+    setIsUploadingImage(false);
 
-    // Reset errors
     setErrors({
       fullName: "",
       email: "",
@@ -426,7 +488,6 @@ export const GuardianProfile = () => {
     setShowToast(true);
   };
 
-  // Format timer display
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -464,10 +525,20 @@ export const GuardianProfile = () => {
               <div className="flex gap-2">
                 <button
                   onClick={handleSaveProfile}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#11285A] text-white text-sm font-semibold hover:bg-[#0d1b3d] transition-colors"
+                  disabled={isSendingOTP || isVerifyingOTP || isUploadingImage}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#11285A] text-white text-sm font-semibold hover:bg-[#0d1b3d] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  <Icon icon="solar:check-circle-bold" className="text-lg" />
-                  Save
+                  {(isSendingOTP || isVerifyingOTP || isUploadingImage) ? (
+                    <>
+                      <Icon icon="eos-icons:loading" className="text-lg" />
+                      {isUploadingImage ? "Uploading Image..." : "Processing..."}
+                    </>
+                  ) : (
+                    <>
+                      <Icon icon="solar:check-circle-bold" className="text-lg" />
+                      Save
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={handleCancelEdit}
@@ -532,9 +603,6 @@ export const GuardianProfile = () => {
               {errors.phone && (
                 <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Must be exactly 11 digits
-              </p>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -585,8 +653,7 @@ export const GuardianProfile = () => {
                 value={profile.city}
               />
             </div>
-
-            {/* Profile Image Upload Section */}
+            
             <div className="flex flex-col gap-2 md:col-span-2">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="flex-shrink-0">
@@ -607,32 +674,27 @@ export const GuardianProfile = () => {
                     )}
                   </div>
                 </div>
-
+                
                 <div className="flex-1">
                   <div className="flex flex-col gap-2">
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-700">
-                        Profile Photo
-                      </h4>
+                      <h4 className="text-sm font-semibold text-gray-700">Profile Photo</h4>
                       <p className="text-xs text-gray-500 mt-1">
-                        Upload a profile image. Maximum file size: 2MB.
-                        Supported formats: JPG, PNG, GIF.
+                        Upload a profile image. Maximum file size: 2MB. Supported formats: JPG, PNG, GIF.
                       </p>
                     </div>
-
+                    
                     {isEditMode ? (
                       <div className="flex flex-col sm:flex-row gap-2 mt-2">
                         <div>
                           <button
                             type="button"
                             onClick={triggerFileInput}
-                            className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2"
+                            disabled={isUploadingImage}
+                            className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
                           >
-                            <Icon
-                              icon="solar:upload-bold"
-                              className="w-4 h-4"
-                            />
-                            Upload New Photo
+                            <Icon icon="solar:upload-bold" className="w-4 h-4" />
+                            {isUploadingImage ? "Uploading..." : "Upload New Photo"}
                           </button>
                           <input
                             ref={fileInputRef}
@@ -640,20 +702,18 @@ export const GuardianProfile = () => {
                             accept="image/jpeg,image/jpg,image/png,image/gif"
                             onChange={handleImageUpload}
                             className="hidden"
-                            disabled={!isEditMode}
+                            disabled={!isEditMode || isUploadingImage}
                           />
                         </div>
-
+                        
                         {profileImage !== avatarPlaceholder && (
                           <button
                             type="button"
                             onClick={handleRemoveImage}
-                            className="px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2"
+                            disabled={isUploadingImage}
+                            className="px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
                           >
-                            <Icon
-                              icon="solar:trash-bin-trash-bold"
-                              className="w-4 h-4"
-                            />
+                            <Icon icon="solar:trash-bin-trash-bold" className="w-4 h-4" />
                             Remove Photo
                           </button>
                         )}
@@ -663,15 +723,14 @@ export const GuardianProfile = () => {
                         Edit mode required to change profile photo
                       </p>
                     )}
-
+                    
                     {imageError && (
                       <p className="text-red-500 text-xs mt-1">{imageError}</p>
                     )}
-
+                    
                     {imageFile && (
                       <p className="text-xs text-gray-500 mt-1">
-                        Selected: {imageFile.name} (
-                        {(imageFile.size / 1024 / 1024).toFixed(2)} MB)
+                        Selected: {imageFile.name} ({(imageFile.size / 1024 / 1024).toFixed(2)} MB)
                       </p>
                     )}
                   </div>
@@ -679,6 +738,7 @@ export const GuardianProfile = () => {
               </div>
             </div>
           </div>
+          
 
           {showToast && (
             <Toast
@@ -692,24 +752,23 @@ export const GuardianProfile = () => {
         </div>
       </main>
 
-      {/* OTP Verification Modal (Design Only) */}
       {showOTPModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-md">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          {/* Blurred background */}
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+          
+          {/* Modal content */}
+          <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-md relative z-10">
             <div className="space-y-6">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  Verify Your Email
+                  Verify Your New Email
                 </h3>
                 <p className="text-gray-600">
-                  Please enter the 6-digit code sent to your email
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Demo: Use 123456 for success, 000000 for error
+                  Please enter the 6-digit code sent to your new email address
                 </p>
               </div>
 
-              {/* OTP Input Container */}
               <div className="flex flex-col items-center">
                 <div className="flex justify-center gap-2 mb-4">
                   {[0, 1, 2, 3, 4, 5].map((index) => (
@@ -721,7 +780,8 @@ export const GuardianProfile = () => {
                       value={otp[index]}
                       onChange={(e) => handleOTPChange(index, e.target.value)}
                       onKeyDown={(e) => handleOTPKeyDown(index, e)}
-                      className="w-12 h-12 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#11285A] focus:outline-none transition-colors"
+                      disabled={isVerifyingOTP}
+                      className="w-12 h-12 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#11285A] focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   ))}
                 </div>
@@ -733,7 +793,6 @@ export const GuardianProfile = () => {
                 )}
               </div>
 
-              {/* Email Display */}
               <div className="text-center text-sm text-gray-600">
                 <p>We've sent a verification code to:</p>
                 <p className="font-semibold text-gray-800 mt-1">
@@ -741,7 +800,6 @@ export const GuardianProfile = () => {
                 </p>
               </div>
 
-              {/* Timer Display */}
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 text-sm text-gray-600">
                   <Icon icon="solar:clock-circle-bold" className="w-4 h-4" />
@@ -754,34 +812,47 @@ export const GuardianProfile = () => {
                 </div>
               </div>
 
-              {/* Resend OTP Link */}
               <div className="text-center text-sm text-gray-600">
                 <p>
                   Didn't receive code?{" "}
                   <button
                     type="button"
                     onClick={handleResendOTP}
-                    disabled={!canResendOTP}
-                    className="text-[#11285A] hover:underline font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                    disabled={!canResendOTP || isSendingOTP}
+                    className="text-[#11285A] hover:underline font-medium disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
                   >
-                    Resend OTP
+                    {isSendingOTP ? (
+                      <>
+                        <Icon icon="eos-icons:loading" className="w-4 h-4" />
+                        Sending...
+                      </>
+                    ) : (
+                      "Resend OTP"
+                    )}
                   </button>
                 </p>
               </div>
 
-              {/* Action Buttons */}
               <div className="space-y-3">
                 <button
                   onClick={handleVerifyOTP}
-                  className="w-full py-3 text-base font-medium text-white bg-[#11285A] hover:bg-[#0d1b3d] rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  disabled={otp.some((digit) => digit === "")}
+                  disabled={otp.some((digit) => digit === "") || isVerifyingOTP}
+                  className="w-full py-3 text-base font-medium text-white bg-[#11285A] hover:bg-[#0d1b3d] rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Verify Code
+                  {isVerifyingOTP ? (
+                    <>
+                      <Icon icon="eos-icons:loading" className="w-5 h-5" />
+                      Verifying...
+                    </>
+                  ) : (
+                    "Verify Code"
+                  )}
                 </button>
 
                 <button
                   onClick={handleCancelOTP}
-                  className="w-full py-3 text-base font-medium text-[#11285A] border-2 border-[#11285A] hover:bg-blue-50 rounded-lg transition-colors"
+                  disabled={isVerifyingOTP}
+                  className="w-full py-3 text-base font-medium text-[#11285A] border-2 border-[#11285A] hover:bg-blue-50 rounded-lg transition-colors disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>

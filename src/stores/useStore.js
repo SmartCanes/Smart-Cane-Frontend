@@ -12,6 +12,12 @@ export const useUserStore = create(
         set((state) => ({
           user: state.user ? { ...state.user, ...updates } : null
         })),
+      updateProfileImage: (imageUrl) =>
+        set((state) => ({
+          user: state.user 
+            ? { ...state.user, guardian_image_url: imageUrl } 
+            : null
+        })),
       getUserInfo: () => get().user,
       getUsername: () => get().user?.username || "",
       getAvatar: () => get().user?.guardian_image_url || ""
@@ -110,7 +116,6 @@ export const useUIStore = create(
       isAnimationDone: false,
       setIsAnimationDone: () => set({ isAnimationDone: true }),
 
-      // ✅ Added only what ForgotPassword needs (no other changes)
       error: null,
       setError: (msg) => set({ error: msg }),
       clearError: () => set({ error: null })

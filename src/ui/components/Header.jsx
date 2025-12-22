@@ -53,6 +53,37 @@ const Header = () => {
     }
   };
 
+  // Get profile image URL - check both possible field names
+  const getProfileImageUrl = () => {
+    if (!user) return null;
+    
+    // Check for guardian_image_url (your GuardianProfile uses this)
+    if (user.guardian_image_url) {
+      // If it's just a relative path (like "profile_pics/filename.jpg"),
+      // we need to prepend the base URL
+      let imageUrl = user.guardian_image_url;
+      
+      // Check if it's already a full URL
+      if (!imageUrl.startsWith('http') && !imageUrl.startsWith('blob:')) {
+        // Prepend the base URL - use your backend URL
+        const baseUrl = "http://localhost:5000/uploads/";
+        imageUrl = baseUrl + imageUrl;
+      }
+      
+      return imageUrl;
+    }
+    
+    // Also check for profileImage if it exists
+    if (user.profileImage) {
+      return user.profileImage;
+    }
+    
+    return null;
+  };
+
+  const profileImageUrl = getProfileImageUrl();
+  const userInitial = user ? user.username?.charAt(0).toUpperCase() : "Z";
+
   return (
     <header
       className={`w-full max-h-[var(--header-height)] bg-primary-100 flex items-center px-5 sm:px-15 justify-between`}
@@ -99,10 +130,36 @@ const Header = () => {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-9 h-9 sm:w-10 sm:h-10 bg-white hover:bg-gray-100 text-primary-100 rounded-full flex items-center justify-center font-poppins font-semibold text-sm sm:text-base transition-colors duration-200"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center transition-colors duration-200"
             aria-label="User menu"
           >
-            {user ? user.username.charAt(0).toUpperCase() : "Z"}
+            {profileImageUrl ? (
+              <>
+                {/* Profile Image */}
+                <img
+                  src={profileImageUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    // Show the initial as fallback when image fails
+                    const fallbackElement = e.target.parentElement.querySelector('.profile-initial-fallback');
+                    if (fallbackElement) {
+                      fallbackElement.classList.remove('hidden');
+                    }
+                  }}
+                />
+                {/* Hidden fallback initial - shown if image fails */}
+                <div className="profile-initial-fallback hidden w-full h-full bg-white hover:bg-gray-100 text-primary-100 flex items-center justify-center font-poppins font-semibold text-sm sm:text-base">
+                  {userInitial}
+                </div>
+              </>
+            ) : (
+              /* Default initial when no profile image */
+              <div className="w-full h-full bg-white hover:bg-gray-100 text-primary-100 flex items-center justify-center font-poppins font-semibold text-sm sm:text-base">
+                {userInitial}
+              </div>
+            )}
           </button>
 
           {/* Dropdown Menu */}
