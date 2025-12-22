@@ -21,7 +21,6 @@ export const useRegisterStore = create(
       },
       step: 1,
       showScanner: false,
-      otpSent: false,
       guardianId: null,
       deviceValidated: {
         validated: false,

@@ -29,7 +29,6 @@ const Register = () => {
     setStep,
     formData,
     updateForm,
-    otpSent,
     setGuardianId,
     setOtpSent,
     deviceValidated,
