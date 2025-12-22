@@ -17,7 +17,7 @@ const Login = () => {
   const { isAnimationDone } = useUIStore();
 
   const [credentials, setCredentials] = useState({
-    username: "",
+    identifier: "",
     password: ""
   });
   const [guardianId, setGuardianId] = useState(null);
@@ -52,7 +52,7 @@ const Login = () => {
 
     if (
       !isBackendEnabled &&
-      credentials.username === "admin" &&
+      credentials.identifier === "admin" &&
       credentials.password === "admin"
     ) {
       navigate("/dashboard");
@@ -60,8 +60,8 @@ const Login = () => {
     }
 
     const newErrors = {};
-    if (!credentials.username.trim())
-      newErrors.username = "Username is required";
+    if (!credentials.identifier.trim())
+      newErrors.identifier = "Email or Username is required";
     if (!credentials.password) newErrors.password = "Password is required";
     if (!captchaValue) newErrors.captcha = "Please complete the CAPTCHA";
     if (Object.keys(newErrors).length > 0) {
@@ -81,7 +81,7 @@ const Login = () => {
 
       setErrors({
         general: msg,
-        username: " ",
+        identifier: " ",
         password: " "
       });
     } finally {
@@ -93,7 +93,12 @@ const Login = () => {
     setModalConfig((prev) => ({ ...prev, isOpen: false }));
     setLoading(true);
 
-    const response = await loginApi(credentials.username, credentials.password);
+    const payload = {
+      password: credentials.password,
+      identifier: credentials.identifier.trim()
+    };
+
+    const response = await loginApi(payload);
     if (response.data.deviceRegistered === false) {
       setGuardianId(response.data.guardianId);
       setModalConfig({
@@ -212,13 +217,13 @@ const Login = () => {
               <div className="space-y-4">
                 <TextField
                   className="font-poppins"
-                  label="Username"
-                  placeholder="Enter your username..."
-                  name="username"
-                  value={credentials.username}
+                  label="Email or Username"
+                  placeholder="Enter your email or username..."
+                  name="identifier"
+                  value={credentials.identifier}
                   onChange={handleChange}
-                  error={errors.username}
-                  maxLength={20}
+                  error={errors.identifier}
+                  maxLength={50}
                   disabled={retryAfter > 0}
                 />
 
