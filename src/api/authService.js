@@ -1,8 +1,8 @@
 import { authCheckApi } from ".";
 import { handleRequest } from "./requestHandler";
 
-export const loginApi = (username, password) =>
-  handleRequest(() => authCheckApi.post("/auth/login", { username, password }));
+export const loginApi = (payload) =>
+  handleRequest(() => authCheckApi.post("/auth/login", payload));
 
 export const logoutApi = () =>
   handleRequest(() => authCheckApi.post("/auth/logout"));
