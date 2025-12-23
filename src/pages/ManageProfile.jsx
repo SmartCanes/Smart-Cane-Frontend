@@ -332,7 +332,7 @@ const ManageProfile = () => {
         {/* Add Guardian Modal */}
         {isModalOpen && (
           <Modal
-            isOpen={open}
+            isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             title="Invite Guardian"
             modalType="info"

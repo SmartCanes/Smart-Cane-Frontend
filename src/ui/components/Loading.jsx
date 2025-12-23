@@ -1,4 +1,4 @@
-import "./Loader.css"; // Siguraduhing na-import ang CSS
+import "./Loader.css"; 
 
 const Loader = () => {
   return (
