@@ -653,9 +653,12 @@ export const GuardianProfile = () => {
                 value={profile.city}
               />
             </div>
-            
-            <div className="flex flex-col gap-2 md:col-span-2">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          </div>
+
+          {/* Profile Photo Section - Only shown in edit mode */}
+          {isEditMode && (
+            <div className="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                 <div className="flex-shrink-0">
                   <div className="relative">
                     <img
@@ -663,15 +666,13 @@ export const GuardianProfile = () => {
                       alt="Profile Preview"
                       className="w-24 h-24 rounded-full object-cover border-2 border-white shadow-sm"
                     />
-                    {isEditMode && (
-                      <button
-                        onClick={triggerFileInput}
-                        className="absolute bottom-0 right-0 bg-[#11285A] text-white p-1.5 rounded-full hover:bg-[#0d1b3d] transition-colors"
-                        title="Change photo"
-                      >
-                        <Icon icon="solar:camera-bold" className="w-4 h-4" />
-                      </button>
-                    )}
+                    <button
+                      onClick={triggerFileInput}
+                      className="absolute bottom-0 right-0 bg-[#11285A] text-white p-1.5 rounded-full hover:bg-[#0d1b3d] transition-colors"
+                      title="Change photo"
+                    >
+                      <Icon icon="solar:camera-bold" className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
                 
@@ -684,45 +685,39 @@ export const GuardianProfile = () => {
                       </p>
                     </div>
                     
-                    {isEditMode ? (
-                      <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                        <div>
-                          <button
-                            type="button"
-                            onClick={triggerFileInput}
-                            disabled={isUploadingImage}
-                            className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
-                          >
-                            <Icon icon="solar:upload-bold" className="w-4 h-4" />
-                            {isUploadingImage ? "Uploading..." : "Upload New Photo"}
-                          </button>
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpeg,image/jpg,image/png,image/gif"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                            disabled={!isEditMode || isUploadingImage}
-                          />
-                        </div>
-                        
-                        {profileImage !== avatarPlaceholder && (
-                          <button
-                            type="button"
-                            onClick={handleRemoveImage}
-                            disabled={isUploadingImage}
-                            className="px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
-                          >
-                            <Icon icon="solar:trash-bin-trash-bold" className="w-4 h-4" />
-                            Remove Photo
-                          </button>
-                        )}
+                    <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                      <div>
+                        <button
+                          type="button"
+                          onClick={triggerFileInput}
+                          disabled={isUploadingImage}
+                          className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
+                        >
+                          <Icon icon="solar:upload-bold" className="w-4 h-4" />
+                          {isUploadingImage ? "Uploading..." : "Upload New Photo"}
+                        </button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/gif"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          disabled={isUploadingImage}
+                        />
                       </div>
-                    ) : (
-                      <p className="text-sm text-gray-500 italic">
-                        Edit mode required to change profile photo
-                      </p>
-                    )}
+                      
+                      {profileImage !== avatarPlaceholder && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          disabled={isUploadingImage}
+                          className="px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
+                        >
+                          <Icon icon="solar:trash-bin-trash-bold" className="w-4 h-4" />
+                          Remove Photo
+                        </button>
+                      )}
+                    </div>
                     
                     {imageError && (
                       <p className="text-red-500 text-xs mt-1">{imageError}</p>
@@ -737,8 +732,7 @@ export const GuardianProfile = () => {
                 </div>
               </div>
             </div>
-          </div>
-          
+          )}
 
           {showToast && (
             <Toast
