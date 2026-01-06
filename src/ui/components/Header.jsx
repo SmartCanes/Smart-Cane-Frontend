@@ -52,21 +52,18 @@ const Header = () => {
     }
   };
 
-  // Get profile image URL - check both possible field names
   const getProfileImageUrl = () => {
     if (!user) return null;
 
-    // Check for guardian_image_url (your GuardianProfile uses this)
-    if (user.guardian_image_url) {
+    if (user.guardianImageUrl) {
       // If it's just a relative path (like "profile_pics/filename.jpg"),
       // we need to prepend the base URL
-      let imageUrl = user.guardian_image_url;
+      let imageUrl = user.guardianImageUrl;
 
       // Check if it's already a full URL
       if (!imageUrl.startsWith("http") && !imageUrl.startsWith("blob:")) {
         // Prepend the base URL - use your backend URL
-        const baseUrl = "http://localhost:5000/uploads/";
-        imageUrl = baseUrl + imageUrl;
+        imageUrl = `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${imageUrl}`;
       }
 
       return imageUrl;

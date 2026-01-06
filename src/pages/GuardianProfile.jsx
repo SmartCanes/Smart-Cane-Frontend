@@ -32,16 +32,16 @@ export const GuardianProfile = () => {
   const { user, setUser } = useUserStore();
 
   const [profile, setProfile] = useState({
-    guardianName: user.guardian_name,
+    guardianName: user.guardianName,
     email: user.email,
-    phone: user.contact_number,
+    contactNumber: user.contactNumber,
     relationship: user.relationship,
     region: user.region || "",
     province: user.province || "",
     city: user.city || "",
     barangay: user.barangay || "",
     village: user.village || "",
-    streetAddress: user.street_address || ""
+    streetAddress: user.streetAddress || ""
   });
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -88,20 +88,26 @@ export const GuardianProfile = () => {
   }, [showOTPModal, otpTimer]);
 
   useEffect(() => {
-    if (user?.guardianImageUrl) {
-      let fullUrl = user.guardianImageUrl;
-
-      if (
-        !user.guardianImageUrl.startsWith("http") &&
-        !user.guardianImageUrl.startsWith("blob:")
-      ) {
-        fullUrl = `http://localhost:5000/uploads/${user.guardianImageUrl}`;
-      }
-
-      setProfileImage(fullUrl);
-    } else {
+    if (!user?.guardianImageUrl) {
       setProfileImage(avatarPlaceholder);
+      return;
     }
+
+    const imageUrl = user.guardianImageUrl;
+
+    if (imageUrl.startsWith("blob:")) {
+      setProfileImage(imageUrl);
+      return;
+    }
+
+    if (imageUrl.startsWith("http")) {
+      setProfileImage(imageUrl);
+      return;
+    }
+
+    setProfileImage(
+      `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${imageUrl}`
+    );
   }, [user?.guardianImageUrl]);
 
   const handleProfileChange = ({ target }) => {
@@ -451,13 +457,13 @@ export const GuardianProfile = () => {
   const handleCancelEdit = () => {
     setProfile({ ...user });
 
-    if (user?.guardian_image_url) {
-      let fullUrl = user.guardian_image_url;
+    if (user?.guardianImageUrl) {
+      let fullUrl = user.guardianImageUrl;
       if (
-        !user.guardian_image_url.startsWith("http") &&
-        !user.guardian_image_url.startsWith("blob:")
+        !user.guardianImageUrl.startsWith("http") &&
+        !user.guardianImageUrl.startsWith("blob:")
       ) {
-        fullUrl = `http://localhost:5000/uploads/${user.guardian_image_url}`;
+        fullUrl = `http://localhost:5000/uploads/${user.guardianImageUrl}`;
       }
       setProfileImage(fullUrl);
     } else {
