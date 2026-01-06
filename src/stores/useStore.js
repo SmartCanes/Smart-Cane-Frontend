@@ -6,7 +6,14 @@ export const useUserStore = create(
   persist(
     (set, get) => ({
       user: null,
-      setUser: (userData) => set({ user: userData }),
+      setUser: (updater) =>
+        set((state) => ({
+          user:
+            typeof updater === "function"
+              ? updater(state.user)
+              : { ...state.user, ...updater }
+        })),
+
       clearUser: () => set({ user: null }),
       updateUser: (updates) =>
         set((state) => ({

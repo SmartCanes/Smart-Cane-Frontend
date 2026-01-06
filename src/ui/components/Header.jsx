@@ -16,6 +16,24 @@ const Header = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+    if (user?.guardianImageUrl) {
+      let url = user.guardianImageUrl;
+      if (!url.startsWith("http") && !url.startsWith("blob:")) {
+        url = `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${url}`;
+      }
+      setProfileImageUrl(url);
+    } else if (user?.profileImage) {
+      setProfileImageUrl(user.profileImage);
+    } else {
+      setProfileImageUrl(null);
+    }
+  }, [user]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -26,10 +44,6 @@ const Header = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const handleProfileClick = () => {
-    setIsDropdownOpen(false);
-  };
 
   const handleNotificationClick = () => {};
 
@@ -52,32 +66,17 @@ const Header = () => {
     }
   };
 
-  const getProfileImageUrl = () => {
-    if (!user) return null;
+  useEffect(() => {
+    // Placeholder: Replace with actual notification fetching logic
+    const fetchNotifications = () => {
+      // Simulate fetching notification count
+      setNotificationCount(3); // Example static count
+    };
 
-    if (user.guardianImageUrl) {
-      // If it's just a relative path (like "profile_pics/filename.jpg"),
-      // we need to prepend the base URL
-      let imageUrl = user.guardianImageUrl;
+    fetchNotifications();
+  }, []);
 
-      // Check if it's already a full URL
-      if (!imageUrl.startsWith("http") && !imageUrl.startsWith("blob:")) {
-        // Prepend the base URL - use your backend URL
-        imageUrl = `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${imageUrl}`;
-      }
-
-      return imageUrl;
-    }
-
-    // Also check for profileImage if it exists
-    if (user.profileImage) {
-      return user.profileImage;
-    }
-
-    return null;
-  };
-
-  const profileImageUrl = getProfileImageUrl();
+  const showImage = profileImageUrl && !imageError;
   const userInitial = user ? user.username?.charAt(0).toUpperCase() : "Z";
 
   return (
@@ -129,33 +128,19 @@ const Header = () => {
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center transition-colors duration-200"
             aria-label="User menu"
           >
-            {profileImageUrl ? (
-              <>
-                {/* Profile Image */}
-                <img
-                  src={profileImageUrl}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    // Show the initial as fallback when image fails
-                    const fallbackElement =
-                      e.target.parentElement.querySelector(
-                        ".profile-initial-fallback"
-                      );
-                    if (fallbackElement) {
-                      fallbackElement.classList.remove("hidden");
-                    }
-                  }}
-                />
-                {/* Hidden fallback initial - shown if image fails */}
-                <div className="profile-initial-fallback hidden w-full h-full bg-white hover:bg-gray-100 text-primary-100 flex items-center justify-center font-poppins font-semibold text-sm sm:text-base">
-                  {userInitial}
-                </div>
-              </>
+            {showImage ? (
+              <img
+                src={profileImageUrl}
+                alt="Profile"
+                className="w-full h-full object-cover"
+                onError={() => setImageError(true)}
+              />
             ) : (
-              /* Default initial when no profile image */
-              <div className="w-full h-full bg-white hover:bg-gray-100 text-primary-100 flex items-center justify-center font-poppins font-semibold text-sm sm:text-base">
+              <div
+                className="w-full h-full bg-white hover:bg-gray-100 text-primary-100
+             flex items-center justify-center font-poppins font-semibold
+             text-sm sm:text-base"
+              >
                 {userInitial}
               </div>
             )}
