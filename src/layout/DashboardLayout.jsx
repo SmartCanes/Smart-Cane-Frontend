@@ -1,4 +1,5 @@
-import { useRealtimeStore } from "@/stores/useStore";
+import { getMyProfile } from "@/api/backendService";
+import { useRealtimeStore, useUserStore } from "@/stores/useStore";
 import DashboardSide from "@/ui/components/DashboardSide";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
 import Header from "@/ui/components/Header";
@@ -9,6 +10,7 @@ import { Outlet } from "react-router-dom";
 const ScrollContext = createContext();
 
 const DashboardLayout = () => {
+  const { setUser } = useUserStore();
   const { emergency, connectWs, disconnectWs } = useRealtimeStore();
   const [toast, setToast] = useState({
     message: "",
@@ -25,6 +27,21 @@ const DashboardLayout = () => {
     return () => {
       disconnectWs();
     };
+  }, []);
+
+  useEffect(() => {
+    const hydrateUser = async () => {
+      try {
+        const res = await getMyProfile();
+        if (res.success) {
+          setUser(res.data);
+        }
+      } catch (err) {
+        console.error("User hydration failed", err);
+      }
+    };
+
+    hydrateUser();
   }, []);
 
   useEffect(() => {

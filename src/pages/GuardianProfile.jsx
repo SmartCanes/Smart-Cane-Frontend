@@ -88,6 +88,21 @@ export const GuardianProfile = () => {
   }, [showOTPModal, otpTimer]);
 
   useEffect(() => {
+    if (!user || isEditMode) return;
+
+    setProfile({
+      guardianName: user.guardianName || "",
+      email: user.email || "",
+      contactNumber: user.contactNumber || "",
+      province: user.province || "",
+      city: user.city || "",
+      barangay: user.barangay || "",
+      village: user.village || "",
+      streetAddress: user.streetAddress || ""
+    });
+  }, [user, isEditMode]);
+
+  useEffect(() => {
     if (!user?.guardianImageUrl) {
       setProfileImage(avatarPlaceholder);
       return;
@@ -398,7 +413,7 @@ export const GuardianProfile = () => {
 
   const saveProfileData = async () => {
     try {
-      let uploadedImageUrl = null;
+      let uploadedImageUrl;
 
       if (imageFile) {
         try {
@@ -452,9 +467,9 @@ export const GuardianProfile = () => {
         village: profile.village,
         streetAddress: profile.streetAddress,
         guardianImageUrl:
-          uploadedImageUrl !== undefined
-            ? uploadedImageUrl
-            : prev.guardianImageUrl
+          uploadedImageUrl === undefined
+            ? prev.guardianImageUrl
+            : uploadedImageUrl
       }));
 
       setIsEditMode(false);
