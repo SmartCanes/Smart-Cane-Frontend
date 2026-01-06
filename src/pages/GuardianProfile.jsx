@@ -331,10 +331,15 @@ export const GuardianProfile = () => {
       }
     } catch (error) {
       console.error("Failed to send OTP:", error);
-      setOtpError(error.message || "Failed to send OTP");
+      setOtpError(
+        error.response?.data?.message || error.message || "Failed to send OTP"
+      );
       setToastConfig({
         show: true,
-        message: "Failed to send OTP. Please try again.",
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to send OTP. Please try again.",
         type: "error"
       });
     } finally {
@@ -354,9 +359,9 @@ export const GuardianProfile = () => {
       otpInputRefs.current[index + 1]?.focus();
     }
 
-    if (newOtp.every((digit) => digit !== "") && index === 5) {
-      handleVerifyOTP();
-    }
+    // if (newOtp.every((digit) => digit !== "") && index === 5) {
+    //   handleVerifyOTP(newOtp);
+    // }
   };
 
   const handleOTPKeyDown = (index, e) => {
@@ -393,22 +398,27 @@ export const GuardianProfile = () => {
       }
     } catch (error) {
       console.error("OTP verification failed:", error);
-      setOtpError(error.message || "Invalid OTP code");
+      setOtpError(
+        error.response?.data?.message || error.message || "Invalid OTP code"
+      );
 
       setToastConfig({
         show: true,
-        message: "OTP verification failed",
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "OTP verification failed",
         type: "error"
       });
     } finally {
       setIsVerifyingOTP(false);
     }
 
-    setShowOTPModal(false);
-    setOriginalEmail(profile.email);
-    setIsVerifyingEmail(false);
+    // setShowOTPModal(false);
+    // setOriginalEmail(profile.email);
+    // setIsVerifyingEmail(false);
 
-    await saveProfileData();
+    // await saveProfileData();
   };
 
   const saveProfileData = async () => {
@@ -482,7 +492,10 @@ export const GuardianProfile = () => {
       console.error("Error saving profile:", error);
       setToastConfig({
         show: true,
-        message: "Failed to save profile. Please try again.",
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to save profile. Please try again.",
         type: "error"
       });
     }
