@@ -35,37 +35,57 @@ export const validateDeviceSerial = (serial_number) =>
 //OTP's
 // Registration OTP:
 export const sendRegistrationOTP = (email) =>
-  handleRequest(() => backendApi.post("/auth/send-otp", { email, purpose: "registration" }));
+  handleRequest(() =>
+    backendApi.post("/auth/send-otp", { email, purpose: "registration" })
+  );
 
 export const verifyRegistrationOTP = (email, otp_code) =>
-  handleRequest(() => backendApi.post("/auth/verify-otp", { email, otp_code, purpose: "registration" }));
+  handleRequest(() =>
+    backendApi.post("/auth/verify-otp", {
+      email,
+      otp_code,
+      purpose: "registration"
+    })
+  );
 
 // Chnage Email
 export const requestEmailChangeOTP = (new_email) =>
-  handleRequest(() => backendApi.post("/auth/profile/change-email/request", { new_email }));
+  handleRequest(() =>
+    backendApi.post("/auth/profile/change-email/request", { new_email })
+  );
 
 export const verifyEmailChangeOTP = (new_email, otp_code) =>
-  handleRequest(() => backendApi.post("/auth/profile/change-email/verify", { new_email, otp_code }));
+  handleRequest(() =>
+    backendApi.post("/auth/profile/change-email/verify", {
+      new_email,
+      otp_code
+    })
+  );
 
 // Forgot Password
 export const forgotPasswordRequest = (email) =>
-  handleRequest(() => backendApi.post("/auth/forgot-password/request", { email }));
+  handleRequest(() =>
+    backendApi.post("/auth/forgot-password/request", { email })
+  );
 
 export const verifyForgotPasswordOTP = (email, otp_code) =>
-  handleRequest(() => backendApi.post("/auth/forgot-password/verify", { email, otp_code }));
+  handleRequest(() =>
+    backendApi.post("/auth/forgot-password/verify", { email, otp_code })
+  );
 
 export const resetPassword = (email, new_password) =>
-  handleRequest(() => backendApi.post("/auth/forgot-password/reset", { email, new_password }));
+  handleRequest(() =>
+    backendApi.post("/auth/forgot-password/reset", { email, new_password })
+  );
 
-// image upload
 export const uploadProfileImage = (imageFile) => {
   const formData = new FormData();
-  formData.append('image', imageFile);
-  
-  return handleRequest(() => 
-    backendApi.post('/guardian/profile/image', formData, {
+  formData.append("image", imageFile);
+
+  return handleRequest(() =>
+    backendApi.post("/guardian/profile/image", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        "Content-Type": "multipart/form-data"
       }
     })
   );

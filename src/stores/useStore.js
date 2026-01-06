@@ -14,8 +14,8 @@ export const useUserStore = create(
         })),
       updateProfileImage: (imageUrl) =>
         set((state) => ({
-          user: state.user 
-            ? { ...state.user, guardian_image_url: imageUrl } 
+          user: state.user
+            ? { ...state.user, guardian_image_url: imageUrl }
             : null
         })),
       getUserInfo: () => get().user,
@@ -90,7 +90,8 @@ export const useRealtimeStore = create((set, get) => ({
           mpuStatus: data.mpuStatus === true || data.mpuStatus === "false",
           esp32Status: data.status === "online",
           raspberryPiStatus:
-            data.raspberryPiStatus === true || data.raspberryPiStatus === "false"
+            data.raspberryPiStatus === true ||
+            data.raspberryPiStatus === "false"
         }
       });
       resetHeartbeat();
