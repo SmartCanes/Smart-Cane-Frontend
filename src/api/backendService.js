@@ -14,14 +14,32 @@ export const updateGuardian = (payload) =>
 export const getMyProfile = () =>
   handleRequest(() => backendApi.get("/guardian/profile"));
 
-// VIP
+// VIP shortcuts
 export const getVIPs = () => handleRequest(() => backendApi.get("/vip"));
 
+//creating vip
+export const createVIP = (payload) =>
+  handleRequest(() => backendApi.post("/vip", payload));
+
+//getting vip or showing vip
+export const getMyVIP = () =>
+  handleRequest(() => backendApi.get("/vip/my-vip"));
+
+//updating exixting vip
+export const updateMyVIP = (payload) =>
+  handleRequest(() => backendApi.put("/vip/my-vip", payload));
+
+//deleting vip
+export const deleteVIP = (id) =>
+  handleRequest(() => backendApi.delete(`/vip/${id}`));
+
+// Updating specific VIP by ID
 export const getVIPById = (id) =>
   handleRequest(() => backendApi.get(`/vip/${id}`));
 
-export const createVIP = (payload) =>
-  handleRequest(() => backendApi.post("/vip", payload));
+// Updating specific VIP by ID
+export const updateVIPById = (id, payload) =>
+  handleRequest(() => backendApi.put(`/vip/${id}`, payload));
 
 // Device
 export const pairDevice = (payload) =>
@@ -84,6 +102,20 @@ export const uploadProfileImage = (imageFile) => {
 
   return handleRequest(() =>
     backendApi.post("/guardian/profile/image", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    })
+  );
+};
+
+// Upload/Retreive VIP img
+export const uploadVIPImage = (vipId, imageFile) => {
+  const formData = new FormData();
+  formData.append("image", imageFile);
+
+  return handleRequest(() =>
+    backendApi.post(`/vip/${vipId}/image`, formData, {
       headers: {
         "Content-Type": "multipart/form-data"
       }
