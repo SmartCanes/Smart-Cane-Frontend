@@ -64,6 +64,7 @@ export const GuardianProfile = () => {
   const [profileImage, setProfileImage] = useState(avatarPlaceholder);
   const [imageFile, setImageFile] = useState(null);
   const [imageError, setImageError] = useState("");
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -160,6 +161,7 @@ export const GuardianProfile = () => {
     const imageUrl = URL.createObjectURL(file);
     setProfileImage(imageUrl);
     setImageFile(file);
+    setImageRemoved(false);
 
     setToastConfig({
       show: true,
@@ -170,7 +172,7 @@ export const GuardianProfile = () => {
 
   const handleRemoveImage = async () => {
     if (!isBackendEnabled) {
-      setProfileImage(null);
+      setProfileImage(avatarPlaceholder);
       setImageFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
 
@@ -182,33 +184,10 @@ export const GuardianProfile = () => {
       return;
     }
 
-    try {
-      setIsUploadingImage(true);
-      const response = await updateGuardian({ guardian_image_url: null });
-
-      if (response.success) {
-        setProfileImage(null);
-        setImageFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-
-        setUser((prev) => ({ ...prev, guardianImageUrl: null }));
-
-        setToastConfig({
-          show: true,
-          message: "Profile image removed successfully",
-          type: "success"
-        });
-      }
-    } catch (error) {
-      console.error("Failed to remove profile image:", error);
-      setToastConfig({
-        show: true,
-        message: "Failed to remove profile image. Please try again.",
-        type: "error"
-      });
-    } finally {
-      setIsUploadingImage(false);
-    }
+    setProfileImage(avatarPlaceholder);
+    setImageFile(null);
+    setImageRemoved(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const triggerFileInput = () => {
@@ -429,7 +408,6 @@ export const GuardianProfile = () => {
         try {
           setIsUploadingImage(true);
           const imageResponse = await uploadProfileImage(imageFile);
-          console.log(imageResponse);
 
           if (imageResponse.success) {
             uploadedImageUrl = imageResponse.data.imageUrl;
@@ -454,8 +432,11 @@ export const GuardianProfile = () => {
         }
       }
 
+      if (imageRemoved) {
+        await updateGuardian({ guardian_image_url: null });
+      }
+
       await updateGuardian({
-        username: user.username,
         guardian_name: profile.guardianName,
         email: profile.email,
         contact_number: profile.contactNumber,
@@ -476,12 +457,12 @@ export const GuardianProfile = () => {
         barangay: profile.barangay,
         village: profile.village,
         streetAddress: profile.streetAddress,
-        guardianImageUrl:
-          uploadedImageUrl === undefined
-            ? prev.guardianImageUrl
-            : uploadedImageUrl
+        guardianImageUrl: imageRemoved
+          ? null
+          : (uploadedImageUrl ?? prev.guardianImageUrl)
       }));
 
+      setImageRemoved(false);
       setIsEditMode(false);
       setToastConfig({
         show: true,
