@@ -608,7 +608,7 @@ const Register = () => {
                 isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
               }
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6"
+              className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-8 pb-8 px-6"
             >
               <div className="text-center space-y-2 ">
                 <h1 className="hidden sm:block  text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
@@ -853,6 +853,7 @@ const Register = () => {
                       onChange={(e) =>
                         handleChange("contactNumber", e.target.value)
                       }
+                      onBlur={() => handleBlur("contactNumber")}
                       inputMode="numeric"
                       maxLength={11}
                       error={errors.contactNumber}
@@ -868,6 +869,7 @@ const Register = () => {
                       name="email"
                       value={formData.email}
                       onChange={(e) => handleChange("email", e.target.value)}
+                      onBlur={() => handleBlur("email")}
                       error={errors.email}
                       maxLength={50}
                       required
@@ -995,7 +997,7 @@ const Register = () => {
                 </Link>
               </p>
 
-              <p className="text-center text-[18px]">
+              <p className="text-center text-sm sm:text-md">
                 By signing up I agree to the{" "}
                 <button
                   onClick={() => {
