@@ -75,6 +75,14 @@ const Register = () => {
         if (value.length > 50) return "Should not exceed 50 characters";
         return "";
 
+      case "middleName":
+        if (!value) return "";
+        if (!/^[a-zA-Z\s]+$/.test(value))
+          return "Should contain only letters and spaces";
+        if (value.length < 2) return "Should be at least 2 characters long";
+        if (value.length > 50) return "Should not exceed 50 characters";
+        return "";
+
       case "lastName":
         if (!value.trim()) return "Last Name is required";
         if (!/^[a-zA-Z\s]+$/.test(value))
@@ -146,7 +154,7 @@ const Register = () => {
 
   const handleChange = (name, value) => {
     if (
-      (name === "firstName" || name === "lastName") &&
+      (name === "firstName" || name === "lastName" || name === "middleName") &&
       value &&
       !/^[a-zA-Z\s]*$/.test(value)
     )
@@ -184,6 +192,7 @@ const Register = () => {
     // Add validation for ALL other fields
     if (
       name === "firstName" ||
+      name === "middleName" ||
       name === "lastName" ||
       name === "username" ||
       name === "contactNumber" ||
@@ -203,6 +212,7 @@ const Register = () => {
     if (stepNumber === 1) {
       const step1Fields = [
         "firstName",
+        "middleName",
         "lastName",
         "username",
         "password",
@@ -342,7 +352,9 @@ const Register = () => {
           const accountPayload = {
             username: formData.username,
             password: formData.password,
-            guardian_name: formData.firstName + " " + formData.lastName,
+            first_name: formData.firstName,
+            middle_name: formData.middleName,
+            last_name: formData.lastName,
             email: formData.email,
             contact_number: formData.contactNumber,
             province: "Metro Manila",
@@ -437,7 +449,7 @@ const Register = () => {
         document.querySelector('[name="contactNumber"]')?.focus();
       } else if (errorMessage.includes("OTP")) {
         setOtpError(errorMessage);
-      } else if (error.response.data.error === 429) {
+      } else if (error?.response?.data?.error === 429) {
         setModalConfig({
           isOpen: true,
           type: "error",
@@ -667,6 +679,21 @@ const Register = () => {
                         error={errors.firstName}
                         maxLength={50}
                         required
+                      />
+
+                      <TextField
+                        ref={firstNameRef}
+                        className="font-poppins"
+                        label={"Middle Name"}
+                        placeholder="Middle Name..."
+                        name="middleName"
+                        value={formData.middleName}
+                        onChange={(e) =>
+                          handleChange("middleName", e.target.value)
+                        }
+                        inputClassName="py-3"
+                        error={errors.middleName}
+                        maxLength={50}
                       />
 
                       <TextField
