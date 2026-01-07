@@ -137,11 +137,15 @@ export const GuardianProfile = () => {
   };
 
   const handleProfileChange = ({ target }) => {
+    const NAME_FIELDS = ["firstName", "middleName", "lastName"];
     const { name, value } = target;
 
     if (name === "contactNumber") {
       const digitsOnly = value.replace(/\D/g, "");
       setProfile((prev) => ({ ...prev, [name]: digitsOnly }));
+    } else if (NAME_FIELDS.includes(name)) {
+      const lettersOnly = value.replace(/[^a-zA-Z\s]/g, "");
+      setProfile((prev) => ({ ...prev, [name]: lettersOnly }));
     } else {
       setProfile((prev) => ({ ...prev, [name]: value }));
     }
