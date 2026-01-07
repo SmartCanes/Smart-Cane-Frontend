@@ -258,7 +258,7 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast, guardianId }) => {
         <Toast
           type={toast.type}
           message={toast.message}
-          onClose={() => setToast({ ...toast, showToast: false })}
+          onClose={() => setToast((prev) => ({ ...prev, showToast: false }))}
         />
       )}
 

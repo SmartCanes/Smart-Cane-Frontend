@@ -885,7 +885,9 @@ export const GuardianProfile = () => {
                   type={toastConfig.type}
                   duration={3000}
                   position="top-right"
-                  onClose={() => (toastConfig.show = false)}
+                  onClose={() =>
+                    setToastConfig((prev) => ({ ...prev, show: false }))
+                  }
                 />
               )}
             </div>
