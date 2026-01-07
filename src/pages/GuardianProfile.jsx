@@ -13,6 +13,17 @@ import {
 } from "@/api/backendService.js";
 import DefaultProfile from "@/ui/components/DefaultProfile";
 
+const PROFILE_FIELDS = [
+  "guardianName",
+  "email",
+  "contactNumber",
+  "province",
+  "city",
+  "barangay",
+  "village",
+  "streetAddress"
+];
+
 const validateName = (name) => {
   const nameRegex = /^[A-Za-z\s.,]+(?: (?:Jr\.?|Sr\.?|I{1,3}|IV))?$/i;
   return nameRegex.test(name.trim());
@@ -30,6 +41,7 @@ const validateEmail = (email) => {
 
 export const GuardianProfile = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
+  const originalProfileRef = useRef(null);
   const { user, setUser } = useUserStore();
 
   const [profile, setProfile] = useState({
@@ -112,6 +124,23 @@ export const GuardianProfile = () => {
 
     setProfileImage(user?.guardianImageUrl);
   }, [user?.guardianImageUrl]);
+
+  const hasProfileChanged = () => {
+    if (!originalProfileRef.current) return false;
+
+    const original = originalProfileRef.current;
+
+    const fieldsChanged = PROFILE_FIELDS.some(
+      (key) => original[key] !== profile[key]
+    );
+
+    const imageChanged =
+      imageRemoved ||
+      imageFile !== null ||
+      original.guardianImageUrl !== user.guardianImageUrl;
+
+    return fieldsChanged || imageChanged;
+  };
 
   const handleProfileChange = ({ target }) => {
     const { name, value } = target;
@@ -222,6 +251,11 @@ export const GuardianProfile = () => {
   };
 
   const handleEditProfile = () => {
+    originalProfileRef.current = {
+      ...profile,
+      guardianImageUrl: user?.guardianImageUrl ?? null
+    };
+
     setIsEditMode(true);
     setToastConfig({
       show: true,
@@ -231,6 +265,17 @@ export const GuardianProfile = () => {
   };
 
   const handleSaveProfile = async () => {
+    if (!hasProfileChanged()) {
+      setToastConfig({
+        show: true,
+        message: "No changes detected",
+        type: "info"
+      });
+
+      setIsEditMode(false);
+      return;
+    }
+
     if (!validateForm()) {
       setToastConfig({
         show: true,
@@ -495,6 +540,7 @@ export const GuardianProfile = () => {
   };
 
   const handleCancelEdit = () => {
+    originalProfileRef.current = null;
     setProfile({ ...user });
 
     if (user?.guardianImageUrl) {
