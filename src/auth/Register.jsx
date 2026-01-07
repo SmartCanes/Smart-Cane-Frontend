@@ -188,18 +188,11 @@ const Register = () => {
         }));
       }
     }
+  };
 
-    // Add validation for ALL other fields
-    if (
-      name === "firstName" ||
-      name === "middleName" ||
-      name === "lastName" ||
-      name === "username" ||
-      name === "contactNumber" ||
-      name === "email" ||
-      name === "streetAddress"
-    ) {
-      const error = validateField(name, newValue);
+  const handleBlur = (name) => {
+    const error = validateField(name, formData[name]);
+    if (error) {
       setErrors((prev) => ({ ...prev, [name]: error }));
     }
   };
@@ -675,6 +668,7 @@ const Register = () => {
                         onChange={(e) =>
                           handleChange("firstName", e.target.value)
                         }
+                        onBlur={() => handleBlur("firstName")}
                         inputClassName="py-3"
                         error={errors.firstName}
                         maxLength={50}
@@ -691,26 +685,26 @@ const Register = () => {
                         onChange={(e) =>
                           handleChange("middleName", e.target.value)
                         }
+                        onBlur={() => handleBlur("middleName")}
                         inputClassName="py-3"
                         error={errors.middleName}
                         maxLength={50}
                       />
-
-                      <TextField
-                        className="font-poppins"
-                        label={"Last Name"}
-                        placeholder="Last Name..."
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={(e) =>
-                          handleChange("lastName", e.target.value)
-                        }
-                        inputClassName="py-3"
-                        error={errors.lastName}
-                        maxLength={50}
-                        required
-                      />
                     </div>
+
+                    <TextField
+                      className="font-poppins"
+                      label={"Last Name"}
+                      placeholder="Last Name..."
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => handleChange("lastName", e.target.value)}
+                      onBlur={() => handleBlur("lastName")}
+                      inputClassName="py-3"
+                      error={errors.lastName}
+                      maxLength={50}
+                      required
+                    />
 
                     <TextField
                       className="font-poppins"
@@ -719,6 +713,7 @@ const Register = () => {
                       name="username"
                       value={formData.username}
                       onChange={(e) => handleChange("username", e.target.value)}
+                      onBlur={() => handleBlur("username")}
                       inputClassName="py-3"
                       error={errors.username}
                       maxLength={20}
@@ -732,6 +727,7 @@ const Register = () => {
                       name="password"
                       value={formData.password}
                       onChange={(e) => handleChange("password", e.target.value)}
+                      onBlur={() => handleBlur("password")}
                       error={errors.password}
                       showValidationRules
                       inputClassName="py-3"
@@ -748,6 +744,7 @@ const Register = () => {
                       onChange={(e) =>
                         handleChange("confirmPassword", e.target.value)
                       }
+                      onBlur={() => handleBlur("confirmPassword")}
                       error={errors.confirmPassword}
                       inputClassName="py-3"
                       maxLength={20}
@@ -771,6 +768,7 @@ const Register = () => {
                         onChange={(e) =>
                           handleChange("streetAddress", e.target.value)
                         }
+                        onBlur={() => handleBlur("streetAddress")}
                         error={errors.streetAddress}
                         maxLength={50}
                         required

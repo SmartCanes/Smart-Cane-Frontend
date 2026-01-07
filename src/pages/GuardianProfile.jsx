@@ -225,6 +225,11 @@ export const GuardianProfile = () => {
     return isValid;
   };
 
+  const handleBlur = (name) => {
+    const error = validateField(name, profile[name]);
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
+
   const handleEditProfile = () => {
     originalProfileRef.current = {
       ...profile,
@@ -593,7 +598,7 @@ export const GuardianProfile = () => {
                     <h3 className="text-lg font-semibold text-[#11285A]">
                       {`${user.firstName} ${user.middleName || ""} ${user.lastName}`}
                     </h3>
-                    <p className="text-sm text-gray-500">{profile.email}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
                 </div>
 
@@ -655,6 +660,7 @@ export const GuardianProfile = () => {
                     name="firstName"
                     value={profile.firstName}
                     onChange={handleProfileChange}
+                    onBlur={() => handleBlur("firstName")}
                     disabled={!isEditMode}
                     error={errors.firstName}
                     placeholder="e.g., Ivan Ren"
@@ -669,6 +675,7 @@ export const GuardianProfile = () => {
                     name="middleName"
                     value={profile.middleName}
                     onChange={handleProfileChange}
+                    onBlur={() => handleBlur("middleName")}
                     disabled={!isEditMode}
                     error={errors.middleName}
                     placeholder="e.g., Manguiat"
@@ -683,6 +690,7 @@ export const GuardianProfile = () => {
                     name="lastName"
                     value={profile.lastName}
                     onChange={handleProfileChange}
+                    onBlur={() => handleBlur("lastName")}
                     disabled={!isEditMode}
                     error={errors.lastName}
                     placeholder="e.g., Villamora"
@@ -697,6 +705,7 @@ export const GuardianProfile = () => {
                     name="username"
                     value={profile.username}
                     onChange={handleProfileChange}
+                    onBlur={() => handleBlur("username")}
                     disabled={!isEditMode}
                     error={errors.username}
                     placeholder="e.g., ivanren123"
@@ -711,6 +720,7 @@ export const GuardianProfile = () => {
                     name="email"
                     value={profile.email}
                     onChange={handleProfileChange}
+                    onBlur={() => handleBlur("email")}
                     disabled={!isEditMode}
                     error={errors.email}
                     placeholder="example@email.com"
@@ -725,6 +735,7 @@ export const GuardianProfile = () => {
                     name="contactNumber"
                     value={profile.contactNumber}
                     onChange={handleProfileChange}
+                    onBlur={() => handleBlur("contactNumber")}
                     disabled={!isEditMode}
                     maxLength="11"
                     error={errors.contactNumber}
@@ -740,6 +751,7 @@ export const GuardianProfile = () => {
                     value={profile.streetAddress}
                     placeholder="Enter your Lot No..."
                     onChange={handleProfileChange}
+                    onBlur={() => handleBlur("streetAddress")}
                     error={errors.streetAddress}
                     disabled={!isEditMode}
                   />
