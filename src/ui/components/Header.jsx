@@ -6,6 +6,7 @@ import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 import { Link } from "react-router-dom";
 import { useRealtimeStore, useUserStore } from "@/stores/useStore";
 import { logoutApi } from "@/api/authService";
+import DefaultProfile from "./DefaultProfile";
 
 const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
@@ -77,7 +78,7 @@ const Header = () => {
   }, []);
 
   const showImage = profileImageUrl && !imageError;
-  const userInitial = user ? user.username?.charAt(0).toUpperCase() : "Z";
+  const userInitial = user ? user.guardianName?.charAt(0).toUpperCase() : "Z";
 
   return (
     <header
@@ -136,13 +137,14 @@ const Header = () => {
                 onError={() => setImageError(true)}
               />
             ) : (
-              <div
-                className="w-full h-full bg-white hover:bg-gray-100 text-primary-100
-             flex items-center justify-center font-poppins font-semibold
-             text-sm sm:text-base"
-              >
-                {userInitial}
-              </div>
+              <DefaultProfile userInitial={userInitial} />
+              //   <div
+              //     className="w-full h-full bg-white hover:bg-gray-100 text-primary-100
+              //  flex items-center justify-center font-poppins font-semibold
+              //  text-sm sm:text-base"
+              //   >
+              //     {userInitial}
+              //   </div>
             )}
           </button>
 

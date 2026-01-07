@@ -11,6 +11,7 @@ import {
   requestEmailChangeOTP,
   verifyEmailChangeOTP
 } from "@/api/backendService.js";
+import DefaultProfile from "@/ui/components/DefaultProfile";
 
 const validateName = (name) => {
   const nameRegex = /^[A-Za-z\s.,]+(?: (?:Jr\.?|Sr\.?|I{1,3}|IV))?$/i;
@@ -109,21 +110,7 @@ export const GuardianProfile = () => {
       return;
     }
 
-    const imageUrl = user.guardianImageUrl;
-
-    if (imageUrl.startsWith("blob:")) {
-      setProfileImage(imageUrl);
-      return;
-    }
-
-    if (imageUrl.startsWith("http")) {
-      setProfileImage(imageUrl);
-      return;
-    }
-
-    setProfileImage(
-      `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${imageUrl}`
-    );
+    setProfileImage(user?.guardianImageUrl);
   }, [user?.guardianImageUrl]);
 
   const handleProfileChange = ({ target }) => {
@@ -159,6 +146,7 @@ export const GuardianProfile = () => {
 
     setImageError("");
     const imageUrl = URL.createObjectURL(file);
+    console.log(imageUrl);
     setProfileImage(imageUrl);
     setImageFile(file);
     setImageRemoved(false);
@@ -171,19 +159,6 @@ export const GuardianProfile = () => {
   };
 
   const handleRemoveImage = async () => {
-    if (!isBackendEnabled) {
-      setProfileImage(avatarPlaceholder);
-      setImageFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-
-      setToastConfig({
-        show: true,
-        message: "Profile image removed locally",
-        type: "info"
-      });
-      return;
-    }
-
     setProfileImage(avatarPlaceholder);
     setImageFile(null);
     setImageRemoved(true);
@@ -194,6 +169,18 @@ export const GuardianProfile = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
+  };
+
+  const resolveProfileImageSrc = (image) => {
+    if (!image) return avatarPlaceholder;
+
+    if (image.startsWith("blob:")) return image;
+
+    if (image.startsWith("http")) return image;
+
+    if (image.includes("default")) return image;
+
+    return `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${image}`;
   };
 
   const validateForm = () => {
@@ -410,7 +397,8 @@ export const GuardianProfile = () => {
           const imageResponse = await uploadProfileImage(imageFile);
 
           if (imageResponse.success) {
-            uploadedImageUrl = imageResponse.data.imageUrl;
+            console.log(imageResponse);
+            uploadedImageUrl = imageResponse.data.relativePath;
             setProfileImage(uploadedImageUrl);
 
             setToastConfig({
@@ -562,15 +550,25 @@ export const GuardianProfile = () => {
           <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8 flex flex-col gap-5">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={profileImage}
-                    alt={profile.guardianName}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
+                <div className="flex items-center gap-4 ">
+                  {!user?.guardianImageUrl ? (
+                    <div className="w-16 h-16 rounded-full overflow-hidden pointer-events-none">
+                      <DefaultProfile
+                        bgColor="bg-[#11285A]"
+                        userInitial={user.guardianName?.charAt(0).toUpperCase()}
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={resolveProfileImageSrc(user.guardianImageUrl)}
+                      alt={user.guardianName}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  )}
+
                   <div>
                     <h3 className="text-lg font-semibold text-[#11285A]">
-                      {profile.guardianName}
+                      {user.guardianName}
                     </h3>
                     <p className="text-sm text-gray-500">{profile.email}</p>
                   </div>
@@ -738,7 +736,7 @@ export const GuardianProfile = () => {
                     <div className="flex-shrink-0">
                       <div className="relative">
                         <img
-                          src={profileImage || avatarPlaceholder}
+                          src={resolveProfileImageSrc(profileImage)}
                           alt="Profile Preview"
                           className="w-24 h-24 rounded-full object-cover border-2 border-white shadow-sm"
                         />
