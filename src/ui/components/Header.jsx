@@ -78,7 +78,7 @@ const Header = () => {
   }, []);
 
   const showImage = profileImageUrl && !imageError;
-  const userInitial = user ? user.guardianName?.charAt(0).toUpperCase() : "Z";
+  const userInitial = user ? user.firstName?.charAt(0).toUpperCase() : "Z";
 
   return (
     <header

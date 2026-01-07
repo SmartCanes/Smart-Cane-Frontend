@@ -12,9 +12,13 @@ import {
   verifyEmailChangeOTP
 } from "@/api/backendService.js";
 import DefaultProfile from "@/ui/components/DefaultProfile";
+import { validateField } from "@/utils/ValidationHelper";
 
 const PROFILE_FIELDS = [
-  "guardianName",
+  "firstName",
+  "middleName",
+  "lastName",
+  "username",
   "email",
   "contactNumber",
   "province",
@@ -24,31 +28,18 @@ const PROFILE_FIELDS = [
   "streetAddress"
 ];
 
-const validateName = (name) => {
-  const nameRegex = /^[A-Za-z\s.,]+(?: (?:Jr\.?|Sr\.?|I{1,3}|IV))?$/i;
-  return nameRegex.test(name.trim());
-};
-
-const validatePhone = (phone) => {
-  const phoneRegex = /^\d{11}$/;
-  return phoneRegex.test(phone.trim());
-};
-
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email.trim());
-};
-
 export const GuardianProfile = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const originalProfileRef = useRef(null);
   const { user, setUser } = useUserStore();
 
   const [profile, setProfile] = useState({
-    guardianName: user.guardianName,
+    firstName: user.firstName,
+    middleName: user.middleName || "",
+    lastName: user.lastName,
+    username: user.username,
     email: user.email,
     contactNumber: user.contactNumber,
-    relationship: user.relationship,
     region: user.region || "",
     province: user.province || "",
     city: user.city || "",
@@ -81,11 +72,12 @@ export const GuardianProfile = () => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
-  const [errors, setErrors] = useState({
-    guardianName: "",
-    email: "",
-    phone: ""
-  });
+  const [errors, setErrors] = useState(
+    PROFILE_FIELDS.reduce((acc, field) => {
+      acc[field] = "";
+      return acc;
+    }, {})
+  );
 
   const otpInputRefs = useRef([]);
 
@@ -105,7 +97,9 @@ export const GuardianProfile = () => {
     if (!user || isEditMode) return;
 
     setProfile({
-      guardianName: user.guardianName || "",
+      firstName: user.firstName || "",
+      middleName: user.middleName || "",
+      lastName: user.lastName || "",
       email: user.email || "",
       contactNumber: user.contactNumber || "",
       province: user.province || "",
@@ -145,7 +139,7 @@ export const GuardianProfile = () => {
   const handleProfileChange = ({ target }) => {
     const { name, value } = target;
 
-    if (name === "phone") {
+    if (name === "contactNumber") {
       const digitsOnly = value.replace(/\D/g, "");
       setProfile((prev) => ({ ...prev, [name]: digitsOnly }));
     } else {
@@ -175,7 +169,6 @@ export const GuardianProfile = () => {
 
     setImageError("");
     const imageUrl = URL.createObjectURL(file);
-    console.log(imageUrl);
     setProfileImage(imageUrl);
     setImageFile(file);
     setImageRemoved(false);
@@ -213,38 +206,16 @@ export const GuardianProfile = () => {
   };
 
   const validateForm = () => {
-    const newErrors = {
-      guardianName: "",
-      email: "",
-      phone: ""
-    };
-
+    const newErrors = {};
     let isValid = true;
 
-    if (!profile.guardianName.trim()) {
-      newErrors.guardianName = "Full name is required";
-      isValid = false;
-    } else if (!validateName(profile.guardianName)) {
-      newErrors.guardianName =
-        "Name can only contain letters, spaces, and suffixes like Jr, II, III, IV";
-      isValid = false;
-    }
-
-    if (!profile.contactNumber.trim()) {
-      newErrors.contactNumber = "Phone number is required";
-      isValid = false;
-    } else if (!validatePhone(profile.contactNumber)) {
-      newErrors.contactNumber = "Phone number must be exactly 11 digits";
-      isValid = false;
-    }
-
-    if (!profile.email.trim()) {
-      newErrors.email = "Email is required";
-      isValid = false;
-    } else if (!validateEmail(profile.email)) {
-      newErrors.email = "Please enter a valid email address";
-      isValid = false;
-    }
+    Object.keys(profile).forEach((key) => {
+      const error = validateField(key, profile[key]);
+      if (error) {
+        newErrors[key] = error;
+        isValid = false;
+      }
+    });
 
     setErrors(newErrors);
     return isValid;
@@ -277,11 +248,11 @@ export const GuardianProfile = () => {
     }
 
     if (!validateForm()) {
-      setToastConfig({
-        show: true,
-        message: "Please fix validation errors before saving",
-        type: "error"
-      });
+      // setToastConfig({
+      //   show: true,
+      //   message: "Please fix validation errors before saving",
+      //   type: "error"
+      // });
       return;
     }
 
@@ -369,10 +340,6 @@ export const GuardianProfile = () => {
     if (value && index < 5) {
       otpInputRefs.current[index + 1]?.focus();
     }
-
-    // if (newOtp.every((digit) => digit !== "") && index === 5) {
-    //   handleVerifyOTP(newOtp);
-    // }
   };
 
   const handleOTPKeyDown = (index, e) => {
@@ -470,7 +437,10 @@ export const GuardianProfile = () => {
       }
 
       await updateGuardian({
-        guardian_name: profile.guardianName,
+        first_name: profile.firstName,
+        middle_name: profile.middleName,
+        last_name: profile.lastName,
+        username: profile.username,
         email: profile.email,
         contact_number: profile.contactNumber,
         province: profile.province,
@@ -482,7 +452,10 @@ export const GuardianProfile = () => {
 
       setUser((prev) => ({
         ...prev,
-        guardianName: profile.guardianName,
+        firstName: profile.firstName,
+        middleName: profile.middleName,
+        lastName: profile.lastName,
+        username: profile.username,
         email: profile.email,
         contactNumber: profile.contactNumber,
         province: profile.province,
@@ -601,20 +574,20 @@ export const GuardianProfile = () => {
                     <div className="w-16 h-16 rounded-full overflow-hidden pointer-events-none">
                       <DefaultProfile
                         bgColor="bg-[#11285A]"
-                        userInitial={user.guardianName?.charAt(0).toUpperCase()}
+                        userInitial={user.firstName?.charAt(0).toUpperCase()}
                       />
                     </div>
                   ) : (
                     <img
                       src={resolveProfileImageSrc(user.guardianImageUrl)}
-                      alt={user.guardianName}
+                      alt={`${user.firstName} ${user.middleName || ""} ${user.lastName}`}
                       className="w-16 h-16 rounded-full object-cover"
                     />
                   )}
 
                   <div>
                     <h3 className="text-lg font-semibold text-[#11285A]">
-                      {user.guardianName}
+                      {`${user.firstName} ${user.middleName || ""} ${user.lastName}`}
                     </h3>
                     <p className="text-sm text-gray-500">{profile.email}</p>
                   </div>
@@ -671,22 +644,59 @@ export const GuardianProfile = () => {
               <div className="grid md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    Full Name
+                    First Name
                   </label>
                   <TextField
                     type="text"
-                    name="guardianName"
-                    value={profile.guardianName}
+                    name="firstName"
+                    value={profile.firstName}
                     onChange={handleProfileChange}
                     disabled={!isEditMode}
-                    inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.guardianName ? "border-red-500" : ""}`}
-                    placeholder="e.g., John Smith Jr"
+                    error={errors.firstName}
+                    placeholder="e.g., Ivan Ren"
                   />
-                  {errors.guardianName && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.guardianName}
-                    </p>
-                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Middle Name
+                  </label>
+                  <TextField
+                    type="text"
+                    name="middleName"
+                    value={profile.middleName}
+                    onChange={handleProfileChange}
+                    disabled={!isEditMode}
+                    error={errors.middleName}
+                    placeholder="e.g., Manguiat"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Last Name
+                  </label>
+                  <TextField
+                    type="text"
+                    name="lastName"
+                    value={profile.lastName}
+                    onChange={handleProfileChange}
+                    disabled={!isEditMode}
+                    error={errors.lastName}
+                    placeholder="e.g., Villamora"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Username
+                  </label>
+                  <TextField
+                    type="text"
+                    name="username"
+                    value={profile.username}
+                    onChange={handleProfileChange}
+                    disabled={!isEditMode}
+                    error={errors.username}
+                    placeholder="e.g., ivanren123"
+                  />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -698,12 +708,9 @@ export const GuardianProfile = () => {
                     value={profile.email}
                     onChange={handleProfileChange}
                     disabled={!isEditMode}
-                    inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.email ? "border-red-500" : ""}`}
+                    error={errors.email}
                     placeholder="example@email.com"
                   />
-                  {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                  )}
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -716,14 +723,9 @@ export const GuardianProfile = () => {
                     onChange={handleProfileChange}
                     disabled={!isEditMode}
                     maxLength="11"
-                    inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"} ${errors.contactNumber ? "border-red-500" : ""}`}
+                    error={errors.contactNumber}
                     placeholder="11 digits only"
                   />
-                  {errors.contactNumber && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.contactNumber}
-                    </p>
-                  )}
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -734,8 +736,8 @@ export const GuardianProfile = () => {
                     value={profile.streetAddress}
                     placeholder="Enter your Lot No..."
                     onChange={handleProfileChange}
+                    error={errors.streetAddress}
                     disabled={!isEditMode}
-                    inputClassName={`${!isEditMode ? "bg-gray-100" : "bg-white"}`}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
