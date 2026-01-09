@@ -77,10 +77,6 @@ const PublicLayout = () => {
     checkAuth();
   }, []);
 
-  if (isAuthenticated === null) {
-    return <div style={{ minHeight: "100vh", background: "transparent" }} />;
-  }
-
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
