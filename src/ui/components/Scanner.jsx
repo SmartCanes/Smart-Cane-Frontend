@@ -137,6 +137,14 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast, guardianId }) => {
     if (e.key === "Backspace" && !serial[index] && index > 0) {
       inputRefs.current[index - 1].current.focus();
     }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      if (!serial.includes("") && !loading && !toast.showToast) {
+        handleManualPair();
+      }
+    }
   };
 
   const handlePair = async (code) => {
