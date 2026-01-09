@@ -1,14 +1,15 @@
 import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import SidebarContent from "@/ui/components/SidebarContent";
-import { verifyAuthApi } from "@/api/authService";
-import { useUIStore } from "@/stores/useStore";
+import { logoutApi, verifyAuthApi } from "@/api/authService";
+import { useUIStore, useUserStore } from "@/stores/useStore";
 
 const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
 
 const ProtectedLayout = () => {
   const navigate = useNavigate();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const { clearUser } = useUserStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -20,11 +21,15 @@ const ProtectedLayout = () => {
 
         const response = await verifyAuthApi();
         if (!response.data.tokenValid) {
+          clearUser();
+          await logoutApi();
           throw new Error("Invalid token");
         }
         setIsAuthChecked(true);
       } catch (error) {
         console.log("Auth check failed:", error);
+        clearUser();
+        await logoutApi();
         navigate("/login", { replace: true });
       }
     };
@@ -44,6 +49,7 @@ const ProtectedLayout = () => {
 const PublicLayout = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const { setIsAnimationDone } = useUIStore();
+  const { clearUser } = useUserStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -57,9 +63,13 @@ const PublicLayout = () => {
         if (response.data.tokenValid) {
           setIsAuthenticated(true);
         } else {
+          clearUser();
+          await logoutApi();
           setIsAuthenticated(false);
         }
       } catch (error) {
+        clearUser();
+        await logoutApi();
         setIsAuthenticated(false);
       }
     };
