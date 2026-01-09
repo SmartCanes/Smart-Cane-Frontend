@@ -82,6 +82,12 @@ const DashboardSide = ({ className = "" }) => {
       path: "/manage-profile"
     },
     {
+      id: "devices",
+      label: "Devices",
+      icon: "mdi:devices",
+      path: "/devices"
+    },
+    {
       id: "health",
       label: "Health",
       icon: "fa6-brands:unity",
@@ -119,13 +125,19 @@ const DashboardSide = ({ className = "" }) => {
       id: "mobile-health",
       label: "Health",
       icon: "fa6-brands:unity",
-      path: "/components"
+      path: "/health"
     },
     {
       id: "mobile-weather",
       label: "Weather",
       icon: "material-symbols-light:weather-hail",
       path: "/weather-board"
+    },
+    {
+      id: "mobile-devices",
+      label: "Devices",
+      icon: "mdi:devices",
+      path: "/devices"
     }
   ];
 
