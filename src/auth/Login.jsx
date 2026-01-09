@@ -27,13 +27,17 @@ const Login = () => {
   const [captchaValue, setCaptchaValue] = useState(null);
   const [captchaLoading, setCaptchaLoading] = useState(true);
   const [retryAfter, setRetryAfter] = useState(0);
+  const [redirectSeconds, setRedirectSeconds] = useState(null);
+
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     variant: "banner",
     title: "",
     message: "",
     actionText: "",
-    onAction: () => {}
+    onAction: () => {},
+    onClose: () => {},
+    autoRedirect: false
   });
 
   const handleChange = (e) => {
@@ -124,17 +128,33 @@ const Login = () => {
   };
 
   const handleOnScan = () => {
+    setRedirectSeconds(10);
     setModalConfig({
       isOpen: true,
-      // onClose: () => handleLogin(),
       variant: "banner",
       title: "Paired Successfully",
-      message:
-        "You can now continue to dashboard and start using your account.",
       actionText: "Proceed to Dashboard",
-      onAction: () => handleLogin()
+      onAction: handleLogin,
+      onClose: () => {},
+      autoRedirect: true
     });
   };
+
+  useEffect(() => {
+    if (!modalConfig.isOpen || !modalConfig.autoRedirect) return;
+    if (redirectSeconds === null) return;
+
+    if (redirectSeconds === 0) {
+      handleLogin();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setRedirectSeconds((s) => s - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [modalConfig.isOpen, modalConfig.autoRedirect, redirectSeconds]);
 
   const startCountdown = (seconds) => {
     setRetryAfter(seconds);
@@ -321,7 +341,20 @@ const Login = () => {
         position={modalConfig.position}
         actionText={modalConfig.actionText}
         title={modalConfig.title}
-        message={modalConfig.message}
+        message={
+          modalConfig.autoRedirect ? (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-700 mt-1">
+                You can now continue to dashboard and start using your account.
+              </p>
+              <p className="text-sm opacity-70">
+                Redirecting in {redirectSeconds}s…
+              </p>
+            </div>
+          ) : (
+            modalConfig.message
+          )
+        }
         variant={modalConfig.variant}
         onAction={modalConfig.onAction}
       />

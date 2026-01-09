@@ -46,7 +46,8 @@ const Register = () => {
     onClose: () => {},
     message: "",
     modalType: null,
-    onAction: null
+    onAction: null,
+    autoRedirect: false
   });
 
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -60,6 +61,7 @@ const Register = () => {
   const [otpError, setOtpError] = useState("");
   const [countdown, setCountdown] = useState(0);
   const [errors, setErrors] = useState({});
+  const [redirectSeconds, setRedirectSeconds] = useState(null);
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
   const countdownRef = useRef(null);
   const firstNameRef = useRef(null);
@@ -472,22 +474,40 @@ const Register = () => {
   };
 
   const handleOnScan = () => {
+    setRedirectSeconds(10);
     setModalConfig({
       isOpen: true,
-      onClose: () => {
-        clearRegisterStore();
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
-      },
+      // onClose: () => {
+      //   clearRegisterStore();
+      //   setModalConfig((prev) => ({ ...prev, isOpen: false }));
+      // },
       variant: "banner",
       title: "Paired Successfully",
-      message: "You can now continue to login and start using your account.",
       actionText: "Proceed to Login",
       onAction: () => {
         clearRegisterStore();
         navigate("/login");
-      }
+      },
+      autoRedirect: true
     });
   };
+
+  useEffect(() => {
+    if (!modalConfig.isOpen || !modalConfig.autoRedirect) return;
+    if (redirectSeconds === null) return;
+
+    if (redirectSeconds === 0) {
+      clearRegisterStore();
+      navigate("/login");
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setRedirectSeconds((s) => s - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [modalConfig.isOpen, modalConfig.autoRedirect, redirectSeconds]);
 
   const hasStepErrors = () => Object.keys(validateStep(step)).length > 0;
 
@@ -997,28 +1017,30 @@ const Register = () => {
                 </Link>
               </p>
 
-              <p className="text-center text-sm sm:text-md">
-                By signing up I agree to the{" "}
-                <button
-                  onClick={() => {
-                    setShowTermsModal(true);
-                    setScrollTarget("terms");
-                  }}
-                  className="text-blue-500 hover:underline"
-                >
-                  Terms and Conditions
-                </button>{" "}
-                and{" "}
-                <button
-                  onClick={() => {
-                    setShowTermsModal(true);
-                    setScrollTarget("privacy");
-                  }}
-                  className="text-blue-500 hover:underline"
-                >
-                  Privacy Policy.
-                </button>
-              </p>
+              {step <= 2 && (
+                <p className="text-center text-sm sm:text-md">
+                  By signing up I agree to the{" "}
+                  <button
+                    onClick={() => {
+                      setShowTermsModal(true);
+                      setScrollTarget("terms");
+                    }}
+                    className="text-blue-500 hover:underline"
+                  >
+                    Terms and Conditions
+                  </button>{" "}
+                  and{" "}
+                  <button
+                    onClick={() => {
+                      setShowTermsModal(true);
+                      setScrollTarget("privacy");
+                    }}
+                    className="text-blue-500 hover:underline"
+                  >
+                    Privacy Policy.
+                  </button>
+                </p>
+              )}
             </motion.div>
           )}
 
@@ -1057,25 +1079,40 @@ const Register = () => {
         position={modalConfig.position}
         actionText={modalConfig.actionText}
         title={modalConfig.title}
-        message={modalConfig.message}
+        message={
+          modalConfig.autoRedirect ? (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-700 mt-1">
+                You can now continue to login and start using your account.
+              </p>
+              <p className="text-sm opacity-70">
+                Redirecting in {redirectSeconds}s…
+              </p>
+            </div>
+          ) : (
+            modalConfig.message
+          )
+        }
         variant={modalConfig.variant}
         onAction={modalConfig.onAction}
       />
 
-      <TermsAndConditions
-        isChecked={termsAccepted}
-        setIsChecked={setTermsAccepted}
-        scrollTo={scrollTarget}
-        isOpen={showTermsModal}
-        onClose={() => {
-          setTermsAccepted(false);
-          setShowTermsModal(false);
-        }}
-        onAccept={() => {
-          setTermsAccepted(true);
-          setShowTermsModal(false);
-        }}
-      />
+      {step <= 2 && (
+        <TermsAndConditions
+          isChecked={termsAccepted}
+          setIsChecked={setTermsAccepted}
+          scrollTo={scrollTarget}
+          isOpen={showTermsModal}
+          onClose={() => {
+            setTermsAccepted(false);
+            setShowTermsModal(false);
+          }}
+          onAccept={() => {
+            setTermsAccepted(true);
+            setShowTermsModal(false);
+          }}
+        />
+      )}
     </>
   );
 };
