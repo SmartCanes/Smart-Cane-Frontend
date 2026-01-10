@@ -4,6 +4,7 @@ import Toast from "../ui/components/Toast";
 import Modal from "../ui/components/Modal";
 import DefaultProfile from "@/ui/components/DefaultProfile";
 import VipProfileModal from "@/ui/VipProfileModal";
+import ScannerCamera from "@/ui/components/Scanner";
 
 // ========== DEVICES COMPONENT ==========
 const Devices = () => {
@@ -29,6 +30,7 @@ const Devices = () => {
 
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [isAddDeviceModalOpen, setIsAddDeviceModalOpen] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({
     show: false,
     deviceId: null
@@ -326,47 +328,6 @@ const Devices = () => {
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
-  // ======== RENDER FUNCTIONS ========
-  const renderDevices = () =>
-    devices.length > 0 ? (
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-        {devices.map((device) => (
-          <DeviceCard
-            key={device.id}
-            device={device}
-            onDelete={handleDeleteClick}
-            onEditVIP={handleEditVIP}
-            onViewVIP={() => handleViewVIP(device)}
-            onRemoveVIP={() => handleRemoveVIP(device.id)}
-            onPairDevice={() =>
-              setPairDeviceModal({ show: true, deviceId: device.id })
-            }
-            onUnpairDevice={() =>
-              setUnpairConfirm({ show: true, deviceId: device.id })
-            }
-            onEditDevice={() =>
-              setEditDeviceModal({
-                show: true,
-                deviceId: device.id,
-                deviceName: device.name
-              })
-            }
-          />
-        ))}
-      </div>
-    ) : (
-      <div className="text-center py-12">
-        <Icon
-          icon="ph:walking-stick"
-          className="w-16 h-16 text-gray-300 mx-auto mb-4"
-        />
-        <p className="text-gray-500 text-lg">No canes added yet.</p>
-        <p className="text-gray-400 text-sm mt-2">
-          Click 'Add Cane' to get started
-        </p>
-      </div>
-    );
-
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
       <div className="mx-auto w-full space-y-4 sm:space-y-6">
@@ -382,7 +343,7 @@ const Devices = () => {
             </p>
           </div>
           <button
-            onClick={handleAddDevice}
+            onClick={() => setShowScanner(true)}
             className="w-full sm:w-auto bg-gradient-to-r bg-[#11285A] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#0d1b3d] transition-all hover:shadow-lg flex items-center justify-center gap-2"
           >
             <Icon icon="ph:plus-bold" className="w-5 h-5" />
@@ -546,38 +507,90 @@ const Devices = () => {
         )}
 
         {/* VIP PROFILE MODAL */}
-        {vipModal.show && (
-          <VipProfileModal
-            isOpen={vipModal.show}
-            onClose={() =>
-              setVipModal({
-                show: false,
-                mode: "view",
-                device: null,
-                vipData: null
-              })
-            }
-            onSubmit={
-              vipModal.mode === "create" ? handleCreateVIP : handleUpdateVIP
-            }
-            initialData={vipModal.vipData}
-            isLoading={false}
-            isUploadingImage={false}
-            title={
-              vipModal.mode === "view"
-                ? "Cane VIP Profile"
-                : vipModal.mode === "create"
-                  ? "Add VIP to Cane"
-                  : "Edit Cane VIP"
-            }
-            submitText={
-              vipModal.mode === "create" ? "Add VIP to Cane" : "Update VIP"
-            }
-            mode={vipModal.mode}
-          />
-        )}
+        <VipProfileModal
+          isOpen={vipModal.show}
+          onClose={() =>
+            setVipModal({
+              show: false,
+              mode: "view",
+              device: null,
+              vipData: null
+            })
+          }
+          onSubmit={
+            vipModal.mode === "create" ? handleCreateVIP : handleUpdateVIP
+          }
+          initialData={vipModal.vipData}
+          isLoading={false}
+          isUploadingImage={false}
+          title={
+            vipModal.mode === "view"
+              ? "Cane VIP Profile"
+              : vipModal.mode === "create"
+                ? "Add VIP to Cane"
+                : "Edit Cane VIP"
+          }
+          submitText={
+            vipModal.mode === "create" ? "Add VIP to Cane" : "Update VIP"
+          }
+          mode={vipModal.mode}
+        />
 
-        {renderDevices()}
+        <Modal
+          isOpen={showScanner}
+          onClose={() => setShowScanner(false)}
+          title="Scan iCane Device"
+          closeTimer={null}
+          // handleConfirm={handleConfirmUnpair}
+          footer={<></>}
+        >
+          <div className="flex flex-col gap-7 sm:justify-center items-center pt-[30px] sm:pt-5 pb-8 sm:pb-5 px-6">
+            <ScannerCamera
+            // onSuccess={handleOnScan}
+            // showOnSuccessToast={false}
+            // guardianId={guardianId}
+            />
+          </div>
+        </Modal>
+
+        {devices.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+            {devices.map((device) => (
+              <DeviceCard
+                key={device.id}
+                device={device}
+                onDelete={handleDeleteClick}
+                onEditVIP={handleEditVIP}
+                onViewVIP={() => handleViewVIP(device)}
+                onRemoveVIP={() => handleRemoveVIP(device.id)}
+                onPairDevice={() =>
+                  setPairDeviceModal({ show: true, deviceId: device.id })
+                }
+                onUnpairDevice={() =>
+                  setUnpairConfirm({ show: true, deviceId: device.id })
+                }
+                onEditDevice={() =>
+                  setEditDeviceModal({
+                    show: true,
+                    deviceId: device.id,
+                    deviceName: device.name
+                  })
+                }
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Icon
+              icon="ph:walking-stick"
+              className="w-16 h-16 text-gray-300 mx-auto mb-4"
+            />
+            <p className="text-gray-500 text-lg">No canes added yet.</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Click 'Add Cane' to get started
+            </p>
+          </div>
+        )}
       </div>
     </main>
   );
