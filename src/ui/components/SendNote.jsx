@@ -2,18 +2,13 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import FeedbackModal from "../feedbackmodal";
 
-
-
-
-
-
 const SendNote = () => {
   const [message, setMessage] = useState("");
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     title: "",
     message: "",
-    variant: "default",
+    variant: "default"
   });
   const maxLength = 500;
 
@@ -23,7 +18,7 @@ const SendNote = () => {
         isOpen: true,
         title: "Error!",
         message: "Please enter a message before sending.",
-        variant: "error",
+        variant: "error"
       });
       return;
     }
@@ -36,7 +31,7 @@ const SendNote = () => {
         isOpen: true,
         title: "Sent!",
         message: "Your message has been sent to Mr. Dela Cruz",
-        variant: "default", // Using default (dark blue) as per screenshot/request for primary look
+        variant: "default" // Using default (dark blue) as per screenshot/request for primary look
       });
       setMessage("");
     } else {
@@ -44,7 +39,7 @@ const SendNote = () => {
         isOpen: true,
         title: "Failed!",
         message: "Something went wrong. Please try again.",
-        variant: "error",
+        variant: "error"
       });
     }
   };

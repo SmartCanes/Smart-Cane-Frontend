@@ -10,7 +10,7 @@ const GuardianNetwork = () => {
   const [toast, setToast] = useState({
     show: false,
     message: "",
-    type: "",
+    type: ""
   });
 
   const guardians = [
@@ -18,14 +18,14 @@ const GuardianNetwork = () => {
       name: "Sarah Johnson",
       role: "Primary Guardian",
       status: "Active",
-      imageUrl: "https://i.pravatar.cc/150?img=1", // Placeholder image
+      imageUrl: "https://i.pravatar.cc/150?img=1" // Placeholder image
     },
     {
       name: "Dr. Emma Wilson",
       role: "Healthcare Provider",
       status: "Offline",
-      imageUrl: "https://i.pravatar.cc/150?img=2", // Placeholder image
-    },
+      imageUrl: "https://i.pravatar.cc/150?img=2" // Placeholder image
+    }
   ];
 
   const handleSendInvitation = async () => {
@@ -33,7 +33,7 @@ const GuardianNetwork = () => {
       setToast({
         show: true,
         message: "Please enter a valid email address.",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -47,13 +47,13 @@ const GuardianNetwork = () => {
       setToast({
         show: true,
         message: "Invitation sent successfully",
-        type: "success",
+        type: "success"
       });
     } catch (error) {
       setToast({
         show: true,
         message: "Something went wrong. Please try again.",
-        type: "error",
+        type: "error"
       });
     }
   };

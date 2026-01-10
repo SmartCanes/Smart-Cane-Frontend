@@ -9,7 +9,7 @@ const Notes = () => {
     isOpen: false,
     title: "",
     message: "",
-    variant: "default",
+    variant: "default"
   });
   const maxCharacters = 500;
 
@@ -19,7 +19,7 @@ const Notes = () => {
         isOpen: true,
         title: "Error!",
         message: "Please enter a message before sending.",
-        variant: "error",
+        variant: "error"
       });
       return;
     }
@@ -32,7 +32,7 @@ const Notes = () => {
         isOpen: true,
         title: "Sent!",
         message: "Your message has been sent to Mr. Dela Cruz",
-        variant: "default", // Using default (dark blue) as per screenshot/request for primary look
+        variant: "default" // Using default (dark blue) as per screenshot/request for primary look
       });
       setMessage("");
     } else {
@@ -40,7 +40,7 @@ const Notes = () => {
         isOpen: true,
         title: "Failed!",
         message: "Something went wrong. Please try again.",
-        variant: "error",
+        variant: "error"
       });
     }
   };

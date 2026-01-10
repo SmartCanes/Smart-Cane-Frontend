@@ -100,15 +100,15 @@ const ActivityReport = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const filteredActivities = activities.filter((activity) =>
-    activity.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    activity.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    activity.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredActivities = activities.filter(
+    (activity) =>
+      activity.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      activity.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      activity.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalItems = filteredActivities.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -126,12 +126,26 @@ const ActivityReport = () => {
       if (currentPage <= 4) {
         pages.push(1, 2, 3, 4, 5, "...", totalPages);
       } else if (currentPage >= totalPages - 3) {
-        pages.push(1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(
+          1,
+          "...",
+          totalPages - 4,
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages
+        );
       } else {
-        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+        pages.push(
+          1,
+          "...",
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          "...",
+          totalPages
+        );
       }
-
-
     }
     return pages;
   };

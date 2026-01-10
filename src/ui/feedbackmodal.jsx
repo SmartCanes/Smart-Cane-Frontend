@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 
@@ -8,7 +8,7 @@ const VARIANTS = {
   success: "bg-green-500",
   error: "bg-red-500",
   warning: "bg-yellow-500",
-  info: "bg-blue-500",
+  info: "bg-blue-500"
 };
 
 const FeedbackModal = ({
@@ -17,7 +17,7 @@ const FeedbackModal = ({
   title = "Sent!",
   message = "Your message has been sent successfully.",
   variant = "default",
-  duration = 3000,
+  duration = 3000
 }) => {
   const headerColor = VARIANTS[variant] || VARIANTS.default;
 
