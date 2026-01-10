@@ -7,7 +7,7 @@ import Toast from "./Toast";
 const PREFIX = "SC-";
 const SERIAL_LENGTH = 6;
 
-const ScannerCamera = ({ onSuccess, showOnSuccessToast = false }) => {
+const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
   const [paused, setPaused] = useState(false);
   const [hasCamera, setHasCamera] = useState(false);
   const [serial, setSerial] = useState(Array(SERIAL_LENGTH).fill(""));
@@ -170,11 +170,12 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false }) => {
           type: "success"
         });
       }
+      if (response) response(res);
       onSuccess();
     } catch (err) {
       setToast({
         showToast: true,
-        message: err.response?.data?.message || "Failed to pair device",
+        message: err.response?.data?.message || "Failed to pair devices",
         type: "error"
       });
     } finally {
