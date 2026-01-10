@@ -6,6 +6,7 @@ import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import {
   checkCredentialsApi,
+  logoutApi,
   registerApi,
   sendOTPApi,
   verifyOTPApi
@@ -29,13 +30,11 @@ const Register = () => {
     setStep,
     formData,
     updateForm,
-    setGuardianId,
     setOtpSent,
     deviceValidated,
     setDeviceValidated,
     clearDeviceValidated,
     clearRegisterStore,
-    guardianId,
     showScanner,
     setShowScanner
   } = useRegisterStore();
@@ -360,13 +359,11 @@ const Register = () => {
           };
 
           const { data } = await registerApi(accountPayload);
-          setGuardianId(data.guardianId);
 
           if (deviceValidated.status === "ok" && deviceValidated.serial) {
             try {
               const res = await pairDevice({
-                device_serial_number: deviceValidated.serial,
-                guardian_id: data.guardianId
+                device_serial_number: deviceValidated.serial
               });
 
               if (res.success) {
@@ -473,7 +470,12 @@ const Register = () => {
     }
   };
 
-  const handleOnScan = () => {
+  const handleOnScan = async () => {
+    try {
+      await logoutApi();
+    } catch (err) {
+      console.warn("Logout failed, continuing anyway", err);
+    }
     setRedirectSeconds(10);
     setModalConfig({
       isOpen: true,
@@ -1056,11 +1058,7 @@ const Register = () => {
                 </p>
               </div>
 
-              <ScannerCamera
-                onSuccess={handleOnScan}
-                showOnSuccessToast={false}
-                guardianId={guardianId}
-              />
+              <ScannerCamera onSuccess={handleOnScan} />
             </div>
           )}
         </div>

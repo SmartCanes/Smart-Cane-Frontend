@@ -5,9 +5,11 @@ import Modal from "../ui/components/Modal";
 import DefaultProfile from "@/ui/components/DefaultProfile";
 import VipProfileModal from "@/ui/VipProfileModal";
 import ScannerCamera from "@/ui/components/Scanner";
+import { useUserStore } from "@/stores/useStore";
 
 // ========== DEVICES COMPONENT ==========
 const Devices = () => {
+  const { user } = useUserStore();
   const [devices, setDevices] = useState([
     {
       id: 1,
@@ -432,9 +434,14 @@ const Devices = () => {
         >
           <div className="flex flex-col gap-7 sm:justify-center items-center pt-[30px] sm:pt-5 pb-8 sm:pb-5 px-6">
             <ScannerCamera
-            // onSuccess={handleOnScan}
-            // showOnSuccessToast={false}
-            // guardianId={guardianId}
+              onSuccess={() => {
+                setShowScanner(false);
+                setToast({
+                  show: true,
+                  type: "success",
+                  message: "Cane successfully paired to your account"
+                });
+              }}
             />
           </div>
         </Modal>

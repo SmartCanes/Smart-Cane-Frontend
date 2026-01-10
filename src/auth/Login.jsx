@@ -325,11 +325,7 @@ const Login = () => {
               </p>
             </div>
 
-            <ScannerCamera
-              onSuccess={handleOnScan}
-              showOnSuccessToast={false}
-              guardianId={guardianId}
-            />
+            <ScannerCamera onSuccess={handleOnScan} guardianId={guardianId} />
           </div>
         )}
       </div>

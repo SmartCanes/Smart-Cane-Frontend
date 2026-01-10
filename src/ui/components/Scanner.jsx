@@ -7,7 +7,7 @@ import Toast from "./Toast";
 const PREFIX = "SC-";
 const SERIAL_LENGTH = 6;
 
-const ScannerCamera = ({ onSuccess, showOnSuccessToast, guardianId }) => {
+const ScannerCamera = ({ onSuccess, showOnSuccessToast = false }) => {
   const [paused, setPaused] = useState(false);
   const [hasCamera, setHasCamera] = useState(false);
   const [serial, setSerial] = useState(Array(SERIAL_LENGTH).fill(""));
@@ -91,7 +91,7 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast, guardianId }) => {
 
       setTimeout(() => {
         scanCooldownRef.current = false;
-      }, 5000);
+      }, 3000);
     }
   };
 
@@ -154,21 +154,11 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast, guardianId }) => {
       return;
     }
 
-    if (!guardianId) {
-      setToast({
-        showToast: true,
-        message: "Registration is not complete. Cannot pair device.",
-        type: "error"
-      });
-      return;
-    }
-
     try {
       setLoading(true);
       setPaused(true);
       const res = await pairDevice({
-        device_serial_number: code,
-        guardian_id: guardianId || 0
+        device_serial_number: code
       });
 
       if (!res.success) return;

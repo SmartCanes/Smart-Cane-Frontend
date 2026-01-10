@@ -21,14 +21,12 @@ export const useRegisterStore = create(
       },
       step: 1,
       showScanner: false,
-      guardianId: null,
       deviceValidated: {
         validated: false,
         serial: null,
         status: null
       },
 
-      setGuardianId: (id) => set({ guardianId: id }),
       setShowScanner: (show) => set({ showScanner: show }),
       setStep: (step) => set({ step }),
       updateForm: (field, value) =>
