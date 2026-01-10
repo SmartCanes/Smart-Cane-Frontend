@@ -14,36 +14,34 @@ export const updateGuardian = (payload) =>
 export const getMyProfile = () =>
   handleRequest(() => backendApi.get("/guardian/profile"));
 
-// VIP shortcuts
 export const getVIPs = () => handleRequest(() => backendApi.get("/vip"));
 
-//creating vip
-export const createVIP = (payload) =>
-  handleRequest(() => backendApi.post("/vip", payload));
+// VIP's
+export const updateVIP = (deviceId, payload) =>
+  handleRequest(() => backendApi.put(`/vip/${deviceId}`, payload));
 
-//getting vip or showing vip
-export const getMyVIP = () =>
-  handleRequest(() => backendApi.get("/vip/my-vip"));
-
-//updating exixting vip
-export const updateMyVIP = (payload) =>
-  handleRequest(() => backendApi.put("/vip/my-vip", payload));
-
-//deleting vip
 export const deleteVIP = (id) =>
   handleRequest(() => backendApi.delete(`/vip/${id}`));
 
-// Updating specific VIP by ID
-export const getVIPById = (id) =>
-  handleRequest(() => backendApi.get(`/vip/${id}`));
-
-// Updating specific VIP by ID
-export const updateVIPById = (id, payload) =>
-  handleRequest(() => backendApi.put(`/vip/${id}`, payload));
-
 // Device
+export const getDevices = () => handleRequest(() => backendApi.get("/device"));
+
+export const assignVipToDevice = (deviceId, payload) =>
+  handleRequest(() => backendApi.post(`/device/${deviceId}`, payload));
+
 export const pairDevice = (payload) =>
   handleRequest(() => backendApi.post("/device/pair", payload));
+
+export const unpairDevice = (deviceId) =>
+  handleRequest(() => backendApi.delete(`/device/${deviceId}`));
+
+export const updateDeviceName = (deviceId, payload) =>
+  handleRequest(() => backendApi.put(`/device/${deviceId}/name`, payload));
+
+export const updateDeviceLastActive = (deviceId, payload) =>
+  handleRequest(() =>
+    backendApi.put(`/device/${deviceId}/last_active_at`, payload)
+  );
 
 export const validateDeviceSerial = (serial_number) =>
   handleRequest(() =>
