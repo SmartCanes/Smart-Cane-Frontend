@@ -2,33 +2,58 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import Toast from "../ui/components/Toast";
 import Modal from "../ui/components/Modal";
-import DefaultProfile from "@/ui/components/DefaultProfile";
 import VipProfileModal from "@/ui/VipProfileModal";
 import ScannerCamera from "@/ui/components/Scanner";
 import { useUserStore } from "@/stores/useStore";
+import { getDevices } from "@/api/backendService";
 
 // ========== DEVICES COMPONENT ==========
 const Devices = () => {
-  const { user } = useUserStore();
   const [devices, setDevices] = useState([
     {
-      id: 1,
-      name: "Jacob's Cane",
-      lastActive: "2026-01-08 14:32",
-      status: "online",
-      vipName: "John Doe",
-      vipImageUrl:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
-      vipId: 101,
-      isPaired: true,
-      province: "Metro Manila",
-      city: "Quezon City",
-      barangay: "San Bartolome",
-      streetAddress: "123 Main Street",
-      batteryLevel: 85,
-      signalStrength: "strong"
+      deviceId: 1,
+      deviceName: "Grandpassss",
+      deviceSerialNumber: "SC-136901",
+      isEmergencyContact: false,
+      lastActiveAt: null,
+      pairedAt: "2026-01-10T14:07:09",
+      relationship: "Son",
+      vip: {
+        barangay: "Barangay 123",
+        city: "Quezon City",
+        createdAt: "2026-01-10T13:51:50",
+        firstName: "Ivan Rensss",
+        lastName: "Villamora",
+        middleName: "Manguiat",
+        province: "Metro Manila",
+        streetAddress: "My Street",
+        updatedAt: "2026-01-10T13:51:50",
+        vipId: 21,
+        vipImageUrl: "https://example.com/images/juan.jpg"
+      }
     }
   ]);
+
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const response = await getDevices();
+
+        if (!response.success) {
+          throw new Error(response.message || "Failed to fetch devices");
+        }
+
+        setDevices(response.data.devices);
+        console.log(devices);
+      } catch (error) {
+        const errorMessage =
+          error.response?.data?.message || error.message || "Login failed";
+        console.error("Error fetching devices:", errorMessage);
+      }
+    };
+
+    fetchDevices();
+  }, []);
 
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [showScanner, setShowScanner] = useState(false);
@@ -538,7 +563,9 @@ const DeviceCard = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-gray-900 font-poppins text-base sm:text-lg truncate">
-                  {device.name}
+                  {device?.deviceName
+                    ? device.deviceName
+                    : device.deviceSerialNumber || "Unnamed Cane"}
                 </h3>
                 <button
                   onClick={() => onEditDevice(device)}
@@ -552,7 +579,9 @@ const DeviceCard = ({
                 </button>
               </div>
               <p className="text-xs sm:text-sm text-gray-500 truncate">
-                Last active: {device.lastActive}
+                {!device.lastActive
+                  ? "Active Now"
+                  : `Last active: ${device.lastActive}`}
               </p>
             </div>
           </div>
@@ -646,7 +675,9 @@ const DeviceCard = ({
             {/* VIP Info */}
             <div className="flex-1 min-w-0">
               <h5 className="font-semibold text-gray-900 text-base sm:text-lg truncate">
-                {device.vipName || "No VIP Assigned"}
+                {device?.vip
+                  ? `${device.vip.firstName} ${device.vip.lastName}`
+                  : "No VIP Assigned"}
               </h5>
               <p className="text-sm text-gray-500 mt-1">
                 {device.relationship
