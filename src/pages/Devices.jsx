@@ -24,39 +24,6 @@ const Devices = () => {
       streetAddress: "123 Main Street",
       batteryLevel: 85,
       signalStrength: "strong"
-    },
-    {
-      id: 2,
-      name: "Sean's Cane",
-      lastActive: "2026-01-07 22:10",
-      status: "offline",
-      vipName: "Jane Smith",
-      vipImageUrl:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop",
-      vipId: 102,
-      isPaired: false,
-      province: "Metro Manila",
-      city: "Quezon City",
-      barangay: "San Bartolome",
-      streetAddress: "456 Oak Avenue",
-      batteryLevel: 42,
-      signalStrength: "weak"
-    },
-    {
-      id: 3,
-      name: "Grandma's Cane",
-      lastActive: "2026-01-06 09:15",
-      status: "online",
-      vipName: "",
-      vipImageUrl: "",
-      vipId: null,
-      isPaired: true,
-      province: "Metro Manila",
-      city: "Quezon City",
-      barangay: "San Bartolome",
-      streetAddress: "",
-      batteryLevel: 100,
-      signalStrength: "medium"
     }
   ]);
 
@@ -95,21 +62,6 @@ const Devices = () => {
   // ======== DEVICE HANDLERS ========
   const handleDeleteClick = (deviceId) => {
     setDeleteConfirm({ show: true, deviceId });
-  };
-
-  const handleConfirmDelete = () => {
-    setDevices((prev) => prev.filter((d) => d.id !== deleteConfirm.deviceId));
-    setToast({
-      show: true,
-      type: "success",
-      message: "Cane removed from your account"
-    });
-    setDeleteConfirm({ show: false, deviceId: null });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
-  };
-
-  const handleCancelDelete = () => {
-    setDeleteConfirm({ show: false, deviceId: null });
   };
 
   const handleAddDevice = () => setIsAddDeviceModalOpen(true);
@@ -195,7 +147,6 @@ const Devices = () => {
   };
 
   const handleUnpairDevice = (deviceId) => {
-    // Unpairing removes the device from the list completely
     setDevices((prev) => prev.filter((d) => d.id !== deviceId));
     setUnpairConfirm({ show: false, deviceId: null });
     setToast({
@@ -417,13 +368,13 @@ const Devices = () => {
     );
 
   return (
-    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] overflow-y-auto p-4 sm:p-6">
+    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
       <div className="mx-auto w-full space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 sm:mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
-              Manage Canes
+              Manage Devices
             </h2>
             <p className="text-gray-500 text-sm mt-1">
               {devices.length} cane{devices.length !== 1 ? "s" : ""} •{" "}
@@ -432,7 +383,7 @@ const Devices = () => {
           </div>
           <button
             onClick={handleAddDevice}
-            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all hover:shadow-lg flex items-center justify-center gap-2"
+            className="w-full sm:w-auto bg-gradient-to-r bg-[#11285A] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#0d1b3d] transition-all hover:shadow-lg flex items-center justify-center gap-2"
           >
             <Icon icon="ph:plus-bold" className="w-5 h-5" />
             Add Cane
@@ -449,7 +400,6 @@ const Devices = () => {
           />
         )}
 
-        {/* DELETE CONFIRMATION MODAL */}
         {deleteConfirm.show && (
           <Modal
             isOpen={deleteConfirm.show}
@@ -469,7 +419,7 @@ const Devices = () => {
             onClose={handleCancelUnpair}
             title="Unpair Cane?"
             modalType="error"
-            message="This will unpair and remove the cane from your account. You can pair it again later."
+            message="This will unpair and remove the cane from your account."
             handleCancel={handleCancelUnpair}
             handleConfirm={handleConfirmUnpair}
           />
@@ -595,40 +545,6 @@ const Devices = () => {
           </Modal>
         )}
 
-        {/* PAIR CANE MODAL */}
-        {pairDeviceModal.show && (
-          <Modal
-            isOpen={pairDeviceModal.show}
-            onClose={() => setPairDeviceModal({ show: false, deviceId: null })}
-            title="Pair Cane"
-            modalType="info"
-            footer={null}
-          >
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                Pair this cane with your account to start monitoring its
-                location and status.
-              </p>
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={() =>
-                    setPairDeviceModal({ show: false, deviceId: null })
-                  }
-                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handlePairDevice(pairDeviceModal.deviceId)}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all hover:shadow-lg"
-                >
-                  Pair Cane
-                </button>
-              </div>
-            </div>
-          </Modal>
-        )}
-
         {/* VIP PROFILE MODAL */}
         {vipModal.show && (
           <VipProfileModal
@@ -661,7 +577,6 @@ const Devices = () => {
           />
         )}
 
-        {/* DEVICE CARDS */}
         {renderDevices()}
       </div>
     </main>
@@ -742,13 +657,11 @@ const DeviceCard = ({
 
           {/* Status Badge */}
           <div
-            className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-              device.isPaired
-                ? "bg-green-100 text-green-800"
-                : "bg-gray-100 text-gray-800"
-            }`}
+            className={
+              "px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 "
+            }
           >
-            {device.isPaired ? "Paired" : "Unpaired"}
+            Paired
           </div>
         </div>
       </div>
@@ -756,13 +669,53 @@ const DeviceCard = ({
       {/* VIP Profile Section */}
       <div className="p-4 sm:p-5">
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <Icon
-              icon="ph:user-circle-bold"
-              className="w-4 h-4 text-blue-600"
-            />
-            Assigned VIP
-          </h4>
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2 ">
+              <Icon
+                icon="ph:user-circle-bold"
+                className="w-4 h-4 text-blue-600"
+              />
+              Assigned VIP
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {device.vipName ? (
+                <>
+                  <button
+                    onClick={() => onViewVIP(device)}
+                    className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5"
+                  >
+                    <Icon icon="ph:eye-bold" className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">View</span>
+                  </button>
+                  <button
+                    onClick={() => onEditVIP(device)}
+                    className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5"
+                  >
+                    <Icon
+                      icon="ph:pencil-simple-bold"
+                      className="w-3.5 h-3.5"
+                    />
+                    <span className="hidden sm:inline">Edit</span>
+                  </button>
+                  <button
+                    onClick={() => onRemoveVIP(device.id)}
+                    className="px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
+                  >
+                    <Icon icon="ph:trash-bold" className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Remove</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => onEditVIP(device)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all hover:shadow-md flex items-center gap-2"
+                >
+                  <Icon icon="ph:user-plus-bold" className="w-4 h-4" />
+                  <span>Assign VIP</span>
+                </button>
+              )}
+            </div>
+          </div>
 
           <div className="flex items-center gap-4">
             {/* VIP Profile Image */}
@@ -793,63 +746,12 @@ const DeviceCard = ({
               <h5 className="font-semibold text-gray-900 text-base sm:text-lg truncate">
                 {device.vipName || "No VIP Assigned"}
               </h5>
-
-              {/* VIP Actions */}
-              <div className="flex flex-wrap gap-2 mt-3">
-                {device.vipName ? (
-                  <>
-                    <button
-                      onClick={() => onViewVIP(device)}
-                      className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5"
-                    >
-                      <Icon icon="ph:eye-bold" className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">View</span>
-                    </button>
-                    <button
-                      onClick={() => onEditVIP(device)}
-                      className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5"
-                    >
-                      <Icon
-                        icon="ph:pencil-simple-bold"
-                        className="w-3.5 h-3.5"
-                      />
-                      <span className="hidden sm:inline">Edit VIP</span>
-                    </button>
-                    <button
-                      onClick={() => onRemoveVIP(device.id)}
-                      className="px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
-                    >
-                      <Icon icon="ph:trash-bold" className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Remove</span>
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => onEditVIP(device)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all hover:shadow-md flex items-center gap-2"
-                  >
-                    <Icon icon="ph:user-plus-bold" className="w-4 h-4" />
-                    <span>Assign VIP</span>
-                  </button>
-                )}
-              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                {device.relationship
+                  ? device.relationship
+                  : "No relationship available"}
+              </p>
             </div>
-          </div>
-        </div>
-
-        {/* Status Indicators */}
-        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
-          <div className="flex items-center gap-2">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                device.status === "online"
-                  ? "bg-green-500 animate-pulse"
-                  : "bg-red-400"
-              }`}
-            />
-            <span className="text-sm text-gray-600">
-              {device.status === "online" ? "Online" : "Offline"}
-            </span>
           </div>
         </div>
       </div>
@@ -882,66 +784,20 @@ const DeviceCard = ({
                     Edit Nickname
                   </button>
 
-                  {device.isPaired ? (
-                    <button
-                      onClick={() => {
-                        onUnpairDevice(device.id);
-                        setShowActionsMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2 border-t border-gray-100"
-                    >
-                      <Icon icon="ph:link-break-bold" className="w-4 h-4" />
-                      Unpair & Remove
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        onPairDevice();
-                        setShowActionsMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-t border-gray-100"
-                    >
-                      <Icon icon="ph:link-bold" className="w-4 h-4" />
-                      Pair Cane
-                    </button>
-                  )}
-
                   <button
                     onClick={() => {
-                      onDelete(device.id);
+                      onUnpairDevice(device.id);
                       setShowActionsMenu(false);
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-100"
+                    className="w-full px-4 py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2 border-t border-gray-100"
                   >
-                    <Icon icon="ph:trash-bold" className="w-4 h-4" />
-                    Delete Cane
+                    <Icon icon="ph:link-break-bold" className="w-4 h-4" />
+                    Unpair & Remove
                   </button>
                 </div>
               </div>
             )}
           </div>
-
-          {/* Quick Unpair Button (only for paired devices) */}
-          {device.isPaired && (
-            <button
-              onClick={() => onUnpairDevice(device.id)}
-              className="px-3 py-1.5 text-sm text-orange-600 hover:text-orange-800 hover:bg-orange-50 rounded-lg transition-colors flex items-center gap-1.5 border border-orange-200"
-            >
-              <Icon icon="ph:link-break-bold" className="w-4 h-4" />
-              <span className="hidden sm:inline">Unpair</span>
-            </button>
-          )}
-
-          {/* Quick Pair Button (only for unpaired devices) */}
-          {!device.isPaired && (
-            <button
-              onClick={() => onPairDevice(device.id)}
-              className="px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5 border border-blue-200"
-            >
-              <Icon icon="ph:link-bold" className="w-4 h-4" />
-              <span className="hidden sm:inline">Pair</span>
-            </button>
-          )}
         </div>
       </div>
     </div>
