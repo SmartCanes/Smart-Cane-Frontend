@@ -14,11 +14,11 @@ const VipProfileModal = ({
   mode = "edit" // 'view', 'create', or 'edit'
 }) => {
   const [formData, setFormData] = useState({
-    first_name: "",
-    middle_name: "",
-    last_name: "",
-    street_address: "",
-    vip_image_url: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    streetAdress: "",
+    vipImageUrl: "",
     province: "Metro Manila",
     city: "Quezon City",
     barangay: "San Bartolome"
@@ -40,17 +40,17 @@ const VipProfileModal = ({
   useEffect(() => {
     if (initialData) {
       setFormData({
-        first_name: initialData.first_name || "",
-        middle_name: initialData.middle_name || "",
-        last_name: initialData.last_name || "",
-        street_address: initialData.street_address || "",
-        vip_image_url: initialData.vip_image_url || "",
+        firstName: initialData.firstName || "",
+        middleName: initialData.middleName || "",
+        lastName: initialData.lastName || "",
+        streetAdress: initialData.streetAdress || "",
+        vipImageUrl: initialData.vipImageUrl || "",
         province: initialData.province || "Metro Manila",
         city: initialData.city || "Quezon City",
         barangay: initialData.barangay || "San Bartolome"
       });
-      if (initialData.vip_image_url) {
-        setImagePreview(initialData.vip_image_url);
+      if (initialData.vipImageUrl) {
+        setImagePreview(initialData.vipImageUrl);
       }
     }
   }, [initialData, mode]);
@@ -94,7 +94,7 @@ const VipProfileModal = ({
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     setImageError("");
-    setFormData((prev) => ({ ...prev, vip_image_url: "" })); // Clear URL if file is uploaded
+    setFormData((prev) => ({ ...prev, vipImageUrl: "" })); // Clear URL if file is uploaded
   };
 
   // Remove image
@@ -116,12 +116,11 @@ const VipProfileModal = ({
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.first_name.trim())
-      newErrors.first_name = "First name is required";
-    if (!formData.last_name.trim())
-      newErrors.last_name = "Last name is required";
-    if (!formData.street_address.trim())
-      newErrors.street_address = "Street address is required";
+    if (!formData.firstName.trim())
+      newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.streetAdress.trim())
+      newErrors.streetAdress = "Street address is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -139,20 +138,36 @@ const VipProfileModal = ({
     if (!validateForm()) return;
 
     const submitData = {
-      ...formData,
-      // If editing and no new image uploaded, keep existing URL
-      vip_image_url: imageFile ? null : formData.vip_image_url
+      first_name: formData.firstName || "",
+      middle_name: formData.middleName || "",
+      last_name: formData.lastName || "",
+      street_address: formData.streetAdress || "",
+      vip_image_url: formData.vipImageUrl || "",
+      province: formData.province || "Metro Manila",
+      city: formData.city || "Quezon City",
+      barangay: formData.barangay || "San Bartolome",
+      vipImageUrl: imageFile ? null : formData.vipImageUrl
     };
 
-    onSubmit(submitData, imageFile);
+    onSubmit({ vip: { ...submitData } }, imageFile);
+    setFormData({
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      streetAdress: "",
+      vipImageUrl: "",
+      province: "Metro Manila",
+      city: "Quezon City",
+      barangay: "San Bartolome"
+    });
   };
 
   // Format full name for display
   const getFullName = () => {
     const parts = [
-      formData.first_name,
-      formData.middle_name,
-      formData.last_name
+      formData.firstName,
+      formData.middleName,
+      formData.lastName
     ].filter(Boolean);
     return parts.join(" ");
   };
@@ -420,17 +435,17 @@ const VipProfileModal = ({
                           {isViewMode ? (
                             <div className="p-3 bg-gray-50 rounded-lg border border-gray-300">
                               <p className="text-gray-800">
-                                {formData.first_name || "—"}
+                                {formData.firstName || "—"}
                               </p>
                             </div>
                           ) : (
                             <input
                               type="text"
-                              name="first_name"
-                              value={formData.first_name}
+                              name="firstName"
+                              value={formData.firstName}
                               onChange={handleInputChange}
                               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
-                                errors.first_name
+                                errors.firstName
                                   ? "border-red-500"
                                   : "border-gray-300"
                               } ${isViewMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
@@ -439,9 +454,9 @@ const VipProfileModal = ({
                               readOnly={isViewMode}
                             />
                           )}
-                          {!isViewMode && errors.first_name && (
+                          {!isViewMode && errors.firstName && (
                             <p className="text-red-500 text-xs">
-                              {errors.first_name}
+                              {errors.firstName}
                             </p>
                           )}
                         </div>
@@ -454,14 +469,14 @@ const VipProfileModal = ({
                           {isViewMode ? (
                             <div className="p-3 bg-gray-50 rounded-lg border border-gray-300">
                               <p className="text-gray-800">
-                                {formData.middle_name || "—"}
+                                {formData.middleName || "—"}
                               </p>
                             </div>
                           ) : (
                             <input
                               type="text"
-                              name="middle_name"
-                              value={formData.middle_name}
+                              name="middleName"
+                              value={formData.middleName}
                               onChange={handleInputChange}
                               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                               placeholder="Enter middle name"
@@ -482,17 +497,17 @@ const VipProfileModal = ({
                           {isViewMode ? (
                             <div className="p-3 bg-gray-50 rounded-lg border border-gray-300">
                               <p className="text-gray-800">
-                                {formData.last_name || "—"}
+                                {formData.lastName || "—"}
                               </p>
                             </div>
                           ) : (
                             <input
                               type="text"
-                              name="last_name"
-                              value={formData.last_name}
+                              name="lastName"
+                              value={formData.lastName}
                               onChange={handleInputChange}
                               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
-                                errors.last_name
+                                errors.lastName
                                   ? "border-red-500"
                                   : "border-gray-300"
                               } ${isViewMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
@@ -501,9 +516,9 @@ const VipProfileModal = ({
                               readOnly={isViewMode}
                             />
                           )}
-                          {!isViewMode && errors.last_name && (
+                          {!isViewMode && errors.lastName && (
                             <p className="text-red-500 text-xs">
-                              {errors.last_name}
+                              {errors.lastName}
                             </p>
                           )}
                         </div>
@@ -534,17 +549,17 @@ const VipProfileModal = ({
                           {isViewMode ? (
                             <div className="p-3 bg-gray-50 rounded-lg border border-gray-300">
                               <p className="text-gray-800">
-                                {formData.street_address || "—"}
+                                {formData.streetAdress || "—"}
                               </p>
                             </div>
                           ) : (
                             <input
                               type="text"
-                              name="street_address"
-                              value={formData.street_address}
+                              name="streetAdress"
+                              value={formData.streetAdress}
                               onChange={handleInputChange}
                               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
-                                errors.street_address
+                                errors.streetAdress
                                   ? "border-red-500"
                                   : "border-gray-300"
                               } ${isViewMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
@@ -553,9 +568,9 @@ const VipProfileModal = ({
                               readOnly={isViewMode}
                             />
                           )}
-                          {!isViewMode && errors.street_address && (
+                          {!isViewMode && errors.streetAdress && (
                             <p className="text-red-500 text-xs">
-                              {errors.street_address}
+                              {errors.streetAdress}
                             </p>
                           )}
                         </div>

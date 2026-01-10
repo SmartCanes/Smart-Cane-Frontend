@@ -5,34 +5,17 @@ import Modal from "../ui/components/Modal";
 import VipProfileModal from "@/ui/VipProfileModal";
 import ScannerCamera from "@/ui/components/Scanner";
 import { useUserStore } from "@/stores/useStore";
-import { getDevices } from "@/api/backendService";
+import {
+  assignVipToDevice,
+  deleteVIP,
+  getDevices,
+  unpairDevice,
+  updateDeviceName
+} from "@/api/backendService";
 
 // ========== DEVICES COMPONENT ==========
 const Devices = () => {
-  const [devices, setDevices] = useState([
-    {
-      deviceId: 1,
-      deviceName: "Grandpassss",
-      deviceSerialNumber: "SC-136901",
-      isEmergencyContact: false,
-      lastActiveAt: null,
-      pairedAt: "2026-01-10T14:07:09",
-      relationship: "Son",
-      vip: {
-        barangay: "Barangay 123",
-        city: "Quezon City",
-        createdAt: "2026-01-10T13:51:50",
-        firstName: "Ivan Rensss",
-        lastName: "Villamora",
-        middleName: "Manguiat",
-        province: "Metro Manila",
-        streetAddress: "My Street",
-        updatedAt: "2026-01-10T13:51:50",
-        vipId: 21,
-        vipImageUrl: "https://example.com/images/juan.jpg"
-      }
-    }
-  ]);
+  const [devices, setDevices] = useState([]);
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -44,7 +27,6 @@ const Devices = () => {
         }
 
         setDevices(response.data.devices);
-        console.log(devices);
       } catch (error) {
         const errorMessage =
           error.response?.data?.message || error.message || "Login failed";
@@ -88,145 +70,152 @@ const Devices = () => {
     deviceId: null
   });
 
-  const handleEditDeviceName = (deviceId, newName) => {
-    if (!newName.trim()) {
+  const handleEditDeviceName = async (deviceId, newName) => {
+    try {
+      const payload =
+        newName !== null ? { device_name: newName } : { device_name: null };
+
+      const response = await updateDeviceName(deviceId, payload);
+
+      if (!response.success) {
+        throw new Error(response.message || "Failed to update cane nickname");
+      }
+
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.deviceId === deviceId ? { ...d, deviceName: newName } : d
+        )
+      );
+
+      setEditDeviceModal({
+        show: false,
+        deviceId: null,
+        deviceName: ""
+      });
+
+      setToast({
+        show: true,
+        type: "success",
+        message: "Cane nickname updated"
+      });
+    } catch (error) {
       setToast({
         show: true,
         type: "error",
-        message: "Cane nickname cannot be empty"
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update cane nickname"
       });
-      setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
-      return;
     }
-
-    setDevices((prev) =>
-      prev.map((d) => (d.id === deviceId ? { ...d, name: newName.trim() } : d))
-    );
-
-    setEditDeviceModal({ show: false, deviceId: null, deviceName: "" });
-    setToast({
-      show: true,
-      type: "success",
-      message: "Cane nickname updated"
-    });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
   };
 
-  // ======== DEVICE PAIRING HANDLERS ========
-  const handlePairDevice = (deviceId) => {
-    setDevices((prev) =>
-      prev.map((d) =>
-        d.id === deviceId ? { ...d, isPaired: true, status: "online" } : d
-      )
-    );
-    setPairDeviceModal({ show: false, deviceId: null });
-    setToast({
-      show: true,
-      type: "success",
-      message: "Cane paired with your account"
-    });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
-  };
+  const handleUnpairDevice = async (deviceId) => {
+    try {
+      const response = await unpairDevice(deviceId);
 
-  const handleUnpairDevice = (deviceId) => {
-    setDevices((prev) => prev.filter((d) => d.id !== deviceId));
-    setUnpairConfirm({ show: false, deviceId: null });
-    setToast({
-      show: true,
-      type: "success",
-      message: "Cane unpaired and removed from your account"
-    });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+      if (!response.success) {
+        throw new Error(response.message || "Failed to unpair cane");
+      }
+
+      setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
+      setUnpairConfirm({ show: false, deviceId: null });
+      setToast({
+        show: true,
+        type: "success",
+        message: "Cane unpaired and removed from your account"
+      });
+    } catch (error) {
+      setToast({
+        show: true,
+        type: "error",
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to unpair cane"
+      });
+    }
   };
 
   // ======== VIP HANDLERS ========
   const handleViewVIP = (device) => {
-    if (!device.vipId) {
+    if (!device.vip) {
       setToast({
         show: true,
         type: "info",
         message: "No VIP assigned to this cane"
       });
-      setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
       return;
     }
 
     const vipData = {
-      vip_id: device.vipId || 0,
-      first_name: device.vipName?.split(" ")[0] || "",
-      middle_name: "",
-      last_name: device.vipName?.split(" ").slice(1).join(" ") || "",
-      vip_image_url: device.vipImageUrl || "",
-      province: device.province || "Metro Manila",
-      city: device.city || "Quezon City",
-      barangay: device.barangay || "San Bartolome",
-      street_address: device.streetAddress || "",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      vip_id: device.vip.vipId,
+      first_name: device.vip.firstName,
+      middle_name: device.vip.middleName || "",
+      last_name: device.vip.lastName,
+      vip_image_url: device.vip.vipImageUrl || "",
+      province: device.vip.province,
+      city: device.vip.city,
+      barangay: device.vip.barangay,
+      street_address: device.vip.streetAddress || "",
+      created_at: device.vip.createdAt,
+      updated_at: device.vip.updatedAt
     };
 
     setVipModal({
       show: true,
       mode: "view",
-      device: device,
-      vipData: vipData
+      device,
+      vipData
     });
   };
 
-  const handleEditVIP = (device) => {
-    if (device.vipId) {
-      const vipData = {
-        vip_id: device.vipId,
-        first_name: device.vipName?.split(" ")[0] || "",
-        middle_name: "",
-        last_name: device.vipName?.split(" ").slice(1).join(" ") || "",
-        vip_image_url: device.vipImageUrl || "",
-        province: device.province || "Metro Manila",
-        city: device.city || "Quezon City",
-        barangay: device.barangay || "San Bartolome",
-        street_address: device.streetAddress || "",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      setVipModal({
-        show: true,
-        mode: "edit",
-        device: device,
-        vipData: vipData
-      });
-    } else {
+  const handleVipModalAction = (device) => {
+    if (!device.vip) {
       setVipModal({
         show: true,
         mode: "create",
-        device: device,
+        device,
         vipData: null
       });
+      return;
     }
+
+    setVipModal({
+      show: true,
+      mode: "edit",
+      device,
+      vipData: {
+        vip_id: device.vip.vipId,
+        first_name: device.vip.firstName,
+        middle_name: device.vip.middleName || "",
+        last_name: device.vip.lastName,
+        vip_image_url: device.vip.vipImageUrl || "",
+        province: device.vip.province,
+        city: device.vip.city,
+        barangay: device.vip.barangay,
+        street_address: device.vip.streetAddress || ""
+      }
+    });
   };
 
-  const handleCreateVIP = async (formData, imageFile) => {
+  const handleCreateVIP = async (formData) => {
     try {
-      const newVipId = Math.floor(Math.random() * 1000) + 100;
+      const response = await assignVipToDevice(
+        vipModal.device.deviceId,
+        formData
+      );
+
+      const newVip = response.data.vip;
 
       setDevices((prev) =>
         prev.map((d) =>
-          d.id === vipModal.device.id
-            ? {
-                ...d,
-                vipName: `${formData.first_name} ${formData.last_name}`.trim(),
-                vipImageUrl: imageFile ? URL.createObjectURL(imageFile) : "",
-                vipId: newVipId,
-                streetAddress: formData.street_address,
-                province: formData.province,
-                city: formData.city,
-                barangay: formData.barangay
-              }
-            : d
+          d.deviceId === vipModal.device.deviceId ? { ...d, vip: newVip } : d
         )
       );
 
       setVipModal({ show: false, mode: "view", device: null, vipData: null });
+
       setToast({
         show: true,
         type: "success",
@@ -236,69 +225,78 @@ const Devices = () => {
       setToast({
         show: true,
         type: "error",
-        message: "Failed to create VIP profile"
+        message: error.response?.data?.message || error.message
       });
-    } finally {
-      setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
     }
   };
 
-  const handleUpdateVIP = async (formData, imageFile) => {
+  const handleUpdateVIP = async (formData) => {
     try {
       setDevices((prev) =>
         prev.map((d) =>
-          d.id === vipModal.device.id
+          d.deviceId === vipModal.device.deviceId
             ? {
                 ...d,
-                vipName: `${formData.first_name} ${formData.last_name}`.trim(),
-                vipImageUrl: imageFile
-                  ? URL.createObjectURL(imageFile)
-                  : d.vipImageUrl,
-                streetAddress: formData.street_address
+                vip: {
+                  ...d.vip,
+                  firstName: formData.first_name,
+                  middleName: formData.middle_name,
+                  lastName: formData.last_name,
+                  vipImageUrl: formData.vip_image_url,
+                  province: formData.province,
+                  city: formData.city,
+                  barangay: formData.barangay,
+                  streetAddress: formData.street_address
+                }
               }
             : d
         )
       );
 
       setVipModal({ show: false, mode: "view", device: null, vipData: null });
+
       setToast({
         show: true,
         type: "success",
         message: "VIP profile updated successfully"
       });
-    } catch (error) {
+    } catch {
       setToast({
         show: true,
         type: "error",
         message: "Failed to update VIP profile"
       });
-    } finally {
-      setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
     }
   };
 
-  const handleRemoveVIP = (deviceId) => {
-    setDeleteVIPConfirm({ show: false, deviceId: null });
-    setDevices((prev) =>
-      prev.map((d) =>
-        d.id === deviceId
-          ? {
-              ...d,
-              vipName: "",
-              vipImageUrl: "",
-              vipId: null,
-              streetAddress: ""
-            }
-          : d
-      )
-    );
+  const handleRemoveVIP = async (deviceId) => {
+    try {
+      setDeleteVIPConfirm({ show: false, deviceId: null });
 
-    setToast({
-      show: true,
-      type: "success",
-      message: "VIP profile removed from cane"
-    });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
+      const response = await deleteVIP(deviceId);
+      if (!response.success) {
+        throw new Error(response.message || "Failed to remove VIP from cane");
+      }
+
+      setDevices((prev) =>
+        prev.map((d) => (d.deviceId === deviceId ? { ...d, vip: null } : d))
+      );
+
+      setToast({
+        show: true,
+        type: "success",
+        message: "VIP profile removed from cane"
+      });
+    } catch (error) {
+      setToast({
+        show: true,
+        type: "error",
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to remove VIP"
+      });
+    }
   };
 
   return (
@@ -367,6 +365,7 @@ const Devices = () => {
               deviceName: ""
             })
           }
+          closeTimer={null}
           title="Edit Cane Nickname"
           modalType="info"
           footer={null}
@@ -393,16 +392,12 @@ const Devices = () => {
 
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() =>
-                  setEditDeviceModal({
-                    show: false,
-                    deviceId: null,
-                    deviceName: ""
-                  })
-                }
+                onClick={() => {
+                  handleEditDeviceName(editDeviceModal.deviceId, null);
+                }}
                 className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all"
               >
-                Cancel
+                Reset to Default
               </button>
               <button
                 onClick={() =>
@@ -467,6 +462,9 @@ const Devices = () => {
                   message: "Cane successfully paired to your account"
                 });
               }}
+              response={(res) => {
+                setDevices((prev) => [...prev, res.data]);
+              }}
             />
           </div>
         </Modal>
@@ -475,20 +473,20 @@ const Devices = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             {devices.map((device) => (
               <DeviceCard
-                key={device.id}
+                key={device.deviceId}
                 device={device}
-                onEditVIP={handleEditVIP}
+                onEditVIP={handleVipModalAction}
                 onViewVIP={() => handleViewVIP(device)}
                 onRemoveVIP={() =>
-                  setDeleteVIPConfirm({ show: true, deviceId: device.id })
+                  setDeleteVIPConfirm({ show: true, deviceId: device.deviceId })
                 }
                 onUnpairDevice={() =>
-                  setUnpairConfirm({ show: true, deviceId: device.id })
+                  setUnpairConfirm({ show: true, deviceId: device.deviceId })
                 }
                 onEditDevice={() =>
                   setEditDeviceModal({
                     show: true,
-                    deviceId: device.id,
+                    deviceId: device.deviceId,
                     deviceName: device.name
                   })
                 }
@@ -609,7 +607,7 @@ const DeviceCard = ({
               Assigned VIP
             </h4>
             <div className="flex flex-wrap gap-2">
-              {device.vipName ? (
+              {device?.vip ? (
                 <>
                   <button
                     onClick={() => onViewVIP(device)}
@@ -629,7 +627,7 @@ const DeviceCard = ({
                     <span className="hidden sm:inline">Edit</span>
                   </button>
                   <button
-                    onClick={() => onRemoveVIP(device.id)}
+                    onClick={() => onRemoveVIP(device.deviceId)}
                     className="px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Icon icon="ph:trash-bold" className="w-3.5 h-3.5" />
@@ -719,7 +717,7 @@ const DeviceCard = ({
 
                   <button
                     onClick={() => {
-                      onUnpairDevice(device.id);
+                      onUnpairDevice(device.deviceId);
                       setShowActionsMenu(false);
                     }}
                     className="w-full px-4 py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2 border-t border-gray-100"

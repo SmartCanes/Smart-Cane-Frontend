@@ -20,20 +20,20 @@ export const getVIPs = () => handleRequest(() => backendApi.get("/vip"));
 export const updateVIP = (deviceId, payload) =>
   handleRequest(() => backendApi.put(`/vip/${deviceId}`, payload));
 
-export const deleteVIP = (id) =>
-  handleRequest(() => backendApi.delete(`/vip/${id}`));
+export const deleteVIP = (deviceId) =>
+  handleRequest(() => backendApi.delete(`/vip/${deviceId}`));
 
 // Device
 export const getDevices = () => handleRequest(() => backendApi.get("/device"));
 
 export const assignVipToDevice = (deviceId, payload) =>
-  handleRequest(() => backendApi.post(`/device/${deviceId}`, payload));
+  handleRequest(() => backendApi.post(`/device/vip/${deviceId}`, payload));
 
 export const pairDevice = (payload) =>
   handleRequest(() => backendApi.post("/device/pair", payload));
 
 export const unpairDevice = (deviceId) =>
-  handleRequest(() => backendApi.delete(`/device/${deviceId}`));
+  handleRequest(() => backendApi.post(`/device/unpair/${deviceId}`));
 
 export const updateDeviceName = (deviceId, payload) =>
   handleRequest(() => backendApi.put(`/device/${deviceId}/name`, payload));
