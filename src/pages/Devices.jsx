@@ -29,12 +29,7 @@ const Devices = () => {
   ]);
 
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [isAddDeviceModalOpen, setIsAddDeviceModalOpen] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState({
-    show: false,
-    deviceId: null
-  });
 
   const [newDeviceName, setNewDeviceName] = useState("");
 
@@ -61,52 +56,10 @@ const Devices = () => {
     deviceId: null
   });
 
-  // ======== DEVICE HANDLERS ========
-  const handleDeleteClick = (deviceId) => {
-    setDeleteConfirm({ show: true, deviceId });
-  };
-
-  const handleAddDevice = () => setIsAddDeviceModalOpen(true);
-
-  const handleCreateDevice = () => {
-    if (!newDeviceName.trim()) {
-      setToast({
-        show: true,
-        type: "error",
-        message: "Please enter a cane nickname"
-      });
-      setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
-      return;
-    }
-
-    const newId = devices.length ? devices[devices.length - 1].id + 1 : 1;
-    const deviceToAdd = {
-      id: newId,
-      name: newDeviceName,
-      lastActive: new Date().toLocaleString(),
-      status: "online",
-      vipName: "",
-      vipImageUrl: "",
-      vipId: null,
-      isPaired: true,
-      province: "Metro Manila",
-      city: "Quezon City",
-      barangay: "San Bartolome",
-      streetAddress: "",
-      batteryLevel: 100,
-      signalStrength: "strong"
-    };
-
-    setDevices((prev) => [...prev, deviceToAdd]);
-    setIsAddDeviceModalOpen(false);
-    setNewDeviceName("");
-    setToast({
-      show: true,
-      type: "success",
-      message: "Cane added successfully"
-    });
-    setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
-  };
+  const [deleteVIPConfirm, setDeleteVIPConfirm] = useState({
+    show: false,
+    deviceId: null
+  });
 
   const handleEditDeviceName = (deviceId, newName) => {
     if (!newName.trim()) {
@@ -157,14 +110,6 @@ const Devices = () => {
       message: "Cane unpaired and removed from your account"
     });
     setTimeout(() => setToast({ show: false, type: "", message: "" }), 3000);
-  };
-
-  const handleConfirmUnpair = () => {
-    handleUnpairDevice(unpairConfirm.deviceId);
-  };
-
-  const handleCancelUnpair = () => {
-    setUnpairConfirm({ show: false, deviceId: null });
   };
 
   // ======== VIP HANDLERS ========
@@ -306,6 +251,7 @@ const Devices = () => {
   };
 
   const handleRemoveVIP = (deviceId) => {
+    setDeleteVIPConfirm({ show: false, deviceId: null });
     setDevices((prev) =>
       prev.map((d) =>
         d.id === deviceId
@@ -361,150 +307,90 @@ const Devices = () => {
           />
         )}
 
-        {deleteConfirm.show && (
-          <Modal
-            isOpen={deleteConfirm.show}
-            onClose={handleCancelDelete}
-            title="Remove Cane?"
-            modalType="error"
-            message="This will remove the cane from your account. You can add it again later by pairing."
-            handleCancel={handleCancelDelete}
-            handleConfirm={handleConfirmDelete}
-          />
-        )}
-
         {/* UNPAIR CONFIRMATION MODAL */}
-        {unpairConfirm.show && (
-          <Modal
-            isOpen={unpairConfirm.show}
-            onClose={handleCancelUnpair}
-            title="Unpair Cane?"
-            modalType="error"
-            message="This will unpair and remove the cane from your account."
-            handleCancel={handleCancelUnpair}
-            handleConfirm={handleConfirmUnpair}
-          />
-        )}
+        <Modal
+          isOpen={unpairConfirm.show}
+          onClose={() => setUnpairConfirm({ show: false, deviceId: null })}
+          title="Unpair Cane?"
+          modalType="error"
+          message="This will unpair and remove the cane from your account."
+          handleCancel={() => setUnpairConfirm({ show: false, deviceId: null })}
+          handleConfirm={() => handleUnpairDevice(unpairConfirm.deviceId)}
+        />
 
-        {/* ADD CANE MODAL */}
-        {isAddDeviceModalOpen && (
-          <Modal
-            isOpen={isAddDeviceModalOpen}
-            onClose={() => setIsAddDeviceModalOpen(false)}
-            title="Add New Cane"
-            modalType="info"
-            footer={null}
-          >
-            <div className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Cane Nickname *
-                </label>
-                <input
-                  type="text"
-                  value={newDeviceName}
-                  onChange={(e) => setNewDeviceName(e.target.value)}
-                  placeholder="e.g., Jacob's Cane, Grandma's Cane"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                  autoFocus
-                />
-                <p className="text-xs text-gray-500">
-                  Give your cane a friendly nickname for easy identification
-                </p>
-              </div>
-
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 mt-2">
-                <p className="text-sm text-blue-700 flex items-start gap-2">
-                  <Icon
-                    icon="ph:info-bold"
-                    className="w-4 h-4 mt-0.5 flex-shrink-0"
-                  />
-                  New canes are automatically paired with your account and ready
-                  to use
-                </p>
-              </div>
-
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={() => setIsAddDeviceModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateDevice}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all hover:shadow-lg"
-                >
-                  Add Cane
-                </button>
-              </div>
-            </div>
-          </Modal>
-        )}
+        <Modal
+          isOpen={deleteVIPConfirm.show}
+          onClose={() => setDeleteVIPConfirm({ show: false, deviceId: null })}
+          title="Remove VIP Profile?"
+          modalType="error"
+          message="This will remove the VIP profile assigned to this cane."
+          handleCancel={() =>
+            setDeleteVIPConfirm({ show: false, deviceId: null })
+          }
+          handleConfirm={() => handleRemoveVIP(deleteVIPConfirm.deviceId)}
+        />
 
         {/* EDIT CANE NAME MODAL */}
-        {editDeviceModal.show && (
-          <Modal
-            isOpen={editDeviceModal.show}
-            onClose={() =>
-              setEditDeviceModal({
-                show: false,
-                deviceId: null,
-                deviceName: ""
-              })
-            }
-            title="Edit Cane Nickname"
-            modalType="info"
-            footer={null}
-          >
-            <div className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Cane Nickname *
-                </label>
-                <input
-                  type="text"
-                  value={editDeviceModal.deviceName}
-                  onChange={(e) =>
-                    setEditDeviceModal((prev) => ({
-                      ...prev,
-                      deviceName: e.target.value
-                    }))
-                  }
-                  placeholder="Enter new cane nickname"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                  autoFocus
-                />
-              </div>
-
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={() =>
-                    setEditDeviceModal({
-                      show: false,
-                      deviceId: null,
-                      deviceName: ""
-                    })
-                  }
-                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() =>
-                    handleEditDeviceName(
-                      editDeviceModal.deviceId,
-                      editDeviceModal.deviceName
-                    )
-                  }
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all hover:shadow-lg"
-                >
-                  Save Changes
-                </button>
-              </div>
+        <Modal
+          isOpen={editDeviceModal.show}
+          onClose={() =>
+            setEditDeviceModal({
+              show: false,
+              deviceId: null,
+              deviceName: ""
+            })
+          }
+          title="Edit Cane Nickname"
+          modalType="info"
+          footer={null}
+        >
+          <div className="flex flex-col gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Cane Nickname *
+              </label>
+              <input
+                type="text"
+                value={editDeviceModal.deviceName}
+                onChange={(e) =>
+                  setEditDeviceModal((prev) => ({
+                    ...prev,
+                    deviceName: e.target.value
+                  }))
+                }
+                placeholder="Enter new cane nickname"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                autoFocus
+              />
             </div>
-          </Modal>
-        )}
+
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() =>
+                  setEditDeviceModal({
+                    show: false,
+                    deviceId: null,
+                    deviceName: ""
+                  })
+                }
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() =>
+                  handleEditDeviceName(
+                    editDeviceModal.deviceId,
+                    editDeviceModal.deviceName
+                  )
+                }
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all hover:shadow-lg"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </Modal>
 
         {/* VIP PROFILE MODAL */}
         <VipProfileModal
@@ -559,12 +445,10 @@ const Devices = () => {
               <DeviceCard
                 key={device.id}
                 device={device}
-                onDelete={handleDeleteClick}
                 onEditVIP={handleEditVIP}
                 onViewVIP={() => handleViewVIP(device)}
-                onRemoveVIP={() => handleRemoveVIP(device.id)}
-                onPairDevice={() =>
-                  setPairDeviceModal({ show: true, deviceId: device.id })
+                onRemoveVIP={() =>
+                  setDeleteVIPConfirm({ show: true, deviceId: device.id })
                 }
                 onUnpairDevice={() =>
                   setUnpairConfirm({ show: true, deviceId: device.id })
@@ -599,11 +483,9 @@ const Devices = () => {
 // UPDATED DeviceCard component with fixed dropdown positioning
 const DeviceCard = ({
   device,
-  onDelete,
   onEditVIP,
   onViewVIP,
   onRemoveVIP,
-  onPairDevice,
   onUnpairDevice,
   onEditDevice
 }) => {
