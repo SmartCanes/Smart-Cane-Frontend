@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import FeedbackModal from "../feedbackmodal";
+import FeedbackModal from "./feedbackmodal";
 
 const SendNote = () => {
   const [message, setMessage] = useState("");

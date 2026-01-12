@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
+import avatarPlaceholder from "@/assets/images/default-profile.jpg";
 import { useState, useRef, useEffect } from "react";
 
 const VipProfileModal = ({
@@ -17,7 +18,7 @@ const VipProfileModal = ({
     firstName: "",
     middleName: "",
     lastName: "",
-    streetAdress: "",
+    streetAddress: "",
     vipImageUrl: "",
     province: "Metro Manila",
     city: "Quezon City",
@@ -43,11 +44,13 @@ const VipProfileModal = ({
         firstName: initialData.firstName || "",
         middleName: initialData.middleName || "",
         lastName: initialData.lastName || "",
-        streetAdress: initialData.streetAdress || "",
+        streetAddress: initialData.streetAddress || "",
         vipImageUrl: initialData.vipImageUrl || "",
         province: initialData.province || "Metro Manila",
         city: initialData.city || "Quezon City",
-        barangay: initialData.barangay || "San Bartolome"
+        barangay: initialData.barangay || "San Bartolome",
+        createdAt: initialData.created_at || "",
+        updatedAt: initialData.updated_at || ""
       });
       if (initialData.vipImageUrl) {
         setImagePreview(initialData.vipImageUrl);
@@ -70,14 +73,12 @@ const VipProfileModal = ({
     }
   };
 
-  // Handle image upload
   const handleImageUpload = (e) => {
     if (isViewMode) return;
 
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file
     const maxSize = 2 * 1024 * 1024; // 2MB
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
 
@@ -97,7 +98,6 @@ const VipProfileModal = ({
     setFormData((prev) => ({ ...prev, vipImageUrl: "" })); // Clear URL if file is uploaded
   };
 
-  // Remove image
   const handleRemoveImage = () => {
     if (isViewMode) return;
 
@@ -106,7 +106,18 @@ const VipProfileModal = ({
     setImageError("");
   };
 
-  // Trigger file input
+  const resolveProfileImageSrc = (image) => {
+    if (!image) return avatarPlaceholder;
+
+    if (image.startsWith("blob:")) return image;
+
+    if (image.startsWith("http")) return image;
+
+    if (image.includes("default")) return image;
+
+    return `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${image}`;
+  };
+
   const triggerFileInput = () => {
     if (isViewMode) return;
     fileInputRef.current?.click();
@@ -119,8 +130,8 @@ const VipProfileModal = ({
     if (!formData.firstName.trim())
       newErrors.firstName = "First name is required";
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.streetAdress.trim())
-      newErrors.streetAdress = "Street address is required";
+    if (!formData.streetAddress.trim())
+      newErrors.streetAddress = "Street address is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -141,12 +152,10 @@ const VipProfileModal = ({
       first_name: formData.firstName || "",
       middle_name: formData.middleName || "",
       last_name: formData.lastName || "",
-      street_address: formData.streetAdress || "",
-      vip_image_url: formData.vipImageUrl || "",
+      street_address: formData.streetAddress || "",
       province: formData.province || "Metro Manila",
       city: formData.city || "Quezon City",
-      barangay: formData.barangay || "San Bartolome",
-      vipImageUrl: imageFile ? null : formData.vipImageUrl
+      barangay: formData.barangay || "San Bartolome"
     };
 
     onSubmit({ vip: { ...submitData } }, imageFile);
@@ -154,7 +163,7 @@ const VipProfileModal = ({
       firstName: "",
       middleName: "",
       lastName: "",
-      streetAdress: "",
+      streetAddress: "",
       vipImageUrl: "",
       province: "Metro Manila",
       city: "Quezon City",
@@ -549,17 +558,17 @@ const VipProfileModal = ({
                           {isViewMode ? (
                             <div className="p-3 bg-gray-50 rounded-lg border border-gray-300">
                               <p className="text-gray-800">
-                                {formData.streetAdress || "—"}
+                                {formData.streetAddress || "—"}
                               </p>
                             </div>
                           ) : (
                             <input
                               type="text"
-                              name="streetAdress"
-                              value={formData.streetAdress}
+                              name="streetAddress"
+                              value={formData.streetAddress}
                               onChange={handleInputChange}
                               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
-                                errors.streetAdress
+                                errors.streetAddress
                                   ? "border-red-500"
                                   : "border-gray-300"
                               } ${isViewMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
@@ -568,9 +577,9 @@ const VipProfileModal = ({
                               readOnly={isViewMode}
                             />
                           )}
-                          {!isViewMode && errors.streetAdress && (
+                          {!isViewMode && errors.streetAddress && (
                             <p className="text-red-500 text-xs">
-                              {errors.streetAdress}
+                              {errors.streetAddress}
                             </p>
                           )}
                         </div>

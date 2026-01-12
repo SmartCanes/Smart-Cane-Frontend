@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import FeedbackModal from "@/ui/feedbackmodal";
+import FeedbackModal from "@/ui/components/feedbackmodal";
 
 const Notes = () => {
   const [message, setMessage] = useState("");
