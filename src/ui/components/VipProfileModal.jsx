@@ -2,6 +2,7 @@ import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import avatarPlaceholder from "@/assets/images/default-profile.jpg";
 import { useState, useRef, useEffect } from "react";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
 const VipProfileModal = ({
   isOpen,
@@ -106,18 +107,6 @@ const VipProfileModal = ({
     setImageError("");
   };
 
-  const resolveProfileImageSrc = (image) => {
-    if (!image) return avatarPlaceholder;
-
-    if (image.startsWith("blob:")) return image;
-
-    if (image.startsWith("http")) return image;
-
-    if (image.includes("default")) return image;
-
-    return `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${image}`;
-  };
-
   const triggerFileInput = () => {
     if (isViewMode) return;
     fileInputRef.current?.click();
@@ -171,7 +160,6 @@ const VipProfileModal = ({
     });
   };
 
-  // Format full name for display
   const getFullName = () => {
     const parts = [
       formData.firstName,
@@ -279,7 +267,7 @@ const VipProfileModal = ({
                             >
                               {imagePreview ? (
                                 <img
-                                  src={imagePreview}
+                                  src={resolveProfileImageSrc(imagePreview)}
                                   alt="Profile Preview"
                                   className="w-full h-full object-cover"
                                 />
@@ -413,7 +401,7 @@ const VipProfileModal = ({
                               {getFullName()}
                             </h3>
                             <p className="text-sm text-gray-600">
-                              VIP ID: {initialData?.vip_id || "N/A"}
+                              VIP ID: {initialData?.vipId || "N/A"}
                             </p>
                           </div>
                         </div>
@@ -679,9 +667,9 @@ const VipProfileModal = ({
                             </label>
                             <div className="p-3 bg-gray-50 rounded-lg border border-gray-300">
                               <p className="text-gray-800 text-sm">
-                                {initialData.created_at
+                                {initialData.createdAt
                                   ? new Date(
-                                      initialData.created_at
+                                      initialData.createdAt
                                     ).toLocaleDateString("en-US", {
                                       year: "numeric",
                                       month: "short",
@@ -699,9 +687,9 @@ const VipProfileModal = ({
                             </label>
                             <div className="p-3 bg-gray-50 rounded-lg border border-gray-300">
                               <p className="text-gray-800 text-sm">
-                                {initialData.updated_at
+                                {initialData.updatedAt
                                   ? new Date(
-                                      initialData.updated_at
+                                      initialData.updatedAt
                                     ).toLocaleDateString("en-US", {
                                       year: "numeric",
                                       month: "short",
@@ -744,7 +732,7 @@ const VipProfileModal = ({
                           {!isViewMode && (
                             <button
                               type="submit"
-                              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="px-6 py-2.5 bg-[#11285A] hover:bg-[#0d1b3d] text-white font-semibold rounded-lg transition-all hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={isLoading}
                             >
                               {isLoading ? (

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import Toast from "../ui/components/Toast";
 import Modal from "../ui/components/Modal";
-import VipProfileModal from "@/ui/VipProfileModal";
+import VipProfileModal from "@/ui/components/VipProfileModal";
 import ScannerCamera from "@/ui/components/Scanner";
 import { useUserStore } from "@/stores/useStore";
 import {
@@ -10,8 +10,11 @@ import {
   deleteVIP,
   getDevices,
   unpairDevice,
-  updateDeviceName
+  updateDeviceName,
+  updateVIP,
+  uploadVIPImage
 } from "@/api/backendService";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
 // ========== DEVICES COMPONENT ==========
 const Devices = () => {
@@ -139,6 +142,7 @@ const Devices = () => {
 
   // ======== VIP HANDLERS ========
   const handleViewVIP = (device) => {
+    const { vip } = device;
     if (!device.vip) {
       setToast({
         show: true,
@@ -149,17 +153,17 @@ const Devices = () => {
     }
 
     const vipData = {
-      vip_id: device.vip.vipId,
-      first_name: device.vip.firstName,
-      middle_name: device.vip.middleName || "",
-      last_name: device.vip.lastName,
-      vip_image_url: device.vip.vipImageUrl || "",
-      province: device.vip.province,
-      city: device.vip.city,
-      barangay: device.vip.barangay,
-      street_address: device.vip.streetAddress || "",
-      created_at: device.vip.createdAt,
-      updated_at: device.vip.updatedAt
+      vipId: vip.vipId,
+      firstName: vip.firstName,
+      middleName: vip.middleName || "",
+      lastName: vip.lastName,
+      vipImageUrl: vip.vipImageUrl || "",
+      province: vip.province,
+      city: vip.city,
+      barangay: vip.barangay,
+      streetAddress: vip.streetAddress || "",
+      createdAt: vip.createdAt,
+      updatedAt: vip.updatedAt
     };
 
     setVipModal({
@@ -186,20 +190,20 @@ const Devices = () => {
       mode: "edit",
       device,
       vipData: {
-        vip_id: device.vip.vipId,
-        first_name: device.vip.firstName,
-        middle_name: device.vip.middleName || "",
-        last_name: device.vip.lastName,
-        vip_image_url: device.vip.vipImageUrl || "",
+        vipId: device.vip.vipId,
+        firstName: device.vip.firstName,
+        middleName: device.vip.middleName || "",
+        lastName: device.vip.lastName,
+        vipImageUrl: device.vip.vipImageUrl || "",
         province: device.vip.province,
         city: device.vip.city,
         barangay: device.vip.barangay,
-        street_address: device.vip.streetAddress || ""
+        streetAddress: device.vip.streetAddress || ""
       }
     });
   };
 
-  const handleCreateVIP = async (formData) => {
+  const handleCreateVIP = async (formData, imageFile) => {
     try {
       const response = await assignVipToDevice(
         vipModal.device.deviceId,
@@ -208,9 +212,37 @@ const Devices = () => {
 
       const newVip = response.data.vip;
 
+      let uploadedImageUrl;
+
+      if (imageFile) {
+        try {
+          const imageResponse = await uploadVIPImage(newVip.vipId, imageFile);
+
+          if (imageResponse.success) {
+            uploadedImageUrl = imageResponse.data.relativePath;
+
+            setToast({
+              show: true,
+              message: "Profile image uploaded successfully",
+              type: "success"
+            });
+          }
+        } catch (imageError) {
+          console.error("Failed to upload image:", imageError);
+          setToast({
+            show: true,
+            message:
+              "Profile saved, but image upload failed. Please try uploading the image again.",
+            type: "warning"
+          });
+        }
+      }
+
       setDevices((prev) =>
         prev.map((d) =>
-          d.deviceId === vipModal.device.deviceId ? { ...d, vip: newVip } : d
+          d.deviceId === vipModal.device.deviceId
+            ? { ...d, vip: { ...newVip, vipImageUrl: uploadedImageUrl } }
+            : d
         )
       );
 
@@ -230,26 +262,47 @@ const Devices = () => {
     }
   };
 
-  const handleUpdateVIP = async (formData) => {
+  const handleUpdateVIP = async (formData, imageFile) => {
     try {
+      let uploadedImageUrl;
+
+      if (imageFile) {
+        try {
+          const imageResponse = await uploadVIPImage(
+            vipModal.vipData.vipId,
+            imageFile
+          );
+
+          if (imageResponse.success) {
+            uploadedImageUrl = imageResponse.data.relativePath;
+
+            setToast({
+              show: true,
+              message: "Profile image uploaded successfully",
+              type: "success"
+            });
+          }
+        } catch (imageError) {
+          console.error("Failed to upload image:", imageError);
+          setToast({
+            show: true,
+            message:
+              "Profile saved, but image upload failed. Please try uploading the image again.",
+            type: "warning"
+          });
+        }
+      }
+
+      const response = await updateVIP(vipModal.device.deviceId, {
+        ...formData,
+        vip_image_url: uploadedImageUrl
+      });
+
+      const newVip = response.data.vip;
+
       setDevices((prev) =>
         prev.map((d) =>
-          d.deviceId === vipModal.device.deviceId
-            ? {
-                ...d,
-                vip: {
-                  ...d.vip,
-                  firstName: formData.first_name,
-                  middleName: formData.middle_name,
-                  lastName: formData.last_name,
-                  vipImageUrl: formData.vip_image_url,
-                  province: formData.province,
-                  city: formData.city,
-                  barangay: formData.barangay,
-                  streetAddress: formData.street_address
-                }
-              }
-            : d
+          d.deviceId === vipModal.device.deviceId ? { ...d, vip: newVip } : d
         )
       );
 
@@ -258,13 +311,13 @@ const Devices = () => {
       setToast({
         show: true,
         type: "success",
-        message: "VIP profile updated successfully"
+        message: "VIP profile updated for cane"
       });
-    } catch {
+    } catch (error) {
       setToast({
         show: true,
         type: "error",
-        message: "Failed to update VIP profile"
+        message: error.response?.data?.message || error.message
       });
     }
   };
@@ -651,9 +704,9 @@ const DeviceCard = ({
             <div className="flex-shrink-0">
               <div className="relative">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 border-white shadow-lg">
-                  {device.vipImageUrl ? (
+                  {device.vip ? (
                     <img
-                      src={device.vipImageUrl}
+                      src={resolveProfileImageSrc(device.vip.vipImageUrl)}
                       alt={device.vipName}
                       className="w-full h-full object-cover"
                     />
@@ -723,7 +776,7 @@ const DeviceCard = ({
                     className="w-full px-4 py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2 border-t border-gray-100"
                   >
                     <Icon icon="ph:link-break-bold" className="w-4 h-4" />
-                    Unpair & Remove
+                    Unpair
                   </button>
                 </div>
               </div>
