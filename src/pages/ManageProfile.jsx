@@ -3,13 +3,19 @@ import { Icon } from "@iconify/react";
 import avatar from "@/assets/images/team-photo.png";
 import Toast from "../ui/components/Toast";
 import Modal from "../ui/components/Modal";
-import {
-  createVIP,
-  getMyVIP,
-  updateMyVIP,
-  deleteVIP,
-  uploadVIPImage
-} from "@/api/backendService.js";
+// import {
+//   createVIP,
+//   getMyVIP,
+//   updateMyVIP,
+//   deleteVIP,
+//   uploadVIPImage
+// } from "@/api/backendService.js";
+
+const createVIP = () => {};
+const getMyVIP = () => {};
+const updateMyVIP = () => {};
+const deleteVIP = () => {};
+const uploadVIPImage = () => {};
 
 // ========== REUSABLE UI COMPONENTS ==========
 const TextField = ({

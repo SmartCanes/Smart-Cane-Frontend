@@ -4,7 +4,8 @@ import Toast from "../ui/components/Toast";
 import Modal from "../ui/components/Modal";
 import VipProfileModal from "@/ui/components/VipProfileModal";
 import ScannerCamera from "@/ui/components/Scanner";
-import { useUserStore } from "@/stores/useStore";
+// import { useUserStore } from "@/stores/useStore";
+
 import {
   assignVipToDevice,
   deleteVIP,

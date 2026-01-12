@@ -1,6 +1,5 @@
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
-import avatarPlaceholder from "@/assets/images/default-profile.jpg";
 import { useState, useRef, useEffect } from "react";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
