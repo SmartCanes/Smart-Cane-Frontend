@@ -13,6 +13,7 @@ import {
 } from "@/api/backendService.js";
 import DefaultProfile from "@/ui/components/DefaultProfile";
 import { validateField } from "@/utils/ValidationHelper";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
 const PROFILE_FIELDS = [
   "firstName",
@@ -195,18 +196,6 @@ export const GuardianProfile = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
-  };
-
-  const resolveProfileImageSrc = (image) => {
-    if (!image) return avatarPlaceholder;
-
-    if (image.startsWith("blob:")) return image;
-
-    if (image.startsWith("http")) return image;
-
-    if (image.includes("default")) return image;
-
-    return `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/uploads/${image}`;
   };
 
   const validateForm = () => {
