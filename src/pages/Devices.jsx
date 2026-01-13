@@ -707,6 +707,7 @@ const DeviceCard = ({
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 border-white shadow-lg">
                   {device.vip ? (
                     <img
+                      loading="lazy"
                       src={resolveProfileImageSrc(device.vip.vipImageUrl)}
                       alt={device.vipName}
                       className="w-full h-full object-cover"

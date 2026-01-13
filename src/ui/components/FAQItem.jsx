@@ -16,7 +16,12 @@ const FAQItem = ({ question, answer }) => {
           animate={{ rotate: isOpen ? 0 : 180 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
         >
-          <img src={chevronIcon} alt="Chevron Icon" className="w-5 h-5" />
+          <img
+            loading="lazy"
+            src={chevronIcon}
+            alt="Chevron Icon"
+            className="w-5 h-5"
+          />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>

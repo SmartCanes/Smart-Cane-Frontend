@@ -131,6 +131,7 @@ const Header = () => {
           >
             {showImage ? (
               <img
+                loading="lazy"
                 src={profileImageUrl}
                 alt="Profile"
                 className="w-full h-full object-cover"

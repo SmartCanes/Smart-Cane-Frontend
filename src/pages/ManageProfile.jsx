@@ -83,6 +83,7 @@ const GuardianCard = ({ guardian, onDelete }) => (
     <div className="flex justify-between items-start gap-3">
       <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
         <img
+          loading="lazy"
           src={guardian.avatar}
           alt={guardian.name}
           className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover flex-shrink-0"
@@ -878,6 +879,7 @@ const ManageProfile = () => {
             <div className="flex items-center gap-3 md:gap-5">
               <div className="relative">
                 <img
+                  loading="lazy"
                   src={userProfile.avatar}
                   alt={userProfile.name}
                   className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover flex-shrink-0"
@@ -995,6 +997,7 @@ const ManageProfile = () => {
                 <div className="flex-shrink-0">
                   <div className="relative">
                     <img
+                      loading="lazy"
                       src={userProfile.avatar}
                       alt="Profile Preview"
                       className="w-24 h-24 rounded-full object-cover border-2 border-white shadow-sm"
@@ -1201,6 +1204,7 @@ const ManageProfile = () => {
                   <div className="flex-shrink-0">
                     <div className="relative">
                       <img
+                        loading="lazy"
                         src={
                           imageFile ? URL.createObjectURL(imageFile) : avatar
                         }

@@ -77,6 +77,7 @@ export default function Toast({
           className={`px-4 py-4 rounded-sm shadow-lg text-white ${colors[type] || colors.info}`}
         >
           <img
+            loading="lazy"
             src={icons[type]}
             alt={`${type} icon`}
             className="w-6 h-6 mr-3"
@@ -90,7 +91,7 @@ export default function Toast({
             onClick={handleClose}
             className="ml-3 font-bold text-lg focus:outline-none cursor-pointer"
           >
-            <img src={ExitIcon} alt="Close icon" />
+            <img loading="lazy" src={ExitIcon} alt="Close icon" />
           </button>
         </motion.div>
       )}

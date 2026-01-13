@@ -133,6 +133,7 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
         >
           {/* Background Pattern */}
           <motion.img
+            loading="lazy"
             src={SmartCaneLogo}
             alt="Background Pattern"
             initial={{ opacity: 0.05 }}
@@ -150,6 +151,7 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
           >
             {/* Logo */}
             <motion.img
+              loading="lazy"
               src={SmartCaneLogo}
               alt="Smart Cane Logo"
               animate={

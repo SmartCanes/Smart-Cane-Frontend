@@ -80,6 +80,7 @@ const FeatureCard = forwardRef(
 
     const primaryVisual = mainImage ? (
       <img
+        loading="lazy"
         src={mainImage}
         alt={mainImageAlt || title || "Feature visual"}
         className={`pointer-events-none select-none ${mainImageClassName}`}

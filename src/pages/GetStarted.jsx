@@ -9,6 +9,7 @@ const GetStarted = () => {
   return (
     <div className="bg-[#11285A] min-h-screen h-full w-full flex items-center justify-center flex-col relative font-poppins px-4 py-8 overflow-hidden">
       <img
+        loading="lazy"
         src={smartcaneLogo}
         alt="Smart Cane Logo"
         className="absolute opacity-5 select-none z-0 pointer-events-none w-[500px] sm:w-[600px] md:w-[720px]"

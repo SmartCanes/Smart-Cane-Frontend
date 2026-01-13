@@ -123,7 +123,12 @@ function WalkingDirections({
             </div>
 
             {/* Destination pin */}
-            <img src={destinationPin} alt="Destination" className="w-5 h-5" />
+            <img
+              loading="lazy"
+              src={destinationPin}
+              alt="Destination"
+              className="w-5 h-5"
+            />
           </div>
 
           {/* Inputs column */}

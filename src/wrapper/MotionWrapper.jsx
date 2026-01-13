@@ -160,6 +160,7 @@ export const HoverIcon = ({
 }) => {
   return (
     <motion.img
+      loading="lazy"
       src={src}
       alt={alt}
       className={`${className} w-[${size}px] h-[${size}px]`}
@@ -185,6 +186,7 @@ export const BlinkIcon = ({
 }) => {
   return (
     <motion.img
+      loading="lazy"
       src={src}
       alt={alt}
       className={`${className} w-[${size}px] h-[${size}px] object-contain`}
@@ -208,6 +210,7 @@ export const BlinkingIcon = ({
 }) => {
   return (
     <motion.img
+      loading="lazy"
       src={src}
       alt={alt}
       className={`${className} w-[${size}px] h-[${size}px] object-contain`}

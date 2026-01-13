@@ -565,6 +565,7 @@ const GuestPage = () => {
         {" "}
         {/* Hero section //Background Image */}
         <img
+          loading="lazy"
           src={heroBackground}
           alt="Group of people walking with canes"
           className="absolute inset-0 h-full w-full object-cover object-center"
@@ -743,6 +744,7 @@ const GuestPage = () => {
         <ScaleIn delay={0.2}>
           <div className="flex justify-center rounded-2xl bg-[#dfdfdf] min-h-36 w-full overflow-hidden sm:min-h-[200px] md:min-h-[240px]">
             <img
+              loading="lazy"
               src={teamPhoto}
               alt="Team Photo"
               className="object-cover w-full rounded-2xl"
@@ -876,6 +878,7 @@ const GuestPage = () => {
               <div className="flex items-center gap-3 ">
                 <BlinkIcon src={icaneLogoWhite} alt="iCane emblem" size={12} />
                 <img
+                  loading="lazy"
                   src={icaneLabel}
                   alt="iCane wordmark"
                   className="h-6 object-contain"

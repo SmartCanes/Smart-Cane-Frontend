@@ -266,6 +266,7 @@ const VipProfileModal = ({
                             >
                               {imagePreview ? (
                                 <img
+                                  loading="lazy"
                                   src={resolveProfileImageSrc(imagePreview)}
                                   alt="Profile Preview"
                                   className="w-full h-full object-cover"

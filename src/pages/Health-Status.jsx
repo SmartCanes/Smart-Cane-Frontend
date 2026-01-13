@@ -50,6 +50,7 @@ const ComponentCard = ({ component, status }) => {
       <div className="flex items-start gap-3 mb-4">
         <div className="flex-shrink-0">
           <img
+            loading="lazy"
             src={ComponentIcon}
             alt="Component Icon"
             className={`w-5 h-5 md:w-7 md:h-7 ${status ? "brightness-0 invert" : ""}`}

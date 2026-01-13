@@ -577,6 +577,7 @@ export const GuardianProfile = () => {
                     </div>
                   ) : (
                     <img
+                      loading="lazy"
                       src={resolveProfileImageSrc(user.guardianImageUrl)}
                       alt={`${user.firstName} ${user.middleName || ""} ${user.lastName}`}
                       className="w-16 h-16 rounded-full object-cover"
@@ -789,6 +790,7 @@ export const GuardianProfile = () => {
                     <div className="flex-shrink-0">
                       <div className="relative">
                         <img
+                          loading="lazy"
                           src={resolveProfileImageSrc(profileImage)}
                           alt="Profile Preview"
                           className="w-24 h-24 rounded-full object-cover border-2 border-white shadow-sm"

@@ -83,6 +83,7 @@ const GuardianNetwork = () => {
               className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4"
             >
               <img
+                loading="lazy"
                 src={guardian.imageUrl}
                 alt={guardian.name}
                 className="w-14 h-14 rounded-full object-cover"

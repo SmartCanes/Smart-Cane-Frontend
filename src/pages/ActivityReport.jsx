@@ -231,6 +231,7 @@ const ActivityReport = () => {
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
                             <img
+                              loading="lazy"
                               src={activity.user.avatar}
                               alt={activity.user.name}
                               className="w-10 h-10 rounded-full object-cover bg-gray-200"
@@ -325,6 +326,7 @@ const ActivityReport = () => {
                     {/* User Info */}
                     <div className="flex items-center gap-3 mb-3">
                       <img
+                        loading="lazy"
                         src={activity.user.avatar}
                         alt={activity.user.name}
                         className="w-12 h-12 rounded-full object-cover bg-gray-200 flex-shrink-0"
