@@ -295,7 +295,7 @@ const Login = () => {
                 <PrimaryButton
                   className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
                   bgColor="bg-primary-100"
-                  text={loading ? "Logging in..." : "Sign In"}
+                  text={loading ? "Signing in..." : "Sign In"}
                   type="submit"
                   disabled={retryAfter > 0 || loading || captchaLoading}
                 />

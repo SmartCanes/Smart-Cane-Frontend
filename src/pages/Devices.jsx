@@ -560,7 +560,7 @@ const Devices = () => {
             vipModal.mode === "create"
               ? isSubmitting
                 ? "Adding..."
-                : "Add VIP to Cane"
+                : "Add VIP"
               : isSubmitting
                 ? "Updating..."
                 : "Update VIP"
