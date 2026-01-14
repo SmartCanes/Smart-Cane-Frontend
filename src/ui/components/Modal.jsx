@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
-import PrimaryButton from "./PrimaryButton";
+import Button from "@/ui/components/Button";
 
 const MODAL_TYPES = {
   warning: {
@@ -68,17 +68,21 @@ export default function Modal({
 
   actionText,
   onAction,
+  confirmText,
 
   handleConfirm,
   handleCancel,
+  isSubmitting = false,
   children,
   footer
 }) {
   useEffect(() => {
+    if (isSubmitting) return;
+
     const handleEscape = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [onClose]);
+  }, [onClose, isSubmitting]);
 
   useEffect(() => {
     if (!closeTimer) return;
@@ -99,7 +103,7 @@ export default function Modal({
         <div className="fixed inset-0 z-50 overflow-y-auto ">
           <motion.div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 flex justify-center items-center"
-            onClick={onClose}
+            onClick={!isSubmitting ? onClose : undefined}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -116,7 +120,8 @@ export default function Modal({
                 {MODAL_VARIANTS[variant].showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+                    disabled={isSubmitting}
+                    className={`absolute top-4 right-4 text-gray-400  transition ${isSubmitting ? "cursor-default hover:none" : "cursor-pointer hover:text-gray-600"}`}
                   >
                     <Icon icon="ph:x-bold" className="w-6 h-6" />
                   </button>
@@ -143,16 +148,33 @@ export default function Modal({
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={handleCancel || onClose}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                      disabled={isSubmitting}
+                      className={`flex-1 px-4 py-2 border rounded-lg transition ${
+                        isSubmitting
+                          ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                          : "border-gray-300 hover:bg-gray-200"
+                      }`}
                     >
                       Cancel
                     </button>
 
                     <button
                       onClick={handleConfirm}
-                      className={`flex-1 px-4 py-2 ${type.buttonColor} ${type.hover} text-white rounded-lg transition-colors font-bold cursor-pointer`}
+                      className={`flex justify-center items-center gap-2 flex-1 px-4 py-2 rounded-lg font-bold text-white transition-colors  ${type.buttonColor} ${!isSubmitting ? `${type.hover} cursor-pointer` : "cursor-not-allowed opacity-70"}`}
+                      disabled={isSubmitting}
                     >
-                      Yes
+                      {isSubmitting && (
+                        <Icon
+                          icon="ph:circle-notch-bold"
+                          className="w-5 h-5 animate-spin"
+                        />
+                      )}
+
+                      {confirmText
+                        ? confirmText
+                        : isSubmitting
+                          ? "Processing..."
+                          : "Confirm"}
                     </button>
                   </div>
                 ) : null}
@@ -177,7 +199,7 @@ export default function Modal({
                     {children || message}
                   </div>
                   {actionText && (
-                    <PrimaryButton
+                    <Button
                       className="w-full max-w-md text-[15px] sm:text-[18px] font-medium mt-auto"
                       bgColor="bg-primary-100"
                       text={actionText}

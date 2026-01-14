@@ -16,10 +16,14 @@ import {
   uploadVIPImage
 } from "@/api/backendService";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import Button from "@/ui/components/Button";
 
 // ========== DEVICES COMPONENT ==========
 const Devices = () => {
   const [devices, setDevices] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nicknameSubmitting, setNicknameSubmitting] = useState(false);
+  const [resetNicknameSubmitting, setResetNicknameSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -74,8 +78,13 @@ const Devices = () => {
     deviceId: null
   });
 
-  const handleEditDeviceName = async (deviceId, newName) => {
+  const handleEditDeviceName = async (deviceId, newName, actionType) => {
+    const setSubmitting =
+      actionType === "save"
+        ? setNicknameSubmitting
+        : setResetNicknameSubmitting;
     try {
+      setSubmitting(true);
       const payload =
         newName !== null ? { device_name: newName } : { device_name: null };
 
@@ -111,11 +120,14 @@ const Devices = () => {
           error.message ||
           "Failed to update cane nickname"
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleUnpairDevice = async (deviceId) => {
     try {
+      setIsSubmitting(true);
       const response = await unpairDevice(deviceId);
 
       if (!response.success) {
@@ -138,6 +150,8 @@ const Devices = () => {
           error.message ||
           "Failed to unpair cane"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -206,6 +220,7 @@ const Devices = () => {
 
   const handleCreateVIP = async (formData, imageFile) => {
     try {
+      setIsSubmitting(true);
       const response = await assignVipToDevice(
         vipModal.device.deviceId,
         formData
@@ -222,20 +237,20 @@ const Devices = () => {
           if (imageResponse.success) {
             uploadedImageUrl = imageResponse.data.relativePath;
 
-            setToast({
-              show: true,
-              message: "Profile image uploaded successfully",
-              type: "success"
-            });
+            // setToast({
+            //   show: true,
+            //   message: "Profile image uploaded successfully",
+            //   type: "success"
+            // });
           }
         } catch (imageError) {
           console.error("Failed to upload image:", imageError);
-          setToast({
-            show: true,
-            message:
-              "Profile saved, but image upload failed. Please try uploading the image again.",
-            type: "warning"
-          });
+          // setToast({
+          //   show: true,
+          //   message:
+          //     "Profile saved, but image upload failed. Please try uploading the image again.",
+          //   type: "warning"
+          // });
         }
       }
 
@@ -254,17 +269,22 @@ const Devices = () => {
         type: "success",
         message: "VIP profile created for cane"
       });
+      return true;
     } catch (error) {
       setToast({
         show: true,
         type: "error",
         message: error.response?.data?.message || error.message
       });
+      return false;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleUpdateVIP = async (formData, imageFile) => {
     try {
+      setIsSubmitting(true);
       let uploadedImageUrl;
 
       if (imageFile) {
@@ -276,21 +296,15 @@ const Devices = () => {
 
           if (imageResponse.success) {
             uploadedImageUrl = imageResponse.data.relativePath;
-
-            setToast({
-              show: true,
-              message: "Profile image uploaded successfully",
-              type: "success"
-            });
           }
         } catch (imageError) {
           console.error("Failed to upload image:", imageError);
-          setToast({
-            show: true,
-            message:
-              "Profile saved, but image upload failed. Please try uploading the image again.",
-            type: "warning"
-          });
+          // setToast({
+          //   show: true,
+          //   message:
+          //     "Profile saved, but image upload failed. Please try uploading the image again.",
+          //   type: "warning"
+          // });
         }
       }
 
@@ -314,18 +328,22 @@ const Devices = () => {
         type: "success",
         message: "VIP profile updated for cane"
       });
+      return true;
     } catch (error) {
       setToast({
         show: true,
         type: "error",
         message: error.response?.data?.message || error.message
       });
+      return false;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleRemoveVIP = async (deviceId) => {
     try {
-      setDeleteVIPConfirm({ show: false, deviceId: null });
+      setIsSubmitting(true);
 
       const response = await deleteVIP(deviceId);
       if (!response.success) {
@@ -336,6 +354,7 @@ const Devices = () => {
         prev.map((d) => (d.deviceId === deviceId ? { ...d, vip: null } : d))
       );
 
+      setDeleteVIPConfirm({ show: false, deviceId: null });
       setToast({
         show: true,
         type: "success",
@@ -350,6 +369,8 @@ const Devices = () => {
           error.message ||
           "Failed to remove VIP"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -367,13 +388,13 @@ const Devices = () => {
               {devices.filter((d) => d.isPaired).length} active
             </p>
           </div>
-          <button
+          <Button
             onClick={() => setShowScanner(true)}
-            className="w-full sm:w-auto bg-gradient-to-r bg-[#11285A] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#0d1b3d] transition-all hover:shadow-lg flex items-center justify-center gap-2"
+            className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center justify-center gap-2"
           >
             <Icon icon="ph:plus-bold" className="w-5 h-5" />
             Add Cane
-          </button>
+          </Button>
         </div>
 
         {/* TOAST NOTIFICATIONS */}
@@ -389,16 +410,20 @@ const Devices = () => {
         {/* UNPAIR CONFIRMATION MODAL */}
         <Modal
           isOpen={unpairConfirm.show}
+          closeTimer={null}
           onClose={() => setUnpairConfirm({ show: false, deviceId: null })}
           title="Unpair Cane?"
           modalType="error"
           message="This will unpair and remove the cane from your account."
           handleCancel={() => setUnpairConfirm({ show: false, deviceId: null })}
           handleConfirm={() => handleUnpairDevice(unpairConfirm.deviceId)}
+          isSubmitting={isSubmitting}
+          confirmText={isSubmitting ? "Unpairing..." : "Unpair"}
         />
 
         <Modal
           isOpen={deleteVIPConfirm.show}
+          closeTimer={null}
           onClose={() => setDeleteVIPConfirm({ show: false, deviceId: null })}
           title="Remove VIP Profile?"
           modalType="error"
@@ -407,6 +432,8 @@ const Devices = () => {
             setDeleteVIPConfirm({ show: false, deviceId: null })
           }
           handleConfirm={() => handleRemoveVIP(deleteVIPConfirm.deviceId)}
+          isSubmitting={isSubmitting}
+          confirmText={isSubmitting ? "Removing..." : "Remove"}
         />
 
         {/* EDIT CANE NAME MODAL */}
@@ -423,15 +450,28 @@ const Devices = () => {
           title="Edit Cane Nickname"
           modalType="info"
           footer={null}
+          isSubmitting={nicknameSubmitting || resetNicknameSubmitting}
         >
-          <div className="flex flex-col gap-4">
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleEditDeviceName(
+                editDeviceModal.deviceId,
+                editDeviceModal.deviceName,
+                "save"
+              );
+            }}
+          >
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
                 Cane Nickname *
               </label>
               <input
                 type="text"
-                value={editDeviceModal.deviceName}
+                value={
+                  resetNicknameSubmitting ? "" : editDeviceModal.deviceName
+                }
                 onChange={(e) =>
                   setEditDeviceModal((prev) => ({
                     ...prev,
@@ -447,25 +487,49 @@ const Devices = () => {
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => {
-                  handleEditDeviceName(editDeviceModal.deviceId, null);
+                  handleEditDeviceName(editDeviceModal.deviceId, null, "reset");
                 }}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all"
+                type="button"
+                disabled={nicknameSubmitting || resetNicknameSubmitting}
+                className={`flex justify-center items-center gap-2 flex-1 px-4 py-2.5 border  font-medium rounded-lg  transition-all ${
+                  resetNicknameSubmitting || nicknameSubmitting
+                    ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                }`}
               >
-                Reset to Default
+                {resetNicknameSubmitting && (
+                  <Icon
+                    icon="ph:circle-notch-bold"
+                    className="w-5 h-5 animate-spin"
+                  />
+                )}
+                {resetNicknameSubmitting ? "Resetting..." : "Reset to Default"}
               </button>
               <button
-                onClick={() =>
-                  handleEditDeviceName(
-                    editDeviceModal.deviceId,
-                    editDeviceModal.deviceName
-                  )
+                type="submit"
+                disabled={
+                  resetNicknameSubmitting ||
+                  nicknameSubmitting ||
+                  (editDeviceModal.deviceName || "").trim() === ""
                 }
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all hover:shadow-lg"
+                className={`flex justify-center items-center gap-2 flex-1 px-4 py-2.5 bg-[#11285A] hover:bg-[#0d1b3d] text-white font-semibold rounded-lg  transition-all hover:shadow-lg ${
+                  resetNicknameSubmitting ||
+                  nicknameSubmitting ||
+                  (editDeviceModal.deviceName || "").trim() === ""
+                    ? "cursor-not-allowed opacity-70"
+                    : "cursor-pointer"
+                }`}
               >
-                Save Changes
+                {nicknameSubmitting && (
+                  <Icon
+                    icon="ph:circle-notch-bold"
+                    className="w-5 h-5 animate-spin"
+                  />
+                )}
+                {nicknameSubmitting ? "Saving..." : "Save Changes"}
               </button>
             </div>
-          </div>
+          </form>
         </Modal>
 
         {/* VIP PROFILE MODAL */}
@@ -483,7 +547,7 @@ const Devices = () => {
             vipModal.mode === "create" ? handleCreateVIP : handleUpdateVIP
           }
           initialData={vipModal.vipData}
-          isLoading={false}
+          isSubmitting={isSubmitting}
           isUploadingImage={false}
           title={
             vipModal.mode === "view"
@@ -493,7 +557,13 @@ const Devices = () => {
                 : "Edit Cane VIP"
           }
           submitText={
-            vipModal.mode === "create" ? "Add VIP to Cane" : "Update VIP"
+            vipModal.mode === "create"
+              ? isSubmitting
+                ? "Adding..."
+                : "Add VIP to Cane"
+              : isSubmitting
+                ? "Updating..."
+                : "Update VIP"
           }
           mode={vipModal.mode}
         />
@@ -745,7 +815,7 @@ const DeviceCard = ({
       {/* Footer Actions */}
       <div className="relative px-4 sm:px-5 py-3 bg-gray-50 border-t border-gray-100">
         <div className="flex justify-between items-center">
-          {/* Manage Button with Dropdown */}
+          {/* Manage button with Dropdown */}
           <div className="relative" ref={actionsMenuRef}>
             <button
               onClick={() => setShowActionsMenu(!showActionsMenu)}

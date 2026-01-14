@@ -12,6 +12,7 @@ const VipProfileModal = ({
   isUploadingImage = false,
   title = "VIP Profile",
   submitText = "Save Profile",
+  isSubmitting = false,
   mode = "edit" // 'view', 'create', or 'edit'
 }) => {
   const [formData, setFormData] = useState({
@@ -126,7 +127,7 @@ const VipProfileModal = ({
   };
 
   // Handle submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isViewMode) {
@@ -146,7 +147,8 @@ const VipProfileModal = ({
       barangay: formData.barangay || "San Bartolome"
     };
 
-    onSubmit({ vip: { ...submitData } }, imageFile);
+    const success = await onSubmit({ vip: { ...submitData } }, imageFile);
+    if (!success) return;
     setFormData({
       firstName: "",
       middleName: "",
@@ -231,8 +233,8 @@ const VipProfileModal = ({
                     </div>
                     <button
                       onClick={onClose}
-                      className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
-                      disabled={isLoading}
+                      className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-default cursor-pointer flex-shrink-0"
+                      disabled={isLoading || isSubmitting}
                       aria-label="Close modal"
                     >
                       <Icon
@@ -332,8 +334,10 @@ const VipProfileModal = ({
                               <button
                                 type="button"
                                 onClick={triggerFileInput}
-                                disabled={isLoading || isUploadingImage}
-                                className="px-4 py-2 bg-white border border-blue-500 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-50 transition-all hover:shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={
+                                  isLoading || isUploadingImage || isSubmitting
+                                }
+                                className="px-4 py-2 bg-white border border-blue-500 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-50 transition-all hover:shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <Icon
                                   icon="ph:upload-simple-bold"
@@ -348,8 +352,8 @@ const VipProfileModal = ({
                                 <button
                                   type="button"
                                   onClick={handleRemoveImage}
-                                  disabled={isLoading}
-                                  className="px-4 py-2 bg-white border border-red-200 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-all hover:shadow-sm flex items-center justify-center gap-2"
+                                  disabled={isLoading || isSubmitting}
+                                  className="px-4 py-2 bg-white border border-red-200 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-all hover:shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed "
                                 >
                                   <Icon
                                     icon="ph:trash-bold"
@@ -723,25 +727,25 @@ const VipProfileModal = ({
                             type="button"
                             onClick={onClose}
                             className={
-                              "px-6 py-2.5 border font-medium rounded-lg transition-all hover:shadow-sm disabled:opacity-50 border-gray-300 text-gray-700 hover:bg-gray-50"
+                              "px-6 py-2.5 border font-medium rounded-lg transition-all hover:shadow-sm disabled:opacity-50 border-gray-300 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed cursor-pointer"
                             }
-                            disabled={isLoading}
+                            disabled={isLoading || isSubmitting}
                           >
                             Cancel
                           </button>
                           {!isViewMode && (
                             <button
                               type="submit"
-                              className="px-6 py-2.5 bg-[#11285A] hover:bg-[#0d1b3d] text-white font-semibold rounded-lg transition-all hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                              disabled={isLoading}
+                              className="px-6 py-2.5 bg-[#11285A] hover:bg-[#0d1b3d] text-white font-semibold rounded-lg transition-all hover:shadow-lg flex items-center gap-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                              disabled={isLoading || isSubmitting}
                             >
-                              {isLoading ? (
+                              {isSubmitting ? (
                                 <>
                                   <Icon
                                     icon="ph:circle-notch-bold"
                                     className="w-5 h-5 animate-spin"
                                   />
-                                  Processing...
+                                  {submitText}
                                 </>
                               ) : (
                                 <>
