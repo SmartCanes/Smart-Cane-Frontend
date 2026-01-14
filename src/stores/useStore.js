@@ -1,3 +1,4 @@
+import { getDevices } from "@/api/backendService";
 import { wsApi } from "@/api/ws-api";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -131,6 +132,74 @@ export const useUIStore = create(
     {
       name: "ui-storage",
       storage: createJSONStorage(() => sessionStorage)
+    }
+  )
+);
+
+export const useDevicesStore = create(
+  persist(
+    (set, get) => ({
+      devices: [],
+      isLoading: false,
+      lastFetchedAt: null,
+
+      fetchDevices: async () => {
+        const { isLoading } = get();
+        if (isLoading) return;
+
+        // if (!force && lastFetchedAt && Date.now() - lastFetchedAt < 30_000) {
+        //   return;
+        // }
+
+        set({ isLoading: true });
+
+        try {
+          const response = await getDevices();
+          if (!response.success) {
+            throw new Error(response.message);
+          }
+
+          set({
+            devices: response.data.devices,
+            lastFetchedAt: Date.now()
+          });
+        } catch (error) {
+          console.error("Failed to fetch devices:", error);
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      upsertDevice: (updatedDevice) =>
+        set((state) => {
+          const exists = state.devices.some(
+            (d) => d.deviceId === updatedDevice.deviceId
+          );
+          return {
+            devices: exists
+              ? state.devices.map((d) =>
+                d.deviceId === updatedDevice.deviceId
+                  ? { ...d, ...updatedDevice }
+                  : d
+              )
+              : [...state.devices, updatedDevice]
+          };
+        }),
+
+      removeDevice: (deviceId) =>
+        set((state) => ({
+          devices: state.devices.filter((d) => d.deviceId !== deviceId)
+        })),
+
+      clearDevices: () => set({ devices: [] })
+    }),
+    {
+      name: "devices-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        devices: state.devices,
+        lastFetchedAt: state.lastFetchedAt
+      })
     }
   )
 );

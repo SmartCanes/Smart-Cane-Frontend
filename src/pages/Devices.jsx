@@ -17,49 +17,34 @@ import {
 } from "@/api/backendService";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import Button from "@/ui/components/Button";
+import { useDevicesStore } from "@/stores/useStore";
 
 // ========== DEVICES COMPONENT ==========
 const Devices = () => {
-  const [devices, setDevices] = useState([]);
+  const { devices, fetchDevices, upsertDevice, removeDevice } =
+    useDevicesStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nicknameSubmitting, setNicknameSubmitting] = useState(false);
   const [resetNicknameSubmitting, setResetNicknameSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const response = await getDevices();
-
-        if (!response.success) {
-          throw new Error(response.message || "Failed to fetch devices");
-        }
-
-        setDevices(response.data.devices);
-      } catch (error) {
-        const errorMessage =
-          error.response?.data?.message || error.message || "Login failed";
-        console.error("Error fetching devices:", errorMessage);
-      }
-    };
-
     fetchDevices();
+
+    const interval = setInterval(() => {
+      fetchDevices();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [showScanner, setShowScanner] = useState(false);
-
-  const [newDeviceName, setNewDeviceName] = useState("");
 
   const [vipModal, setVipModal] = useState({
     show: false,
     mode: "view", // 'view', 'create', or 'edit'
     device: null,
     vipData: null
-  });
-
-  const [pairDeviceModal, setPairDeviceModal] = useState({
-    show: false,
-    deviceId: null
   });
 
   const [editDeviceModal, setEditDeviceModal] = useState({
@@ -94,11 +79,10 @@ const Devices = () => {
         throw new Error(response.message || "Failed to update cane nickname");
       }
 
-      setDevices((prev) =>
-        prev.map((d) =>
-          d.deviceId === deviceId ? { ...d, deviceName: newName } : d
-        )
-      );
+      upsertDevice({
+        deviceId,
+        deviceName: newName
+      });
 
       setEditDeviceModal({
         show: false,
@@ -134,7 +118,7 @@ const Devices = () => {
         throw new Error(response.message || "Failed to unpair cane");
       }
 
-      setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
+      removeDevice(deviceId);
       setUnpairConfirm({ show: false, deviceId: null });
       setToast({
         show: true,
@@ -254,13 +238,10 @@ const Devices = () => {
         }
       }
 
-      setDevices((prev) =>
-        prev.map((d) =>
-          d.deviceId === vipModal.device.deviceId
-            ? { ...d, vip: { ...newVip, vipImageUrl: uploadedImageUrl } }
-            : d
-        )
-      );
+      upsertDevice({
+        deviceId: vipModal.device.deviceId,
+        vip: { ...newVip, vipImageUrl: uploadedImageUrl }
+      });
 
       setVipModal({ show: false, mode: "view", device: null, vipData: null });
 
@@ -315,11 +296,10 @@ const Devices = () => {
 
       const newVip = response.data.vip;
 
-      setDevices((prev) =>
-        prev.map((d) =>
-          d.deviceId === vipModal.device.deviceId ? { ...d, vip: newVip } : d
-        )
-      );
+      upsertDevice({
+        deviceId: vipModal.device.deviceId,
+        vip: newVip
+      });
 
       setVipModal({ show: false, mode: "view", device: null, vipData: null });
 
@@ -350,9 +330,10 @@ const Devices = () => {
         throw new Error(response.message || "Failed to remove VIP from cane");
       }
 
-      setDevices((prev) =>
-        prev.map((d) => (d.deviceId === deviceId ? { ...d, vip: null } : d))
-      );
+      upsertDevice({
+        deviceId,
+        vip: null
+      });
 
       setDeleteVIPConfirm({ show: false, deviceId: null });
       setToast({
@@ -587,7 +568,7 @@ const Devices = () => {
                 });
               }}
               response={(res) => {
-                setDevices((prev) => [...prev, res.data]);
+                upsertDevice(res.data);
               }}
             />
           </div>
