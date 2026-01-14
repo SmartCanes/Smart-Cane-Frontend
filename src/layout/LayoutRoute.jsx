@@ -1,85 +1,85 @@
-import { Outlet, Navigate, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Outlet, Navigate } from "react-router-dom";
 import SidebarContent from "@/ui/components/SidebarContent";
-import { logoutApi, verifyAuthApi } from "@/api/authService";
 import { useUIStore, useUserStore } from "@/stores/useStore";
 
-const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
-
 const ProtectedLayout = () => {
-  const navigate = useNavigate();
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
-  const { clearUser } = useUserStore();
+  // const navigate = useNavigate();
+  // const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const { user } = useUserStore();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (!isBackendEnabled) {
-          setIsAuthChecked(true);
-          return;
-        }
+  // useEffect(() => {z
+  //   const checkAuth = async () => {
+  //     try {
+  //       if (!isBackendEnabled) {
+  //         setIsAuthChecked(true);
+  //         return;
+  //       }
 
-        const response = await verifyAuthApi();
-        if (!response.data.tokenValid) {
-          clearUser();
-          await logoutApi();
-          throw new Error("Invalid token");
-        }
-        setIsAuthChecked(true);
-      } catch (error) {
-        console.log("Auth check failed:", error);
-        clearUser();
-        await logoutApi();
-        navigate("/login", { replace: true });
-      }
-    };
+  //       const response = await verifyAuthApi();
+  //       if (!response.data.tokenValid) {
+  //         clearUser();
+  //         await logoutApi();
+  //         throw new Error("Invalid token");
+  //       }
+  //       setIsAuthChecked(true);
+  //     } catch (error) {
+  //       console.log("Auth check failed:", error);
+  //       clearUser();
+  //       await logoutApi();
+  //       navigate("/login", { replace: true });
+  //     }
+  //   };
 
-    checkAuth();
-  }, [navigate]);
+  //   checkAuth();
+  // }, [navigate]);
 
-  if (!isAuthChecked) {
-    return (
-      <div style={{ minHeight: "100vh", background: "transparent" }}></div>
-    );
-  }
+  // if (!isAuthChecked) {
+  //   return (
+  //     <div style={{ minHeight: "100vh", background: "transparent" }}></div>
+  //   );
+  // }
+
+  if (!user) return <Navigate to="/login" replace />;
 
   return <Outlet />;
 };
 
 const PublicLayout = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  // const [isAuthenticated, setIsAuthenticated] = useState(null);
   const { setIsAnimationDone } = useUIStore();
-  const { clearUser } = useUserStore();
+  const { user } = useUserStore();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (!isBackendEnabled) {
-          setIsAuthenticated(false);
-          return;
-        }
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     try {
+  //       if (!isBackendEnabled) {
+  //         setIsAuthenticated(false);
+  //         return;
+  //       }
 
-        const response = await verifyAuthApi();
-        if (response.data.tokenValid) {
-          setIsAuthenticated(true);
-        } else {
-          clearUser();
-          await logoutApi();
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        clearUser();
-        await logoutApi();
-        setIsAuthenticated(false);
-      }
-    };
+  //       const response = await verifyAuthApi();
+  //       if (response.data.tokenValid) {
+  //         setIsAuthenticated(true);
+  //       } else {
+  //         clearUser();
+  //         await logoutApi();
+  //         setIsAuthenticated(false);
+  //       }
+  //     } catch (error) {
+  //       clearUser();
+  //       await logoutApi();
+  //       setIsAuthenticated(false);
+  //     }
+  //   };
 
-    checkAuth();
-  }, []);
+  //   checkAuth();
+  // }, []);
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  // if (isAuthenticated) {
+  //   return <Navigate to="/dashboard" replace />;
+  // }
+
+  if (user) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
