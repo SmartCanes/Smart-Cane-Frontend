@@ -8,12 +8,93 @@ import { useRealtimeStore, useUserStore } from "@/stores/useStore";
 import { logoutApi } from "@/api/authService";
 import DefaultProfile from "./DefaultProfile";
 
+function showLogoutModal(message = "Logging out...") {
+  if (document.getElementById("logout-modal-overlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "logout-modal-overlay";
+  Object.assign(overlay.style, {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+    pointerEvents: "all"
+  });
+
+  const modal = document.createElement("div");
+  Object.assign(modal.style, {
+    background: "#fff",
+    borderRadius: "16px",
+    padding: "40px 30px",
+    minWidth: "300px",
+    maxWidth: "90%",
+    textAlign: "center",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "20px",
+    fontFamily: "'Poppins', sans-serif"
+  });
+
+  const spinner = document.createElement("div");
+  Object.assign(spinner.style, {
+    border: "6px solid #f3f3f3",
+    borderTop: "6px solid #11285A",
+    borderRadius: "50%",
+    width: "50px",
+    height: "50px",
+    animation: "spin 1s linear infinite"
+  });
+
+  const styleEl = document.createElement("style");
+  styleEl.innerHTML = `
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
+    }
+  `;
+  document.head.appendChild(styleEl);
+
+  const msg = document.createElement("div");
+  msg.innerText = message;
+  Object.assign(msg.style, {
+    fontSize: "1.2rem",
+    color: "#11285A",
+    fontWeight: "600"
+  });
+
+  modal.appendChild(spinner);
+  modal.appendChild(msg);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  document.body.style.pointerEvents = "none";
+  document.body.style.userSelect = "none";
+  document.body.style.opacity = "0.8";
+
+  return function hideLogoutModal() {
+    overlay.remove();
+    document.body.style.pointerEvents = "auto";
+    document.body.style.userSelect = "auto";
+    document.body.style.opacity = "1";
+    styleEl.remove();
+  };
+}
+
 const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const [notificationCount, setNotificationCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
@@ -54,16 +135,23 @@ const Header = () => {
       navigate("/login");
       return;
     }
-    setIsDropdownOpen(false);
+    const enablePage = showLogoutModal("Logging out...");
     try {
+      setIsLoggingOut(true);
+
       const response = await logoutApi();
       if (response.success) {
         clearUser();
         disconnectWs();
+        setIsDropdownOpen(false);
+        setIsLoggingOut(false);
         navigate("/login");
       }
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      setIsLoggingOut(false);
+      enablePage();
     }
   };
 
@@ -173,13 +261,14 @@ const Header = () => {
                       setIsDropdownOpen(false);
                       navigate("/settings");
                     }}
+                    disabled={isLoggingOut}
                     className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
                   >
                     Settings
                   </button>
                   <button
                     onClick={handleLogoutClick}
-                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex gap-2"
                   >
                     Logout
                   </button>
