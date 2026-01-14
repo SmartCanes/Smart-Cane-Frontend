@@ -24,19 +24,58 @@ export const authCheckApi = axios.create({
   withCredentials: true
 });
 
+const refreshApi = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+  headers: { "Content-Type": "application/json" }
+});
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
+    }
+  });
+  failedQueue = [];
+};
+
 backendApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/auth/refresh")
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: () => resolve(backendApi(originalRequest)),
+            reject
+          });
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
+
       try {
-        await backendApi.post("/auth/refresh", {}, { withCredentials: true });
+        await refreshApi.post("/auth/refresh");
+        processQueue();
         return backendApi(originalRequest);
-      } catch (err) {
-        window.location.href = "/login";
-        return Promise.reject(err);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        window.location.replace("/login");
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
