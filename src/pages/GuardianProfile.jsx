@@ -412,6 +412,12 @@ export const GuardianProfile = () => {
   };
 
   const saveProfileData = async () => {
+    setToastConfig({
+      show: false,
+      message: "",
+      type: "info"
+    });
+
     try {
       let uploadedImageUrl;
 
@@ -477,6 +483,7 @@ export const GuardianProfile = () => {
 
       setImageRemoved(false);
       setIsEditMode(false);
+
       setToastConfig({
         show: true,
         message: "Profile saved successfully",
