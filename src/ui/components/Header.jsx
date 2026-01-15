@@ -11,80 +11,228 @@ import DefaultProfile from "./DefaultProfile";
 function showLogoutModal(message = "Logging out...") {
   if (document.getElementById("logout-modal-overlay")) return;
 
+  // Create overlay container
   const overlay = document.createElement("div");
   overlay.id = "logout-modal-overlay";
-  Object.assign(overlay.style, {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    background: "rgba(0,0,0,0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999,
-    pointerEvents: "all"
-  });
 
-  const modal = document.createElement("div");
-  Object.assign(modal.style, {
-    background: "#fff",
-    borderRadius: "16px",
-    padding: "40px 30px",
-    minWidth: "300px",
-    maxWidth: "90%",
-    textAlign: "center",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "20px",
-    fontFamily: "'Poppins', sans-serif"
-  });
-
-  const spinner = document.createElement("div");
-  Object.assign(spinner.style, {
-    border: "6px solid #f3f3f3",
-    borderTop: "6px solid #11285A",
-    borderRadius: "50%",
-    width: "50px",
-    height: "50px",
-    animation: "spin 1s linear infinite"
-  });
-
+  // Create and append framer-motion-like styles
   const styleEl = document.createElement("style");
   styleEl.innerHTML = `
-    @keyframes spin { 
-      0% { transform: rotate(0deg); } 
-      100% { transform: rotate(360deg); } 
+    #logout-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: all;
+    }
+    
+    #logout-modal-overlay .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    
+    #logout-modal-overlay .modal-content {
+      position: relative;
+      z-index: 10;
+      background: white;
+      border-radius: 1rem;
+      padding: 2.5rem;
+      min-width: 300px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      border: 1px solid #f3f4f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      animation: slideUp 0.3s ease-out 0.1s forwards;
+    }
+    
+    #logout-modal-overlay .spinner-container {
+      position: relative;
+      width: 4rem;
+      height: 4rem;
+    }
+    
+    #logout-modal-overlay .spinner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #11285A;
+      animation: spin 1s linear infinite;
+    }
+    
+    #logout-modal-overlay .message {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+      margin: 0;
+    }
+    
+    #logout-modal-overlay .submessage {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+    }
+    
+    #logout-modal-overlay .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #f3f4f6;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    
+    #logout-modal-overlay .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #11285A, #3b82f6);
+      border-radius: 2px;
+      width: 0%;
+      animation: progress 2s ease-in-out infinite;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes progress {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+    
+    /* Disable body scroll and interaction */
+    body.logout-modal-open {
+      overflow: hidden;
+      pointer-events: none;
+      user-select: none;
+    }
+    
+    body.logout-modal-open * {
+      pointer-events: none;
+    }
+    
+    body.logout-modal-open #logout-modal-overlay,
+    body.logout-modal-open #logout-modal-overlay * {
+      pointer-events: all;
     }
   `;
   document.head.appendChild(styleEl);
 
-  const msg = document.createElement("div");
-  msg.innerText = message;
-  Object.assign(msg.style, {
-    fontSize: "1.2rem",
-    color: "#11285A",
-    fontWeight: "600"
-  });
+  // Create backdrop
+  const backdrop = document.createElement("div");
+  backdrop.className = "backdrop";
 
-  modal.appendChild(spinner);
-  modal.appendChild(msg);
-  overlay.appendChild(modal);
+  // Create modal content
+  const modalContent = document.createElement("div");
+  modalContent.className = "modal-content";
+
+  // Create spinner container
+  const spinnerContainer = document.createElement("div");
+  spinnerContainer.className = "spinner-container";
+
+  const spinner = document.createElement("div");
+  spinner.className = "spinner";
+
+  spinnerContainer.appendChild(spinner);
+
+  // Create message container
+  const messageContainer = document.createElement("div");
+
+  const mainMessage = document.createElement("h3");
+  mainMessage.className = "message";
+  mainMessage.textContent = message;
+
+  const subMessage = document.createElement("p");
+  subMessage.className = "submessage";
+  subMessage.textContent = "Please wait while we secure your session...";
+
+  messageContainer.appendChild(mainMessage);
+  messageContainer.appendChild(subMessage);
+
+  // Create progress bar
+  const progressBar = document.createElement("div");
+  progressBar.className = "progress-bar";
+
+  const progressFill = document.createElement("div");
+  progressFill.className = "progress-fill";
+
+  progressBar.appendChild(progressFill);
+
+  // Assemble modal
+  modalContent.appendChild(spinnerContainer);
+  modalContent.appendChild(messageContainer);
+  modalContent.appendChild(progressBar);
+
+  // Assemble overlay
+  overlay.appendChild(backdrop);
+  overlay.appendChild(modalContent);
+
+  // Add to document
   document.body.appendChild(overlay);
+  document.body.classList.add("logout-modal-open");
 
-  document.body.style.pointerEvents = "none";
-  document.body.style.userSelect = "none";
-  document.body.style.opacity = "0.8";
-
+  // Return hide function with animations
   return function hideLogoutModal() {
-    overlay.remove();
-    document.body.style.pointerEvents = "auto";
-    document.body.style.userSelect = "auto";
-    document.body.style.opacity = "1";
-    styleEl.remove();
+    if (!overlay.parentNode) return;
+
+    // Add exit animations
+    backdrop.style.animation = "fadeOut 0.2s ease-out forwards";
+    modalContent.style.animation = "slideDown 0.2s ease-out forwards";
+
+    // Remove elements after animation
+    setTimeout(() => {
+      overlay.remove();
+      styleEl.remove();
+      document.body.classList.remove("logout-modal-open");
+    }, 200);
   };
 }
 
