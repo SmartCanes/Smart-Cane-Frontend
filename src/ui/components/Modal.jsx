@@ -100,7 +100,7 @@ export default function Modal({
   return (
     <AnimatePresence mode="wait">
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto ">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
           <motion.div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 flex justify-center items-center"
             onClick={!isSubmitting ? onClose : undefined}
@@ -110,7 +110,7 @@ export default function Modal({
           >
             {variant === "dialog" && (
               <motion.div
-                className="relative bg-white p-6 rounded-2xl shadow-xl w-full max-w-md font-poppins"
+                className="relative bg-white p-6 rounded-2xl shadow-xl w-full max-w-md font-poppins mx-5"
                 onClick={(e) => e.stopPropagation()}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}

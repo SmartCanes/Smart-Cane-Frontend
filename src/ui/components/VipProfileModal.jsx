@@ -208,7 +208,9 @@ const VipProfileModal = ({
               <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 rounded-t-2xl z-10">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                      {title}
+                    </h3>
                     <p className="text-sm text-gray-500 mt-1">
                       {isViewMode
                         ? "View VIP profile details"
@@ -251,7 +253,7 @@ const VipProfileModal = ({
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                            className={`text-sm sm:text-base w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
                               errors.firstName
                                 ? "border-red-500"
                                 : "border-gray-300"
@@ -273,7 +275,7 @@ const VipProfileModal = ({
                           Middle Name
                         </label>
                         {isViewMode ? (
-                          <div className="mt-1 p-3 bg-gray-100 rounded-lg text-base text-gray-800 font-poppins">
+                          <div className="mt-1 p-3 bg-gray-100 rounded-lg text-base text-gray-800">
                             {formData.middleName || "—"}
                           </div>
                         ) : (
@@ -282,7 +284,7 @@ const VipProfileModal = ({
                             name="middleName"
                             value={formData.middleName}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                            className="text-sm sm:text-base w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
                             placeholder="Enter middle name"
                             disabled={isLoading}
                           />
@@ -307,7 +309,7 @@ const VipProfileModal = ({
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                            className={`text-sm sm:text-base w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
                               errors.lastName
                                 ? "border-red-500"
                                 : "border-gray-300"
@@ -341,7 +343,7 @@ const VipProfileModal = ({
                             name="streetAddress"
                             value={formData.streetAddress}
                             onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                            className={`text-sm sm:text-base w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
                               errors.streetAddress
                                 ? "border-red-500"
                                 : "border-gray-300"
@@ -362,7 +364,7 @@ const VipProfileModal = ({
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                           Province
                         </label>
-                        <div className="mt-1 p-3 bg-gray-100 rounded-lg text-base text-gray-800 font-poppins">
+                        <div className="mt-1 p-3 bg-gray-100 rounded-lg text-sm sm:text-base text-gray-800">
                           {formData.province}
                         </div>
                       </div>
@@ -372,7 +374,7 @@ const VipProfileModal = ({
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                           City
                         </label>
-                        <div className="mt-1 p-3 bg-gray-100 rounded-lg text-base text-gray-800 font-poppins">
+                        <div className="mt-1 p-3 bg-gray-100 rounded-lg text-sm sm:text-base text-gray-800">
                           {formData.city}
                         </div>
                       </div>
@@ -444,7 +446,7 @@ const VipProfileModal = ({
                                         isUploadingImage ||
                                         isSubmitting
                                       }
-                                      className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
+                                      className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed "
                                     >
                                       <Icon
                                         icon="solar:upload-bold"
@@ -519,7 +521,7 @@ const VipProfileModal = ({
                             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                               Created At
                             </label>
-                            <div className="mt-1 p-3 bg-gray-100 rounded-lg text-base text-gray-800 font-poppins">
+                            <div className="mt-1 p-3 bg-gray-100 rounded-lg text-sm sm:text-base text-gray-800">
                               {initialData.createdAt
                                 ? new Date(
                                     initialData.createdAt
@@ -537,7 +539,7 @@ const VipProfileModal = ({
                             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                               Last Updated
                             </label>
-                            <div className="mt-1 p-3 bg-gray-100 rounded-lg text-base text-gray-800 font-poppins">
+                            <div className="mt-1 p-3 bg-gray-100 rounded-lg text-sm sm:text-base text-gray-800">
                               {initialData.updatedAt
                                 ? new Date(
                                     initialData.updatedAt
@@ -570,7 +572,7 @@ const VipProfileModal = ({
                       </p>
                     )}
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 text-sm sm:text-base">
                     {!isViewMode && (
                       <>
                         <button

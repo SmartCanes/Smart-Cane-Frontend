@@ -110,22 +110,16 @@ const DashboardSide = ({ className = "" }) => {
       path: "/manage-profile"
     },
     {
-      id: "mobile-notes",
-      label: "Notes",
-      icon: "material-symbols-light:add-notes-outline-rounded",
-      path: "/notes"
+      id: "mobile-health",
+      label: "Health",
+      icon: "fa6-brands:unity",
+      path: "/health"
     },
     {
       id: "mobile-home",
       label: "Home",
       icon: "material-symbols:home-rounded",
       path: "/dashboard"
-    },
-    {
-      id: "mobile-health",
-      label: "Health",
-      icon: "fa6-brands:unity",
-      path: "/health"
     },
     {
       id: "mobile-weather",

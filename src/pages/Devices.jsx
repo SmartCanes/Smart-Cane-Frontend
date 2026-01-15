@@ -9,7 +9,6 @@ import ScannerCamera from "@/ui/components/Scanner";
 import {
   assignVipToDevice,
   deleteVIP,
-  getDevices,
   unpairDevice,
   updateDeviceName,
   updateVIP,
@@ -26,16 +25,6 @@ const Devices = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nicknameSubmitting, setNicknameSubmitting] = useState(false);
   const [resetNicknameSubmitting, setResetNicknameSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetchDevices();
-
-    const interval = setInterval(() => {
-      fetchDevices();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [showScanner, setShowScanner] = useState(false);
@@ -62,6 +51,28 @@ const Devices = () => {
     show: false,
     deviceId: null
   });
+
+  useEffect(() => {
+    fetchDevices();
+
+    const interval = setInterval(() => {
+      fetchDevices();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (showScanner) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showScanner]);
 
   const handleEditDeviceName = async (deviceId, newName, actionType) => {
     const setSubmitting =
@@ -540,11 +551,11 @@ const Devices = () => {
           submitText={
             vipModal.mode === "create"
               ? isSubmitting
-                ? "Adding..."
-                : "Add VIP"
+                ? "Creating..."
+                : "Create"
               : isSubmitting
                 ? "Updating..."
-                : "Update VIP"
+                : "Update"
           }
           mode={vipModal.mode}
         />
