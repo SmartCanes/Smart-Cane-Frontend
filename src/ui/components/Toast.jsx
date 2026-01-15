@@ -39,10 +39,10 @@ export default function Toast({
   };
 
   const positionStyles = {
-    "top-left": { top: "1rem", left: "1rem" },
-    "top-right": { top: "1rem", right: "1rem" },
-    "bottom-left": { bottom: "1rem", left: "1rem" },
-    "bottom-right": { bottom: "1rem", right: "1rem" }
+    "top-left": "top-22 left-4 sm:left-4",
+    "top-right": "top-22 right-4 sm:right-4",
+    "bottom-left": "bottom-20 md:bottom-6 left-4",
+    "bottom-right": "bottom-20 md:bottom-6 right-4"
   };
 
   const icons = {
@@ -57,6 +57,18 @@ export default function Toast({
   if (position.includes("top")) slideFrom.y = -50;
   if (position.includes("bottom")) slideFrom.y = 50;
 
+  useEffect(() => {
+    if (visible) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [visible]);
+
   return (
     <AnimatePresence>
       {visible && (
@@ -65,33 +77,82 @@ export default function Toast({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: position.includes("left") ? -50 : 50 }}
           transition={{ duration: 0.3 }}
+          className={`
+            fixed z-50 flex items-center
+            w-[calc(100vw-1rem)] sm:w-auto sm:min-w-[280px] sm:max-w-[400px]
+            min-h-[56px] sm:min-h-[64px]
+            px-3 sm:px-4
+            py-3 sm:py-4
+            rounded-lg shadow-xl
+            text-white
+            ${colors[type] || colors.info}
+            ${positionStyles[position]}
+          `}
           style={{
-            position: "fixed",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            minWidth: 250,
-            maxWidth: 400,
-            ...positionStyles[position]
+            // Responsive max width for mobile only
+            maxWidth: "calc(100vw - 2rem)",
+            wordBreak: "break-word"
           }}
-          className={`px-4 py-4 rounded-sm shadow-lg text-white ${colors[type] || colors.info}`}
         >
-          <img
-            loading="lazy"
-            src={icons[type]}
-            alt={`${type} icon`}
-            className="w-6 h-6 mr-3"
+          {/* Icon */}
+          <div className="flex-shrink-0 mr-3">
+            <img
+              loading="lazy"
+              src={icons[type]}
+              alt={`${type} icon`}
+              className="w-5 h-5 sm:w-6 sm:h-6"
+            />
+          </div>
+
+          {/* Message */}
+          <div className="flex-1 min-w-0">
+            <p
+              className="
+              text-sm sm:text-base
+              font-normal
+              leading-relaxed
+              break-words
+              overflow-hidden
+            "
+            >
+              {message}
+            </p>
+          </div>
+
+          {/* Divider - hidden on mobile if message is long */}
+          <div
+            className={`
+            flex-shrink-0
+            w-px h-5 sm:h-6
+            bg-white/30
+            mx-2 sm:mx-3
+            ${message.length > 40 ? "hidden sm:block" : ""}
+          `}
           />
 
-          <span className="flex-1">{message}</span>
-
-          <div className="w-px h-6 bg-white ml-5 mr-2 opacity-30"></div>
-
+          {/* Close Button */}
           <button
             onClick={handleClose}
-            className="ml-3 font-bold text-lg focus:outline-none cursor-pointer"
+            className="
+              flex-shrink-0
+              ml-1 sm:ml-2
+              p-1
+              focus:outline-none
+              focus:ring-2 focus:ring-white/50
+              rounded
+              transition-opacity
+              hover:opacity-80
+              active:opacity-60
+              cursor-pointer
+            "
+            aria-label="Close toast"
           >
-            <img loading="lazy" src={ExitIcon} alt="Close icon" />
+            <img
+              loading="lazy"
+              src={ExitIcon}
+              alt="Close"
+              className="w-4 h-4 sm:w-5 sm:h-5"
+            />
           </button>
         </motion.div>
       )}

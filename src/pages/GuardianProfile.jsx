@@ -233,11 +233,11 @@ export const GuardianProfile = () => {
     };
 
     setIsEditMode(true);
-    setToastConfig({
-      show: true,
-      message: "Edit mode activated",
-      type: "info"
-    });
+    // setToastConfig({
+    //   show: true,
+    //   message: "Edit mode activated",
+    //   type: "info"
+    // });
   };
 
   const handleSaveProfile = async (e) => {
@@ -555,11 +555,11 @@ export const GuardianProfile = () => {
     });
 
     setIsEditMode(false);
-    setToastConfig({
-      show: true,
-      message: "Changes cancelled",
-      type: "warning"
-    });
+    // setToastConfig({
+    //   show: true,
+    //   message: "Changes cancelled",
+    //   type: "warning"
+    // });
   };
 
   const formatTime = (seconds) => {
@@ -955,7 +955,7 @@ export const GuardianProfile = () => {
                   message={toastConfig.message}
                   type={toastConfig.type}
                   duration={3000}
-                  position="top-right"
+                  position="bottom-right"
                   onClose={() =>
                     setToastConfig((prev) => ({ ...prev, show: false }))
                   }

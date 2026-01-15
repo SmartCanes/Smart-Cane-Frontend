@@ -1377,7 +1377,7 @@ const ManageProfile = () => {
           <Toast
             type={toast.type}
             message={toast.message}
-            position="top-right"
+            position="bottom-right"
             onClose={() => setToast({ show: false, type: "", message: "" })}
           />
         )}

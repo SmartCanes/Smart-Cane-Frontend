@@ -389,16 +389,6 @@ const Devices = () => {
           </Button>
         </div>
 
-        {/* TOAST NOTIFICATIONS */}
-        {toast.show && (
-          <Toast
-            type={toast.type}
-            message={toast.message}
-            position="top-right"
-            onClose={() => setToast({ show: false, type: "", message: "" })}
-          />
-        )}
-
         {/* UNPAIR CONFIRMATION MODAL */}
         <Modal
           isOpen={unpairConfirm.show}
@@ -622,6 +612,15 @@ const Devices = () => {
           </div>
         )}
       </div>
+
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          position="bottom-right"
+          onClose={() => setToast({ show: false, type: "", message: "" })}
+        />
+      )}
     </main>
   );
 };
