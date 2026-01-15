@@ -104,6 +104,7 @@ export const GuardianProfile = () => {
       middleName: user.middleName || "",
       lastName: user.lastName || "",
       email: user.email || "",
+      username: user.username || "",
       contactNumber: user.contactNumber || "",
       province: user.province || "",
       city: user.city || "",
