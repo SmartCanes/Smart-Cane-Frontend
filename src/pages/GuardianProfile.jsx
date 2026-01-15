@@ -33,6 +33,7 @@ export const GuardianProfile = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const originalProfileRef = useRef(null);
   const { user, setUser } = useUserStore();
+  const formRef = useRef(null);
 
   const [profile, setProfile] = useState({
     firstName: user.firstName,
@@ -65,6 +66,7 @@ export const GuardianProfile = () => {
   const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
   const [isSendingOTP, setIsSendingOTP] = useState(false);
   const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [profileImage, setProfileImage] = useState(avatarPlaceholder);
   const [imageFile, setImageFile] = useState(null);
@@ -233,7 +235,8 @@ export const GuardianProfile = () => {
     });
   };
 
-  const handleSaveProfile = async () => {
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
     if (!hasProfileChanged()) {
       setToastConfig({
         show: true,
@@ -407,7 +410,6 @@ export const GuardianProfile = () => {
           const imageResponse = await uploadProfileImage(imageFile);
 
           if (imageResponse.success) {
-            console.log(imageResponse);
             uploadedImageUrl = imageResponse.data.relativePath;
             setProfileImage(uploadedImageUrl);
 
@@ -434,6 +436,7 @@ export const GuardianProfile = () => {
         await updateGuardian({ guardian_image_url: null });
       }
 
+      setIsSubmitting(true);
       await updateGuardian({
         first_name: profile.firstName,
         middle_name: profile.middleName,
@@ -483,6 +486,8 @@ export const GuardianProfile = () => {
           "Failed to save profile. Please try again.",
         type: "error"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -603,7 +608,10 @@ export const GuardianProfile = () => {
                 ) : (
                   <div className="flex gap-2">
                     <button
-                      onClick={handleSaveProfile}
+                      type="button"
+                      onClick={() => {
+                        formRef.current.requestSubmit();
+                      }}
                       disabled={
                         isSendingOTP || isVerifyingOTP || isUploadingImage
                       }
@@ -622,7 +630,7 @@ export const GuardianProfile = () => {
                             icon="solar:check-circle-bold"
                             className="text-lg"
                           />
-                          Save
+                          {isSubmitting ? "Saving..." : "Save"}
                         </>
                       )}
                     </button>
@@ -640,7 +648,11 @@ export const GuardianProfile = () => {
                 )}
               </div>
 
-              <div className="grid md:grid-cols-2 gap-5">
+              <form
+                ref={formRef}
+                className="grid md:grid-cols-2 gap-5"
+                onSubmit={handleSaveProfile}
+              >
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                     First Name
@@ -797,6 +809,7 @@ export const GuardianProfile = () => {
                         />
                         {isEditMode && (
                           <button
+                            type="button"
                             onClick={triggerFileInput}
                             className="absolute bottom-0 right-0 bg-[#11285A] text-white p-1.5 rounded-full hover:bg-[#0d1b3d] transition-colors"
                             title="Change photo"
@@ -886,7 +899,8 @@ export const GuardianProfile = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+                <button type="submit" className="hidden" />
+              </form>
 
               {toastConfig.show && (
                 <Toast
