@@ -2,6 +2,9 @@ import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import { validateField } from "@/utils/ValidationHelper";
+import TextField from "@/ui/components/TextField";
+import Toast from "./Toast";
 
 const VipProfileModal = ({
   isOpen,
@@ -15,6 +18,7 @@ const VipProfileModal = ({
   isSubmitting = false,
   mode = "edit" // 'view', 'create', or 'edit'
 }) => {
+  const initialDataRef = useRef(null);
   const [formData, setFormData] = useState({
     firstName: "",
     middleName: "",
@@ -30,17 +34,22 @@ const VipProfileModal = ({
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [imageError, setImageError] = useState("");
+  const [toastConfig, setToastConfig] = useState({
+    show: false,
+    message: "",
+    type: "info"
+  });
 
   const fileInputRef = useRef(null);
   const formRef = useRef(null);
 
-  // Determine mode based on props
   const isViewMode = mode === "view";
   const isCreateMode = mode === "create";
-  const isEditMode = mode === "edit";
+  // const isEditMode = mode === "edit";
 
-  // Initialize form with initialData if provided (for editing/viewing)
   useEffect(() => {
+    if (!isOpen) return;
+
     if (initialData) {
       setFormData({
         firstName: initialData.firstName || "",
@@ -54,11 +63,40 @@ const VipProfileModal = ({
         createdAt: initialData.created_at || "",
         updatedAt: initialData.updated_at || ""
       });
-      if (initialData.vipImageUrl) {
-        setImagePreview(initialData.vipImageUrl);
-      }
+      setImagePreview(initialData.vipImageUrl || "");
+      setImageFile(null);
+      setImageError("");
+      setErrors({});
+    } else {
+      setFormData({
+        firstName: "",
+        middleName: "",
+        lastName: "",
+        streetAddress: "",
+        vipImageUrl: "",
+        province: "Metro Manila",
+        city: "Quezon City",
+        barangay: "San Bartolome"
+      });
+      setImagePreview("");
+      setImageFile(null);
+      setImageError("");
+      setErrors({});
     }
-  }, [initialData, mode]);
+
+    initialDataRef.current = initialData
+      ? {
+          firstName: initialData.firstName || "",
+          middleName: initialData.middleName || "",
+          lastName: initialData.lastName || "",
+          streetAddress: initialData.streetAddress || "",
+          province: initialData.province || "",
+          city: initialData.city || "",
+          barangay: initialData.barangay || "",
+          vipImageUrl: initialData.vipImageUrl || ""
+        }
+      : null;
+  }, [isOpen, initialData]);
 
   useEffect(() => {
     if (isOpen) {
@@ -71,6 +109,26 @@ const VipProfileModal = ({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  const hasErrors = () => {
+    return Object.values(errors).some((error) => error);
+  };
+
+  const hasChanges = (() => {
+    if (isCreateMode) return true;
+
+    if (!initialDataRef.current) return true;
+
+    const original = initialDataRef.current;
+
+    const fieldsChanged = Object.keys(original).some(
+      (key) => formData[key] !== original[key]
+    );
+
+    const imageChanged = Boolean(imageFile);
+
+    return fieldsChanged || imageChanged;
+  })();
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -85,6 +143,11 @@ const VipProfileModal = ({
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+  };
+
+  const handleBlur = (name) => {
+    const error = validateField(name, formData[name]);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   const handleImageUpload = (e) => {
@@ -109,7 +172,7 @@ const VipProfileModal = ({
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     setImageError("");
-    setFormData((prev) => ({ ...prev, vipImageUrl: "" })); // Clear URL if file is uploaded
+    setFormData((prev) => ({ ...prev, vipImageUrl: "" }));
   };
 
   const handleRemoveImage = () => {
@@ -125,7 +188,6 @@ const VipProfileModal = ({
     fileInputRef.current?.click();
   };
 
-  // Validate form
   const validateForm = () => {
     const newErrors = {};
 
@@ -139,7 +201,6 @@ const VipProfileModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -148,6 +209,14 @@ const VipProfileModal = ({
       return;
     }
 
+    if (!hasChanges) {
+      setToastConfig({
+        show: true,
+        message: "No changes detected",
+        type: "info"
+      });
+      return;
+    }
     if (!validateForm()) return;
 
     const submitData = {
@@ -278,24 +347,16 @@ const VipProfileModal = ({
                             {formData.firstName || "—"}
                           </div>
                         ) : (
-                          <input
+                          <TextField
                             type="text"
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleInputChange}
-                            className={`text-sm sm:text-base w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
-                              errors.firstName
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            } bg-white`}
+                            onBlur={() => handleBlur("firstName")}
                             placeholder="Enter first name"
+                            error={errors.firstName}
                             disabled={isLoading}
                           />
-                        )}
-                        {!isViewMode && errors.firstName && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {errors.firstName}
-                          </p>
                         )}
                       </div>
 
@@ -309,13 +370,14 @@ const VipProfileModal = ({
                             {formData.middleName || "—"}
                           </div>
                         ) : (
-                          <input
+                          <TextField
                             type="text"
                             name="middleName"
                             value={formData.middleName}
                             onChange={handleInputChange}
-                            className="text-sm sm:text-base w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                            handleBlur={() => handleBlur("middleName")}
                             placeholder="Enter middle name"
+                            error={errors.middleName}
                             disabled={isLoading}
                           />
                         )}
@@ -334,24 +396,16 @@ const VipProfileModal = ({
                             {formData.lastName || "—"}
                           </div>
                         ) : (
-                          <input
+                          <TextField
                             type="text"
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleInputChange}
-                            className={`text-sm sm:text-base w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
-                              errors.lastName
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            } bg-white`}
+                            onBlur={() => handleBlur("lastName")}
                             placeholder="Enter last name"
+                            error={errors.lastName}
                             disabled={isLoading}
                           />
-                        )}
-                        {!isViewMode && errors.lastName && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {errors.lastName}
-                          </p>
                         )}
                       </div>
 
@@ -368,29 +422,21 @@ const VipProfileModal = ({
                             {formData.streetAddress || "—"}
                           </div>
                         ) : (
-                          <input
+                          <TextField
                             type="text"
                             name="streetAddress"
                             value={formData.streetAddress}
                             onChange={handleInputChange}
-                            className={`text-sm sm:text-base w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
-                              errors.streetAddress
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            } bg-white`}
+                            onBlur={() => handleBlur("streetAddress")}
                             placeholder="Enter street address..."
+                            error={errors.streetAddress}
                             disabled={isLoading}
                           />
-                        )}
-                        {!isViewMode && errors.streetAddress && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {errors.streetAddress}
-                          </p>
                         )}
                       </div>
 
                       {/* Province */}
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 mb-2">
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                           Province
                         </label>
@@ -400,7 +446,7 @@ const VipProfileModal = ({
                       </div>
 
                       {/* City */}
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 mb-2">
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                           City
                         </label>
@@ -410,7 +456,7 @@ const VipProfileModal = ({
                       </div>
 
                       {/* Barangay */}
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 mb-2">
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                           Barangay
                         </label>
@@ -473,7 +519,8 @@ const VipProfileModal = ({
                                       disabled={
                                         isLoading ||
                                         isUploadingImage ||
-                                        isSubmitting
+                                        isSubmitting ||
+                                        hasErrors()
                                       }
                                       className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed "
                                     >
@@ -614,7 +661,12 @@ const VipProfileModal = ({
                           type="button"
                           onClick={() => formRef.current?.requestSubmit()}
                           className="px-6 py-2.5 bg-[#11285A] text-white font-bold rounded-lg hover:bg-[#0d1b3d] transition-colors flex items-center gap-2 disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
-                          disabled={isLoading || isSubmitting}
+                          disabled={
+                            isLoading ||
+                            isSubmitting ||
+                            !hasChanges ||
+                            hasErrors()
+                          }
                         >
                           {isSubmitting ? (
                             <>
@@ -640,6 +692,15 @@ const VipProfileModal = ({
           </div>
         </motion.div>
       </div>
+      {toastConfig.show && (
+        <Toast
+          message={toastConfig.message}
+          type={toastConfig.type}
+          duration={3000}
+          position="bottom-right"
+          onClose={() => setToastConfig((prev) => ({ ...prev, show: false }))}
+        />
+      )}
     </AnimatePresence>
   );
 };

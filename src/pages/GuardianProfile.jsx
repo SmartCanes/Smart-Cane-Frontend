@@ -249,7 +249,7 @@ export const GuardianProfile = () => {
         type: "info"
       });
 
-      setIsEditMode(false);
+      // setIsEditMode(false);
       return;
     }
 
@@ -355,7 +355,7 @@ export const GuardianProfile = () => {
 
   const handleOTPEnterKey = (e) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // prevent default form submission / newline
+      e.preventDefault();
       handleVerifyOTP();
     }
   };
@@ -630,6 +630,7 @@ export const GuardianProfile = () => {
                         isVerifyingOTP ||
                         isUploadingImage ||
                         isSubmitting ||
+                        !hasProfileChanged() ||
                         hasErrors()
                       }
                       className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#11285A] text-white text-sm font-semibold hover:bg-[#0d1b3d] transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
