@@ -254,11 +254,11 @@ export const GuardianProfile = () => {
     }
 
     if (!validateForm()) {
-      // setToastConfig({
-      //   show: true,
-      //   message: "Please fix validation errors before saving",
-      //   type: "error"
-      // });
+      setToastConfig({
+        show: true,
+        message: "Please fix validation errors before saving",
+        type: "error"
+      });
       return;
     }
 
@@ -300,7 +300,6 @@ export const GuardianProfile = () => {
       setOtpError("");
 
       const response = await requestEmailChangeOTP(profile.email);
-
       if (response.success) {
         setShowOTPModal(true);
         setOtpTimer(300);
@@ -354,6 +353,13 @@ export const GuardianProfile = () => {
     }
   };
 
+  const handleOTPEnterKey = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // prevent default form submission / newline
+      handleVerifyOTP();
+    }
+  };
+
   const handleVerifyOTP = async () => {
     const otpCode = otp.join("");
 
@@ -368,11 +374,11 @@ export const GuardianProfile = () => {
       const response = await verifyEmailChangeOTP(profile.email, otpCode);
 
       if (response.success) {
-        setToastConfig({
-          show: true,
-          message: "Email verified successfully",
-          type: "success"
-        });
+        // setToastConfig({
+        //   show: true,
+        //   message: "Email verified successfully",
+        //   type: "success"
+        // });
 
         setShowOTPModal(false);
         setOriginalEmail(profile.email);
@@ -981,7 +987,10 @@ export const GuardianProfile = () => {
                           onChange={(e) =>
                             handleOTPChange(index, e.target.value)
                           }
-                          onKeyDown={(e) => handleOTPKeyDown(index, e)}
+                          onKeyDown={(e) => {
+                            handleOTPKeyDown(index, e);
+                            handleOTPEnterKey(e);
+                          }}
                           disabled={isVerifyingOTP}
                           className="w-12 h-12 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#11285A] focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
@@ -1002,20 +1011,22 @@ export const GuardianProfile = () => {
                     </p>
                   </div>
 
-                  <div className="text-center">
-                    <div className="inline-flex items-center gap-2 text-sm text-gray-600">
-                      <Icon
-                        icon="solar:clock-circle-bold"
-                        className="w-4 h-4"
-                      />
-                      <span className="font-medium">
-                        Expires in:{" "}
-                        <span className="text-[#11285A]">
-                          {formatTime(otpTimer)}
+                  {!canResendOTP && (
+                    <div className="text-center">
+                      <div className="inline-flex items-center gap-2 text-sm text-gray-600">
+                        <Icon
+                          icon="solar:clock-circle-bold"
+                          className="w-4 h-4"
+                        />
+                        <span className="font-medium">
+                          Expires in:{" "}
+                          <span className="text-[#11285A]">
+                            {formatTime(otpTimer)}
+                          </span>
                         </span>
-                      </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="text-center text-sm text-gray-600">
                     <p>
@@ -1024,7 +1035,7 @@ export const GuardianProfile = () => {
                         type="button"
                         onClick={handleResendOTP}
                         disabled={!canResendOTP || isSendingOTP}
-                        className="text-[#11285A] hover:underline font-medium disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                        className="text-[#11285A] hover:underline font-medium disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
                       >
                         {isSendingOTP ? (
                           <>
@@ -1045,9 +1056,11 @@ export const GuardianProfile = () => {
                     <button
                       onClick={handleVerifyOTP}
                       disabled={
-                        otp.some((digit) => digit === "") || isVerifyingOTP
+                        otp.some((digit) => digit === "") ||
+                        isVerifyingOTP ||
+                        isSendingOTP
                       }
-                      className="w-full py-3 text-base font-medium text-white bg-[#11285A] hover:bg-[#0d1b3d] rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-3 text-base font-medium text-white bg-[#11285A] hover:bg-[#0d1b3d] rounded-lg transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isVerifyingOTP ? (
                         <>
@@ -1061,8 +1074,12 @@ export const GuardianProfile = () => {
 
                     <button
                       onClick={handleCancelOTP}
-                      disabled={isVerifyingOTP}
-                      className="w-full py-3 text-base font-medium text-[#11285A] border-2 border-[#11285A] hover:bg-blue-50 rounded-lg transition-colors disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed"
+                      disabled={isVerifyingOTP || isSendingOTP}
+                      className={`w-full py-3 text-base font-medium text-[#11285A] border-2 border-[#11285A] rounded-lg transition-colors ${
+                        isVerifyingOTP || isSendingOTP
+                          ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                          : "border-gray-300 hover:bg-gray-200 cursor-pointer "
+                      }`}
                     >
                       Cancel
                     </button>
