@@ -555,7 +555,7 @@ const Devices = () => {
                 : "Create"
               : isSubmitting
                 ? "Updating..."
-                : "Update"
+                : "Update VIP"
           }
           mode={vipModal.mode}
         />

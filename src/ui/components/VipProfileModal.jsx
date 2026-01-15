@@ -221,7 +221,7 @@ const VipProfileModal = ({
                   </div>
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-600 p-1"
+                    className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
                     disabled={isLoading || isSubmitting}
                   >
                     <Icon icon="ph:x-bold" className="w-6 h-6" />
@@ -231,6 +231,36 @@ const VipProfileModal = ({
 
               {/* Form */}
               <div className="flex-1 overflow-y-auto">
+                {isViewMode && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 p-4 border border-gray-200 bg-gray-50">
+                      <div className="flex-shrink-0">
+                        <div className="relative">
+                          <img
+                            loading="lazy"
+                            src={resolveProfileImageSrc(imagePreview)}
+                            alt="Profile Preview"
+                            className="w-48 h-48 rounded-4xl object-cover border-2 border-white shadow-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex-1 sm:mt-7">
+                        <div className="flex flex-col">
+                          <h3 className="text-md sm:text-xl font-semibold text-gray-700">
+                            {getFullName()}
+                          </h3>
+                          <p className="text-sm sm:text-sm text-gray-500 mt-1">
+                            VIP ID: {initialData.vipId}
+                          </p>
+                          <p className="text-sm sm:text-sm text-gray-500 mt-1">
+                            Relationship:{" "}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <form onSubmit={handleSubmit} className="p-6" ref={formRef}>
                   <div className="space-y-6">
                     {/* Personal Information Section */}
@@ -391,51 +421,50 @@ const VipProfileModal = ({
                     </div>
 
                     {/* VIP PROFILE PHOTO SECTION */}
-                    <div className="mt-6">
-                      <div className="flex flex-col gap-2">
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                          <div className="flex-shrink-0">
-                            <div className="relative">
-                              <img
-                                loading="lazy"
-                                src={resolveProfileImageSrc(imagePreview)}
-                                alt="Profile Preview"
-                                className="w-24 h-24 rounded-full object-cover border-2 border-white shadow-sm"
-                              />
-                              {!isViewMode && (
-                                <button
-                                  type="button"
-                                  onClick={triggerFileInput}
-                                  className="absolute bottom-0 right-0 bg-[#11285A] text-white p-1.5 rounded-full hover:bg-[#0d1b3d] transition-colors"
-                                  title="Change photo"
-                                  disabled={
-                                    isLoading ||
-                                    isUploadingImage ||
-                                    isSubmitting
-                                  }
-                                >
-                                  <Icon
-                                    icon="solar:camera-bold"
-                                    className="w-4 h-4"
-                                  />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex-1">
-                            <div className="flex flex-col gap-2">
-                              <div>
-                                <h4 className="text-sm font-semibold text-gray-700">
-                                  Profile Photo (Optional)
-                                </h4>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Upload a profile image. Maximum file size:
-                                  2MB. Supported formats: JPG, PNG, GIF.
-                                </p>
+                    {!isViewMode && (
+                      <div className="mt-6">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <div className="flex-shrink-0">
+                              <div className="relative">
+                                <img
+                                  loading="lazy"
+                                  src={resolveProfileImageSrc(imagePreview)}
+                                  alt="Profile Preview"
+                                  className="w-24 h-24 rounded-full object-cover border-2 border-white shadow-sm"
+                                />
+                                {!isViewMode && (
+                                  <button
+                                    type="button"
+                                    onClick={triggerFileInput}
+                                    className="absolute bottom-0 right-0 bg-[#11285A] text-white p-1.5 rounded-full hover:bg-[#0d1b3d] transition-colors"
+                                    title="Change photo"
+                                    disabled={
+                                      isLoading ||
+                                      isUploadingImage ||
+                                      isSubmitting
+                                    }
+                                  >
+                                    <Icon
+                                      icon="solar:camera-bold"
+                                      className="w-4 h-4"
+                                    />
+                                  </button>
+                                )}
                               </div>
+                            </div>
 
-                              {!isViewMode && (
+                            <div className="flex-1">
+                              <div className="flex flex-col gap-2">
+                                <div>
+                                  <h4 className="text-sm font-semibold text-gray-700">
+                                    Profile Photo (Optional)
+                                  </h4>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Upload a profile image. Maximum file size:
+                                    2MB. Supported formats: JPG, PNG, GIF.
+                                  </p>
+                                </div>
                                 <div className="flex flex-col sm:flex-row gap-2 mt-2 w-fit">
                                   <div>
                                     <button
@@ -489,26 +518,24 @@ const VipProfileModal = ({
                                     </button>
                                   )}
                                 </div>
-                              )}
-
-                              {imageError && (
-                                <p className="text-red-500 text-xs mt-1">
-                                  {imageError}
-                                </p>
-                              )}
-
-                              {!isViewMode && imageFile && (
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Selected: {imageFile.name} (
-                                  {(imageFile.size / 1024 / 1024).toFixed(2)}{" "}
-                                  MB)
-                                </p>
-                              )}
+                                {imageError && (
+                                  <p className="text-red-500 text-xs mt-1">
+                                    {imageError}
+                                  </p>
+                                )}
+                                {!isViewMode && imageFile && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Selected: {imageFile.name} (
+                                    {(imageFile.size / 1024 / 1024).toFixed(2)}{" "}
+                                    MB)
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Additional Info (View Mode Only) */}
                     {isViewMode && initialData && (
@@ -578,7 +605,7 @@ const VipProfileModal = ({
                         <button
                           type="button"
                           onClick={onClose}
-                          className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
+                          className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed cursor-pointer"
                           disabled={isLoading || isSubmitting}
                         >
                           Cancel
@@ -586,7 +613,7 @@ const VipProfileModal = ({
                         <button
                           type="button"
                           onClick={() => formRef.current?.requestSubmit()}
-                          className="px-6 py-2.5 bg-[#11285A] text-white font-bold rounded-lg hover:bg-[#0d1b3d] transition-colors flex items-center gap-2 disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-70"
+                          className="px-6 py-2.5 bg-[#11285A] text-white font-bold rounded-lg hover:bg-[#0d1b3d] transition-colors flex items-center gap-2 disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
                           disabled={isLoading || isSubmitting}
                         >
                           {isSubmitting ? (
