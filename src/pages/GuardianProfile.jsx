@@ -84,6 +84,10 @@ export const GuardianProfile = () => {
 
   const otpInputRefs = useRef([]);
 
+  const hasErrors = () => {
+    return Object.values(errors).some((error) => error);
+  };
+
   useEffect(() => {
     let timer;
     if (showOTPModal && otpTimer > 0) {
@@ -413,12 +417,7 @@ export const GuardianProfile = () => {
           if (imageResponse.success) {
             uploadedImageUrl = imageResponse.data.relativePath;
             setProfileImage(uploadedImageUrl);
-
-            setToastConfig({
-              show: true,
-              message: "Profile image uploaded successfully",
-              type: "success"
-            });
+            setImageFile(null);
           }
         } catch (imageError) {
           console.error("Failed to upload image:", imageError);
@@ -601,7 +600,7 @@ export const GuardianProfile = () => {
                 {!isEditMode ? (
                   <button
                     onClick={handleEditProfile}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#11285A] text-[#11285A] text-sm font-semibold hover:bg-blue-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#11285A] text-[#11285A] text-sm font-semibold hover:bg-blue-50 transition-colors cursor-pointer"
                   >
                     <Icon icon="solar:pen-bold" className="text-lg" />
                     Edit Profile
@@ -614,30 +613,55 @@ export const GuardianProfile = () => {
                         formRef.current.requestSubmit();
                       }}
                       disabled={
-                        isSendingOTP || isVerifyingOTP || isUploadingImage
+                        isSendingOTP ||
+                        isVerifyingOTP ||
+                        isUploadingImage ||
+                        isSubmitting ||
+                        hasErrors()
                       }
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#11285A] text-white text-sm font-semibold hover:bg-[#0d1b3d] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#11285A] text-white text-sm font-semibold hover:bg-[#0d1b3d] transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       {isSendingOTP || isVerifyingOTP || isUploadingImage ? (
                         <>
-                          <Icon icon="eos-icons:loading" className="text-lg" />
+                          <Icon
+                            icon="ph:circle-notch-bold"
+                            className="w-5 h-5 animate-spin"
+                          />
                           {isUploadingImage
                             ? "Uploading Image..."
                             : "Processing..."}
                         </>
                       ) : (
                         <>
-                          <Icon
-                            icon="solar:check-circle-bold"
-                            className="text-lg"
-                          />
+                          {isSubmitting ? (
+                            <Icon
+                              icon="ph:circle-notch-bold"
+                              className="w-5 h-5 animate-spin"
+                            />
+                          ) : (
+                            <Icon
+                              icon="solar:check-circle-bold"
+                              className="text-lg"
+                            />
+                          )}
+
                           {isSubmitting ? "Saving..." : "Save"}
                         </>
                       )}
                     </button>
                     <button
                       onClick={handleCancelEdit}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                      disabled={
+                        isSendingOTP ||
+                        isVerifyingOTP ||
+                        isUploadingImage ||
+                        isSubmitting
+                      }
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold hover:bg-gray-50 transition-colors ${
+                        isSubmitting
+                          ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                          : "border-gray-300 hover:bg-gray-200 cursor-pointer"
+                      }`}
                     >
                       <Icon
                         icon="solar:close-circle-bold"
@@ -842,7 +866,12 @@ export const GuardianProfile = () => {
                               <button
                                 type="button"
                                 onClick={triggerFileInput}
-                                disabled={isUploadingImage}
+                                disabled={
+                                  isSendingOTP ||
+                                  isVerifyingOTP ||
+                                  isUploadingImage ||
+                                  isSubmitting
+                                }
                                 className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
                               >
                                 <Icon
@@ -867,7 +896,12 @@ export const GuardianProfile = () => {
                               <button
                                 type="button"
                                 onClick={handleRemoveImage}
-                                disabled={isUploadingImage}
+                                disabled={
+                                  isSendingOTP ||
+                                  isVerifyingOTP ||
+                                  isUploadingImage ||
+                                  isSubmitting
+                                }
                                 className="px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
                               >
                                 <Icon
