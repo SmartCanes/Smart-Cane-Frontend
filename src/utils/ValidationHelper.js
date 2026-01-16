@@ -73,6 +73,18 @@ const VALIDATION_RULES = {
       test: (v) => v.length <= 100,
       message: "Should not exceed 100 characters"
     }
+  ],
+  relationship: [
+    { test: (v) => v.trim() !== "", message: "Relationship is required" },
+    {
+      test: (v) => /^[a-zA-Z\s]+$/.test(v),
+      message: "Only letters and spaces allowed"
+    },
+    {
+      test: (v) => v.length >= 2,
+      message: "Should be at least 2 characters long"
+    },
+    { test: (v) => v.length <= 50, message: "Should not exceed 50 characters" }
   ]
 };
 

@@ -5,6 +5,15 @@ import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import { validateField } from "@/utils/ValidationHelper";
 import TextField from "@/ui/components/TextField";
 import Toast from "./Toast";
+import SelectField from "./SelectField";
+
+const VIP_FIELDS = [
+  "firstName",
+  "middleName",
+  "lastName",
+  "relationship",
+  "streetAddress"
+];
 
 const VipProfileModal = ({
   isOpen,
@@ -24,13 +33,19 @@ const VipProfileModal = ({
     middleName: "",
     lastName: "",
     streetAddress: "",
+    relationship: "",
     vipImageUrl: "",
     province: "Metro Manila",
     city: "Quezon City",
     barangay: "San Bartolome"
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState(
+    VIP_FIELDS.reduce((acc, field) => {
+      acc[field] = "";
+      return acc;
+    }, {})
+  );
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [imageError, setImageError] = useState("");
@@ -55,6 +70,7 @@ const VipProfileModal = ({
         firstName: initialData.firstName || "",
         middleName: initialData.middleName || "",
         lastName: initialData.lastName || "",
+        relationship: initialData.relationship || "",
         streetAddress: initialData.streetAddress || "",
         vipImageUrl: initialData.vipImageUrl || "",
         province: initialData.province || "Metro Manila",
@@ -63,15 +79,22 @@ const VipProfileModal = ({
         createdAt: initialData.created_at || "",
         updatedAt: initialData.updated_at || ""
       });
+
       setImagePreview(initialData.vipImageUrl || "");
       setImageFile(null);
       setImageError("");
-      setErrors({});
+      setErrors(
+        VIP_FIELDS.reduce((acc, field) => {
+          acc[field] = "";
+          return acc;
+        }, {})
+      );
     } else {
       setFormData({
         firstName: "",
         middleName: "",
         lastName: "",
+        relationship: "",
         streetAddress: "",
         vipImageUrl: "",
         province: "Metro Manila",
@@ -81,7 +104,12 @@ const VipProfileModal = ({
       setImagePreview("");
       setImageFile(null);
       setImageError("");
-      setErrors({});
+      setErrors(
+        VIP_FIELDS.reduce((acc, field) => {
+          acc[field] = "";
+          return acc;
+        }, {})
+      );
     }
 
     initialDataRef.current = initialData
@@ -89,6 +117,7 @@ const VipProfileModal = ({
           firstName: initialData.firstName || "",
           middleName: initialData.middleName || "",
           lastName: initialData.lastName || "",
+          relationship: initialData.relationship || "",
           streetAddress: initialData.streetAddress || "",
           province: initialData.province || "",
           city: initialData.city || "",
@@ -130,7 +159,6 @@ const VipProfileModal = ({
     return fieldsChanged || imageChanged;
   })();
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     if (isViewMode) return;
 
@@ -139,7 +167,6 @@ const VipProfileModal = ({
       ...prev,
       [name]: value
     }));
-    // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -190,15 +217,18 @@ const VipProfileModal = ({
 
   const validateForm = () => {
     const newErrors = {};
+    let isValid = true;
 
-    if (!formData.firstName.trim())
-      newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.streetAddress.trim())
-      newErrors.streetAddress = "Street address is required";
+    Object.keys(formData).forEach((key) => {
+      const error = validateField(key, formData[key]);
+      if (error) {
+        newErrors[key] = error;
+        isValid = false;
+      }
+    });
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
@@ -223,18 +253,23 @@ const VipProfileModal = ({
       first_name: formData.firstName || "",
       middle_name: formData.middleName || "",
       last_name: formData.lastName || "",
+      relationship: formData.relationship || "",
       street_address: formData.streetAddress || "",
       province: formData.province || "Metro Manila",
       city: formData.city || "Quezon City",
       barangay: formData.barangay || "San Bartolome"
     };
 
-    const success = await onSubmit({ vip: { ...submitData } }, imageFile);
+    const success = await onSubmit(
+      { relationship: formData.relationship, vip: { ...submitData } },
+      imageFile
+    );
     if (!success) return;
     setFormData({
       firstName: "",
       middleName: "",
       lastName: "",
+      relationship: "",
       streetAddress: "",
       vipImageUrl: "",
       province: "Metro Manila",
@@ -323,7 +358,9 @@ const VipProfileModal = ({
                             VIP ID: {initialData.vipId}
                           </p>
                           <p className="text-sm sm:text-sm text-gray-500 mt-1">
-                            Relationship:{" "}
+                            Relationship to Guardian:{" "}
+                            {initialData.relationship.charAt(0).toUpperCase() +
+                              initialData.relationship.slice(1) || "—"}
                           </p>
                         </div>
                       </div>
@@ -408,6 +445,36 @@ const VipProfileModal = ({
                           />
                         )}
                       </div>
+                      {!isViewMode && (
+                        <div className="flex flex-col gap-2">
+                          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Relationship{" "}
+                            {!isViewMode && (
+                              <span className="text-red-500">*</span>
+                            )}
+                          </label>
+                          <SelectField
+                            name="relationship"
+                            value={formData.relationship}
+                            placeholder="Select Relationship..."
+                            required
+                            onChange={handleInputChange}
+                            onCustomInputChange={handleInputChange}
+                            options={[
+                              { value: "parent", label: "Parent" },
+                              { value: "spouse", label: "Spouse" },
+                              { value: "child", label: "Child" },
+                              { value: "sibling", label: "Sibling" },
+                              { value: "relative", label: "Relative" },
+                              { value: "guardian", label: "Guardian" },
+                              { value: "others", label: "Others" }
+                            ]}
+                            hasCustomOption={true}
+                            customOptionValue={formData.relationship}
+                            error={errors.relationship}
+                          />
+                        </div>
+                      )}
 
                       {/* Street Address */}
                       <div className="flex flex-col gap-2">
@@ -519,8 +586,7 @@ const VipProfileModal = ({
                                       disabled={
                                         isLoading ||
                                         isUploadingImage ||
-                                        isSubmitting ||
-                                        hasErrors()
+                                        isSubmitting
                                       }
                                       className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed "
                                     >

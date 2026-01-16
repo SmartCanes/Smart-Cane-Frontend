@@ -168,6 +168,7 @@ const Devices = () => {
       middleName: vip.middleName || "",
       lastName: vip.lastName,
       vipImageUrl: vip.vipImageUrl || "",
+      relationship: device.relationship || "",
       province: vip.province,
       city: vip.city,
       barangay: vip.barangay,
@@ -204,6 +205,7 @@ const Devices = () => {
         firstName: device.vip.firstName,
         middleName: device.vip.middleName || "",
         lastName: device.vip.lastName,
+        relationship: device.relationship || "",
         vipImageUrl: device.vip.vipImageUrl || "",
         province: device.vip.province,
         city: device.vip.city,
@@ -794,9 +796,7 @@ const DeviceCard = ({
                   : "No VIP Assigned"}
               </h5>
               <p className="text-sm text-gray-500 mt-1">
-                {device.relationship
-                  ? device.relationship
-                  : "No relationship available"}
+                VIP ID: {device?.vip ? device.vip.vipId : "No Vip Available"}
               </p>
             </div>
           </div>
