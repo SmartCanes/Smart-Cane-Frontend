@@ -3,9 +3,9 @@ import { Icon } from "@iconify/react";
 import Modal from "@/ui/components/Modal";
 import Toast from "@/ui/components/Toast";
 import { AnimatePresence, motion } from "framer-motion";
+import { inviteGuardianLink } from "@/api/backendService";
 
 const getDeviceGuardians = () => {};
-const inviteGuardianToDevice = () => {};
 const removeGuardianFromDevice = () => {};
 
 const ManageGuardiansModal = ({
@@ -36,7 +36,6 @@ const ManageGuardiansModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      fetchGuardians();
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -87,7 +86,7 @@ const ManageGuardiansModal = ({
     try {
       setIsSubmitting(true);
 
-      const response = await inviteGuardianToDevice(deviceId, email);
+      const response = await inviteGuardianLink(deviceId, { email });
 
       if (!response.success) {
         throw new Error(response.message || "Invitation failed");
@@ -191,10 +190,8 @@ const ManageGuardiansModal = ({
     }
   ];
 
-  // For now, use mock data. Replace with actual API data when ready.
   const displayGuardians = guardians.length > 0 ? guardians : mockGuardians;
 
-  // List view component
   const GuardiansListView = () => (
     <div className="space-y-4">
       {displayGuardians.map((guardian) => (
@@ -283,7 +280,6 @@ const ManageGuardiansModal = ({
     </div>
   );
 
-  // Tile view component (existing)
   const GuardiansTileView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {displayGuardians.map((guardian) => (
@@ -411,9 +407,8 @@ const ManageGuardiansModal = ({
 
               {/* Content */}
               <div className="flex-1 overflow-y-auto p-6">
-                {/* VIP Info Card */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex flex-row items-start md:items-center justify-between gap-4">
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">
                         VIP Information
@@ -616,65 +611,63 @@ const ManageGuardiansModal = ({
       </div>
 
       {/* INVITE MODAL */}
-      {inviteModalOpen && (
-        <Modal
-          isOpen={inviteModalOpen}
-          title="Invite Guardian"
-          modalType="info"
-          footer={null}
-          onClose={() => setInviteModalOpen(false)}
-        >
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Guardian Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Enter email address"
-                disabled={isSubmitting}
-              />
-              <p className="text-sm text-gray-500 mt-2">
-                An invitation will be sent to this email address
-              </p>
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => setInviteModalOpen(false)}
-                className="flex-1 border border-gray-300 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSendInvite}
-                disabled={isSubmitting || !email}
-                className={`flex-1 py-2.5 rounded-lg font-bold text-white ${
-                  isSubmitting || !email
-                    ? "bg-green-400 cursor-not-allowed"
-                    : "bg-[#2ECC71] hover:bg-green-600"
-                }`}
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Icon
-                      icon="ph:circle-notch-bold"
-                      className="w-5 h-5 animate-spin"
-                    />
-                    Sending...
-                  </span>
-                ) : (
-                  "Send Invitation"
-                )}
-              </button>
-            </div>
+      <Modal
+        isOpen={inviteModalOpen}
+        title="Invite Guardian"
+        modalType="info"
+        footer={null}
+        onClose={() => setInviteModalOpen(false)}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Guardian Email Address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              placeholder="Enter email address"
+              disabled={isSubmitting}
+            />
+            <p className="text-sm text-gray-500 mt-2">
+              An invitation will be sent to this email address
+            </p>
           </div>
-        </Modal>
-      )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={() => setInviteModalOpen(false)}
+              className="flex-1 border border-gray-300 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSendInvite}
+              disabled={isSubmitting || !email}
+              className={`flex-1 py-2.5 rounded-lg font-bold text-white ${
+                isSubmitting || !email
+                  ? "bg-green-400 cursor-not-allowed"
+                  : "bg-[#2ECC71] hover:bg-green-600"
+              }`}
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Icon
+                    icon="ph:circle-notch-bold"
+                    className="w-5 h-5 animate-spin"
+                  />
+                  Sending...
+                </span>
+              ) : (
+                "Send Invitation"
+              )}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* DELETE CONFIRMATION MODAL */}
       {deleteConfirm.show && (

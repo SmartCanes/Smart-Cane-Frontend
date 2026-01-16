@@ -22,6 +22,7 @@ import GetStarted from "./pages/GetStarted.jsx";
 import { GuardianProfile } from "./pages/GuardianProfile";
 import HealthStatus from "./pages/Health-Status.jsx";
 import Devices from "./pages/Devices";
+import GuardianInvite from "./pages/GuardianInvite";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -34,6 +35,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/guardian-invite" element={<GuardianInvite />} />
         </Route>
 
         <Route element={<ProtectedLayout />}>
