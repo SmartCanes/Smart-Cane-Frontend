@@ -14,7 +14,6 @@ import ForgotPassword from "./auth/FogotPassword.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
 import Setting from "./pages/Setting";
-import ManageProfile from "./pages/ManageProfile.jsx";
 import DashboardLayout from "./layout/DashboardLayout";
 import WeatherBoard from "./pages/WeatherBoard";
 import ActivityReport from "./pages/ActivityReport";
@@ -41,7 +40,6 @@ createRoot(document.getElementById("root")).render(
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/activity-report" element={<ActivityReport />} />
-            <Route path="/manage-profile" element={<ManageProfile />} />
             <Route path="/devices" element={<Devices />} />
             <Route path="/weather-board" element={<WeatherBoard />} />
             <Route path="/settings" element={<Setting />} />
