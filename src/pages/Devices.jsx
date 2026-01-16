@@ -17,6 +17,7 @@ import {
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import Button from "@/ui/components/Button";
 import { useDevicesStore } from "@/stores/useStore";
+import ManageGuardiansModal from "@/ui/components/ManageGuardians";
 
 // ========== DEVICES COMPONENT ==========
 const Devices = () => {
@@ -28,6 +29,7 @@ const Devices = () => {
 
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [showScanner, setShowScanner] = useState(false);
+  const [viewMode, setViewMode] = useState("tiles");
 
   const [vipModal, setVipModal] = useState({
     show: false,
@@ -50,6 +52,13 @@ const Devices = () => {
   const [deleteVIPConfirm, setDeleteVIPConfirm] = useState({
     show: false,
     deviceId: null
+  });
+
+  const [manageGuardiansModal, setManageGuardiansModal] = useState({
+    show: false,
+    deviceId: null,
+    vipName: "",
+    vipId: null
   });
 
   useEffect(() => {
@@ -182,6 +191,17 @@ const Devices = () => {
       mode: "view",
       device,
       vipData
+    });
+  };
+
+  const handleManageGuardians = (device) => {
+    setManageGuardiansModal({
+      show: true,
+      deviceId: device.deviceId,
+      vipName: device.vip
+        ? `${device.vip.firstName} ${device.vip.lastName}`
+        : "No VIP assigned",
+      vipId: device.vip ? device.vip.vipId : null
     });
   };
 
@@ -382,13 +402,44 @@ const Devices = () => {
               {devices.filter((d) => d.isPaired).length} active
             </p>
           </div>
-          <Button
-            onClick={() => setShowScanner(true)}
-            className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center justify-center gap-2"
-          >
-            <Icon icon="ph:plus-bold" className="w-5 h-5" />
-            Add Cane
-          </Button>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode("tiles")}
+                className={`px-3 py-1.5 rounded-md flex items-center gap-2 transition-colors ${
+                  viewMode === "tiles"
+                    ? "bg-white shadow-sm text-blue-600"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Icon icon="ph:squares-four-bold" className="w-4 h-4" />
+                <span className="text-sm font-medium hidden sm:inline">
+                  Tiles
+                </span>
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`px-3 py-1.5 rounded-md flex items-center gap-2 transition-colors ${
+                  viewMode === "list"
+                    ? "bg-white shadow-sm text-blue-600"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Icon icon="ph:list-bullets-bold" className="w-4 h-4" />
+                <span className="text-sm font-medium hidden sm:inline">
+                  List
+                </span>
+              </button>
+            </div>
+            <Button
+              onClick={() => setShowScanner(true)}
+              className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center justify-center gap-2"
+            >
+              <Icon icon="ph:plus-bold" className="w-5 h-5" />
+              Add Cane
+            </Button>
+          </div>
         </div>
 
         {/* UNPAIR CONFIRMATION MODAL */}
@@ -552,6 +603,21 @@ const Devices = () => {
           mode={vipModal.mode}
         />
 
+        <ManageGuardiansModal
+          isOpen={manageGuardiansModal.show}
+          onClose={() =>
+            setManageGuardiansModal({
+              show: false,
+              deviceId: null,
+              vipName: "",
+              deviceName: ""
+            })
+          }
+          deviceId={manageGuardiansModal.deviceId}
+          vipName={manageGuardiansModal.vipName}
+          vipId={manageGuardiansModal.vipId}
+        />
+
         <Modal
           isOpen={showScanner}
           onClose={() => setShowScanner(false)}
@@ -578,29 +644,62 @@ const Devices = () => {
         </Modal>
 
         {devices.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-            {devices.map((device) => (
-              <DeviceCard
-                key={device.deviceId}
-                device={device}
+          <>
+            {viewMode === "list" ? (
+              <DevicesListView
+                devices={devices}
                 onEditVIP={handleVipModalAction}
-                onViewVIP={() => handleViewVIP(device)}
-                onRemoveVIP={() =>
-                  setDeleteVIPConfirm({ show: true, deviceId: device.deviceId })
+                onViewVIP={handleViewVIP}
+                onRemoveVIP={(deviceId) =>
+                  setDeleteVIPConfirm({ show: true, deviceId })
                 }
-                onUnpairDevice={() =>
-                  setUnpairConfirm({ show: true, deviceId: device.deviceId })
+                onUnpairDevice={(deviceId) =>
+                  setUnpairConfirm({ show: true, deviceId })
                 }
-                onEditDevice={() =>
+                onEditDevice={(device) =>
                   setEditDeviceModal({
                     show: true,
                     deviceId: device.deviceId,
-                    deviceName: device.name
+                    deviceName: device.deviceName
                   })
                 }
+                onManageGuardians={handleManageGuardians}
               />
-            ))}
-          </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                {devices.map((device) => (
+                  <DeviceCard
+                    key={device.deviceId}
+                    device={device}
+                    onEditVIP={handleVipModalAction}
+                    onViewVIP={() => handleViewVIP(device)}
+                    onRemoveVIP={() =>
+                      setDeleteVIPConfirm({
+                        show: true,
+                        deviceId: device.deviceId
+                      })
+                    }
+                    onUnpairDevice={() =>
+                      setUnpairConfirm({
+                        show: true,
+                        deviceId: device.deviceId
+                      })
+                    }
+                    onEditDevice={() =>
+                      setEditDeviceModal({
+                        show: true,
+                        deviceId: device.deviceId,
+                        deviceName: device.name
+                      })
+                    }
+                    onManageGuardians={() => {
+                      handleManageGuardians(device);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-12">
             <Icon
@@ -634,7 +733,8 @@ const DeviceCard = ({
   onViewVIP,
   onRemoveVIP,
   onUnpairDevice,
-  onEditDevice
+  onEditDevice,
+  onManageGuardians
 }) => {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsMenuRef = useRef(null);
@@ -825,7 +925,7 @@ const DeviceCard = ({
                       onEditDevice(device);
                       setShowActionsMenu(false);
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
                   >
                     <Icon icon="ph:pencil-simple-bold" className="w-4 h-4" />
                     Edit Nickname
@@ -833,10 +933,21 @@ const DeviceCard = ({
 
                   <button
                     onClick={() => {
+                      onManageGuardians();
+                      setShowActionsMenu(false);
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100 cursor-pointer"
+                  >
+                    <Icon icon="ph:users-bold" className="w-4 h-4" />
+                    Manage Guardians
+                  </button>
+
+                  <button
+                    onClick={() => {
                       onUnpairDevice(device.deviceId);
                       setShowActionsMenu(false);
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2 border-t border-gray-100"
+                    className="w-full px-4 py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2 border-t border-gray-100 cursor-pointer"
                   >
                     <Icon icon="ph:link-break-bold" className="w-4 h-4" />
                     Unpair
@@ -847,6 +958,172 @@ const DeviceCard = ({
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+const DevicesListView = ({
+  devices,
+  onEditVIP,
+  onViewVIP,
+  onRemoveVIP,
+  onUnpairDevice,
+  onEditDevice,
+  onManageGuardians
+}) => {
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  return (
+    <div className="space-y-4">
+      {devices.map((device) => (
+        <div
+          key={device.deviceId}
+          className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 transition-all overflow-hidden"
+        >
+          <div className="p-4 flex justify-between items-start gap-4">
+            {/* LEFT INFO */}
+            <div className="flex items-start gap-4 flex-1 min-w-0">
+              <div className="relative">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                  <Icon
+                    icon="ph:walking-stick"
+                    className="w-5 h-5 text-blue-600"
+                  />
+                </div>
+                <div
+                  className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                    device.status === "online" ? "bg-green-500" : "bg-red-400"
+                  }`}
+                />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3">
+                  <h3 className="font-bold text-gray-900 truncate">
+                    {device.deviceName ||
+                      device.deviceSerialNumber ||
+                      "Unnamed Cane"}
+                  </h3>
+
+                  <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                    Paired
+                  </span>
+                </div>
+
+                <p className="text-sm text-gray-500">
+                  {!device.lastActive
+                    ? "Active Now"
+                    : `Last active: ${device.lastActive}`}
+                </p>
+
+                <div className="mt-2 text-sm text-gray-600 space-y-1">
+                  <p>
+                    <strong>VIP:</strong>{" "}
+                    {device.vip
+                      ? `${device.vip.firstName} ${device.vip.lastName}`
+                      : "No VIP Assigned"}
+                  </p>
+                  <p>
+                    <strong>VIP ID:</strong>{" "}
+                    {device.vip ? device.vip.vipId : "—"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT ACTIONS */}
+            <div className="flex flex-col gap-2 items-end">
+              {device.vip ? (
+                <>
+                  <button
+                    onClick={() => onViewVIP(device)}
+                    className="text-sm text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg flex items-center gap-2"
+                  >
+                    <Icon icon="ph:eye-bold" />
+                    View VIP
+                  </button>
+
+                  <button
+                    onClick={() => onEditVIP(device)}
+                    className="text-sm text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg flex items-center gap-2"
+                  >
+                    <Icon icon="ph:pencil-simple-bold" />
+                    Edit VIP
+                  </button>
+
+                  <button
+                    onClick={() => onRemoveVIP(device.deviceId)}
+                    className="text-sm text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg flex items-center gap-2"
+                  >
+                    <Icon icon="ph:trash-bold" />
+                    Remove VIP
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => onEditVIP(device)}
+                  className="text-sm text-white bg-[#11285A] hover:bg-[#0d1b3d] px-4 py-2 rounded-lg flex items-center gap-2"
+                >
+                  <Icon icon="ph:user-plus-bold" />
+                  Assign VIP
+                </button>
+              )}
+
+              {/* MANAGE DROPDOWN */}
+              <div className="relative">
+                <button
+                  onClick={() =>
+                    setOpenMenuId(
+                      openMenuId === device.deviceId ? null : device.deviceId
+                    )
+                  }
+                  className="text-sm text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg flex items-center gap-2"
+                >
+                  <Icon icon="ph:gear-six-bold" />
+                  Manage
+                </button>
+
+                {openMenuId === device.deviceId && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white border rounded-lg shadow-xl z-50">
+                    <button
+                      onClick={() => {
+                        onEditDevice(device);
+                        setOpenMenuId(null);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <Icon icon="ph:pencil-simple-bold" />
+                      Edit Nickname
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        onManageGuardians(device);
+                        setOpenMenuId(null);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <Icon icon="ph:users-bold" />
+                      Manage Guardians
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        onUnpairDevice(device.deviceId);
+                        setOpenMenuId(null);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
+                    >
+                      <Icon icon="ph:link-break-bold" />
+                      Unpair
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
