@@ -65,7 +65,15 @@ export const verifyRegistrationOTP = (email, otp_code) =>
     })
   );
 
-// Chnage Email
+export const inviteGuardianLink = (deviceId, payload) =>
+  handleRequest(() => {
+    backendApi.post(`/device/${deviceId}/invite-guardian`, payload);
+  });
+
+export const verifyGuardianInvite = (token) =>
+  handleRequest(() => backendApi.post("/vip/accept-invite", { token }));
+
+// Change Email
 export const requestEmailChangeOTP = (new_email) =>
   handleRequest(() =>
     backendApi.post("/auth/profile/change-email/request", { new_email })
