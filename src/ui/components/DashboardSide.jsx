@@ -4,7 +4,6 @@ import { HoverNavEffect } from "@/wrapper/MotionWrapper";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 
-// Component for Desktop Menu Items (Walang ginalaw dito sa logic)
 const MenuButton = memo(({ item, isActive, onNavigate }) => (
   <HoverNavEffect
     delay={0.1}
@@ -38,7 +37,7 @@ const MenuButton = memo(({ item, isActive, onNavigate }) => (
           stiffness: 300,
           damping: 30
         }}
-        className="w-full h-18 rounded-l-full"
+        className="w-full h-18 rounded-l-full cursor-pointer "
       >
         <div className="flex items-center gap-4 px-6 py-3">
           <Icon icon={item.icon} className="w-6 h-6 flex-shrink-0 text-base" />
@@ -148,7 +147,7 @@ const DashboardSide = ({ className = "" }) => {
             <HoverNavEffect delay={0.1} key={item.id}>
               <button
                 onClick={() => handleNavigation(item.path)}
-                className={`flex flex-col items-center justify-center w-16 py-3 transition-all duration-300 ${
+                className={`flex flex-col items-center justify-center w-16 py-3 transition-all duration-300 cursor-pointer  ${
                   location.pathname === item.path
                     ? "bg-white text-primary-100 font-bold shadow-md" // Active: White BG, Dark Text
                     : "text-gray-400 hover:text-white" // Inactive: Grayish

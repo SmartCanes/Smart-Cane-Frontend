@@ -362,7 +362,7 @@ const Header = () => {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center transition-colors duration-200"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center transition-colors duration-200 cursor-pointer"
             aria-label="User menu"
           >
             {showImage ? (
@@ -400,7 +400,7 @@ const Header = () => {
                       setIsDropdownOpen(false);
                       navigate("/profile");
                     }}
-                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
+                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 cursor-pointer"
                   >
                     Profile
                   </button>
@@ -410,13 +410,13 @@ const Header = () => {
                       navigate("/settings");
                     }}
                     disabled={isLoggingOut}
-                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
+                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 cursor-pointer"
                   >
                     Settings
                   </button>
                   <button
                     onClick={handleLogoutClick}
-                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex gap-2"
+                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex gap-2 cursor-pointer"
                   >
                     Logout
                   </button>

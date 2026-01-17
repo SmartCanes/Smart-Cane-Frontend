@@ -850,7 +850,7 @@ export const GuardianProfile = () => {
                           <button
                             type="button"
                             onClick={triggerFileInput}
-                            className="absolute bottom-0 right-0 bg-[#11285A] text-white p-1.5 rounded-full hover:bg-[#0d1b3d] transition-colors"
+                            className="absolute bottom-0 right-0 bg-[#11285A] text-white p-1.5 rounded-full hover:bg-[#0d1b3d] cursor-pointer transition-colors"
                             title="Change photo"
                           >
                             <Icon
@@ -886,7 +886,7 @@ export const GuardianProfile = () => {
                                   isUploadingImage ||
                                   isSubmitting
                                 }
-                                className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
+                                className="px-4 py-2 bg-white border border-[#11285A] text-[#11285A] text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed cursor-pointer"
                               >
                                 <Icon
                                   icon="solar:upload-bold"
@@ -916,7 +916,7 @@ export const GuardianProfile = () => {
                                   isUploadingImage ||
                                   isSubmitting
                                 }
-                                className="px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed"
+                                className="px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed cursor-pointer"
                               >
                                 <Icon
                                   icon="solar:trash-bin-trash-bold"
