@@ -700,6 +700,7 @@ const ManageGuardiansModal = ({
       {/* TOAST */}
       {toast.show && (
         <Toast
+          key="toast-modal"
           type={toast.type}
           message={toast.message}
           position="bottom-right"
