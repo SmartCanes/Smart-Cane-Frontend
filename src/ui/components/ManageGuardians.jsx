@@ -364,7 +364,7 @@ const ManageGuardiansModal = ({
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="sync">
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <motion.div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 flex justify-center items-center"
@@ -612,6 +612,7 @@ const ManageGuardiansModal = ({
 
       {/* INVITE MODAL */}
       <Modal
+        key="invite-modal"
         isOpen={inviteModalOpen}
         title="Invite Guardian"
         modalType="info"
@@ -627,6 +628,12 @@ const ManageGuardiansModal = ({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !isSubmitting && email) {
+                  e.preventDefault();
+                  handleSendInvite();
+                }
+              }}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               placeholder="Enter email address"
               disabled={isSubmitting}

@@ -73,6 +73,7 @@ export default function Toast({
     <AnimatePresence>
       {visible && (
         <motion.div
+          key="toast-root"
           initial={{ opacity: 0, x: position.includes("left") ? -50 : 50 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: position.includes("left") ? -50 : 50 }}

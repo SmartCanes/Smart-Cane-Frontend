@@ -102,6 +102,7 @@ export default function Modal({
       {isOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <motion.div
+            key="modal-root"
             className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 flex justify-center items-center"
             onClick={!isSubmitting ? onClose : undefined}
             initial={{ opacity: 0 }}
