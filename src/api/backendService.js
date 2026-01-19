@@ -27,6 +27,9 @@ export const deleteVIP = (deviceId) =>
 export const getDevices = () =>
   handleRequest(() => backendApi.get("/device/list"));
 
+export const getDeviceGuardians = (deviceId) =>
+  handleRequest(() => backendApi.get(`/device/${deviceId}/guardians`));
+
 export const assignVipToDevice = (deviceId, payload) =>
   handleRequest(() => backendApi.post(`/device/vip/${deviceId}`, payload));
 

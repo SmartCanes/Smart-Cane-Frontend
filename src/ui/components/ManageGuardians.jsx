@@ -3,9 +3,8 @@ import { Icon } from "@iconify/react";
 import Modal from "@/ui/components/Modal";
 import Toast from "@/ui/components/Toast";
 import { AnimatePresence, motion } from "framer-motion";
-import { inviteGuardianLink } from "@/api/backendService";
+import { getDeviceGuardians, inviteGuardianLink } from "@/api/backendService";
 
-const getDeviceGuardians = () => {};
 const removeGuardianFromDevice = () => {};
 
 const ManageGuardiansModal = ({
@@ -33,6 +32,7 @@ const ManageGuardiansModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [guardians, setGuardians] = useState([]);
   const [viewMode, setViewMode] = useState("tiles");
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -45,6 +45,12 @@ const ManageGuardiansModal = ({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isOpen && deviceId) {
+      fetchGuardians();
+    }
+  }, [isOpen, deviceId]);
+
   const fetchGuardians = async () => {
     try {
       setIsLoading(true);
@@ -53,7 +59,7 @@ const ManageGuardiansModal = ({
       const response = await getDeviceGuardians(deviceId);
 
       if (response.success) {
-        setGuardians(response.data || []);
+        setGuardians(response.data.guardians || []);
       } else {
         throw new Error(response.message || "Failed to load guardians");
       }
@@ -64,8 +70,7 @@ const ManageGuardiansModal = ({
         type: "error",
         message: "Failed to load guardians. Please try again."
       });
-      // setGuardians([]);
-      setGuardians(mockGuardians); // Use mock data on error for now
+      setGuardians([]);
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +91,6 @@ const ManageGuardiansModal = ({
       setIsSubmitting(true);
 
       const response = await inviteGuardianLink(deviceId, { email });
-      console.log(response);
 
       if (!response.success) {
         throw new Error(response.message || "Invitation failed");
@@ -100,8 +104,6 @@ const ManageGuardiansModal = ({
 
       setInviteModalOpen(false);
       setEmail("");
-
-      // fetchGuardians();
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -154,50 +156,9 @@ const ManageGuardiansModal = ({
     }
   };
 
-  const mockGuardians = [
-    {
-      id: 1,
-      fullName: "Juan Dela Cruz",
-      email: "juan@example.com",
-      phone: "09123456789",
-      gender: "Male",
-      address: "123 Main St, Manila",
-      status: "active"
-    },
-    {
-      id: 2,
-      fullName: "Maria Santos",
-      email: "maria@example.com",
-      phone: "09123456790",
-      gender: "Female",
-      address: "456 Oak St, Quezon City",
-      status: "pending"
-    },
-    {
-      id: 3,
-      fullName: "Pedro Garcia",
-      email: "pedro@example.com",
-      phone: "09123456791",
-      gender: "Male",
-      address: "789 Pine St, Makati",
-      status: "active"
-    },
-    {
-      id: 4,
-      fullName: "Ana Reyes",
-      email: "ana@example.com",
-      phone: "09123456792",
-      gender: "Female",
-      address: "101 Maple St, Taguig",
-      status: "inactive"
-    }
-  ];
-
-  const displayGuardians = guardians.length > 0 ? guardians : mockGuardians;
-
   const GuardiansListView = () => (
     <div className="space-y-4">
-      {displayGuardians.map((guardian) => (
+      {guardians.map((guardian) => (
         <div
           key={guardian.id}
           className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 transition-all duration-200 overflow-hidden"
@@ -285,7 +246,7 @@ const ManageGuardiansModal = ({
 
   const GuardiansTileView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {displayGuardians.map((guardian) => (
+      {guardians.map((guardian) => (
         <div
           key={guardian.id}
           className="bg-white p-4 md:p-6 rounded-2xl shadow-md border border-gray-100"
@@ -449,7 +410,7 @@ const ManageGuardiansModal = ({
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <div>
                       <h4 className="text-lg font-semibold text-gray-900">
-                        Assigned Guardians ({displayGuardians.length})
+                        Assigned Guardians ({guardians.length})
                       </h4>
                       <p className="text-sm text-gray-500 mt-1">
                         Guardians who can monitor this VIP
@@ -502,7 +463,7 @@ const ManageGuardiansModal = ({
                         <p className="text-gray-500">Loading guardians...</p>
                       </div>
                     </div>
-                  ) : displayGuardians.length === 0 ? (
+                  ) : guardians.length === 0 ? (
                     <div className="text-center py-16 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50">
                       <Icon
                         icon="ph:users-three-bold"
@@ -547,9 +508,7 @@ const ManageGuardiansModal = ({
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Total Guardians</p>
-                        <p className="text-2xl font-bold">
-                          {displayGuardians.length}
-                        </p>
+                        <p className="text-2xl font-bold">{guardians.length}</p>
                       </div>
                     </div>
                   </div>
@@ -565,9 +524,8 @@ const ManageGuardiansModal = ({
                         <p className="text-sm text-gray-500">Active</p>
                         <p className="text-2xl font-bold">
                           {
-                            displayGuardians.filter(
-                              (g) => g.status === "active"
-                            ).length
+                            guardians.filter((g) => g.status === "active")
+                              .length
                           }
                         </p>
                       </div>
@@ -585,9 +543,8 @@ const ManageGuardiansModal = ({
                         <p className="text-sm text-gray-500">Pending Invites</p>
                         <p className="text-2xl font-bold">
                           {
-                            displayGuardians.filter(
-                              (g) => g.status === "pending"
-                            ).length
+                            guardians.filter((g) => g.status === "pending")
+                              .length
                           }
                         </p>
                       </div>
