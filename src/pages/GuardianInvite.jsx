@@ -104,7 +104,6 @@ const GuardianInvite = () => {
     const processInvite = async () => {
       try {
         const response = await verifyGuardianInvite(token);
-        console.log(response);
 
         if (!response.success) throw new Error("Failed to verify invitation");
 

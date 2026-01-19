@@ -17,7 +17,8 @@ export const useRegisterStore = create(
         village: "Saint Francis",
         email: "",
         contactNumber: "",
-        deviceSerial: ""
+        deviceSerial: "",
+        inviteToken: ""
       },
       step: 1,
       showScanner: false,
@@ -59,6 +60,31 @@ export const useRegisterStore = create(
           }
         }),
 
+      invite: {
+        token: null,
+        email: null,
+        valid: false
+      },
+
+      setInvite: ({ token, email }) =>
+        set({
+          invite: {
+            token,
+            email,
+            valid: true
+          }
+        }),
+
+      clearInvite: () =>
+        set({
+          invite: {
+            token: null,
+            email: null,
+            valid: false
+          }
+        }),
+
+
       clearRegisterStore: () =>
         set({
           formData: {
@@ -75,6 +101,11 @@ export const useRegisterStore = create(
             email: "",
             contactNumber: "",
             deviceSerial: ""
+          },
+          invite: {
+            token: null,
+            email: null,
+            valid: false
           },
           deviceValidated: {
             validated: false,

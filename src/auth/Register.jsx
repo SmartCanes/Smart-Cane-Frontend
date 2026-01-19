@@ -16,7 +16,11 @@ import { useRegisterStore } from "@/stores/useRegisterStore";
 import ScannerCamera from "@/ui/components/Scanner";
 import Modal from "@/ui/components/Modal";
 import TermsAndConditions from "@/ui/components/TermsAndPrivacyModal";
-import { pairDevice, validateDeviceSerial } from "@/api/backendService";
+import {
+  decodeInviteToken,
+  pairDevice,
+  validateDeviceSerial
+} from "@/api/backendService";
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -36,7 +40,9 @@ const Register = () => {
     clearDeviceValidated,
     clearRegisterStore,
     showScanner,
-    setShowScanner
+    setShowScanner,
+    setInvite,
+    invite
   } = useRegisterStore();
   const { isAnimationDone } = useUIStore();
 
@@ -60,11 +66,13 @@ const Register = () => {
   const [otpError, setOtpError] = useState("");
   const [countdown, setCountdown] = useState(0);
   const [errors, setErrors] = useState({});
+
   const [redirectSeconds, setRedirectSeconds] = useState(null);
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
   const countdownRef = useRef(null);
   const firstNameRef = useRef(null);
   const streetAddressRef = useRef(null);
+  const inviteMode = invite.valid;
 
   const validateField = (name, value) => {
     switch (name) {
@@ -315,6 +323,42 @@ const Register = () => {
             email: formData.email,
             contact_number: formData.contactNumber
           });
+
+          if (inviteMode) {
+            const accountPayload = {
+              username: formData.username,
+              password: formData.password,
+              first_name: formData.firstName,
+              middle_name: formData.middleName,
+              last_name: formData.lastName,
+              email: formData.email,
+              contact_number: formData.contactNumber,
+              province: "Metro Manila",
+              village: "Saint Francis",
+              city: "Quezon City",
+              barangay: "San Bartolome",
+              street_address: formData.streetAddress,
+              invite_token: invite.token
+            };
+
+            await registerApi(accountPayload);
+
+            setModalConfig({
+              isOpen: true,
+              onClose: () =>
+                setModalConfig((prev) => ({ ...prev, isOpen: false })),
+              variant: "banner",
+              title: "Account Created via Invite!",
+              message:
+                "Your account has been created successfully using the invite link.",
+              actionText: "Go to Login",
+              onAction: () => navigate("/login")
+            });
+            clearDeviceValidated();
+            clearRegisterStore();
+            break;
+          }
+
           await sendOtp();
           setStep(3);
           break;
@@ -601,6 +645,26 @@ const Register = () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, [deviceValidated.validated, setDeviceValidated]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const inviteToken = params.get("invite_token");
+
+    if (!inviteToken) return;
+
+    const decode = async () => {
+      const res = await decodeInviteToken(inviteToken);
+
+      if (res?.data?.email) {
+        updateForm("email", res.data.email);
+        setInvite({ token: inviteToken, email: res.data.email });
+      }
+
+      window.history.replaceState({}, "", window.location.pathname);
+    };
+
+    decode();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -894,6 +958,7 @@ const Register = () => {
                       onBlur={() => handleBlur("email")}
                       error={errors.email}
                       maxLength={50}
+                      disabled={inviteMode}
                       required
                     />
                   </div>
@@ -984,10 +1049,10 @@ const Register = () => {
                       className="w-full py-3 sm:py-4 text-md sm:text-md"
                       text={
                         isSubmitting
-                          ? step === 3
-                            ? "Verifying..."
+                          ? step === 3 || (step === 2 && inviteMode)
+                            ? "Creating Account..."
                             : "Checking..."
-                          : `${step === 3 ? "Create Account" : "Next"}`
+                          : `${step === 3 || (step === 2 && inviteMode) ? "Create Account" : "Next"}`
                       }
                       type="submit"
                       disabled={isSubmitting || hasStepErrors()}

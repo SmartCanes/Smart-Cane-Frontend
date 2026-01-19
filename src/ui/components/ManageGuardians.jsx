@@ -86,6 +86,7 @@ const ManageGuardiansModal = ({
       setIsSubmitting(true);
 
       const response = await inviteGuardianLink(deviceId, { email });
+      console.log(response);
 
       if (!response.success) {
         throw new Error(response.message || "Invitation failed");
@@ -100,7 +101,7 @@ const ManageGuardiansModal = ({
       setInviteModalOpen(false);
       setEmail("");
 
-      fetchGuardians();
+      // fetchGuardians();
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
