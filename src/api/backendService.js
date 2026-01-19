@@ -66,12 +66,15 @@ export const verifyRegistrationOTP = (email, otp_code) =>
   );
 
 export const inviteGuardianLink = (deviceId, payload) =>
-  handleRequest(() => {
-    backendApi.post(`/device/${deviceId}/invite-guardian`, payload);
-  });
+  handleRequest(() =>
+    backendApi.post(`/device/${deviceId}/invite-guardian`, payload)
+  );
 
 export const verifyGuardianInvite = (token) =>
-  handleRequest(() => backendApi.post("/vip/accept-invite", { token }));
+  handleRequest(() => backendApi.get(`/device/accept-invite/${token}`));
+
+export const decodeInviteToken = (token) =>
+  handleRequest(() => backendApi.get(`/device/decode-invite/${token}`));
 
 // Change Email
 export const requestEmailChangeOTP = (new_email) =>
