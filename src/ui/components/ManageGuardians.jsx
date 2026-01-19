@@ -32,8 +32,7 @@ const ManageGuardiansModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [guardians, setGuardians] = useState([]);
-  const [viewMode, setViewMode] = useState("tiles"); // "tiles" or "list"
-
+  const [viewMode, setViewMode] = useState("tiles");
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -101,13 +100,16 @@ const ManageGuardiansModal = ({
       setInviteModalOpen(false);
       setEmail("");
 
-      // Refresh the guardians list
       fetchGuardians();
     } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to send invitation";
       setToast({
         show: true,
         type: "error",
-        message: error.message || "Failed to send invitation"
+        message: errorMessage
       });
     } finally {
       setIsSubmitting(false);

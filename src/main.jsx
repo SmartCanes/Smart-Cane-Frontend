@@ -30,12 +30,12 @@ createRoot(document.getElementById("root")).render(
       <Routes>
         <Route path="/" element={<GuestPage />} />
         <Route path="/get-started" element={<GetStarted />} />
+        <Route path="/guardian-invite/:token" element={<GuardianInvite />} />
 
         <Route element={<PublicLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/guardian-invite" element={<GuardianInvite />} />
         </Route>
 
         <Route element={<ProtectedLayout />}>
