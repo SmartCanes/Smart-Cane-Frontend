@@ -84,7 +84,6 @@ export const useRegisterStore = create(
           }
         }),
 
-
       clearRegisterStore: () =>
         set({
           formData: {
