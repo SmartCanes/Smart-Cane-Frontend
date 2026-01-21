@@ -4,7 +4,7 @@ import Toast from "../ui/components/Toast";
 import Modal from "../ui/components/Modal";
 import VipProfileModal from "@/ui/components/VipProfileModal";
 import ScannerCamera from "@/ui/components/Scanner";
-// import { useUserStore } from "@/stores/useStore";
+import { motion } from "framer-motion";
 
 import {
   assignVipToDevice,
@@ -23,7 +23,7 @@ import ManageGuardiansModal from "@/ui/components/ManageGuardians";
 const Devices = () => {
   const { devices, fetchDevices, upsertDevice, removeDevice } =
     useDevicesStore();
-  const { fetchGuardians, guardiansByDevice } = useGuardiansStore();
+  const { fetchGuardians } = useGuardiansStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nicknameSubmitting, setNicknameSubmitting] = useState(false);
   const [resetNicknameSubmitting, setResetNicknameSubmitting] = useState(false);
@@ -185,11 +185,6 @@ const Devices = () => {
   const handleViewVIP = (device) => {
     const { vip } = device;
     if (!device.vip) {
-      setToast({
-        show: true,
-        type: "info",
-        message: "No VIP assigned to this cane"
-      });
       return;
     }
 
@@ -784,7 +779,12 @@ const DeviceCard = ({
   }, []);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <motion.div
+      onClick={() => onViewVIP(device)}
+      whileHover={{ y: -6, scale: 1.015 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+      className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+    >
       {/* Card Header with Status */}
       <div className="p-4 sm:p-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex justify-between items-start">
@@ -854,14 +854,20 @@ const DeviceCard = ({
               {device?.vip ? (
                 <>
                   <button
-                    onClick={() => onViewVIP(device)}
+                    onClick={(e) => {
+                      e.stopPropagation;
+                      onViewVIP(device);
+                    }}
                     className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Icon icon="ph:eye-bold" className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">View</span>
                   </button>
                   <button
-                    onClick={() => onEditVIP(device)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditVIP(device);
+                    }}
                     className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Icon
@@ -871,7 +877,10 @@ const DeviceCard = ({
                     <span className="hidden sm:inline">Edit</span>
                   </button>
                   <button
-                    onClick={() => onRemoveVIP(device.deviceId)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveVIP(device.deviceId);
+                    }}
                     className="px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Icon icon="ph:trash-bold" className="w-3.5 h-3.5" />
@@ -985,7 +994,7 @@ const DeviceCard = ({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -1015,8 +1024,10 @@ const DevicesListView = ({
         </div>
       ) : (
         devices.map((device) => (
-          <div
+          <motion.div
             key={device.deviceId}
+            whileHover={{ y: -6, scale: 1.015 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
             className="bg-white rounded-2xl border border-gray-100 hover:border-blue-200 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <div className="p-4 sm:p-5">
@@ -1376,7 +1387,7 @@ const DevicesListView = ({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))
       )}
     </div>
