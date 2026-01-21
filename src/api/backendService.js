@@ -30,6 +30,9 @@ export const getDevices = () =>
 export const getDeviceGuardians = (deviceId) =>
   handleRequest(() => backendApi.get(`/device/${deviceId}/guardians`));
 
+export const getAllDeviceGuardians = () =>
+  handleRequest(() => backendApi.get(`/device/guardians`));
+
 export const assignVipToDevice = (deviceId, payload) =>
   handleRequest(() => backendApi.post(`/device/vip/${deviceId}`, payload));
 

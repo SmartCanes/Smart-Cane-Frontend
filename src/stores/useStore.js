@@ -1,4 +1,4 @@
-import { getDevices } from "@/api/backendService";
+import { getAllDeviceGuardians, getDevices } from "@/api/backendService";
 import { wsApi } from "@/api/ws-api";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -199,6 +199,128 @@ export const useDevicesStore = create(
       partialize: (state) => ({
         devices: state.devices,
         lastFetchedAt: state.lastFetchedAt
+      })
+    }
+  )
+);
+
+export const useGuardiansStore = create(
+  persist(
+    (set, get) => ({
+      guardiansByDevice: [],
+
+      getGuardiansByDevice: (deviceId) =>
+        get().guardiansByDevice.find((d) => d.deviceId === deviceId)
+          ?.guardians || [],
+
+      guardians: (deviceId) =>
+        get().guardiansByDevice.find((d) => d.deviceId === deviceId)
+          ?.guardians || [],
+
+      setGuardians: (deviceId, guardians) =>
+        set((state) => {
+          const existing = state.guardiansByDevice.find(
+            (d) => d.deviceId === deviceId
+          );
+          if (existing) {
+            return {
+              guardiansByDevice: state.guardiansByDevice.map((d) =>
+                d.deviceId === deviceId ? { ...d, guardians } : d
+              )
+            };
+          } else {
+            return {
+              guardiansByDevice: [
+                ...state.guardiansByDevice,
+                { deviceId, guardians }
+              ]
+            };
+          }
+        }),
+
+      upsertGuardian: (deviceId, guardian) =>
+        set((state) => ({
+          guardiansByDevice: state.guardiansByDevice.map((d) => {
+            if (d.deviceId !== deviceId) return d;
+
+            const exists = d.guardians.some(
+              (g) => g.guardianId === guardian.guardianId
+            );
+
+            return {
+              ...d,
+              guardians: exists
+                ? d.guardians.map((g) =>
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
+                : [...d.guardians, guardian]
+            };
+          })
+        })),
+
+      removeGuardian: (deviceId, guardianId) =>
+        set((state) => ({
+          guardiansByDevice: state.guardiansByDevice.map((d) =>
+            d.deviceId === deviceId
+              ? {
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
+              : d
+          )
+        })),
+
+      clearGuardians: (deviceId) =>
+        set((state) => ({
+          guardiansByDevice: state.guardiansByDevice.map((d) =>
+            d.deviceId === deviceId
+              ? { ...d, guardians: [], lastFetchedAt: null }
+              : d
+          )
+        })),
+
+      clearAllGuardians: () =>
+        set({
+          guardiansByDevice: []
+        }),
+
+      fetchGuardians: async () => {
+        try {
+          const response = await getAllDeviceGuardians();
+
+          if (response.success) {
+            set((state) => ({
+              guardiansByDevice: response.data.guardiansByDevice.map((d) => ({
+                deviceId: d.deviceId,
+                guardians: d.guardians || []
+              }))
+            }));
+
+            return {
+              success: true,
+              data: response.data.guardiansByDevice || []
+            };
+          } else {
+            return { success: false, message: response.message };
+          }
+        } catch (error) {
+          console.error("Error fetching guardians:", error);
+          return {
+            success: false,
+            message: error.message || "Failed to fetch"
+          };
+        }
+      }
+    }),
+    {
+      name: "guardians-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        guardiansByDevice: state.guardiansByDevice
       })
     }
   )

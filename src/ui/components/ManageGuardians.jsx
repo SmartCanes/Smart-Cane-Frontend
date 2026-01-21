@@ -3,7 +3,8 @@ import { Icon } from "@iconify/react";
 import Modal from "@/ui/components/Modal";
 import Toast from "@/ui/components/Toast";
 import { AnimatePresence, motion } from "framer-motion";
-import { getDeviceGuardians, inviteGuardianLink } from "@/api/backendService";
+import { inviteGuardianLink } from "@/api/backendService";
+import { useGuardiansStore } from "@/stores/useStore";
 
 const removeGuardianFromDevice = () => {};
 
@@ -14,6 +15,7 @@ const ManageGuardiansModal = ({
   vipName,
   vipId
 }) => {
+  const { guardians, setGuardians, removeGuardian } = useGuardiansStore();
   const [email, setEmail] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({
@@ -28,9 +30,7 @@ const ManageGuardiansModal = ({
     message: ""
   });
 
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [guardians, setGuardians] = useState([]);
   const [viewMode, setViewMode] = useState("tiles");
 
   useEffect(() => {
@@ -45,38 +45,6 @@ const ManageGuardiansModal = ({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (isOpen && deviceId) {
-      fetchGuardians();
-    }
-  }, [isOpen, deviceId]);
-
-  const fetchGuardians = async () => {
-    try {
-      setIsLoading(true);
-
-      // Call your API to fetch guardians for this device
-      const response = await getDeviceGuardians(deviceId);
-
-      if (response.success) {
-        setGuardians(response.data.guardians || []);
-      } else {
-        throw new Error(response.message || "Failed to load guardians");
-      }
-    } catch (error) {
-      console.error("Error fetching guardians:", error);
-      setToast({
-        show: true,
-        type: "error",
-        message: "Failed to load guardians. Please try again."
-      });
-      setGuardians([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /* ================= INVITE GUARDIAN ================= */
   const handleSendInvite = async () => {
     if (!email || !email.includes("@")) {
       setToast({
@@ -158,9 +126,9 @@ const ManageGuardiansModal = ({
 
   const GuardiansListView = () => (
     <div className="space-y-4">
-      {guardians.map((guardian) => (
+      {guardians(deviceId).map((guardian) => (
         <div
-          key={guardian.id}
+          key={guardian.guardianId}
           className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 transition-all duration-200 overflow-hidden"
         >
           <div className="p-4">
@@ -227,7 +195,7 @@ const ManageGuardiansModal = ({
                 onClick={() =>
                   setDeleteConfirm({
                     show: true,
-                    guardianId: guardian.id,
+                    guardianId: guardian.guardianId,
                     guardianName: guardian.fullName
                   })
                 }
@@ -246,9 +214,9 @@ const ManageGuardiansModal = ({
 
   const GuardiansTileView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {guardians.map((guardian) => (
+      {guardians(deviceId).map((guardian) => (
         <div
-          key={guardian.id}
+          key={guardian.guardianId}
           className="bg-white p-4 md:p-6 rounded-2xl shadow-md border border-gray-100"
         >
           <div className="flex justify-between items-start">
@@ -277,7 +245,7 @@ const ManageGuardiansModal = ({
               onClick={() =>
                 setDeleteConfirm({
                   show: true,
-                  guardianId: guardian.id,
+                  guardianId: guardian.guardianId,
                   guardianName: guardian.fullName
                 })
               }
@@ -362,7 +330,7 @@ const ManageGuardiansModal = ({
                   <button
                     onClick={onClose}
                     className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
-                    disabled={isLoading || isSubmitting}
+                    disabled={isSubmitting}
                   >
                     <Icon icon="ph:x-bold" className="w-6 h-6" />
                   </button>
@@ -410,7 +378,7 @@ const ManageGuardiansModal = ({
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <div>
                       <h4 className="text-lg font-semibold text-gray-900">
-                        Assigned Guardians ({guardians.length})
+                        Assigned Guardians ({guardians(deviceId).length})
                       </h4>
                       <p className="text-sm text-gray-500 mt-1">
                         Guardians who can monitor this VIP
@@ -451,19 +419,7 @@ const ManageGuardiansModal = ({
                       </div>
                     </div>
                   </div>
-
-                  {/* Loading State */}
-                  {isLoading ? (
-                    <div className="flex items-center justify-center py-20">
-                      <div className="flex flex-col items-center gap-4">
-                        <Icon
-                          icon="ph:circle-notch-bold"
-                          className="w-12 h-12 text-blue-600 animate-spin"
-                        />
-                        <p className="text-gray-500">Loading guardians...</p>
-                      </div>
-                    </div>
-                  ) : guardians.length === 0 ? (
+                  {guardians(deviceId).length === 0 ? (
                     <div className="text-center py-16 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50">
                       <Icon
                         icon="ph:users-three-bold"
@@ -508,7 +464,9 @@ const ManageGuardiansModal = ({
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Total Guardians</p>
-                        <p className="text-2xl font-bold">{guardians.length}</p>
+                        <p className="text-2xl font-bold">
+                          {guardians(deviceId).length}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -524,8 +482,9 @@ const ManageGuardiansModal = ({
                         <p className="text-sm text-gray-500">Active</p>
                         <p className="text-2xl font-bold">
                           {
-                            guardians.filter((g) => g.status === "active")
-                              .length
+                            guardians(deviceId).filter(
+                              (g) => g.status === "active"
+                            ).length
                           }
                         </p>
                       </div>
@@ -543,8 +502,9 @@ const ManageGuardiansModal = ({
                         <p className="text-sm text-gray-500">Pending Invites</p>
                         <p className="text-2xl font-bold">
                           {
-                            guardians.filter((g) => g.status === "pending")
-                              .length
+                            guardians(deviceId).filter(
+                              (g) => g.status === "pending"
+                            ).length
                           }
                         </p>
                       </div>
@@ -559,7 +519,7 @@ const ManageGuardiansModal = ({
                   <button
                     onClick={onClose}
                     className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed cursor-pointer"
-                    disabled={isLoading || isSubmitting}
+                    disabled={isSubmitting}
                   >
                     Close
                   </button>
