@@ -945,7 +945,10 @@ const DeviceCard = ({
           {/* Manage button with Dropdown */}
           <div className="relative" ref={actionsMenuRef}>
             <button
-              onClick={() => setShowActionsMenu(!showActionsMenu)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowActionsMenu(!showActionsMenu);
+              }}
               className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Icon icon="ph:gear-six-bold" className="w-4 h-4" />
@@ -957,7 +960,8 @@ const DeviceCard = ({
               <div className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
                 <div className="py-1">
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onEditDevice(device);
                       setShowActionsMenu(false);
                     }}
@@ -968,7 +972,8 @@ const DeviceCard = ({
                   </button>
 
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onManageGuardians();
                       setShowActionsMenu(false);
                     }}
@@ -979,7 +984,8 @@ const DeviceCard = ({
                   </button>
 
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onUnpairDevice(device.deviceId);
                       setShowActionsMenu(false);
                     }}
