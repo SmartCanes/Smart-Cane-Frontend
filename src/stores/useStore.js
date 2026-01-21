@@ -178,10 +178,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),

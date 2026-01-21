@@ -4,7 +4,11 @@ import { useNavigate } from "react-router-dom";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
 import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 import { Link } from "react-router-dom";
-import { useRealtimeStore, useUserStore } from "@/stores/useStore";
+import {
+  useDevicesStore,
+  useRealtimeStore,
+  useUserStore
+} from "@/stores/useStore";
 import { logoutApi } from "@/api/authService";
 import DefaultProfile from "./DefaultProfile";
 
@@ -239,6 +243,7 @@ function showLogoutModal(message = "Logging out...") {
 const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
+  const { clearDevices } = useDevicesStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const [notificationCount, setNotificationCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -290,6 +295,7 @@ const Header = () => {
       const response = await logoutApi();
       if (response.success) {
         clearUser();
+        clearDevices();
         disconnectWs();
         setIsDropdownOpen(false);
         setIsLoggingOut(false);
