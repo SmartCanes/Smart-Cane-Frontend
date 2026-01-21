@@ -191,7 +191,7 @@ const ManageGuardiansModal = ({
           <div className="p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4 min-w-0">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                   {guardian.guardianImageUrl ? (
                     <img
                       loading="lazy"
@@ -210,7 +210,7 @@ const ManageGuardiansModal = ({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-gray-900 text-base leading-tight truncate">
+                    <h3 className="font-semibold text-gray-900 text-base leading-tight break-words">
                       {capitalizeWords(
                         `${guardian.firstName} ${guardian.lastName}`
                       )}
@@ -235,7 +235,9 @@ const ManageGuardiansModal = ({
                         icon="ph:envelope-bold"
                         className="w-4 h-4 text-gray-400 flex-shrink-0"
                       />
-                      <span className="truncate">{guardian.email}</span>
+                      <span className="break-words w-full">
+                        {guardian.email}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-2 text-gray-600">
@@ -321,11 +323,13 @@ const ManageGuardiansModal = ({
         "
         >
           {/* Header */}
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-4">
+          {/* Header */}
+          <div className="flex justify-between items-start gap-3">
+            {/* Left side */}
+            <div className="flex items-start gap-4 min-w-0">
               {/* Avatar */}
-              <div className="relative">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-md">
+              <div className="relative shrink-0">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-md overflow-hidden">
                   {guardian.guardianImageUrl ? (
                     <img
                       loading="lazy"
@@ -354,28 +358,29 @@ const ManageGuardiansModal = ({
                 />
               </div>
 
-              {/* Name & email */}
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-gray-900 text-lg leading-tight">
+              {/* Name / Email / Status */}
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-semibold text-gray-900 text-base sm:text-lg leading-tight break-words">
                     {capitalizeWords(
                       `${guardian.firstName} ${guardian.lastName}`
                     )}
                   </h3>
 
                   {isSelf(guardian.guardianId) && (
-                    <span className="text-xs font-medium text-white bg-blue-600 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-medium text-white bg-blue-600 px-2 py-0.5 rounded-full shrink-0">
                       You
                     </span>
                   )}
                 </div>
 
-                <p className="text-sm text-gray-500 mt-1 truncate">
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
                   {guardian.email}
                 </p>
 
+                {/* Status */}
                 <span
-                  className={`inline-flex items-center gap-1 mt-2 px-3 py-1 text-xs rounded-full font-semibold ${
+                  className={`inline-flex w-fit mt-2 px-3 py-1 text-xs rounded-full font-semibold ${
                     guardian.status === "active"
                       ? "bg-green-50 text-green-800"
                       : guardian.status === "pending"
@@ -388,8 +393,8 @@ const ManageGuardiansModal = ({
               </div>
             </div>
 
-            {/* Remove button */}
-            <div className="flex gap-2">
+            {/* Actions */}
+            <div className="flex gap-2 shrink-0">
               {!isSelf(guardian.guardianId) && (
                 <>
                   <button
@@ -399,7 +404,7 @@ const ManageGuardiansModal = ({
                       setIsEditOpen(true);
                     }}
                     title="Edit guardian"
-                    className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                    className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                   >
                     <Icon icon="ph:pencil-bold" className="w-5 h-5" />
                   </button>
@@ -415,7 +420,7 @@ const ManageGuardiansModal = ({
                     }}
                     disabled={isSubmitting}
                     title="Remove guardian"
-                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 cursor-pointer"
+                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50"
                   >
                     <Icon icon="ph:trash-bold" className="w-5 h-5" />
                   </button>
@@ -450,10 +455,10 @@ const ManageGuardiansModal = ({
 
             <div>
               <p className="text-xs uppercase tracking-wide text-gray-400">
-                Email Address
+                Street Address
               </p>
               <p className="mt-1 text-gray-800 break-all">
-                {guardian.email || "—"}
+                {guardian.streetAddress || "—"}
               </p>
             </div>
 
@@ -548,7 +553,7 @@ const ManageGuardiansModal = ({
                     <div className="w-full md:w-auto mt-3 md:mt-0">
                       <button
                         onClick={() => setInviteModalOpen(true)}
-                        className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto whitespace-nowrap"
+                        className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto whitespace-nowrap text-sm smtext-base"
                         disabled={isSubmitting}
                       >
                         <Icon icon="ph:user-plus-bold" className="w-5 h-5" />
