@@ -5,6 +5,7 @@ import Toast from "@/ui/components/Toast";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   inviteGuardianLink,
+  modifyGuardianRole,
   removeGuardianFromDevice
 } from "@/api/backendService";
 import { useGuardiansStore, useUserStore } from "@/stores/useStore";
@@ -123,10 +124,53 @@ const ManageGuardiansModal = ({
         message: "Guardian removed successfully"
       });
     } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to remove guardian";
       setToast({
         show: true,
         type: "error",
-        message: error.message || "Failed to remove guardian"
+        message: errorMessage
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditGuardianRole = async () => {
+    if (!selectedGuardian?.role) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await modifyGuardianRole(
+        deviceId,
+        selectedGuardian.guardianId,
+        { role: selectedGuardian.role }
+      );
+
+      console.log(response);
+
+      if (!response.success)
+        throw new Error(response.message || "Failed to update role");
+
+      setSelectedGuardian(null);
+      setIsEditOpen(false);
+
+      setToast({
+        show: true,
+        type: "success",
+        message: "Guardian role updated successfully"
+      });
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update guardian role";
+      setToast({
+        show: true,
+        type: "error",
+        message: errorMessage
       });
     } finally {
       setIsSubmitting(false);
@@ -764,9 +808,9 @@ const ManageGuardiansModal = ({
               <option value="" disabled>
                 Select role
               </option>
-              <option value="Primary Guardian">Primary Guardian</option>
-              <option value="Secondary Guardian">Secondary Guardian</option>
-              <option value="Guardian">Guardian</option>
+              <option value="primary">Primary Guardian</option>
+              <option value="secondary">Secondary Guardian</option>
+              <option value="guardian">Guardian</option>
             </select>
           </div>
 
@@ -783,14 +827,7 @@ const ManageGuardiansModal = ({
 
             <button
               onClick={() => {
-                if (!selectedGuardian?.role) return;
-
-                // handleUpdateGuardian(
-                //   selectedGuardian.guardianId,
-                //   selectedGuardian.role
-                // );
-                setIsEditOpen(false);
-                setSelectedGuardian(null);
+                handleEditGuardianRole();
               }}
               disabled={!selectedGuardian?.role}
               className="flex-1 py-2.5 rounded-lg font-bold text-white cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed"
