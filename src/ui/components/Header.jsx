@@ -6,6 +6,7 @@ import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 import { Link } from "react-router-dom";
 import {
   useDevicesStore,
+  useGuardiansStore,
   useRealtimeStore,
   useUserStore
 } from "@/stores/useStore";
@@ -244,6 +245,7 @@ const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
   const { clearDevices } = useDevicesStore();
+  const { clearAllGuardians } = useGuardiansStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const [notificationCount, setNotificationCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -296,6 +298,7 @@ const Header = () => {
       if (response.success) {
         clearUser();
         clearDevices();
+        clearAllGuardians();
         disconnectWs();
         setIsDropdownOpen(false);
         setIsLoggingOut(false);
