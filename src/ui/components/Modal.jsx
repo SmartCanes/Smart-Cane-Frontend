@@ -150,10 +150,10 @@ export default function Modal({
                     <button
                       onClick={handleCancel || onClose}
                       disabled={isSubmitting}
-                      className={`flex-1 px-4 py-2 border rounded-lg transition ${
+                      className={`flex-1 px-4 py-2 border rounded-lg transition  ${
                         isSubmitting
                           ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                          : "border-gray-300 hover:bg-gray-200"
+                          : "border-gray-300 hover:bg-gray-200 cursor-pointer"
                       }`}
                     >
                       Cancel

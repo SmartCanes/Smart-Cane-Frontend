@@ -128,6 +128,7 @@ const ManageGuardiansModal = ({
         error.response?.data?.message ||
         error.message ||
         "Failed to remove guardian";
+      setDeleteConfirm({ show: false, guardianId: null, guardianName: "" });
       setToast({
         show: true,
         type: "error",
@@ -282,7 +283,7 @@ const ManageGuardiansModal = ({
                         setDeleteConfirm({
                           show: true,
                           guardianId: guardian.guardianId,
-                          guardianName: guardian.fullName
+                          guardianName: capitalizeWords(guardian.firstName)
                         });
                       }}
                       className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
@@ -408,7 +409,7 @@ const ManageGuardiansModal = ({
                       setDeleteConfirm({
                         show: true,
                         guardianId: guardian.guardianId,
-                        guardianName: guardian.fullName
+                        guardianName: capitalizeWords(guardian.firstName)
                       });
                     }}
                     disabled={isSubmitting}
@@ -843,7 +844,7 @@ const ManageGuardiansModal = ({
         isOpen={deleteConfirm.show}
         title="Remove Guardian"
         modalType="error"
-        message={`Are you sure you want to remove ${deleteConfirm.guardianName} as a guardian? This action cannot be undone.`}
+        message={`Are you sure you want to remove ${deleteConfirm.guardianName} as a guardian?`}
         handleCancel={() =>
           setDeleteConfirm({
             show: false,
@@ -855,6 +856,9 @@ const ManageGuardiansModal = ({
         isSubmitting={isSubmitting}
         confirmText={isSubmitting ? "Removing..." : "Remove Guardian"}
         cancelText="Cancel"
+        onClose={() => {
+          setDeleteConfirm({ show: false, guardianId: null, guardianName: "" });
+        }}
       />
 
       {toast.show && (
