@@ -12,6 +12,7 @@ import { useGuardiansStore, useUserStore } from "@/stores/useStore";
 import { capitalizeWords } from "@/utils/Capitalize";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import DefaultProfile from "./DefaultProfile";
+import RoleBadge from "./RoleBadge";
 
 const ManageGuardiansModal = ({
   isOpen,
@@ -183,13 +184,13 @@ const ManageGuardiansModal = ({
       {guardians(deviceId).map((guardian) => (
         <motion.div
           key={guardian.guardianId}
-          whileHover={{ y: -6, scale: 1.015 }}
+          whileHover={{ y: -4, scale: 1.01 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
-          className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
+          className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all overflow-hidden"
         >
           <div className="p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 min-w-0">
                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                   {guardian.guardianImageUrl ? (
                     <img
@@ -206,95 +207,95 @@ const ManageGuardiansModal = ({
                     />
                   )}
                 </div>
+
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-bold text-gray-900 text-base">
-                      {guardian.fullName}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-gray-900 text-base leading-tight truncate">
+                      {capitalizeWords(
+                        `${guardian.firstName} ${guardian.lastName}`
+                      )}
                     </h3>
+
                     <span
-                      className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${
+                      className={`px-2 py-0.5 text-xs rounded-full font-medium ${
                         guardian.status === "active"
                           ? "bg-green-100 text-green-800"
                           : guardian.status === "pending"
                             ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
+                            : "bg-gray-100 text-gray-700"
                       }`}
                     >
-                      {guardian.status || "inactive"}
+                      {guardian.status || "Inactive"}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                    <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6 text-sm">
+                    <div className="flex items-center gap-2 text-gray-600 min-w-0">
                       <Icon
                         icon="ph:envelope-bold"
-                        className="w-4 h-4 text-gray-400"
+                        className="w-4 h-4 text-gray-400 flex-shrink-0"
                       />
                       <span className="truncate">{guardian.email}</span>
                     </div>
+
                     <div className="flex items-center gap-2 text-gray-600">
                       <Icon
                         icon="ph:phone-bold"
-                        className="w-4 h-4 text-gray-400"
+                        className="w-4 h-4 text-gray-400 flex-shrink-0"
                       />
-                      <span>{guardian.phone || "—"}</span>
+                      <span>{guardian.contactNumber || "—"}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Icon
-                        icon="ph:gender-intersex-bold"
-                        className="w-4 h-4 text-gray-400"
-                      />
-                      <span>{guardian.gender || "—"}</span>
+
+                    <div className="flex items-center">
+                      <RoleBadge role={guardian.role} fixed />
                     </div>
                   </div>
 
-                  <div className="mt-3 text-sm text-gray-600 flex items-start gap-2">
+                  {/* Relationship */}
+                  <div className="mt-2 flex items-start gap-2 text-sm text-gray-600">
                     <Icon
-                      icon="ph:map-pin-bold"
+                      icon="ph:users-three-bold"
                       className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"
                     />
                     <span className="line-clamp-2">
-                      {guardian.address || "—"}
+                      {capitalizeWords(guardian.relationship) || "—"}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                {!isSelf(guardian.guardianId) && (
-                  <>
-                    {/* Edit Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedGuardian(guardian);
-                        setIsEditOpen(true);
-                      }}
-                      title="Edit guardian"
-                      className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
-                    >
-                      <Icon icon="ph:pencil-bold" className="w-5 h-5" />
-                    </button>
+              {/* Actions */}
+              {!isSelf(guardian.guardianId) && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedGuardian(guardian);
+                      setIsEditOpen(true);
+                    }}
+                    title="Edit guardian"
+                    className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  >
+                    <Icon icon="ph:pencil-bold" className="w-5 h-5" />
+                  </button>
 
-                    {/* Remove Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteConfirm({
-                          show: true,
-                          guardianId: guardian.guardianId,
-                          guardianName: capitalizeWords(guardian.firstName)
-                        });
-                      }}
-                      className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                      disabled={isSubmitting}
-                      title="Remove guardian"
-                    >
-                      <Icon icon="ph:trash-bold" className="w-5 h-5" />
-                    </button>
-                  </>
-                )}
-              </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteConfirm({
+                        show: true,
+                        guardianId: guardian.guardianId,
+                        guardianName: capitalizeWords(guardian.firstName)
+                      });
+                    }}
+                    disabled={isSubmitting}
+                    title="Remove guardian"
+                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    <Icon icon="ph:trash-bold" className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
@@ -441,10 +442,10 @@ const ManageGuardiansModal = ({
               <p className="text-xs uppercase tracking-wide text-gray-400">
                 Role
               </p>
-              <p className="mt-1 text-gray-800">
-                {guardian.role?.charAt(0).toUpperCase() +
-                  guardian.role?.slice(1) || "—"}
-              </p>
+
+              <div className="mt-2">
+                <RoleBadge role={guardian.role} />
+              </div>
             </div>
 
             <div>
