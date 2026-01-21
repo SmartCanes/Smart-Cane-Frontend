@@ -8,6 +8,7 @@ import {
   removeGuardianFromDevice
 } from "@/api/backendService";
 import { useGuardiansStore, useUserStore } from "@/stores/useStore";
+import { capitalizeWords } from "@/utils/Capitalize";
 
 const ManageGuardiansModal = ({
   isOpen,
@@ -280,18 +281,31 @@ const ManageGuardiansModal = ({
               </div>
 
               {/* Name & email */}
-              <div>
-                <h3 className="font-semibold text-gray-900 text-lg leading-tight">
-                  {guardian.firstName + " " + guardian.lastName}
-                </h3>
-                <p className="text-sm text-gray-500">{guardian.email}</p>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-gray-900 text-lg leading-tight">
+                    {capitalizeWords(
+                      `${guardian.firstName} ${guardian.lastName}`
+                    )}
+                  </h3>
+
+                  {isSelf(guardian.guardianId) && (
+                    <span className="text-xs font-medium text-white bg-blue-600 px-2 py-0.5 rounded-full">
+                      You
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-sm text-gray-500 mt-1 truncate">
+                  {guardian.email}
+                </p>
 
                 <span
-                  className={`inline-flex items-center gap-1 mt-2 px-2.5 py-1 text-xs rounded-full font-medium ${
+                  className={`inline-flex items-center gap-1 mt-2 px-3 py-1 text-xs rounded-full font-semibold ${
                     guardian.status === "active"
-                      ? "bg-green-50 text-green-700"
+                      ? "bg-green-50 text-green-800"
                       : guardian.status === "pending"
-                        ? "bg-yellow-50 text-yellow-700"
+                        ? "bg-yellow-50 text-yellow-800"
                         : "bg-gray-100 text-gray-600"
                   }`}
                 >
