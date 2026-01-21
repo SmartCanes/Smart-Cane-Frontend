@@ -70,6 +70,7 @@ const Devices = () => {
 
     const interval = setInterval(() => {
       fetchDevices();
+      fetchGuardians();
     }, 30000);
 
     return () => clearInterval(interval);
