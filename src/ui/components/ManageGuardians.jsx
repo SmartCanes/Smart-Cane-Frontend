@@ -9,6 +9,8 @@ import {
 } from "@/api/backendService";
 import { useGuardiansStore, useUserStore } from "@/stores/useStore";
 import { capitalizeWords } from "@/utils/Capitalize";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import DefaultProfile from "./DefaultProfile";
 
 const ManageGuardiansModal = ({
   isOpen,
@@ -144,7 +146,20 @@ const ManageGuardiansModal = ({
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Icon icon="ph:user-bold" className="w-6 h-6 text-blue-600" />
+                  {guardian.guardianImageUrl ? (
+                    <img
+                      loading="lazy"
+                      src={resolveProfileImageSrc(guardian.guardianImageUrl)}
+                      alt={`${guardian.fullName}'s avatar`}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <DefaultProfile
+                      hover="none"
+                      bgColor="bg-[#11285A]"
+                      userInitial={guardian.firstName?.charAt(0).toUpperCase()}
+                    />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
@@ -265,7 +280,20 @@ const ManageGuardiansModal = ({
               {/* Avatar */}
               <div className="relative">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-md">
-                  <Icon icon="ph:user-bold" className="w-7 h-7 text-white" />
+                  {guardian.guardianImageUrl ? (
+                    <img
+                      loading="lazy"
+                      src={resolveProfileImageSrc(guardian.guardianImageUrl)}
+                      alt={`${guardian.fullName}'s avatar`}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <DefaultProfile
+                      hover="none"
+                      bgColor="bg-[#11285A]"
+                      userInitial={guardian.firstName?.charAt(0).toUpperCase()}
+                    />
+                  )}
                 </div>
 
                 {/* Status dot */}
