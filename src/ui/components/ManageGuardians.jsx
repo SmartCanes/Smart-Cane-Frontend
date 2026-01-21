@@ -231,7 +231,7 @@ const ManageGuardiansModal = ({
                     guardianName: guardian.fullName
                   })
                 }
-                className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                 disabled={isSubmitting}
                 title="Remove guardian"
               >
@@ -281,7 +281,7 @@ const ManageGuardiansModal = ({
                   guardianName: guardian.fullName
                 })
               }
-              className="text-gray-400 hover:text-red-500 p-1"
+              className="text-gray-400 hover:text-red-500 p-1 cursor-pointer"
               disabled={isSubmitting}
             >
               <Icon icon="ph:trash-bold" className="w-5 h-5" />
@@ -397,7 +397,7 @@ const ManageGuardiansModal = ({
                     <button
                       onClick={() => setInviteModalOpen(true)}
                       className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed whitespace-nowrap"
-                      disabled={isLoading || isSubmitting}
+                      disabled={isSubmitting}
                     >
                       <Icon icon="ph:user-plus-bold" className="w-5 h-5" />
                       Invite Guardian
@@ -576,8 +576,12 @@ const ManageGuardiansModal = ({
         isOpen={inviteModalOpen}
         title="Invite Guardian"
         modalType="info"
+        closeTimer={null}
         footer={null}
-        onClose={() => setInviteModalOpen(false)}
+        onClose={() => {
+          setEmail("");
+          setInviteModalOpen(false);
+        }}
       >
         <div className="space-y-4">
           <div>
@@ -606,7 +610,7 @@ const ManageGuardiansModal = ({
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setInviteModalOpen(false)}
-              className="flex-1 border border-gray-300 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex-1 border py-2.5 rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer border-gray-300 hover:bg-gray-200 disabled:border-gray-200 disabled:text-gray-400"
               disabled={isSubmitting}
             >
               Cancel
@@ -614,11 +618,7 @@ const ManageGuardiansModal = ({
             <button
               onClick={handleSendInvite}
               disabled={isSubmitting || !email}
-              className={`flex-1 py-2.5 rounded-lg font-bold text-white ${
-                isSubmitting || !email
-                  ? "bg-green-400 cursor-not-allowed"
-                  : "bg-[#2ECC71] hover:bg-green-600"
-              }`}
+              className="flex-1 py-2.5 rounded-lg font-bold text-white cursor-pointer bg-[#2ECC71] hover:bg-green-600 "
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">

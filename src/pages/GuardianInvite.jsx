@@ -178,13 +178,13 @@ const GuardianInvite = () => {
           <div className="flex flex-col gap-3 mt-4">
             <button
               onClick={() => navigate("/dashboard")}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium cursor-pointer"
             >
               Go to Dashboard Now
             </button>
             <button
               onClick={() => navigate("/")}
-              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm"
+              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm cursor-pointer"
             >
               Return to Homepage
             </button>
@@ -203,13 +203,13 @@ const GuardianInvite = () => {
                   }
                 })
               }
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium cursor-pointer"
             >
               Go to Login Now
             </button>
             <button
               onClick={() => navigate("/")}
-              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm"
+              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm cursor-pointer"
             >
               Return to Homepage
             </button>
@@ -222,13 +222,13 @@ const GuardianInvite = () => {
               onClick={() =>
                 navigate(`/register?invite_token=${encodeURIComponent(token)}`)
               }
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
             >
               Register Now
             </button>
             <button
               onClick={() => navigate("/login")}
-              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm"
+              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm cursor-pointer"
             >
               Already have an account? Login
             </button>
@@ -240,13 +240,13 @@ const GuardianInvite = () => {
           <div className="flex flex-col gap-3 mt-4">
             <button
               onClick={() => navigate("/")}
-              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
               Return to Home
             </button>
             <button
               onClick={() => navigate("/contact")}
-              className="px-6 py-2 text-blue-600 hover:text-blue-800 hover:underline text-sm"
+              className="px-6 py-2 text-blue-600 hover:text-blue-800 hover:underline text-sm cursor-pointer"
             >
               Contact Support
             </button>
@@ -257,13 +257,13 @@ const GuardianInvite = () => {
           <div className="flex flex-col gap-3 mt-4">
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              className="px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors cursor-pointer"
             >
               Try Again
             </button>
             <button
               onClick={() => navigate("/")}
-              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm"
+              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm cursor-pointer"
             >
               Go to Homepage
             </button>
