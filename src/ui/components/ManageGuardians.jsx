@@ -20,6 +20,8 @@ const ManageGuardiansModal = ({
   const { user } = useUserStore();
   const [email, setEmail] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [selectedGuardian, setSelectedGuardian] = useState(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({
     show: false,
     guardianId: null,
@@ -130,9 +132,11 @@ const ManageGuardiansModal = ({
   const GuardiansListView = () => (
     <div className="space-y-4">
       {guardians(deviceId).map((guardian) => (
-        <div
+        <motion.div
           key={guardian.guardianId}
-          className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 transition-all duration-200 overflow-hidden"
+          whileHover={{ y: -6, scale: 1.015 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+          className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
         >
           <div className="p-4">
             <div className="flex items-start justify-between">
@@ -146,7 +150,7 @@ const ManageGuardiansModal = ({
                       {guardian.fullName}
                     </h3>
                     <span
-                      className={`inline-block px-2 py-1 text-xs rounded-full ${
+                      className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${
                         guardian.status === "active"
                           ? "bg-green-100 text-green-800"
                           : guardian.status === "pending"
@@ -193,25 +197,45 @@ const ManageGuardiansModal = ({
                   </div>
                 </div>
               </div>
-              {!isSelf(guardian.guardianId) && (
-                <button
-                  onClick={() =>
-                    setDeleteConfirm({
-                      show: true,
-                      guardianId: guardian.guardianId,
-                      guardianName: guardian.fullName
-                    })
-                  }
-                  className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
-                  disabled={isSubmitting}
-                  title="Remove guardian"
-                >
-                  <Icon icon="ph:trash-bold" className="w-5 h-5" />
-                </button>
-              )}
+
+              <div className="flex gap-2">
+                {!isSelf(guardian.guardianId) && (
+                  <>
+                    {/* Edit Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGuardian(guardian);
+                        setIsEditOpen(true);
+                      }}
+                      title="Edit guardian"
+                      className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      <Icon icon="ph:pencil-bold" className="w-5 h-5" />
+                    </button>
+
+                    {/* Remove Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirm({
+                          show: true,
+                          guardianId: guardian.guardianId,
+                          guardianName: guardian.fullName
+                        });
+                      }}
+                      className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                      disabled={isSubmitting}
+                      title="Remove guardian"
+                    >
+                      <Icon icon="ph:trash-bold" className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
@@ -219,25 +243,55 @@ const ManageGuardiansModal = ({
   const GuardiansTileView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {guardians(deviceId).map((guardian) => (
-        <div
+        <motion.div
           key={guardian.guardianId}
-          className="bg-white p-4 md:p-6 rounded-2xl shadow-md border border-gray-100"
+          whileHover={{ y: -6, scale: 1.015 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+          className="
+          group relative
+          rounded-2xl
+          bg-white/80 backdrop-blur
+          shadow-sm hover:shadow-xl
+          ring-1 ring-gray-200/70
+          p-5 md:p-6
+          transition-all
+        "
         >
+          {/* Header */}
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
-                <Icon icon="ph:user-bold" className="w-7 h-7 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">{guardian.fullName}</h3>
-                <p className="text-sm text-gray-500">{guardian.email}</p>
+              {/* Avatar */}
+              <div className="relative">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-md">
+                  <Icon icon="ph:user-bold" className="w-7 h-7 text-white" />
+                </div>
+
+                {/* Status dot */}
                 <span
-                  className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
+                  className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-white ${
                     guardian.status === "active"
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-green-500"
                       : guardian.status === "pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-gray-100 text-gray-800"
+                        ? "bg-yellow-400"
+                        : "bg-gray-400"
+                  }`}
+                />
+              </div>
+
+              {/* Name & email */}
+              <div>
+                <h3 className="font-semibold text-gray-900 text-lg leading-tight">
+                  {guardian.firstName + " " + guardian.lastName}
+                </h3>
+                <p className="text-sm text-gray-500">{guardian.email}</p>
+
+                <span
+                  className={`inline-flex items-center gap-1 mt-2 px-2.5 py-1 text-xs rounded-full font-medium ${
+                    guardian.status === "active"
+                      ? "bg-green-50 text-green-700"
+                      : guardian.status === "pending"
+                        ? "bg-yellow-50 text-yellow-700"
+                        : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   {guardian.status || "inactive"}
@@ -245,56 +299,86 @@ const ManageGuardiansModal = ({
               </div>
             </div>
 
-            {!isSelf(guardian.guardianId) && (
-              <button
-                onClick={() =>
-                  setDeleteConfirm({
-                    show: true,
-                    guardianId: guardian.guardianId,
-                    guardianName: guardian.fullName
-                  })
-                }
-                className="text-gray-400 hover:text-red-500 p-1 cursor-pointer"
-                disabled={isSubmitting}
-              >
-                <Icon icon="ph:trash-bold" className="w-5 h-5" />
-              </button>
-            )}
+            {/* Remove button */}
+            <div className="flex gap-2">
+              {!isSelf(guardian.guardianId) && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedGuardian(guardian);
+                      setIsEditOpen(true);
+                    }}
+                    title="Edit guardian"
+                    className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                  >
+                    <Icon icon="ph:pencil-bold" className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteConfirm({
+                        show: true,
+                        guardianId: guardian.guardianId,
+                        guardianName: guardian.fullName
+                      });
+                    }}
+                    disabled={isSubmitting}
+                    title="Remove guardian"
+                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 cursor-pointer"
+                  >
+                    <Icon icon="ph:trash-bold" className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Divider */}
+          <div className="my-5 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+
+          {/* Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <label className="text-xs text-gray-500">Full Name</label>
-              <div className="mt-1 p-2 bg-gray-100 rounded-md text-sm">
-                {guardian.fullName || "—"}
-              </div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">
+                Phone Number
+              </p>
+              <p className="mt-1 text-gray-800">
+                {guardian.contactNumber || "—"}
+              </p>
             </div>
+
             <div>
-              <label className="text-xs text-gray-500">Phone Number</label>
-              <div className="mt-1 p-2 bg-gray-100 rounded-md text-sm">
-                {guardian.phone || "—"}
-              </div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">
+                Role
+              </p>
+              <p className="mt-1 text-gray-800">
+                {guardian.role?.charAt(0).toUpperCase() +
+                  guardian.role?.slice(1) || "—"}
+              </p>
             </div>
+
             <div>
-              <label className="text-xs text-gray-500">Gender</label>
-              <div className="mt-1 p-2 bg-gray-100 rounded-md text-sm">
-                {guardian.gender || "—"}
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-gray-500">Email Address</label>
-              <div className="mt-1 p-2 bg-gray-100 rounded-md text-sm">
+              <p className="text-xs uppercase tracking-wide text-gray-400">
+                Email Address
+              </p>
+              <p className="mt-1 text-gray-800 break-all">
                 {guardian.email || "—"}
-              </div>
+              </p>
             </div>
+
             <div className="md:col-span-2">
-              <label className="text-xs text-gray-500">Address</label>
-              <div className="mt-1 p-2 bg-gray-100 rounded-md text-sm">
-                {guardian.address || "—"}
-              </div>
+              <p className="text-xs uppercase tracking-wide text-gray-400">
+                Relationship
+              </p>
+              <p className="mt-1 text-gray-800">
+                {guardian.relationship?.charAt(0).toUpperCase() +
+                  guardian.relationship?.slice(1) || "—"}
+              </p>
             </div>
           </div>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
@@ -346,36 +430,42 @@ const ManageGuardiansModal = ({
               {/* Content */}
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <div className="flex flex-row items-start md:items-center justify-between gap-4">
-                    <div className="flex-1">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
+                    {/* VIP Info */}
+                    <div className="flex-1 w-full">
                       <h4 className="font-semibold text-gray-900">
                         VIP Information
                       </h4>
-                      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <label className="text-xs text-gray-500">
                             VIP ID
                           </label>
-                          <div className="mt-1 font-medium">{vipId || "—"}</div>
+                          <div className="mt-1 font-medium truncate">
+                            {vipId || "—"}
+                          </div>
                         </div>
                         <div>
                           <label className="text-xs text-gray-500">
                             VIP Name
                           </label>
-                          <div className="mt-1 font-medium">
+                          <div className="mt-1 font-medium truncate">
                             {vipName || "—"}
                           </div>
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => setInviteModalOpen(true)}
-                      className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed whitespace-nowrap"
-                      disabled={isSubmitting}
-                    >
-                      <Icon icon="ph:user-plus-bold" className="w-5 h-5" />
-                      Invite Guardian
-                    </button>
+
+                    <div className="w-full md:w-auto mt-3 md:mt-0">
+                      <button
+                        onClick={() => setInviteModalOpen(true)}
+                        className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto whitespace-nowrap"
+                        disabled={isSubmitting}
+                      >
+                        <Icon icon="ph:user-plus-bold" className="w-5 h-5" />
+                        Invite Guardian
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -601,26 +691,91 @@ const ManageGuardiansModal = ({
         </div>
       </Modal>
 
-      {deleteConfirm.show && (
-        <Modal
-          key="delete-confirmation-modal"
-          isOpen={deleteConfirm.show}
-          title="Remove Guardian"
-          modalType="error"
-          message={`Are you sure you want to remove ${deleteConfirm.guardianName} as a guardian? This action cannot be undone.`}
-          handleCancel={() =>
-            setDeleteConfirm({
-              show: false,
-              guardianId: null,
-              guardianName: ""
-            })
-          }
-          handleConfirm={handleRemoveGuardian}
-          isSubmitting={isSubmitting}
-          confirmText={isSubmitting ? "Removing..." : "Remove Guardian"}
-          cancelText="Cancel"
-        />
-      )}
+      <Modal
+        key="edit-guardian-modal"
+        isOpen={isEditOpen}
+        title="Edit Guardian Role"
+        modalType="info"
+        closeTimer={null}
+        footer={null}
+        onClose={() => {
+          setSelectedGuardian(null);
+          setIsEditOpen(false);
+        }}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Role
+            </label>
+            <select
+              value={selectedGuardian?.role || ""}
+              onChange={(e) =>
+                setSelectedGuardian((prev) => ({
+                  ...prev,
+                  role: e.target.value
+                }))
+              }
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            >
+              <option value="" disabled>
+                Select role
+              </option>
+              <option value="Primary Guardian">Primary Guardian</option>
+              <option value="Secondary Guardian">Secondary Guardian</option>
+              <option value="Guardian">Guardian</option>
+            </select>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={() => {
+                setSelectedGuardian(null);
+                setIsEditOpen(false);
+              }}
+              className="flex-1 border py-2.5 rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer border-gray-300 hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={() => {
+                if (!selectedGuardian?.role) return;
+
+                // handleUpdateGuardian(
+                //   selectedGuardian.guardianId,
+                //   selectedGuardian.role
+                // );
+                setIsEditOpen(false);
+                setSelectedGuardian(null);
+              }}
+              disabled={!selectedGuardian?.role}
+              className="flex-1 py-2.5 rounded-lg font-bold text-white cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        key="delete-confirmation-modal"
+        isOpen={deleteConfirm.show}
+        title="Remove Guardian"
+        modalType="error"
+        message={`Are you sure you want to remove ${deleteConfirm.guardianName} as a guardian? This action cannot be undone.`}
+        handleCancel={() =>
+          setDeleteConfirm({
+            show: false,
+            guardianId: null,
+            guardianName: ""
+          })
+        }
+        handleConfirm={handleRemoveGuardian}
+        isSubmitting={isSubmitting}
+        confirmText={isSubmitting ? "Removing..." : "Remove Guardian"}
+        cancelText="Cancel"
+      />
 
       {toast.show && (
         <Toast
