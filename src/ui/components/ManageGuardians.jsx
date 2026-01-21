@@ -3,10 +3,11 @@ import { Icon } from "@iconify/react";
 import Modal from "@/ui/components/Modal";
 import Toast from "@/ui/components/Toast";
 import { AnimatePresence, motion } from "framer-motion";
-import { inviteGuardianLink } from "@/api/backendService";
-import { useGuardiansStore } from "@/stores/useStore";
-
-const removeGuardianFromDevice = () => {};
+import {
+  inviteGuardianLink,
+  removeGuardianFromDevice
+} from "@/api/backendService";
+import { useGuardiansStore, useUserStore } from "@/stores/useStore";
 
 const ManageGuardiansModal = ({
   isOpen,
@@ -15,7 +16,8 @@ const ManageGuardiansModal = ({
   vipName,
   vipId
 }) => {
-  const { guardians, setGuardians, removeGuardian } = useGuardiansStore();
+  const { guardians, removeGuardian } = useGuardiansStore();
+  const { user } = useUserStore();
   const [email, setEmail] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({
@@ -44,6 +46,10 @@ const ManageGuardiansModal = ({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  const isSelf = (guardianId) => {
+    return guardianId === user.guardianId;
+  };
 
   const handleSendInvite = async () => {
     if (!email || !email.includes("@")) {
@@ -87,7 +93,6 @@ const ManageGuardiansModal = ({
     }
   };
 
-  /* ================= REMOVE GUARDIAN ================= */
   const handleRemoveGuardian = async () => {
     if (!deleteConfirm.guardianId) return;
 
@@ -103,9 +108,7 @@ const ManageGuardiansModal = ({
         throw new Error(response.message || "Failed to remove guardian");
       }
 
-      setGuardians((prev) =>
-        prev.filter((g) => g.id !== deleteConfirm.guardianId)
-      );
+      removeGuardian(deviceId, deleteConfirm.guardianId);
       setDeleteConfirm({ show: false, guardianId: null, guardianName: "" });
 
       setToast({
@@ -190,21 +193,22 @@ const ManageGuardiansModal = ({
                   </div>
                 </div>
               </div>
-
-              <button
-                onClick={() =>
-                  setDeleteConfirm({
-                    show: true,
-                    guardianId: guardian.guardianId,
-                    guardianName: guardian.fullName
-                  })
-                }
-                className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
-                disabled={isSubmitting}
-                title="Remove guardian"
-              >
-                <Icon icon="ph:trash-bold" className="w-5 h-5" />
-              </button>
+              {!isSelf(guardian.guardianId) && (
+                <button
+                  onClick={() =>
+                    setDeleteConfirm({
+                      show: true,
+                      guardianId: guardian.guardianId,
+                      guardianName: guardian.fullName
+                    })
+                  }
+                  className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                  disabled={isSubmitting}
+                  title="Remove guardian"
+                >
+                  <Icon icon="ph:trash-bold" className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -241,19 +245,21 @@ const ManageGuardiansModal = ({
               </div>
             </div>
 
-            <button
-              onClick={() =>
-                setDeleteConfirm({
-                  show: true,
-                  guardianId: guardian.guardianId,
-                  guardianName: guardian.fullName
-                })
-              }
-              className="text-gray-400 hover:text-red-500 p-1 cursor-pointer"
-              disabled={isSubmitting}
-            >
-              <Icon icon="ph:trash-bold" className="w-5 h-5" />
-            </button>
+            {!isSelf(guardian.guardianId) && (
+              <button
+                onClick={() =>
+                  setDeleteConfirm({
+                    show: true,
+                    guardianId: guardian.guardianId,
+                    guardianName: guardian.fullName
+                  })
+                }
+                className="text-gray-400 hover:text-red-500 p-1 cursor-pointer"
+                disabled={isSubmitting}
+              >
+                <Icon icon="ph:trash-bold" className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -530,7 +536,6 @@ const ManageGuardiansModal = ({
         </motion.div>
       </div>
 
-      {/* INVITE MODAL */}
       <Modal
         key="invite-modal"
         isOpen={inviteModalOpen}
@@ -596,9 +601,9 @@ const ManageGuardiansModal = ({
         </div>
       </Modal>
 
-      {/* DELETE CONFIRMATION MODAL */}
       {deleteConfirm.show && (
         <Modal
+          key="delete-confirmation-modal"
           isOpen={deleteConfirm.show}
           title="Remove Guardian"
           modalType="error"
@@ -617,7 +622,6 @@ const ManageGuardiansModal = ({
         />
       )}
 
-      {/* TOAST */}
       {toast.show && (
         <Toast
           key="toast-modal"

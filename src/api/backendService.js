@@ -33,6 +33,11 @@ export const getDeviceGuardians = (deviceId) =>
 export const getAllDeviceGuardians = () =>
   handleRequest(() => backendApi.get(`/device/guardians`));
 
+export const removeGuardianFromDevice = (deviceId, guardianId) =>
+  handleRequest(() =>
+    backendApi.delete(`/device/${deviceId}/guardians/${guardianId}`)
+  );
+
 export const assignVipToDevice = (deviceId, payload) =>
   handleRequest(() => backendApi.post(`/device/vip/${deviceId}`, payload));
 
