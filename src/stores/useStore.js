@@ -142,6 +142,7 @@ export const useDevicesStore = create(
       devices: [],
       isLoading: false,
       lastFetchedAt: null,
+      hasFetchedOnce: false,
 
       fetchDevices: async () => {
         const { isLoading } = get();
@@ -161,7 +162,8 @@ export const useDevicesStore = create(
 
           set({
             devices: response.data.devices,
-            lastFetchedAt: Date.now()
+            lastFetchedAt: Date.now(),
+            hasFetchedOnce: true
           });
         } catch (error) {
           console.error("Failed to fetch devices:", error);
@@ -178,10 +180,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                  d.deviceId === updatedDevice.deviceId
-                    ? { ...d, ...updatedDevice }
-                    : d
-                )
+                d.deviceId === updatedDevice.deviceId
+                  ? { ...d, ...updatedDevice }
+                  : d
+              )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -191,14 +193,15 @@ export const useDevicesStore = create(
           devices: state.devices.filter((d) => d.deviceId !== deviceId)
         })),
 
-      clearDevices: () => set({ devices: [] })
+      clearDevices: () => set({ devices: [], lastFetchedAt: null, hasFetchedOnce: false })
     }),
     {
       name: "devices-storage",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         devices: state.devices,
-        lastFetchedAt: state.lastFetchedAt
+        lastFetchedAt: state.lastFetchedAt,
+        hasFetchedOnce: state.hasFetchedOnce
       })
     }
   )
@@ -251,10 +254,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                    g.guardianId === guardian.guardianId
-                      ? { ...g, ...guardian }
-                      : g
-                  )
+                  g.guardianId === guardian.guardianId
+                    ? { ...g, ...guardian }
+                    : g
+                )
                 : [...d.guardians, guardian]
             };
           })
@@ -265,11 +268,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                  ...d,
-                  guardians: d.guardians.filter(
-                    (g) => g.guardianId !== guardianId
-                  )
-                }
+                ...d,
+                guardians: d.guardians.filter(
+                  (g) => g.guardianId !== guardianId
+                )
+              }
               : d
           )
         })),
