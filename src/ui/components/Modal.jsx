@@ -65,6 +65,9 @@ export default function Modal({
   variant = "dialog",
   closeTimer = 5000,
   icon,
+  width = "max-w-md",
+  height = "h-auto",
+  maxHeight = "max-h-[90vh]",
 
   actionText,
   onAction,
@@ -111,7 +114,7 @@ export default function Modal({
           >
             {variant === "dialog" && (
               <motion.div
-                className="relative bg-white p-6 rounded-2xl shadow-xl w-full max-w-md font-poppins mx-5"
+                className={`relative bg-white p-6 rounded-2xl shadow-xl w-full ${width} ${height} ${maxHeight} font-poppins mx-5`}
                 onClick={(e) => e.stopPropagation()}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}

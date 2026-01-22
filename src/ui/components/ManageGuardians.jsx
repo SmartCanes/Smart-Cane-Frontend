@@ -13,6 +13,7 @@ import { capitalizeWords } from "@/utils/Capitalize";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import DefaultProfile from "./DefaultProfile";
 import RoleBadge from "./RoleBadge";
+import { SelectRole } from "./SelectRole";
 
 const ManageGuardiansModal = ({
   isOpen,
@@ -150,8 +151,6 @@ const ManageGuardiansModal = ({
         selectedGuardian.guardianId,
         { role: selectedGuardian.role }
       );
-
-      console.log(response);
 
       if (!response.success)
         throw new Error(response.message || "Failed to update role");
@@ -322,7 +321,6 @@ const ManageGuardiansModal = ({
           transition-all
         "
         >
-          {/* Header */}
           {/* Header */}
           <div className="flex justify-between items-start gap-3">
             {/* Left side */}
@@ -785,65 +783,15 @@ const ManageGuardiansModal = ({
         </div>
       </Modal>
 
-      <Modal
-        key="edit-guardian-modal"
+      <SelectRole
+        key="edit-guardian-role-modal"
+        isSubmitting={isSubmitting}
         isOpen={isEditOpen}
-        title="Edit Guardian Role"
-        modalType="info"
-        closeTimer={null}
-        footer={null}
-        onClose={() => {
-          setSelectedGuardian(null);
-          setIsEditOpen(false);
-        }}
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Role
-            </label>
-            <select
-              value={selectedGuardian?.role || ""}
-              onChange={(e) =>
-                setSelectedGuardian((prev) => ({
-                  ...prev,
-                  role: e.target.value
-                }))
-              }
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            >
-              <option value="" disabled>
-                Select role
-              </option>
-              <option value="primary">Primary Guardian</option>
-              <option value="secondary">Secondary Guardian</option>
-              <option value="guardian">Guardian</option>
-            </select>
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => {
-                setSelectedGuardian(null);
-                setIsEditOpen(false);
-              }}
-              className="flex-1 border py-2.5 rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer border-gray-300 hover:bg-gray-200"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={() => {
-                handleEditGuardianRole();
-              }}
-              disabled={!selectedGuardian?.role}
-              className="flex-1 py-2.5 rounded-lg font-bold text-white cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      </Modal>
+        onClose={() => setIsEditOpen(false)}
+        selectedGuardian={selectedGuardian}
+        setSelectedGuardian={setSelectedGuardian}
+        handleEditGuardianRole={handleEditGuardianRole}
+      />
 
       <Modal
         key="delete-confirmation-modal"
@@ -866,7 +814,6 @@ const ManageGuardiansModal = ({
           setDeleteConfirm({ show: false, guardianId: null, guardianName: "" });
         }}
       />
-
       {toast.show && (
         <Toast
           key="toast-modal"
