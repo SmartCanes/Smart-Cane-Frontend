@@ -15,6 +15,12 @@ import DefaultProfile from "./DefaultProfile";
 import RoleBadge from "./RoleBadge";
 import { SelectRole } from "./SelectRole";
 
+const roleHierarchy = {
+  primary: 3,
+  secondary: 2,
+  guardian: 1
+};
+
 const ManageGuardiansModal = ({
   isOpen,
   onClose,
@@ -22,7 +28,8 @@ const ManageGuardiansModal = ({
   vipName,
   vipId
 }) => {
-  const { guardians, removeGuardian, upsertGuardian } = useGuardiansStore();
+  const { guardians, removeGuardian, upsertGuardian, currentGuardianRole } =
+    useGuardiansStore();
   const { user } = useUserStore();
   const [email, setEmail] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -56,8 +63,15 @@ const ManageGuardiansModal = ({
     };
   }, [isOpen]);
 
+  const currentRole = currentGuardianRole(user.guardianId);
+
   const isSelf = (guardianId) => {
     return guardianId === user.guardianId;
+  };
+
+  const canManageGuardian = (currentRole, targetRole) => {
+    if (!currentRole || !targetRole) return false;
+    return roleHierarchy[currentRole] > roleHierarchy[targetRole];
   };
 
   const handleSendInvite = async () => {
@@ -142,7 +156,12 @@ const ManageGuardiansModal = ({
   };
 
   const handleEditGuardianRole = async (selectedRoleValue) => {
-    if (!selectedGuardian?.role || !selectedRoleValue) return;
+    if (
+      !selectedGuardian?.role ||
+      !selectedRoleValue ||
+      selectedRoleValue === "primary"
+    )
+      return;
 
     try {
       setIsSubmitting(true);
@@ -271,37 +290,38 @@ const ManageGuardiansModal = ({
               </div>
 
               {/* Actions */}
-              {!isSelf(guardian.guardianId) && (
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedGuardian(guardian);
-                      setIsEditOpen(true);
-                    }}
-                    title="Edit guardian"
-                    className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                  >
-                    <Icon icon="ph:pencil-bold" className="w-5 h-5" />
-                  </button>
+              {!isSelf(guardian.guardianId) &&
+                canManageGuardian(currentRole, guardian.role) && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGuardian(guardian);
+                        setIsEditOpen(true);
+                      }}
+                      title="Edit guardian"
+                      className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    >
+                      <Icon icon="ph:pencil-bold" className="w-5 h-5" />
+                    </button>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteConfirm({
-                        show: true,
-                        guardianId: guardian.guardianId,
-                        guardianName: capitalizeWords(guardian.firstName)
-                      });
-                    }}
-                    disabled={isSubmitting}
-                    title="Remove guardian"
-                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
-                  >
-                    <Icon icon="ph:trash-bold" className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirm({
+                          show: true,
+                          guardianId: guardian.guardianId,
+                          guardianName: capitalizeWords(guardian.firstName)
+                        });
+                      }}
+                      disabled={isSubmitting}
+                      title="Remove guardian"
+                      className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    >
+                      <Icon icon="ph:trash-bold" className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
         </motion.div>
@@ -398,37 +418,38 @@ const ManageGuardiansModal = ({
 
             {/* Actions */}
             <div className="flex gap-2 shrink-0">
-              {!isSelf(guardian.guardianId) && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedGuardian(guardian);
-                      setIsEditOpen(true);
-                    }}
-                    title="Edit guardian"
-                    className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                  >
-                    <Icon icon="ph:pencil-bold" className="w-5 h-5" />
-                  </button>
+              {!isSelf(guardian.guardianId) &&
+                canManageGuardian(currentRole, guardian.role) && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGuardian(guardian);
+                        setIsEditOpen(true);
+                      }}
+                      title="Edit guardian"
+                      className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      <Icon icon="ph:pencil-bold" className="w-5 h-5" />
+                    </button>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteConfirm({
-                        show: true,
-                        guardianId: guardian.guardianId,
-                        guardianName: capitalizeWords(guardian.firstName)
-                      });
-                    }}
-                    disabled={isSubmitting}
-                    title="Remove guardian"
-                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50"
-                  >
-                    <Icon icon="ph:trash-bold" className="w-5 h-5" />
-                  </button>
-                </>
-              )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirm({
+                          show: true,
+                          guardianId: guardian.guardianId,
+                          guardianName: capitalizeWords(guardian.firstName)
+                        });
+                      }}
+                      disabled={isSubmitting}
+                      title="Remove guardian"
+                      className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 cursor-pointer"
+                    >
+                      <Icon icon="ph:trash-bold" className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
             </div>
           </div>
 

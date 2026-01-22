@@ -180,10 +180,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -193,7 +193,8 @@ export const useDevicesStore = create(
           devices: state.devices.filter((d) => d.deviceId !== deviceId)
         })),
 
-      clearDevices: () => set({ devices: [], lastFetchedAt: null, hasFetchedOnce: false })
+      clearDevices: () =>
+        set({ devices: [], lastFetchedAt: null, hasFetchedOnce: false })
     }),
     {
       name: "devices-storage",
@@ -254,25 +255,33 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                  g.guardianId === guardian.guardianId
-                    ? { ...g, ...guardian }
-                    : g
-                )
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
                 : [...d.guardians, guardian]
             };
           })
         })),
+
+      currentGuardianRole: (guardianId) => {
+        const guardian = get()
+          .guardiansByDevice.flatMap((d) => d.guardians)
+          .find((g) => g.guardianId === guardianId);
+
+        return guardian ? guardian.role : "primary";
+      },
 
       removeGuardian: (deviceId, guardianId) =>
         set((state) => ({
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                ...d,
-                guardians: d.guardians.filter(
-                  (g) => g.guardianId !== guardianId
-                )
-              }
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
               : d
           )
         })),

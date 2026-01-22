@@ -29,15 +29,15 @@ const PERMISSION_CATEGORIES = [
 ];
 
 const ROLE_OPTIONS = [
-  {
-    value: "primary",
-    title: "Primary Guardian",
-    description: "Full system access and control",
-    icon: ({ className }) => (
-      <Icon icon="ph:crown-simple-bold" className={className} />
-    ),
-    permissions: ["All permissions"]
-  },
+  // {
+  //   value: "primary",
+  //   title: "Primary Guardian",
+  //   description: "Full system access and control",
+  //   icon: ({ className }) => (
+  //     <Icon icon="ph:crown-simple-bold" className={className} />
+  //   ),
+  //   permissions: ["All permissions"]
+  // },
   {
     value: "secondary",
     title: "Secondary Guardian",
@@ -142,7 +142,7 @@ export const SelectRole = ({
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {ROLE_OPTIONS.map((role) => {
                     const isSelected = selectedRoleValue === role.value;
                     const RoleIcon =

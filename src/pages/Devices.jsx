@@ -16,14 +16,18 @@ import {
 } from "@/api/backendService";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import Button from "@/ui/components/Button";
-import { useDevicesStore, useGuardiansStore } from "@/stores/useStore";
+import {
+  useDevicesStore,
+  useGuardiansStore,
+  useUserStore
+} from "@/stores/useStore";
 import ManageGuardiansModal from "@/ui/components/ManageGuardians";
 
-// ========== DEVICES COMPONENT ==========
 const Devices = () => {
   const { devices, fetchDevices, upsertDevice, removeDevice, hasFetchedOnce } =
     useDevicesStore();
-  const { fetchGuardians } = useGuardiansStore();
+  const { fetchGuardians, currentGuardianRole } = useGuardiansStore();
+  const { user } = useUserStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nicknameSubmitting, setNicknameSubmitting] = useState(false);
   const [resetNicknameSubmitting, setResetNicknameSubmitting] = useState(false);
@@ -62,6 +66,10 @@ const Devices = () => {
     vipName: "",
     vipId: null
   });
+
+  const currentRole = currentGuardianRole(user.guardianId);
+
+  const canManageVIP = currentRole === "primary" || currentRole === "secondary";
 
   useEffect(() => {
     fetchDevices();
@@ -718,6 +726,7 @@ const Devices = () => {
                     onManageGuardians={() => {
                       handleManageGuardians(device);
                     }}
+                    canManageGuardian={canManageVIP}
                   />
                 ))}
               </div>
@@ -749,7 +758,6 @@ const Devices = () => {
   );
 };
 
-// UPDATED DeviceCard component with fixed dropdown positioning
 const DeviceCard = ({
   device,
   onEditVIP,
@@ -757,7 +765,8 @@ const DeviceCard = ({
   onRemoveVIP,
   onUnpairDevice,
   onEditDevice,
-  onManageGuardians
+  onManageGuardians,
+  canManageGuardian
 }) => {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsMenuRef = useRef(null);
@@ -864,29 +873,33 @@ const DeviceCard = ({
                     <Icon icon="ph:eye-bold" className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">View</span>
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditVIP(device);
-                    }}
-                    className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Icon
-                      icon="ph:pencil-simple-bold"
-                      className="w-3.5 h-3.5"
-                    />
-                    <span className="hidden sm:inline">Edit</span>
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRemoveVIP(device.deviceId);
-                    }}
-                    className="px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Icon icon="ph:trash-bold" className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Remove</span>
-                  </button>
+                  {canManageGuardian && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditVIP(device);
+                        }}
+                        className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Icon
+                          icon="ph:pencil-simple-bold"
+                          className="w-3.5 h-3.5"
+                        />
+                        <span className="hidden sm:inline">Edit</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveVIP(device.deviceId);
+                        }}
+                        className="px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Icon icon="ph:trash-bold" className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Remove</span>
+                      </button>
+                    </>
+                  )}
                 </>
               ) : (
                 <button
