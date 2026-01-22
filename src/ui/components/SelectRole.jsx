@@ -497,7 +497,7 @@ export const SelectRole = ({
               </button>
 
               <button
-                onClick={handleEditGuardianRole}
+                onClick={() => handleEditGuardianRole(selectedRoleValue)}
                 disabled={!selectedRoleValue || isSubmitting}
                 className={`flex justify-center items-center gap-2 flex-1 px-4 py-2.5 bg-[#11285A] hover:bg-[#0d1b3d] text-white font-semibold rounded-lg transition-all hover:shadow-lg ${
                   !selectedRoleValue || isSubmitting

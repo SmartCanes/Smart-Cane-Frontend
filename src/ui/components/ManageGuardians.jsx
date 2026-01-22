@@ -22,7 +22,7 @@ const ManageGuardiansModal = ({
   vipName,
   vipId
 }) => {
-  const { guardians, removeGuardian } = useGuardiansStore();
+  const { guardians, removeGuardian, upsertGuardian } = useGuardiansStore();
   const { user } = useUserStore();
   const [email, setEmail] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -141,8 +141,8 @@ const ManageGuardiansModal = ({
     }
   };
 
-  const handleEditGuardianRole = async () => {
-    if (!selectedGuardian?.role) return;
+  const handleEditGuardianRole = async (selectedRoleValue) => {
+    if (!selectedGuardian?.role || !selectedRoleValue) return;
 
     try {
       setIsSubmitting(true);
@@ -154,6 +154,11 @@ const ManageGuardiansModal = ({
 
       if (!response.success)
         throw new Error(response.message || "Failed to update role");
+
+      upsertGuardian(deviceId, {
+        ...selectedGuardian,
+        role: selectedRoleValue
+      });
 
       setSelectedGuardian(null);
       setIsEditOpen(false);
