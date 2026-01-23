@@ -20,9 +20,9 @@ import ActivityReport from "./pages/ActivityReport";
 import Notes from "./pages/Notes.jsx";
 import GetStarted from "./pages/GetStarted.jsx";
 import { GuardianProfile } from "./pages/GuardianProfile";
-import HealthStatus from "./pages/Health-Status.jsx";
 import Devices from "./pages/Devices";
 import GuardianInvite from "./pages/GuardianInvite";
+import Advanced from "./pages/Advanced.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -47,7 +47,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/settings" element={<Setting />} />
             <Route path="/profile" element={<GuardianProfile />} />
             <Route path="/notes" element={<Notes />} />
-            <Route path="/health" element={<HealthStatus />} />
+            <Route path="/advanced" element={<Advanced />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

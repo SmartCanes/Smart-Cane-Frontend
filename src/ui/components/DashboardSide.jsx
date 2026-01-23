@@ -81,10 +81,10 @@ const DashboardSide = ({ className = "" }) => {
       path: "/devices"
     },
     {
-      id: "health",
-      label: "Health",
+      id: "advanced",
+      label: "Advanced",
       icon: "fa6-brands:unity",
-      path: "/health"
+      path: "/advanced"
     }
     // {
     //   id: "settings",
@@ -121,10 +121,10 @@ const DashboardSide = ({ className = "" }) => {
       path: "/devices"
     },
     {
-      id: "mobile-health",
+      id: "mobile-advanced",
       label: "Advanced",
       icon: "fa6-brands:unity",
-      path: "/health"
+      path: "/advanced"
     }
   ];
 

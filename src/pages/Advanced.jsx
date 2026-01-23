@@ -92,7 +92,7 @@ const ComponentCard = ({ component, status }) => {
   );
 };
 
-function HealthStatus() {
+function Advanced() {
   const [components, setComponents] = useState(componentsData);
   const { componentHealth } = useRealtimeStore();
 
@@ -145,4 +145,4 @@ function HealthStatus() {
   );
 }
 
-export default HealthStatus;
+export default Advanced;
