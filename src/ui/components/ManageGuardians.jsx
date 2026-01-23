@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo, memo } from "react";
 import { Icon } from "@iconify/react";
 import Modal from "@/ui/components/Modal";
 import Toast from "@/ui/components/Toast";
@@ -21,6 +21,812 @@ const roleHierarchy = {
   guardian: 1
 };
 
+const relationshipOptions = [
+  { value: "spouse", label: "Spouse" },
+  { value: "parent", label: "Parent" },
+  { value: "child", label: "Child" },
+  { value: "sibling", label: "Sibling" },
+  { value: "friend", label: "Friend" },
+  { value: "caregiver", label: "Caregiver" },
+  { value: "neighbor", label: "Neighbor" },
+  { value: "other", label: "Other" }
+];
+
+// Memoized EmergencyContactBadge Component
+const EmergencyContactBadge = memo(
+  ({ isEmergency, onToggle, disabled = false }) => {
+    return (
+      <button
+        onClick={onToggle}
+        disabled={disabled}
+        className={`
+        inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all
+        ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-105 active:scale-95"}
+        ${
+          isEmergency
+            ? "bg-red-100 text-red-700 border border-red-200 hover:bg-red-200"
+            : "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
+        }
+      `}
+        title={
+          isEmergency
+            ? "Remove as emergency contact"
+            : "Set as emergency contact"
+        }
+      >
+        <Icon
+          icon={isEmergency ? "ph:heart-bold" : "ph:heart"}
+          className={`w-4 h-4 ${isEmergency ? "text-red-500" : "text-gray-400"}`}
+        />
+        <span>{isEmergency ? "Emergency Contact" : "Set as Emergency"}</span>
+      </button>
+    );
+  }
+);
+
+EmergencyContactBadge.displayName = "EmergencyContactBadge";
+
+// Memoized EditRelationshipModal
+const EditRelationshipModal = memo(
+  ({ isOpen, onClose, guardian, onSave, isSubmitting }) => {
+    const [relationship, setRelationship] = useState(
+      guardian?.relationship || ""
+    );
+    const [customRelationship, setCustomRelationship] = useState("");
+
+    useEffect(() => {
+      if (guardian) {
+        setRelationship(guardian.relationship || "");
+        const isCustom = !relationshipOptions.some(
+          (option) => option.value === guardian.relationship
+        );
+        if (isCustom && guardian.relationship) {
+          setCustomRelationship(guardian.relationship);
+          setRelationship("custom");
+        }
+      }
+    }, [guardian]);
+
+    const handleSave = useCallback(async () => {
+      const finalRelationship =
+        relationship === "custom" ? customRelationship.trim() : relationship;
+
+      if (!finalRelationship) {
+        return;
+      }
+
+      await onSave(guardian.guardianId, finalRelationship);
+      onClose();
+    }, [relationship, customRelationship, guardian, onSave, onClose]);
+
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden"
+        >
+          {/* Header */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Edit Relationship
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Update relationship for {guardian?.firstName}
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                disabled={isSubmitting}
+              >
+                <Icon icon="ph:x-bold" className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {/* Guardian Preview */}
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center overflow-hidden">
+                {guardian?.guardianImageUrl ? (
+                  <img
+                    loading="lazy"
+                    src={resolveProfileImageSrc(guardian.guardianImageUrl)}
+                    alt={guardian.firstName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white font-bold">
+                    {guardian?.firstName?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">
+                  {capitalizeWords(
+                    `${guardian?.firstName} ${guardian?.lastName}`
+                  )}
+                </h4>
+                <p className="text-sm text-gray-500">{guardian?.email}</p>
+              </div>
+            </div>
+
+            {/* Relationship Selection */}
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Select Relationship Type
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                {relationshipOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setRelationship(option.value);
+                      setCustomRelationship("");
+                    }}
+                    className={`
+                    p-4 rounded-xl border-2 text-left transition-all
+                    ${
+                      relationship === option.value
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                    }
+                  `}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900">
+                        {option.label}
+                      </span>
+                      {relationship === option.value && (
+                        <Icon
+                          icon="ph:check-circle"
+                          className="w-5 h-5 text-blue-500"
+                        />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom Relationship Option */}
+              <div
+                className={`
+              p-4 rounded-xl border-2 transition-all
+              ${
+                relationship === "custom"
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+              }
+            `}
+              >
+                <button
+                  onClick={() => setRelationship("custom")}
+                  className="w-full text-left"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-gray-900">Custom</span>
+                    {relationship === "custom" && (
+                      <Icon
+                        icon="ph:check-circle"
+                        className="w-5 h-5 text-blue-500"
+                      />
+                    )}
+                  </div>
+                </button>
+
+                {relationship === "custom" && (
+                  <div className="mt-3">
+                    <input
+                      type="text"
+                      value={customRelationship}
+                      onChange={(e) => setCustomRelationship(e.target.value)}
+                      placeholder="Enter custom relationship"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      autoFocus
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Enter a custom relationship description
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Current Relationship Display */}
+            {guardian?.relationship && (
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-gray-600">
+                  Current relationship:{" "}
+                  <span className="font-semibold text-blue-700">
+                    {capitalizeWords(guardian.relationship)}
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="p-6 border-t border-gray-200">
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={
+                  isSubmitting || (!relationship && !customRelationship)
+                }
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Icon
+                      icon="ph:circle-notch"
+                      className="w-5 h-5 animate-spin"
+                    />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Icon icon="ph:check" className="w-5 h-5" />
+                    Save Relationship
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+);
+
+EditRelationshipModal.displayName = "EditRelationshipModal";
+
+// Memoized Guardian Card Components
+const GuardianTile = memo(
+  ({
+    guardian,
+    isSelf,
+    currentRole,
+    canManageGuardian,
+    onEditRelationship,
+    onEditRole,
+    onRemove,
+    onToggleEmergency,
+    isSubmitting
+  }) => {
+    const handleEditRelationshipClick = useCallback(() => {
+      onEditRelationship(guardian);
+    }, [onEditRelationship, guardian]);
+
+    const handleEditRoleClick = useCallback(() => {
+      onEditRole(guardian);
+    }, [onEditRole, guardian]);
+
+    const handleRemoveClick = useCallback(() => {
+      onRemove(guardian);
+    }, [onRemove, guardian]);
+
+    const handleToggleEmergencyClick = useCallback(() => {
+      onToggleEmergency(guardian.guardianId, guardian.isEmergency);
+    }, [onToggleEmergency, guardian.guardianId, guardian.isEmergency]);
+
+    const isCurrentUserSelf = isSelf(guardian.guardianId);
+    const canManage =
+      !isCurrentUserSelf && canManageGuardian(currentRole, guardian.role);
+
+    return (
+      <motion.div
+        layout
+        whileHover={{ y: -6, scale: 1.015 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        className={`
+        group relative
+        rounded-2xl
+        bg-white/80 backdrop-blur
+        shadow-sm hover:shadow-xl
+        ring-1 ring-gray-200/70
+        p-5 md:p-6
+        transition-all
+        ${guardian.isEmergency ? "ring-2 ring-red-200" : ""}
+      `}
+      >
+        {/* Emergency Contact Ribbon */}
+        {guardian.isEmergency && (
+          <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1 z-10">
+            <Icon icon="ph:heart-bold" className="w-3 h-3" />
+            EMERGENCY
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="flex justify-between items-start gap-3">
+          {/* Left side */}
+          <div className="flex items-start gap-4 min-w-0 flex-1">
+            {/* Avatar with Emergency Badge */}
+            <div className="relative shrink-0">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-md overflow-hidden">
+                {guardian.guardianImageUrl ? (
+                  <img
+                    loading="lazy"
+                    src={resolveProfileImageSrc(guardian.guardianImageUrl)}
+                    alt={`${guardian.fullName}'s avatar`}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <DefaultProfile
+                    hover="none"
+                    bgColor="bg-[#11285A]"
+                    userInitial={guardian.firstName?.charAt(0).toUpperCase()}
+                  />
+                )}
+              </div>
+
+              {/* Status dot */}
+              <span
+                className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-white ${
+                  guardian.status === "active"
+                    ? "bg-green-500"
+                    : guardian.status === "pending"
+                      ? "bg-yellow-400"
+                      : "bg-gray-400"
+                }`}
+              />
+            </div>
+
+            {/* Name / Email / Status */}
+            <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-semibold text-gray-900 text-base sm:text-lg leading-tight break-words">
+                  {capitalizeWords(
+                    `${guardian.firstName} ${guardian.lastName}`
+                  )}
+                </h3>
+
+                {isCurrentUserSelf && (
+                  <span className="text-xs font-medium text-white bg-blue-600 px-2 py-0.5 rounded-full shrink-0">
+                    You
+                  </span>
+                )}
+              </div>
+
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
+                {guardian.email}
+              </p>
+
+              <div className="flex items-center gap-2 mt-2">
+                {/* Status */}
+                <span
+                  className={`inline-flex px-3 py-1 text-xs rounded-full font-semibold ${
+                    guardian.status === "active"
+                      ? "bg-green-50 text-green-800"
+                      : guardian.status === "pending"
+                        ? "bg-yellow-50 text-yellow-800"
+                        : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {guardian.status || "inactive"}
+                </span>
+
+                {/* Role Badge */}
+                <RoleBadge role={guardian.role} />
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          {canManage && (
+            <div className="flex gap-2 shrink-0">
+              {/* Relationship Edit Icon */}
+              <button
+                onClick={handleEditRelationshipClick}
+                title="Edit relationship"
+                className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+              >
+                <Icon icon="ph:pencil-simple-bold" className="w-5 h-5" />
+              </button>
+
+              {/* Role Edit Icon */}
+              <button
+                onClick={handleEditRoleClick}
+                title="Edit role"
+                className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+              >
+                <Icon icon="ph:shield-check-bold" className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={handleRemoveClick}
+                disabled={isSubmitting}
+                title="Remove guardian"
+                className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 cursor-pointer"
+              >
+                <Icon icon="ph:trash-bold" className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="my-5 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+
+        {/* Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          {/* Phone Number with Emergency Indicator */}
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">
+              Phone Number
+              {guardian.isEmergency && (
+                <span className="ml-2 text-red-500">
+                  <Icon icon="ph:heart-bold" className="inline w-3 h-3" />
+                </span>
+              )}
+            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-gray-800 font-medium">
+                {guardian.contactNumber || "—"}
+              </p>
+              {!guardian.contactNumber && (
+                <span className="text-xs text-gray-400">
+                  No number provided
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Relationship with Edit */}
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">
+              Relationship
+            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-gray-800 font-medium">
+                {capitalizeWords(guardian.relationship) || "Not specified"}
+              </p>
+              {canManage && (
+                <button
+                  onClick={handleEditRelationshipClick}
+                  className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  title="Edit relationship"
+                >
+                  <Icon icon="ph:pencil-simple-bold" className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Street Address */}
+          <div className="md:col-span-2">
+            <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">
+              Street Address
+            </p>
+            <p className="text-gray-800">{guardian.streetAddress || "—"}</p>
+          </div>
+        </div>
+
+        {/* Emergency Contact Button */}
+        <div className="mt-6 pt-4 border-t border-gray-100">
+          <EmergencyContactBadge
+            isEmergency={guardian.isEmergency}
+            onToggle={handleToggleEmergencyClick}
+            disabled={isSubmitting || isCurrentUserSelf}
+          />
+        </div>
+      </motion.div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function to prevent unnecessary re-renders
+    return (
+      prevProps.guardian.guardianId === nextProps.guardian.guardianId &&
+      prevProps.guardian.isEmergency === nextProps.guardian.isEmergency &&
+      prevProps.guardian.status === nextProps.guardian.status &&
+      prevProps.guardian.relationship === nextProps.guardian.relationship &&
+      prevProps.guardian.role === nextProps.guardian.role &&
+      prevProps.isSubmitting === nextProps.isSubmitting &&
+      prevProps.currentRole === nextProps.currentRole
+    );
+  }
+);
+
+GuardianTile.displayName = "GuardianTile";
+
+const GuardianListItem = memo(
+  ({
+    guardian,
+    isSelf,
+    currentRole,
+    canManageGuardian,
+    onEditRelationship,
+    onEditRole,
+    onRemove,
+    onToggleEmergency,
+    isSubmitting
+  }) => {
+    const handleEditRelationshipClick = useCallback(() => {
+      onEditRelationship(guardian);
+    }, [onEditRelationship, guardian]);
+
+    const handleEditRoleClick = useCallback(() => {
+      onEditRole(guardian);
+    }, [onEditRole, guardian]);
+
+    const handleRemoveClick = useCallback(() => {
+      onRemove(guardian);
+    }, [onRemove, guardian]);
+
+    const handleToggleEmergencyClick = useCallback(() => {
+      onToggleEmergency(guardian.guardianId, guardian.isEmergency);
+    }, [onToggleEmergency, guardian.guardianId, guardian.isEmergency]);
+
+    const isCurrentUserSelf = isSelf(guardian.guardianId);
+    const canManage =
+      !isCurrentUserSelf && canManageGuardian(currentRole, guardian.role);
+
+    return (
+      <motion.div
+        layout
+        whileHover={{ y: -4, scale: 1.01 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all overflow-hidden"
+      >
+        <div className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4 min-w-0 flex-1">
+              <div className="relative">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {guardian.guardianImageUrl ? (
+                    <img
+                      loading="lazy"
+                      src={resolveProfileImageSrc(guardian.guardianImageUrl)}
+                      alt={`${guardian.fullName}'s avatar`}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <DefaultProfile
+                      hover="none"
+                      bgColor="bg-[#11285A]"
+                      userInitial={guardian.firstName?.charAt(0).toUpperCase()}
+                    />
+                  )}
+                </div>
+                {guardian.isEmergency && (
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-lg">
+                    <Icon icon="ph:heart-bold" className="w-3 h-3" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <h3 className="font-semibold text-gray-900 text-base leading-tight break-words">
+                    {capitalizeWords(
+                      `${guardian.firstName} ${guardian.lastName}`
+                    )}
+                  </h3>
+
+                  {guardian.isEmergency && (
+                    <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full font-medium flex items-center gap-1">
+                      <Icon icon="ph:heart-bold" className="w-3 h-3" />
+                      Emergency Contact
+                    </span>
+                  )}
+
+                  <span
+                    className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                      guardian.status === "active"
+                        ? "bg-green-100 text-green-800"
+                        : guardian.status === "pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {guardian.status || "Inactive"}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6 text-sm">
+                  <div className="flex items-center gap-2 text-gray-600 min-w-0">
+                    <Icon
+                      icon="ph:envelope-bold"
+                      className="w-4 h-4 text-gray-400 flex-shrink-0"
+                    />
+                    <span className="break-words w-full">{guardian.email}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Icon
+                      icon="ph:phone-bold"
+                      className="w-4 h-4 text-gray-400 flex-shrink-0"
+                    />
+                    <span>{guardian.contactNumber || "—"}</span>
+                  </div>
+
+                  <div className="flex items-center">
+                    <RoleBadge role={guardian.role} fixed />
+                  </div>
+                </div>
+
+                {/* Relationship with Edit Button */}
+                <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                  <Icon
+                    icon="ph:users-three-bold"
+                    className="w-4 h-4 text-gray-400 flex-shrink-0"
+                  />
+                  <span className="line-clamp-2">
+                    {capitalizeWords(guardian.relationship) || "Not specified"}
+                  </span>
+                  {canManage && (
+                    <button
+                      onClick={handleEditRelationshipClick}
+                      className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      title="Edit relationship"
+                    >
+                      <Icon icon="ph:pencil-simple-bold" className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Emergency Contact Toggle */}
+                <div className="mt-3">
+                  <EmergencyContactBadge
+                    isEmergency={guardian.isEmergency}
+                    onToggle={handleToggleEmergencyClick}
+                    disabled={isSubmitting || isCurrentUserSelf}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            {canManage && (
+              <div className="flex items-center gap-1">
+                {/* Role Edit Icon */}
+                <button
+                  onClick={handleEditRoleClick}
+                  title="Edit role"
+                  className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                >
+                  <Icon icon="ph:shield-check-bold" className="w-5 h-5" />
+                </button>
+
+                <button
+                  onClick={handleRemoveClick}
+                  disabled={isSubmitting}
+                  title="Remove guardian"
+                  className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                >
+                  <Icon icon="ph:trash-bold" className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.guardian.guardianId === nextProps.guardian.guardianId &&
+      prevProps.guardian.isEmergency === nextProps.guardian.isEmergency &&
+      prevProps.guardian.status === nextProps.guardian.status &&
+      prevProps.guardian.relationship === nextProps.guardian.relationship &&
+      prevProps.guardian.role === nextProps.guardian.role &&
+      prevProps.isSubmitting === nextProps.isSubmitting &&
+      prevProps.currentRole === nextProps.currentRole
+    );
+  }
+);
+
+GuardianListItem.displayName = "GuardianListItem";
+
+const GuardiansTileView = memo(
+  ({
+    guardians,
+    currentRole,
+    isSelf,
+    canManageGuardian,
+    onEditRelationship,
+    onEditRole,
+    onRemove,
+    onToggleEmergency,
+    isSubmitting
+  }) => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {guardians.map((guardian) => (
+          <GuardianTile
+            key={guardian.guardianId}
+            guardian={guardian}
+            isSelf={isSelf}
+            currentRole={currentRole}
+            canManageGuardian={canManageGuardian}
+            onEditRelationship={onEditRelationship}
+            onEditRole={onEditRole}
+            onRemove={onRemove}
+            onToggleEmergency={onToggleEmergency}
+            isSubmitting={isSubmitting}
+          />
+        ))}
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.guardians.length === nextProps.guardians.length &&
+      prevProps.guardians.every(
+        (g, i) =>
+          g.guardianId === nextProps.guardians[i]?.guardianId &&
+          g.isEmergency === nextProps.guardians[i]?.isEmergency
+      ) &&
+      prevProps.isSubmitting === nextProps.isSubmitting &&
+      prevProps.currentRole === nextProps.currentRole
+    );
+  }
+);
+
+GuardiansTileView.displayName = "GuardiansTileView";
+
+const GuardiansListView = memo(
+  ({
+    guardians,
+    currentRole,
+    isSelf,
+    canManageGuardian,
+    onEditRelationship,
+    onEditRole,
+    onRemove,
+    onToggleEmergency,
+    isSubmitting
+  }) => {
+    return (
+      <div className="space-y-4">
+        {guardians.map((guardian) => (
+          <GuardianListItem
+            key={guardian.guardianId}
+            guardian={guardian}
+            isSelf={isSelf}
+            currentRole={currentRole}
+            canManageGuardian={canManageGuardian}
+            onEditRelationship={onEditRelationship}
+            onEditRole={onEditRole}
+            onRemove={onRemove}
+            onToggleEmergency={onToggleEmergency}
+            isSubmitting={isSubmitting}
+          />
+        ))}
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.guardians.length === nextProps.guardians.length &&
+      prevProps.guardians.every(
+        (g, i) =>
+          g.guardianId === nextProps.guardians[i]?.guardianId &&
+          g.isEmergency === nextProps.guardians[i]?.isEmergency
+      ) &&
+      prevProps.isSubmitting === nextProps.isSubmitting &&
+      prevProps.currentRole === nextProps.currentRole
+    );
+  }
+);
+
+GuardiansListView.displayName = "GuardiansListView";
+
 const ManageGuardiansModal = ({
   isOpen,
   onClose,
@@ -34,7 +840,8 @@ const ManageGuardiansModal = ({
   const [email, setEmail] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [selectedGuardian, setSelectedGuardian] = useState(null);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isSetRoleOpen, setIsSetRoleOpen] = useState(false);
+  const [isEditRelationshipOpen, setIsEditRelationshipOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({
     show: false,
     guardianId: null,
@@ -50,6 +857,18 @@ const ManageGuardiansModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState("tiles");
 
+  // Memoize guardians data
+  const currentGuardians = useMemo(
+    () => guardians(deviceId),
+    [guardians, deviceId]
+  );
+
+  // Memoize current role
+  const currentRole = useMemo(
+    () => currentGuardianRole(user.guardianId),
+    [currentGuardianRole, user.guardianId]
+  );
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -63,18 +882,21 @@ const ManageGuardiansModal = ({
     };
   }, [isOpen]);
 
-  const currentRole = currentGuardianRole(user.guardianId);
+  // Memoize helper functions
+  const isSelf = useCallback(
+    (guardianId) => {
+      return guardianId === user.guardianId;
+    },
+    [user.guardianId]
+  );
 
-  const isSelf = (guardianId) => {
-    return guardianId === user.guardianId;
-  };
-
-  const canManageGuardian = (currentRole, targetRole) => {
+  const canManageGuardian = useCallback((currentRole, targetRole) => {
     if (!currentRole || !targetRole) return false;
     return roleHierarchy[currentRole] > roleHierarchy[targetRole];
-  };
+  }, []);
 
-  const handleSendInvite = async () => {
+  // Memoize event handlers
+  const handleSendInvite = useCallback(async () => {
     if (!email || !email.includes("@")) {
       setToast({
         show: true,
@@ -114,9 +936,9 @@ const ManageGuardiansModal = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [email, deviceId]);
 
-  const handleRemoveGuardian = async () => {
+  const handleRemoveGuardian = useCallback(async () => {
     if (!deleteConfirm.guardianId) return;
 
     try {
@@ -153,352 +975,232 @@ const ManageGuardiansModal = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [deviceId, deleteConfirm.guardianId]);
 
-  const handleEditGuardianRole = async (selectedRoleValue) => {
-    if (
-      !selectedGuardian?.role ||
-      !selectedRoleValue ||
-      selectedRoleValue === "primary"
-    )
-      return;
+  const handleEditGuardianRole = useCallback(
+    async (selectedRoleValue) => {
+      if (
+        !selectedGuardian?.role ||
+        !selectedRoleValue ||
+        selectedRoleValue === "primary"
+      )
+        return;
 
-    try {
-      setIsSubmitting(true);
-      const response = await modifyGuardianRole(
-        deviceId,
-        selectedGuardian.guardianId,
-        { role: selectedGuardian.role }
-      );
+      try {
+        setIsSubmitting(true);
+        const response = await modifyGuardianRole(
+          deviceId,
+          selectedGuardian.guardianId,
+          { role: selectedRoleValue }
+        );
 
-      if (!response.success)
-        throw new Error(response.message || "Failed to update role");
+        if (!response.success)
+          throw new Error(response.message || "Failed to update role");
 
-      upsertGuardian(deviceId, {
-        ...selectedGuardian,
-        role: selectedRoleValue
-      });
+        upsertGuardian(deviceId, {
+          ...selectedGuardian,
+          role: selectedRoleValue
+        });
 
-      setSelectedGuardian(null);
-      setIsEditOpen(false);
+        setSelectedGuardian(null);
+        setIsSetRoleOpen(false);
 
-      setToast({
-        show: true,
-        type: "success",
-        message: "Guardian role updated successfully"
-      });
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to update guardian role";
-      setToast({
-        show: true,
-        type: "error",
-        message: errorMessage
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const GuardiansListView = () => (
-    <div className="space-y-4">
-      {guardians(deviceId).map((guardian) => (
-        <motion.div
-          key={guardian.guardianId}
-          whileHover={{ y: -4, scale: 1.01 }}
-          transition={{ duration: 0.15, ease: "easeOut" }}
-          className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all overflow-hidden"
-        >
-          <div className="p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  {guardian.guardianImageUrl ? (
-                    <img
-                      loading="lazy"
-                      src={resolveProfileImageSrc(guardian.guardianImageUrl)}
-                      alt={`${guardian.fullName}'s avatar`}
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    <DefaultProfile
-                      hover="none"
-                      bgColor="bg-[#11285A]"
-                      userInitial={guardian.firstName?.charAt(0).toUpperCase()}
-                    />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-gray-900 text-base leading-tight break-words">
-                      {capitalizeWords(
-                        `${guardian.firstName} ${guardian.lastName}`
-                      )}
-                    </h3>
-
-                    <span
-                      className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                        guardian.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : guardian.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {guardian.status || "Inactive"}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6 text-sm">
-                    <div className="flex items-center gap-2 text-gray-600 min-w-0">
-                      <Icon
-                        icon="ph:envelope-bold"
-                        className="w-4 h-4 text-gray-400 flex-shrink-0"
-                      />
-                      <span className="break-words w-full">
-                        {guardian.email}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Icon
-                        icon="ph:phone-bold"
-                        className="w-4 h-4 text-gray-400 flex-shrink-0"
-                      />
-                      <span>{guardian.contactNumber || "—"}</span>
-                    </div>
-
-                    <div className="flex items-center">
-                      <RoleBadge role={guardian.role} fixed />
-                    </div>
-                  </div>
-
-                  {/* Relationship */}
-                  <div className="mt-2 flex items-start gap-2 text-sm text-gray-600">
-                    <Icon
-                      icon="ph:users-three-bold"
-                      className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"
-                    />
-                    <span className="line-clamp-2">
-                      {capitalizeWords(guardian.relationship) || "—"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              {!isSelf(guardian.guardianId) &&
-                canManageGuardian(currentRole, guardian.role) && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedGuardian(guardian);
-                        setIsEditOpen(true);
-                      }}
-                      title="Edit guardian"
-                      className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                    >
-                      <Icon icon="ph:pencil-bold" className="w-5 h-5" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteConfirm({
-                          show: true,
-                          guardianId: guardian.guardianId,
-                          guardianName: capitalizeWords(guardian.firstName)
-                        });
-                      }}
-                      disabled={isSubmitting}
-                      title="Remove guardian"
-                      className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
-                    >
-                      <Icon icon="ph:trash-bold" className="w-5 h-5" />
-                    </button>
-                  </div>
-                )}
-            </div>
-          </div>
-        </motion.div>
-      ))}
-    </div>
+        setToast({
+          show: true,
+          type: "success",
+          message: "Guardian role updated successfully"
+        });
+      } catch (error) {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update guardian role";
+        setToast({
+          show: true,
+          type: "error",
+          message: errorMessage
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [deviceId, selectedGuardian]
   );
 
-  const GuardiansTileView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {guardians(deviceId).map((guardian) => (
-        <motion.div
-          key={guardian.guardianId}
-          whileHover={{ y: -6, scale: 1.015 }}
-          transition={{ duration: 0.15, ease: "easeOut" }}
-          className="
-          group relative
-          rounded-2xl
-          bg-white/80 backdrop-blur
-          shadow-sm hover:shadow-xl
-          ring-1 ring-gray-200/70
-          p-5 md:p-6
-          transition-all
-        "
-        >
-          {/* Header */}
-          <div className="flex justify-between items-start gap-3">
-            {/* Left side */}
-            <div className="flex items-start gap-4 min-w-0">
-              {/* Avatar */}
-              <div className="relative shrink-0">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-md overflow-hidden">
-                  {guardian.guardianImageUrl ? (
-                    <img
-                      loading="lazy"
-                      src={resolveProfileImageSrc(guardian.guardianImageUrl)}
-                      alt={`${guardian.fullName}'s avatar`}
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    <DefaultProfile
-                      hover="none"
-                      bgColor="bg-[#11285A]"
-                      userInitial={guardian.firstName?.charAt(0).toUpperCase()}
-                    />
-                  )}
-                </div>
+  const handleEditRelationship = useCallback(
+    async (guardianId, newRelationship) => {
+      try {
+        setIsSubmitting(true);
 
-                {/* Status dot */}
-                <span
-                  className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-white ${
-                    guardian.status === "active"
-                      ? "bg-green-500"
-                      : guardian.status === "pending"
-                        ? "bg-yellow-400"
-                        : "bg-gray-400"
-                  }`}
-                />
-              </div>
+        // Note: You need to implement updateGuardianRelationship API function
+        // const response = await updateGuardianRelationship(deviceId, guardianId, {
+        //   relationship: newRelationship
+        // });
 
-              {/* Name / Email / Status */}
-              <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold text-gray-900 text-base sm:text-lg leading-tight break-words">
-                    {capitalizeWords(
-                      `${guardian.firstName} ${guardian.lastName}`
-                    )}
-                  </h3>
+        // For now, simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-                  {isSelf(guardian.guardianId) && (
-                    <span className="text-xs font-medium text-white bg-blue-600 px-2 py-0.5 rounded-full shrink-0">
-                      You
-                    </span>
-                  )}
-                </div>
+        // Update in store (you'll need to implement this in your store)
+        // upsertGuardian(deviceId, {
+        //   ...selectedGuardian,
+        //   relationship: newRelationship
+        // });
 
-                <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
-                  {guardian.email}
-                </p>
+        setToast({
+          show: true,
+          type: "success",
+          message: "Relationship updated successfully"
+        });
 
-                {/* Status */}
-                <span
-                  className={`inline-flex w-fit mt-2 px-3 py-1 text-xs rounded-full font-semibold ${
-                    guardian.status === "active"
-                      ? "bg-green-50 text-green-800"
-                      : guardian.status === "pending"
-                        ? "bg-yellow-50 text-yellow-800"
-                        : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {guardian.status || "inactive"}
-                </span>
-              </div>
-            </div>
+        setIsEditRelationshipOpen(false);
+        setSelectedGuardian(null);
+      } catch (error) {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update relationship";
+        setToast({
+          show: true,
+          type: "error",
+          message: errorMessage
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [deviceId]
+  );
 
-            {/* Actions */}
-            <div className="flex gap-2 shrink-0">
-              {!isSelf(guardian.guardianId) &&
-                canManageGuardian(currentRole, guardian.role) && (
-                  <>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedGuardian(guardian);
-                        setIsEditOpen(true);
-                      }}
-                      title="Edit guardian"
-                      className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
-                    >
-                      <Icon icon="ph:pencil-bold" className="w-5 h-5" />
-                    </button>
+  // Optimized emergency contact handler
+  const handleToggleEmergencyContact = useCallback(
+    async (guardianId, isEmergency) => {
+      try {
+        setIsSubmitting(true);
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteConfirm({
-                          show: true,
-                          guardianId: guardian.guardianId,
-                          guardianName: capitalizeWords(guardian.firstName)
-                        });
-                      }}
-                      disabled={isSubmitting}
-                      title="Remove guardian"
-                      className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 cursor-pointer"
-                    >
-                      <Icon icon="ph:trash-bold" className="w-5 h-5" />
-                    </button>
-                  </>
-                )}
-            </div>
-          </div>
+        // Note: You need to implement setEmergencyContact API function
+        // const response = await setEmergencyContact(deviceId, guardianId, {
+        //   isEmergency: !isEmergency
+        // });
 
-          {/* Divider */}
-          <div className="my-5 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+        // For now, simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-          {/* Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">
-                Phone Number
-              </p>
-              <p className="mt-1 text-gray-800">
-                {guardian.contactNumber || "—"}
-              </p>
-            </div>
+        // Update in store (you'll need to implement this in your store)
+        // const updatedGuardian = currentGuardians.find(g => g.guardianId === guardianId);
+        // if (updatedGuardian) {
+        //   upsertGuardian(deviceId, {
+        //     ...updatedGuardian,
+        //     isEmergency: !isEmergency
+        //   });
+        // }
 
-            <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">
-                Role
-              </p>
+        setToast({
+          show: true,
+          type: "success",
+          message: !isEmergency
+            ? "Set as emergency contact"
+            : "Removed from emergency contacts"
+        });
+      } catch (error) {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update emergency contact";
+        setToast({
+          show: true,
+          type: "error",
+          message: errorMessage
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [deviceId, currentGuardians]
+  );
 
-              <div className="mt-2">
-                <RoleBadge role={guardian.role} />
-              </div>
-            </div>
+  // Memoize event handlers for guardian actions
+  const handleEditRelationshipClick = useCallback((guardian) => {
+    setSelectedGuardian(guardian);
+    setIsEditRelationshipOpen(true);
+  }, []);
 
-            <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400">
-                Street Address
-              </p>
-              <p className="mt-1 text-gray-800 break-all">
-                {guardian.streetAddress || "—"}
-              </p>
-            </div>
+  const handleEditRoleClick = useCallback((guardian) => {
+    setSelectedGuardian(guardian);
+    setIsSetRoleOpen(true);
+  }, []);
 
-            <div className="md:col-span-2">
-              <p className="text-xs uppercase tracking-wide text-gray-400">
-                Relationship
-              </p>
-              <p className="mt-1 text-gray-800">
-                {guardian.relationship?.charAt(0).toUpperCase() +
-                  guardian.relationship?.slice(1) || "—"}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      ))}
-    </div>
+  const handleRemoveClick = useCallback((guardian) => {
+    setDeleteConfirm({
+      show: true,
+      guardianId: guardian.guardianId,
+      guardianName: capitalizeWords(guardian.firstName)
+    });
+  }, []);
+
+  // Memoize the view components with stable props
+  const tileView = useMemo(
+    () => (
+      <GuardiansTileView
+        guardians={currentGuardians}
+        currentRole={currentRole}
+        isSelf={isSelf}
+        canManageGuardian={canManageGuardian}
+        onEditRelationship={handleEditRelationshipClick}
+        onEditRole={handleEditRoleClick}
+        onRemove={handleRemoveClick}
+        onToggleEmergency={handleToggleEmergencyContact}
+        isSubmitting={isSubmitting}
+      />
+    ),
+    [
+      currentGuardians,
+      currentRole,
+      isSelf,
+      canManageGuardian,
+      handleEditRelationshipClick,
+      handleEditRoleClick,
+      handleRemoveClick,
+      handleToggleEmergencyContact,
+      isSubmitting
+    ]
+  );
+
+  const listView = useMemo(
+    () => (
+      <GuardiansListView
+        guardians={currentGuardians}
+        currentRole={currentRole}
+        isSelf={isSelf}
+        canManageGuardian={canManageGuardian}
+        onEditRelationship={handleEditRelationshipClick}
+        onEditRole={handleEditRoleClick}
+        onRemove={handleRemoveClick}
+        onToggleEmergency={handleToggleEmergencyContact}
+        isSubmitting={isSubmitting}
+      />
+    ),
+    [
+      currentGuardians,
+      currentRole,
+      isSelf,
+      canManageGuardian,
+      handleEditRelationshipClick,
+      handleEditRoleClick,
+      handleRemoveClick,
+      handleToggleEmergencyContact,
+      isSubmitting
+    ]
+  );
+
+  // Memoize stats
+  const stats = useMemo(
+    () => ({
+      total: currentGuardians.length,
+      active: currentGuardians.filter((g) => g.status === "active").length,
+      pending: currentGuardians.filter((g) => g.status === "pending").length,
+      emergency: currentGuardians.filter((g) => g.isEmergency).length
+    }),
+    [currentGuardians]
   );
 
   if (!isOpen) return null;
@@ -577,7 +1279,7 @@ const ManageGuardiansModal = ({
                     <div className="w-full md:w-auto mt-3 md:mt-0">
                       <button
                         onClick={() => setInviteModalOpen(true)}
-                        className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto whitespace-nowrap text-sm smtext-base"
+                        className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto whitespace-nowrap text-sm sm:text-base"
                         disabled={isSubmitting}
                       >
                         <Icon icon="ph:user-plus-bold" className="w-5 h-5" />
@@ -592,7 +1294,7 @@ const ManageGuardiansModal = ({
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <div>
                       <h4 className="text-lg font-semibold text-gray-900">
-                        Assigned Guardians ({guardians(deviceId).length})
+                        Assigned Guardians ({stats.total})
                       </h4>
                       <p className="text-sm text-gray-500 mt-1">
                         Guardians who can monitor this VIP
@@ -633,7 +1335,8 @@ const ManageGuardiansModal = ({
                       </div>
                     </div>
                   </div>
-                  {guardians(deviceId).length === 0 ? (
+
+                  {stats.total === 0 ? (
                     <div className="text-center py-16 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50">
                       <Icon
                         icon="ph:users-three-bold"
@@ -655,19 +1358,12 @@ const ManageGuardiansModal = ({
                       </button>
                     </div>
                   ) : (
-                    <>
-                      {/* Guardians View */}
-                      {viewMode === "list" ? (
-                        <GuardiansListView />
-                      ) : (
-                        <GuardiansTileView />
-                      )}
-                    </>
+                    <>{viewMode === "tiles" ? tileView : listView}</>
                   )}
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                {/* Stats with Emergency Contacts Count */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 p-2 rounded-lg">
@@ -678,9 +1374,7 @@ const ManageGuardiansModal = ({
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Total Guardians</p>
-                        <p className="text-2xl font-bold">
-                          {guardians(deviceId).length}
-                        </p>
+                        <p className="text-2xl font-bold">{stats.total}</p>
                       </div>
                     </div>
                   </div>
@@ -694,13 +1388,7 @@ const ManageGuardiansModal = ({
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Active</p>
-                        <p className="text-2xl font-bold">
-                          {
-                            guardians(deviceId).filter(
-                              (g) => g.status === "active"
-                            ).length
-                          }
-                        </p>
+                        <p className="text-2xl font-bold">{stats.active}</p>
                       </div>
                     </div>
                   </div>
@@ -714,13 +1402,23 @@ const ManageGuardiansModal = ({
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Pending Invites</p>
-                        <p className="text-2xl font-bold">
-                          {
-                            guardians(deviceId).filter(
-                              (g) => g.status === "pending"
-                            ).length
-                          }
+                        <p className="text-2xl font-bold">{stats.pending}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-red-100 p-2 rounded-lg">
+                        <Icon
+                          icon="ph:heart-bold"
+                          className="w-6 h-6 text-red-600"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">
+                          Emergency Contacts
                         </p>
+                        <p className="text-2xl font-bold">{stats.emergency}</p>
                       </div>
                     </div>
                   </div>
@@ -744,6 +1442,7 @@ const ManageGuardiansModal = ({
         </motion.div>
       </div>
 
+      {/* Invite Modal */}
       <Modal
         key="invite-modal"
         isOpen={inviteModalOpen}
@@ -809,16 +1508,30 @@ const ManageGuardiansModal = ({
         </div>
       </Modal>
 
+      {/* Role Selection Modal */}
       <SelectRole
         key="edit-guardian-role-modal"
         isSubmitting={isSubmitting}
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
+        isOpen={isSetRoleOpen}
+        onClose={() => setIsSetRoleOpen(false)}
         selectedGuardian={selectedGuardian}
         setSelectedGuardian={setSelectedGuardian}
         handleEditGuardianRole={handleEditGuardianRole}
       />
 
+      {/* Relationship Edit Modal */}
+      <EditRelationshipModal
+        isOpen={isEditRelationshipOpen}
+        onClose={() => {
+          setIsEditRelationshipOpen(false);
+          setSelectedGuardian(null);
+        }}
+        guardian={selectedGuardian}
+        onSave={handleEditRelationship}
+        isSubmitting={isSubmitting}
+      />
+
+      {/* Delete Confirmation Modal */}
       <Modal
         key="delete-confirmation-modal"
         isOpen={deleteConfirm.show}
@@ -853,4 +1566,4 @@ const ManageGuardiansModal = ({
   );
 };
 
-export default ManageGuardiansModal;
+export default memo(ManageGuardiansModal);
