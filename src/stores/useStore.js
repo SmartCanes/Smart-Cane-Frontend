@@ -213,10 +213,6 @@ export const useGuardiansStore = create(
     (set, get) => ({
       guardiansByDevice: [],
 
-      getGuardiansByDevice: (deviceId) =>
-        get().guardiansByDevice.find((d) => d.deviceId === deviceId)
-          ?.guardians || [],
-
       guardians: (deviceId) =>
         get().guardiansByDevice.find((d) => d.deviceId === deviceId)
           ?.guardians || [],
