@@ -33,7 +33,6 @@ const VipProfileModal = ({
     middleName: "",
     lastName: "",
     streetAddress: "",
-    relationship: "",
     vipImageUrl: "",
     province: "Metro Manila",
     city: "Quezon City",
@@ -70,7 +69,6 @@ const VipProfileModal = ({
         firstName: initialData.firstName || "",
         middleName: initialData.middleName || "",
         lastName: initialData.lastName || "",
-        relationship: initialData.relationship || "",
         streetAddress: initialData.streetAddress || "",
         vipImageUrl: initialData.vipImageUrl || "",
         province: initialData.province || "Metro Manila",
@@ -94,7 +92,6 @@ const VipProfileModal = ({
         firstName: "",
         middleName: "",
         lastName: "",
-        relationship: "",
         streetAddress: "",
         vipImageUrl: "",
         province: "Metro Manila",
@@ -117,7 +114,6 @@ const VipProfileModal = ({
           firstName: initialData.firstName || "",
           middleName: initialData.middleName || "",
           lastName: initialData.lastName || "",
-          relationship: initialData.relationship || "",
           streetAddress: initialData.streetAddress || "",
           province: initialData.province || "",
           city: initialData.city || "",
@@ -253,23 +249,18 @@ const VipProfileModal = ({
       first_name: formData.firstName || "",
       middle_name: formData.middleName || "",
       last_name: formData.lastName || "",
-      relationship: formData.relationship || "",
       street_address: formData.streetAddress || "",
       province: formData.province || "Metro Manila",
       city: formData.city || "Quezon City",
       barangay: formData.barangay || "San Bartolome"
     };
 
-    const success = await onSubmit(
-      { relationship: formData.relationship, vip: { ...submitData } },
-      imageFile
-    );
+    const success = await onSubmit({ vip: { ...submitData } }, imageFile);
     if (!success) return;
     setFormData({
       firstName: "",
       middleName: "",
       lastName: "",
-      relationship: "",
       streetAddress: "",
       vipImageUrl: "",
       province: "Metro Manila",
@@ -445,7 +436,7 @@ const VipProfileModal = ({
                           />
                         )}
                       </div>
-                      {!isViewMode && (
+                      {/* {!isViewMode && (
                         <div className="flex flex-col gap-2">
                           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                             Relationship{" "}
@@ -474,7 +465,7 @@ const VipProfileModal = ({
                             error={errors.relationship}
                           />
                         </div>
-                      )}
+                      )} */}
 
                       {/* Street Address */}
                       <div className="flex flex-col gap-2">
