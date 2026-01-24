@@ -585,7 +585,7 @@ const GuardianListItem = ({
       layout
       whileHover={{ y: -4, scale: 1.01 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
-      className="bg-white rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all overflow-hidden"
+      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden ${guardian.isEmergencyContact ? "ring-2 ring-red-200" : "border border-gray-200 hover:border-blue-200 "}`}
     >
       <div className="p-4">
         <div className="flex items-start justify-between gap-4">
