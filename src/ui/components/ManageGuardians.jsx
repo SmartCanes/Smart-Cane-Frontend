@@ -323,8 +323,9 @@ const GuardianTile = ({
   isSubmitting
 }) => {
   const isCurrentUserSelf = isSelf(guardian.guardianId);
-  const canManage =
-    !isCurrentUserSelf && canManageGuardian(currentRole, guardian.role);
+  const canManage = canManageGuardian(currentRole, guardian.role);
+  const canEditRelationship =
+    currentRole === "primary" || currentRole === "secondary";
 
   return (
     <motion.div
@@ -424,9 +425,8 @@ const GuardianTile = ({
         </div>
 
         {/* Actions */}
-        {canManage && (
-          <div className="flex gap-2 shrink-0">
-            {/* Relationship Edit Icon */}
+        <div className="flex gap-2 shrink-0">
+          {canEditRelationship && (
             <button
               onClick={() => onEditRelationship(guardian)}
               title="Edit relationship"
@@ -434,26 +434,28 @@ const GuardianTile = ({
             >
               <Icon icon="ph:pencil-simple-bold" className="w-5 h-5" />
             </button>
+          )}
+          {canManage && (
+            <>
+              <button
+                onClick={() => onEditRole(guardian)}
+                title="Edit role"
+                className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+              >
+                <Icon icon="ph:shield-check-bold" className="w-5 h-5" />
+              </button>
 
-            {/* Role Edit Icon */}
-            <button
-              onClick={() => onEditRole(guardian)}
-              title="Edit role"
-              className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
-            >
-              <Icon icon="ph:shield-check-bold" className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => onRemove(guardian)}
-              disabled={isSubmitting}
-              title="Remove guardian"
-              className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 cursor-pointer"
-            >
-              <Icon icon="ph:trash-bold" className="w-5 h-5" />
-            </button>
-          </div>
-        )}
+              <button
+                onClick={() => onRemove(guardian)}
+                disabled={isSubmitting}
+                title="Remove guardian"
+                className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 cursor-pointer"
+              >
+                <Icon icon="ph:trash-bold" className="w-5 h-5" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Divider */}
@@ -537,8 +539,7 @@ const GuardianListItem = ({
   isSubmitting
 }) => {
   const isCurrentUserSelf = isSelf(guardian.guardianId);
-  const canManage =
-    !isCurrentUserSelf && canManageGuardian(currentRole, guardian.role);
+  const canManage = canManageGuardian(currentRole, guardian.role);
 
   return (
     <motion.div
