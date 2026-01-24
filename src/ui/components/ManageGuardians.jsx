@@ -29,8 +29,7 @@ const relationshipOptions = [
   { value: "child", label: "Child" },
   { value: "sibling", label: "Sibling" },
   { value: "friend", label: "Friend" },
-  { value: "caregiver", label: "Caregiver" },
-  { value: "neighbor", label: "Neighbor" }
+  { value: "caregiver", label: "Caregiver" }
 ];
 
 const EmergencyContactBadge = ({
@@ -79,6 +78,19 @@ const EditRelationshipModal = ({
     guardian?.relationship || ""
   );
   const [customRelationship, setCustomRelationship] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      // setToast({ show: false, type: "", message: "" });
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (guardian) {
@@ -147,7 +159,8 @@ const EditRelationshipModal = ({
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-6">
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Guardian Preview */}
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center overflow-hidden">
@@ -275,7 +288,7 @@ const EditRelationshipModal = ({
                 <button
                   onClick={onClose}
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-sm sm:text-base text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -284,7 +297,7 @@ const EditRelationshipModal = ({
                   disabled={
                     isSubmitting || (!relationship && !customRelationship)
                   }
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium text-sm sm:text-base hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -297,7 +310,7 @@ const EditRelationshipModal = ({
                   ) : (
                     <>
                       <Icon icon="ph:check" className="w-5 h-5" />
-                      Save Relationship
+                      Save
                     </>
                   )}
                 </button>
@@ -838,7 +851,7 @@ const ManageGuardiansModal = ({
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
-      setToast({ show: false, type: "", message: "" });
+      // setToast({ show: false, type: "", message: "" });
     }
 
     return () => {
@@ -1114,7 +1127,7 @@ const ManageGuardiansModal = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="relative z-10 w-full max-w-6xl mx-4">
+          <div className="relative z-10 w-full max-w-6xl px-4 sm:px-6">
             <motion.div
               className="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] flex flex-col border border-gray-100 overflow-hidden"
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1335,7 +1348,7 @@ const ManageGuardiansModal = ({
                 <div className="flex justify-end">
                   <button
                     onClick={onClose}
-                    className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed cursor-pointer"
+                    className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium text-xs sm:text-base rounded-lg hover:bg-gray-50 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed cursor-pointer"
                     disabled={isSubmitting}
                   >
                     Close
