@@ -322,10 +322,26 @@ const GuardianTile = ({
   onToggleEmergency,
   isSubmitting
 }) => {
+  function canEditGuardianRelationship(currentRole, guardian, isCurrentUser) {
+    if (currentRole === "primary") return true;
+
+    if (currentRole === "secondary") {
+      if (isCurrentUser) return true;
+      if (guardian.role === "guardian") return true;
+      return false;
+    }
+
+    return false;
+  }
+
   const isCurrentUserSelf = isSelf(guardian.guardianId);
   const canManage = canManageGuardian(currentRole, guardian.role);
-  const canEditRelationship =
-    currentRole === "primary" || currentRole === "secondary";
+  const canEditRelationship = canEditGuardianRelationship(
+    currentRole,
+    guardian,
+    isCurrentUserSelf
+  );
+  const canToggleEmergencyContact = currentRole === "primary";
 
   return (
     <motion.div
@@ -514,15 +530,20 @@ const GuardianTile = ({
       </div>
 
       {/* Emergency Contact Button */}
-      <div className="mt-6 pt-4 border-t border-gray-100">
-        <EmergencyContactBadge
-          isEmergencyContact={guardian.isEmergencyContact}
-          onToggle={() =>
-            onToggleEmergency(guardian.guardianId, guardian.isEmergencyContact)
-          }
-          disabled={isSubmitting}
-        />
-      </div>
+      {canToggleEmergencyContact && (
+        <div className="mt-6 pt-4 border-t border-gray-100">
+          <EmergencyContactBadge
+            isEmergencyContact={guardian.isEmergencyContact}
+            onToggle={() =>
+              onToggleEmergency(
+                guardian.guardianId,
+                guardian.isEmergencyContact
+              )
+            }
+            disabled={isSubmitting}
+          />
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -538,8 +559,26 @@ const GuardianListItem = ({
   onToggleEmergency,
   isSubmitting
 }) => {
+  function canEditGuardianRelationship(currentRole, guardian, isCurrentUser) {
+    if (currentRole === "primary") return true;
+
+    if (currentRole === "secondary") {
+      if (isCurrentUser) return true;
+      if (guardian.role === "guardian") return true;
+      return false;
+    }
+
+    return false;
+  }
+
   const isCurrentUserSelf = isSelf(guardian.guardianId);
   const canManage = canManageGuardian(currentRole, guardian.role);
+  const canEditRelationship = canEditGuardianRelationship(
+    currentRole,
+    guardian,
+    isCurrentUserSelf
+  );
+  const canToggleEmergencyContact = currentRole === "primary";
 
   return (
     <motion.div
@@ -582,6 +621,12 @@ const GuardianListItem = ({
                     `${guardian.firstName} ${guardian.lastName}`
                   )}
                 </h3>
+
+                {isCurrentUserSelf && (
+                  <span className="text-xs font-medium text-white bg-blue-600 px-2 py-0.5 rounded-full shrink-0">
+                    You
+                  </span>
+                )}
 
                 {guardian.isEmergencyContact && (
                   <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full font-medium flex items-center gap-1">
@@ -634,7 +679,7 @@ const GuardianListItem = ({
                 <span className="line-clamp-2">
                   {capitalizeWords(guardian.relationship) || "Not specified"}
                 </span>
-                {canManage && (
+                {canEditRelationship && (
                   <button
                     onClick={() => onEditRelationship(guardian)}
                     className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
@@ -646,18 +691,20 @@ const GuardianListItem = ({
               </div>
 
               {/* Emergency Contact Toggle */}
-              <div className="mt-3">
-                <EmergencyContactBadge
-                  isEmergencyContact={guardian.isEmergencyContact}
-                  onToggle={() =>
-                    onToggleEmergency(
-                      guardian.guardianId,
-                      guardian.isEmergencyContact
-                    )
-                  }
-                  disabled={isSubmitting}
-                />
-              </div>
+              {canToggleEmergencyContact && (
+                <div className="mt-3">
+                  <EmergencyContactBadge
+                    isEmergencyContact={guardian.isEmergencyContact}
+                    onToggle={() =>
+                      onToggleEmergency(
+                        guardian.guardianId,
+                        guardian.isEmergencyContact
+                      )
+                    }
+                    disabled={isSubmitting}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
