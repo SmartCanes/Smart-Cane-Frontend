@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import Modal from "@/ui/components/Modal";
 import Toast from "@/ui/components/Toast";
@@ -99,77 +99,87 @@ const EditRelationshipModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 flex justify-center items-center"
+        onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       >
-        {/* Header */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900">
-                Edit Relationship
-              </h3>
-              <p className="text-sm text-gray-500 mt-1">
-                Update relationship for {guardian?.firstName}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              disabled={isSubmitting}
-            >
-              <Icon icon="ph:x-bold" className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Guardian Preview */}
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center overflow-hidden">
-              {guardian?.guardianImageUrl ? (
-                <img
-                  loading="lazy"
-                  src={resolveProfileImageSrc(guardian.guardianImageUrl)}
-                  alt={guardian.firstName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-white font-bold">
-                  {guardian?.firstName?.charAt(0).toUpperCase()}
+        <div className="relative z-10 w-full max-w-3xl mx-4">
+          <motion.div
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] flex flex-col border border-gray-100 overflow-hidden"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.2 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Edit Relationship
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Update relationship for {guardian?.firstName}
+                  </p>
                 </div>
-              )}
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900">
-                {capitalizeWords(
-                  `${guardian?.firstName} ${guardian?.lastName}`
-                )}
-              </h4>
-              <p className="text-sm text-gray-500">{guardian?.email}</p>
-            </div>
-          </div>
-
-          {/* Relationship Selection */}
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Select Relationship Type
-            </label>
-
-            <div className="grid grid-cols-2 gap-3">
-              {relationshipOptions.map((option) => (
                 <button
-                  key={option.value}
-                  onClick={() => {
-                    setRelationship(option.value);
-                    setCustomRelationship("");
-                  }}
-                  className={`
+                  onClick={onClose}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
+                >
+                  <Icon icon="ph:x-bold" className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Guardian Preview */}
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center overflow-hidden">
+                  {guardian?.guardianImageUrl ? (
+                    <img
+                      loading="lazy"
+                      src={resolveProfileImageSrc(guardian.guardianImageUrl)}
+                      alt={guardian.firstName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white font-bold">
+                      {guardian?.firstName?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">
+                    {capitalizeWords(
+                      `${guardian?.firstName} ${guardian?.lastName}`
+                    )}
+                  </h4>
+                  <p className="text-sm text-gray-500">{guardian?.email}</p>
+                </div>
+              </div>
+
+              {/* Relationship Selection */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Select Relationship Type
+                </label>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {relationshipOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setRelationship(option.value);
+                        setCustomRelationship("");
+                      }}
+                      className={`
                     p-4 rounded-xl border-2 text-left transition-all
                     ${
                       relationship === option.value
@@ -177,25 +187,25 @@ const EditRelationshipModal = ({
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                     }
                   `}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900">
-                      {option.label}
-                    </span>
-                    {relationship === option.value && (
-                      <Icon
-                        icon="ph:check-circle"
-                        className="w-5 h-5 text-blue-500"
-                      />
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900">
+                          {option.label}
+                        </span>
+                        {relationship === option.value && (
+                          <Icon
+                            icon="ph:check-circle"
+                            className="w-5 h-5 text-blue-500"
+                          />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
 
-            {/* Custom Relationship Option */}
-            <div
-              className={`
+                {/* Custom Relationship Option */}
+                <div
+                  className={`
               p-4 rounded-xl border-2 transition-all
               ${
                 relationship === "custom"
@@ -203,84 +213,88 @@ const EditRelationshipModal = ({
                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
               }
             `}
-            >
-              <button
-                onClick={() => setRelationship("custom")}
-                className="w-full text-left"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-gray-900">Custom</span>
+                >
+                  <button
+                    onClick={() => setRelationship("custom")}
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-gray-900">Custom</span>
+                      {relationship === "custom" && (
+                        <Icon
+                          icon="ph:check-circle"
+                          className="w-5 h-5 text-blue-500"
+                        />
+                      )}
+                    </div>
+                  </button>
+
                   {relationship === "custom" && (
-                    <Icon
-                      icon="ph:check-circle"
-                      className="w-5 h-5 text-blue-500"
-                    />
+                    <div className="mt-3">
+                      <input
+                        type="text"
+                        value={customRelationship}
+                        onChange={(e) => setCustomRelationship(e.target.value)}
+                        placeholder="Enter custom relationship"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        autoFocus
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        Enter a custom relationship description
+                      </p>
+                    </div>
                   )}
                 </div>
-              </button>
+              </div>
 
-              {relationship === "custom" && (
-                <div className="mt-3">
-                  <input
-                    type="text"
-                    value={customRelationship}
-                    onChange={(e) => setCustomRelationship(e.target.value)}
-                    placeholder="Enter custom relationship"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoFocus
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Enter a custom relationship description
+              {/* Current Relationship Display */}
+              {guardian?.relationship && (
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    Current relationship:{" "}
+                    <span className="font-semibold text-blue-700">
+                      {capitalizeWords(guardian.relationship)}
+                    </span>
                   </p>
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Current Relationship Display */}
-          {guardian?.relationship && (
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600">
-                Current relationship:{" "}
-                <span className="font-semibold text-blue-700">
-                  {capitalizeWords(guardian.relationship)}
-                </span>
-              </p>
+            {/* Footer */}
+            <div className="p-6 border-t border-gray-200">
+              <div className="flex gap-3">
+                <button
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={
+                    isSubmitting || (!relationship && !customRelationship)
+                  }
+                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Icon
+                        icon="ph:circle-notch"
+                        className="w-5 h-5 animate-spin"
+                      />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Icon icon="ph:check" className="w-5 h-5" />
+                      Save Relationship
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t border-gray-200">
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isSubmitting || (!relationship && !customRelationship)}
-              className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <Icon
-                    icon="ph:circle-notch"
-                    className="w-5 h-5 animate-spin"
-                  />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Icon icon="ph:check" className="w-5 h-5" />
-                  Save Relationship
-                </>
-              )}
-            </button>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
     </div>
@@ -781,7 +795,6 @@ const ManageGuardiansModal = ({
     return roleHierarchy[currentRole] > roleHierarchy[targetRole];
   };
 
-  // Event handlers
   const handleSendInvite = async () => {
     if (!email || !email.includes("@")) {
       setToast({
@@ -1002,7 +1015,6 @@ const ManageGuardiansModal = ({
     });
   };
 
-  // Calculate stats
   const stats = {
     total: currentGuardians.length,
     active: currentGuardians.filter((g) => g.status === "active").length,
