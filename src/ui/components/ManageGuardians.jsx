@@ -30,8 +30,7 @@ const relationshipOptions = [
   { value: "sibling", label: "Sibling" },
   { value: "friend", label: "Friend" },
   { value: "caregiver", label: "Caregiver" },
-  { value: "neighbor", label: "Neighbor" },
-  { value: "other", label: "Other" }
+  { value: "neighbor", label: "Neighbor" }
 ];
 
 const EmergencyContactBadge = ({
