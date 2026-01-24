@@ -38,6 +38,19 @@ export const modifyGuardianRole = (deviceId, guardianId, payload) =>
     backendApi.put(`/device/${deviceId}/guardians/${guardianId}/role`, payload)
   );
 
+export const modifyGuardianRelationship = (deviceId, guardianId, payload) =>
+  handleRequest(() =>
+    backendApi.put(
+      `/device/${deviceId}/guardians/${guardianId}/relationship`,
+      payload
+    )
+  );
+
+export const toggleEmergencyContact = (deviceId, guardianId) =>
+  handleRequest(() =>
+    backendApi.put(`/device/${deviceId}/guardians/${guardianId}/emergency`)
+  );
+
 export const removeGuardianFromDevice = (deviceId, guardianId) =>
   handleRequest(() =>
     backendApi.delete(`/device/${deviceId}/guardians/${guardianId}`)

@@ -5,8 +5,10 @@ import Toast from "@/ui/components/Toast";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   inviteGuardianLink,
+  modifyGuardianRelationship,
   modifyGuardianRole,
-  removeGuardianFromDevice
+  removeGuardianFromDevice,
+  toggleEmergencyContact
 } from "@/api/backendService";
 import { useGuardiansStore, useUserStore } from "@/stores/useStore";
 import { capitalizeWords } from "@/utils/Capitalize";
@@ -32,7 +34,11 @@ const relationshipOptions = [
   { value: "other", label: "Other" }
 ];
 
-const EmergencyContactBadge = ({ isEmergency, onToggle, disabled = false }) => {
+const EmergencyContactBadge = ({
+  isEmergencyContact,
+  onToggle,
+  disabled = false
+}) => {
   return (
     <button
       onClick={onToggle}
@@ -41,20 +47,24 @@ const EmergencyContactBadge = ({ isEmergency, onToggle, disabled = false }) => {
         inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-105 active:scale-95"}
         ${
-          isEmergency
+          isEmergencyContact
             ? "bg-red-100 text-red-700 border border-red-200 hover:bg-red-200"
             : "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
         }
       `}
       title={
-        isEmergency ? "Remove as emergency contact" : "Set as emergency contact"
+        isEmergencyContact
+          ? "Remove as emergency contact"
+          : "Set as emergency contact"
       }
     >
       <Icon
-        icon={isEmergency ? "ph:heart-bold" : "ph:heart"}
-        className={`w-4 h-4 ${isEmergency ? "text-red-500" : "text-gray-400"}`}
+        icon={isEmergencyContact ? "ph:heart-bold" : "ph:heart"}
+        className={`w-4 h-4 ${isEmergencyContact ? "text-red-500" : "text-gray-400"}`}
       />
-      <span>{isEmergency ? "Emergency Contact" : "Set as Emergency"}</span>
+      <span>
+        {isEmergencyContact ? "Emergency Contact" : "Set as Emergency"}
+      </span>
     </button>
   );
 };
@@ -329,11 +339,11 @@ const GuardianTile = ({
         ring-1 ring-gray-200/70
         p-5 md:p-6
         transition-all
-        ${guardian.isEmergency ? "ring-2 ring-red-200" : ""}
+        ${guardian.isEmergencyContact ? "ring-2 ring-red-200" : ""}
       `}
     >
       {/* Emergency Contact Ribbon */}
-      {guardian.isEmergency && (
+      {guardian.isEmergencyContact && (
         <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1 z-10">
           <Icon icon="ph:heart-bold" className="w-3 h-3" />
           EMERGENCY
@@ -455,7 +465,7 @@ const GuardianTile = ({
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">
             Phone Number
-            {guardian.isEmergency && (
+            {guardian.isEmergencyContact && (
               <span className="ml-2 text-red-500">
                 <Icon icon="ph:heart-bold" className="inline w-3 h-3" />
               </span>
@@ -483,7 +493,7 @@ const GuardianTile = ({
             {canManage && (
               <button
                 onClick={() => onEditRelationship(guardian)}
-                className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
                 title="Edit relationship"
               >
                 <Icon icon="ph:pencil-simple-bold" className="w-3 h-3" />
@@ -504,11 +514,11 @@ const GuardianTile = ({
       {/* Emergency Contact Button */}
       <div className="mt-6 pt-4 border-t border-gray-100">
         <EmergencyContactBadge
-          isEmergency={guardian.isEmergency}
+          isEmergencyContact={guardian.isEmergencyContact}
           onToggle={() =>
-            onToggleEmergency(guardian.guardianId, guardian.isEmergency)
+            onToggleEmergency(guardian.guardianId, guardian.isEmergencyContact)
           }
-          disabled={isSubmitting || isCurrentUserSelf}
+          disabled={isSubmitting}
         />
       </div>
     </motion.div>
@@ -557,7 +567,7 @@ const GuardianListItem = ({
                   />
                 )}
               </div>
-              {guardian.isEmergency && (
+              {guardian.isEmergencyContact && (
                 <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-lg">
                   <Icon icon="ph:heart-bold" className="w-3 h-3" />
                 </div>
@@ -572,7 +582,7 @@ const GuardianListItem = ({
                   )}
                 </h3>
 
-                {guardian.isEmergency && (
+                {guardian.isEmergencyContact && (
                   <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full font-medium flex items-center gap-1">
                     <Icon icon="ph:heart-bold" className="w-3 h-3" />
                     Emergency Contact
@@ -626,7 +636,7 @@ const GuardianListItem = ({
                 {canManage && (
                   <button
                     onClick={() => onEditRelationship(guardian)}
-                    className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
                     title="Edit relationship"
                   >
                     <Icon icon="ph:pencil-simple-bold" className="w-3 h-3" />
@@ -637,11 +647,14 @@ const GuardianListItem = ({
               {/* Emergency Contact Toggle */}
               <div className="mt-3">
                 <EmergencyContactBadge
-                  isEmergency={guardian.isEmergency}
+                  isEmergencyContact={guardian.isEmergencyContact}
                   onToggle={() =>
-                    onToggleEmergency(guardian.guardianId, guardian.isEmergency)
+                    onToggleEmergency(
+                      guardian.guardianId,
+                      guardian.isEmergencyContact
+                    )
                   }
-                  disabled={isSubmitting || isCurrentUserSelf}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
@@ -654,7 +667,7 @@ const GuardianListItem = ({
               <button
                 onClick={() => onEditRole(guardian)}
                 title="Edit role"
-                className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 <Icon icon="ph:shield-check-bold" className="w-5 h-5" />
               </button>
@@ -663,7 +676,7 @@ const GuardianListItem = ({
                 onClick={() => onRemove(guardian)}
                 disabled={isSubmitting}
                 title="Remove guardian"
-                className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 <Icon icon="ph:trash-bold" className="w-5 h-5" />
               </button>
@@ -927,10 +940,13 @@ const ManageGuardiansModal = ({
     try {
       setIsSubmitting(true);
 
-      // Implement your API call here
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await modifyGuardianRelationship(deviceId, guardianId, {
+        relationship: newRelationship
+      });
 
-      // Update in store
+      if (!response.success)
+        throw new Error(response.message || "Failed to update relationship");
+
       upsertGuardian(deviceId, {
         ...selectedGuardian,
         relationship: newRelationship
@@ -959,26 +975,43 @@ const ManageGuardiansModal = ({
     }
   };
 
-  const handleToggleEmergencyContact = async (guardianId, isEmergency) => {
+  const handleToggleEmergencyContact = async (guardianId) => {
     try {
       setIsSubmitting(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await toggleEmergencyContact(deviceId, guardianId);
 
-      const updatedGuardian = currentGuardians.find(
-        (g) => g.guardianId === guardianId
-      );
-      if (updatedGuardian) {
-        upsertGuardian(deviceId, {
-          ...updatedGuardian,
-          isEmergency: !isEmergency
+      const isEmergencyContact = response.data.isEmergencyContact;
+
+      if (!response.success)
+        throw new Error(
+          response.message || "Failed to update emergency contact"
+        );
+
+      if (isEmergencyContact) {
+        currentGuardians.forEach((g) => {
+          upsertGuardian(deviceId, {
+            ...g,
+            isEmergencyContact: g.guardianId === guardianId
+          });
         });
+      } else {
+        const updatedGuardian = currentGuardians.find(
+          (g) => g.guardianId === guardianId
+        );
+
+        if (updatedGuardian) {
+          upsertGuardian(deviceId, {
+            ...updatedGuardian,
+            isEmergencyContact: false
+          });
+        }
       }
 
       setToast({
         show: true,
         type: "success",
-        message: !isEmergency
+        message: isEmergencyContact
           ? "Set as emergency contact"
           : "Removed from emergency contacts"
       });
@@ -1019,7 +1052,7 @@ const ManageGuardiansModal = ({
     total: currentGuardians.length,
     active: currentGuardians.filter((g) => g.status === "active").length,
     pending: currentGuardians.filter((g) => g.status === "pending").length,
-    emergency: currentGuardians.filter((g) => g.isEmergency).length
+    emergency: currentGuardians.filter((g) => g.isEmergencyContact).length
   };
 
   if (!isOpen) return null;
@@ -1362,6 +1395,7 @@ const ManageGuardiansModal = ({
 
       {/* Relationship Edit Modal */}
       <EditRelationshipModal
+        key="edit-relationship-modal"
         isOpen={isEditRelationshipOpen}
         onClose={() => {
           setIsEditRelationshipOpen(false);
