@@ -1236,8 +1236,8 @@ const ManageGuardiansModal = ({
                   )}
                 </div>
 
-                {/* Stats with Emergency Contacts Count */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+                {/* Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 p-2 rounded-lg">
@@ -1277,22 +1277,6 @@ const ManageGuardiansModal = ({
                       <div>
                         <p className="text-sm text-gray-500">Pending Invites</p>
                         <p className="text-2xl font-bold">{stats.pending}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-red-100 p-2 rounded-lg">
-                        <Icon
-                          icon="ph:heart-bold"
-                          className="w-6 h-6 text-red-600"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">
-                          Emergency Contacts
-                        </p>
-                        <p className="text-2xl font-bold">{stats.emergency}</p>
                       </div>
                     </div>
                   </div>
