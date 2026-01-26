@@ -580,7 +580,7 @@ const GuardianTile = ({
       </div>
 
       {/* Emergency Contact Button */}
-      {canToggleEmergencyContact && (
+      {canToggleEmergencyContact && !guardian.isEmergencyContact && (
         <div className="mt-6 pt-4 border-t border-gray-100">
           <EmergencyContactBadge
             isEmergencyContact={guardian.isEmergencyContact}
@@ -590,7 +590,7 @@ const GuardianTile = ({
                 guardian.isEmergencyContact
               )
             }
-            disabled={isSubmitting}
+            disabled={isSubmitting || guardian.isEmergencyContact}
           />
         </div>
       )}
@@ -1079,6 +1079,23 @@ const ManageGuardiansModal = ({
   const handleToggleEmergencyContact = async (guardianId) => {
     try {
       setIsSubmitting(true);
+
+      const currentEmergencyContacts = currentGuardians.filter(
+        (g) => g.isEmergencyContact
+      );
+
+      const isOnlyEmergencyContact =
+        currentEmergencyContacts.length === 1 &&
+        currentEmergencyContacts[0].guardianId === guardianId;
+
+      if (isOnlyEmergencyContact) {
+        setToast({
+          show: true,
+          type: "error",
+          message: "There must always be at least one emergency contact."
+        });
+        return;
+      }
 
       const response = await toggleEmergencyContact(deviceId, guardianId);
 
