@@ -77,7 +77,7 @@ const Devices = () => {
 
     const interval = setInterval(() => {
       fetchDevices();
-      fetchGuardians();
+      fetchGuardiansAndInvites();
     }, 30000);
 
     return () => clearInterval(interval);
@@ -666,6 +666,7 @@ const Devices = () => {
                 });
               }}
               response={(res) => {
+                fetchGuardiansAndInvites();
                 upsertDevice(res.data);
               }}
             />
