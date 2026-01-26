@@ -418,7 +418,7 @@ const GuardianTile = ({
       )}
 
       {/* Header */}
-      <div className="flex justify-between items-start gap-3">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         {/* Left side */}
         <div className="flex items-start gap-4 min-w-0 flex-1">
           {/* Avatar with Emergency Badge */}
@@ -455,7 +455,7 @@ const GuardianTile = ({
           {/* Name / Email / Status */}
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-gray-900 text-base sm:text-lg leading-tight break-words">
+              <h3 className="font-semibold text-gray-900 text-base sm:text-lg leading-tight truncate max-w-full">
                 {capitalizeWords(`${guardian.firstName} ${guardian.lastName}`)}
               </h3>
 
@@ -466,14 +466,14 @@ const GuardianTile = ({
               )}
             </div>
 
-            <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate max-w-full">
               {guardian.email}
             </p>
 
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex flex-wrap items-center gap-2 mt-2">
               {/* Status */}
               <span
-                className={`inline-flex px-3 py-1 text-xs rounded-full font-semibold ${
+                className={`inline-flex shrink-0 px-3 py-1 text-xs rounded-full font-semibold ${
                   guardian.status === "active"
                     ? "bg-green-50 text-green-800"
                     : guardian.status === "pending"
@@ -491,7 +491,7 @@ const GuardianTile = ({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 shrink-0">
+        <div className="flex gap-2 shrink-0 ml-auto">
           {canEditRelationship && (
             <button
               onClick={() => onEditRelationship(guardian)}
@@ -528,7 +528,7 @@ const GuardianTile = ({
       <div className="my-5 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
       {/* Details */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
         {/* Phone Number with Emergency Indicator */}
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">
@@ -540,7 +540,7 @@ const GuardianTile = ({
             )}
           </p>
           <div className="flex items-center gap-2">
-            <p className="text-gray-800 font-medium">
+            <p className="text-gray-800 font-medium text-xs sm:text-base">
               {guardian.contactNumber || "—"}
             </p>
             {!guardian.contactNumber && (
@@ -555,7 +555,7 @@ const GuardianTile = ({
             Relationship
           </p>
           <div className="flex items-center gap-2">
-            <p className="text-gray-800 font-medium">
+            <p className="text-gray-800 font-medium text-xs sm:text-base">
               {capitalizeWords(guardian.relationship) || "Not specified"}
             </p>
             {canManage && (
@@ -575,7 +575,9 @@ const GuardianTile = ({
           <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">
             Street Address
           </p>
-          <p className="text-gray-800">{guardian.streetAddress || "—"}</p>
+          <p className="text-gray-800 text-xs sm:text-base">
+            {guardian.streetAddress || "—"}
+          </p>
         </div>
       </div>
 
