@@ -4,6 +4,7 @@ import Modal from "@/ui/components/Modal";
 import Toast from "@/ui/components/Toast";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  getPendingInvites,
   inviteGuardianLink,
   modifyGuardianRelationship,
   modifyGuardianRole,
@@ -855,8 +856,13 @@ const ManageGuardiansModal = ({
   vipName,
   vipId
 }) => {
-  const { guardians, removeGuardian, upsertGuardian, currentGuardianRole } =
-    useGuardiansStore();
+  const {
+    guardians,
+    removeGuardian,
+    upsertGuardian,
+    currentGuardianRole,
+    pendingInvitesCount
+  } = useGuardiansStore();
   const { user } = useUserStore();
   const [email, setEmail] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -878,10 +884,8 @@ const ManageGuardiansModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState("tiles");
 
-  // Get current guardians
   const currentGuardians = guardians(deviceId);
 
-  // Get current role
   const currentRole = currentGuardianRole(user.guardianId);
 
   useEffect(() => {
@@ -1149,8 +1153,7 @@ const ManageGuardiansModal = ({
   const stats = {
     total: currentGuardians.length,
     active: currentGuardians.filter((g) => g.status === "active").length,
-    pending: currentGuardians.filter((g) => g.status === "pending").length,
-    emergency: currentGuardians.filter((g) => g.isEmergencyContact).length
+    pending: pendingInvitesCount(deviceId)
   };
 
   if (!isOpen) return null;

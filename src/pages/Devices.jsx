@@ -26,7 +26,7 @@ import ManageGuardiansModal from "@/ui/components/ManageGuardians";
 const Devices = () => {
   const { devices, fetchDevices, upsertDevice, removeDevice, hasFetchedOnce } =
     useDevicesStore();
-  const { fetchGuardians, currentGuardianRole } = useGuardiansStore();
+  const { fetchGuardiansAndInvites, currentGuardianRole } = useGuardiansStore();
   const { user } = useUserStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nicknameSubmitting, setNicknameSubmitting] = useState(false);
@@ -73,7 +73,7 @@ const Devices = () => {
 
   useEffect(() => {
     fetchDevices();
-    fetchGuardians();
+    fetchGuardiansAndInvites();
 
     const interval = setInterval(() => {
       fetchDevices();

@@ -33,6 +33,9 @@ export const getDeviceGuardians = (deviceId) =>
 export const getAllDeviceGuardians = () =>
   handleRequest(() => backendApi.get(`/device/guardians`));
 
+export const getPendingInvites = () =>
+  handleRequest(() => backendApi.get(`/device/pending-invites`));
+
 export const modifyGuardianRole = (deviceId, guardianId, payload) =>
   handleRequest(() =>
     backendApi.put(`/device/${deviceId}/guardians/${guardianId}/role`, payload)

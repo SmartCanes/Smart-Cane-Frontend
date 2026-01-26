@@ -1,4 +1,8 @@
-import { getAllDeviceGuardians, getDevices } from "@/api/backendService";
+import {
+  getAllDeviceGuardians,
+  getDevices,
+  getPendingInvites
+} from "@/api/backendService";
 import { wsApi } from "@/api/ws-api";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -180,10 +184,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                  d.deviceId === updatedDevice.deviceId
-                    ? { ...d, ...updatedDevice }
-                    : d
-                )
+                d.deviceId === updatedDevice.deviceId
+                  ? { ...d, ...updatedDevice }
+                  : d
+              )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -212,6 +216,7 @@ export const useGuardiansStore = create(
   persist(
     (set, get) => ({
       guardiansByDevice: [],
+      pendingInvitesByDevice: [],
 
       guardians: (deviceId) =>
         get().guardiansByDevice.find((d) => d.deviceId === deviceId)
@@ -251,10 +256,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                    g.guardianId === guardian.guardianId
-                      ? { ...g, ...guardian }
-                      : g
-                  )
+                  g.guardianId === guardian.guardianId
+                    ? { ...g, ...guardian }
+                    : g
+                )
                 : [...d.guardians, guardian]
             };
           })
@@ -273,11 +278,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                  ...d,
-                  guardians: d.guardians.filter(
-                    (g) => g.guardianId !== guardianId
-                  )
-                }
+                ...d,
+                guardians: d.guardians.filter(
+                  (g) => g.guardianId !== guardianId
+                )
+              }
               : d
           )
         })),
@@ -296,31 +301,62 @@ export const useGuardiansStore = create(
           guardiansByDevice: []
         }),
 
-      fetchGuardians: async () => {
-        try {
-          const response = await getAllDeviceGuardians();
-
-          if (response.success) {
-            set((state) => ({
-              guardiansByDevice: response.data.guardiansByDevice.map((d) => ({
-                deviceId: d.deviceId,
-                guardians: d.guardians || []
-              }))
-            }));
-
+      setPendingInvitesCount: (deviceId, count) =>
+        set((state) => {
+          const existing = state.pendingInvitesByDevice.find(
+            (d) => d.deviceId === deviceId
+          );
+          if (existing) {
             return {
-              success: true,
-              data: response.data.guardiansByDevice || []
+              pendingInvitesByDevice: state.pendingInvitesByDevice.map((d) =>
+                d.deviceId === deviceId ? { ...d, count } : d
+              )
             };
           } else {
+            return {
+              pendingInvitesByDevice: [
+                ...state.pendingInvitesByDevice,
+                { deviceId, count }
+              ]
+            };
+          }
+        }),
+
+      pendingInvitesCount: (deviceId) =>
+        (
+          get().pendingInvitesByDevice.find((d) => d.deviceId === deviceId) ||
+          {}
+        ).count || 0,
+
+      fetchGuardiansAndInvites: async () => {
+        try {
+          const response = await getAllDeviceGuardians();
+          if (!response.success) {
             return { success: false, message: response.message };
           }
+
+          const guardiansByDevice = response.data.guardiansByDevice.map(
+            (d) => ({
+              deviceId: d.deviceId,
+              guardians: d.guardians || []
+            })
+          );
+          set({ guardiansByDevice });
+
+          const inviteRes = await getPendingInvites();
+          if (inviteRes.success) {
+            inviteRes.data.pendingInvitesCounts.forEach((item) => {
+              get().setPendingInvitesCount(
+                item.deviceId,
+                item.pendingInvitesCount
+              );
+            });
+          }
+
+          return { success: true, data: guardiansByDevice };
         } catch (error) {
-          console.error("Error fetching guardians:", error);
-          return {
-            success: false,
-            message: error.message || "Failed to fetch"
-          };
+          console.error("Error fetching guardians and invites:", error);
+          return { success: false, message: error.message || "Failed" };
         }
       }
     }),
@@ -328,7 +364,8 @@ export const useGuardiansStore = create(
       name: "guardians-storage",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        guardiansByDevice: state.guardiansByDevice
+        guardiansByDevice: state.guardiansByDevice,
+        pendingInvitesByDevice: state.pendingInvitesByDevice
       })
     }
   )
