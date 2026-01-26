@@ -23,6 +23,7 @@ import { GuardianProfile } from "./pages/GuardianProfile";
 import Devices from "./pages/Devices";
 import GuardianInvite from "./pages/GuardianInvite";
 import Advanced from "./pages/Advanced.jsx";
+import Notifications from "./pages/Notifications";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -48,6 +49,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/profile" element={<GuardianProfile />} />
             <Route path="/notes" element={<Notes />} />
             <Route path="/advanced" element={<Advanced />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -245,6 +245,170 @@ function showLogoutModal(message = "Logging out...") {
   };
 }
 
+const NotificationDropdown = ({ notifications, onClose, onNavigateToAll }) => {
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case "alert":
+        return "ph:warning-circle";
+      case "warning":
+        return "ph:warning";
+      case "info":
+        return "ph:info";
+      default:
+        return "ph:bell";
+    }
+  };
+
+  const getTypeColor = (type) => {
+    switch (type) {
+      case "alert":
+        return "text-red-500";
+      case "warning":
+        return "text-yellow-500";
+      case "info":
+        return "text-blue-500";
+      default:
+        return "text-gray-500";
+    }
+  };
+
+  const formatTime = (date) => {
+    const now = new Date();
+    const diffMs = now - new Date(date);
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${Math.floor(diffMs / 86400000)}d ago`;
+  };
+
+  const handleNotificationClick = (notification) => {
+    onClose();
+  };
+
+  return (
+    <div
+      ref={dropdownRef}
+      className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 overflow-hidden animate-[slideDown_0.2s_ease-out]"
+    >
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-gray-900 text-lg">Notifications</h3>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500">
+              {notifications.length} total
+            </span>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+            >
+              <Icon icon="ph:x" className="w-4 h-4 text-gray-500" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-h-[400px] overflow-y-auto">
+        {notifications.length === 0 ? (
+          <div className="p-8 text-center">
+            <Icon
+              icon="ph:bell-slash"
+              className="w-12 h-12 mx-auto mb-3 text-gray-300"
+            />
+            <p className="text-gray-500 text-sm">No notifications yet</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {notifications.slice(0, 5).map((notification) => (
+              <motion.button
+                key={notification.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                onClick={() => handleNotificationClick(notification)}
+                className={`w-full text-left p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
+                  !notification.read ? "bg-blue-50/50" : ""
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`mt-1 ${getTypeColor(notification.type)}`}>
+                    <Icon
+                      icon={getTypeIcon(notification.type)}
+                      className="w-5 h-5"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="font-medium text-gray-900 text-sm">
+                          {notification.title}
+                        </h4>
+                        <p className="text-gray-600 text-xs mt-1 line-clamp-2">
+                          {notification.message}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                          {formatTime(notification.timestamp)}
+                        </span>
+                        {!notification.read && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <span className="text-xs text-gray-400">
+                        Device: {notification.deviceId}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => {
+              onClose();
+              onNavigateToAll();
+            }}
+            className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1 cursor-pointer"
+          >
+            See all notifications
+            <Icon icon="ph:arrow-right" className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => {
+              console.log("Mark all as read");
+            }}
+            className="text-gray-600 hover:text-gray-700 text-sm font-medium cursor-pointer"
+          >
+            Mark all as read
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
@@ -264,6 +428,10 @@ const Header = () => {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [vipOpen, setVipOpen] = useState(false);
   const vipRef = useRef(null);
+
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const notificationRef = useRef(null);
 
   useEffect(() => {
     if (devices.length && !selectedDevice) {
@@ -307,8 +475,6 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleNotificationClick = () => {};
-
   const handleLogoutClick = async () => {
     if (!isBackendEnabled) {
       clearUser();
@@ -344,6 +510,74 @@ const Header = () => {
 
     fetchNotifications();
   }, []);
+
+  useEffect(() => {
+    const fetchNotifications = () => {
+      const mockNotifications = [
+        {
+          id: 1,
+          title: "Fall Detected",
+          message: "John Smith's iCane detected a fall at Main Street",
+          timestamp: new Date(Date.now() - 5 * 60 * 1000),
+          type: "alert",
+          read: false,
+          deviceId: "ICN-001"
+        },
+        {
+          id: 2,
+          title: "Battery Low",
+          message: "iCane device battery is at 15%",
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          type: "warning",
+          read: true,
+          deviceId: "IC-12345"
+        },
+        {
+          id: 3,
+          title: "Device Connected",
+          message: "New iCane device paired successfully",
+          timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+          type: "info",
+          read: false,
+          deviceId: "IC-67890"
+        }
+      ];
+      setNotifications(mockNotifications);
+      setNotificationCount(mockNotifications.filter((n) => !n.read).length);
+    };
+
+    fetchNotifications();
+
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target) &&
+        !event.target.closest(".notification-button")
+      ) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleNotificationClick = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+  };
+
+  const handleNavigateToNotifications = () => {
+    setIsNotificationOpen(false);
+    navigate("/notifications");
+  };
 
   const showImage = profileImageUrl && !imageError;
   const userInitial = user ? user.firstName?.charAt(0).toUpperCase() : "Z";
@@ -493,18 +727,31 @@ const Header = () => {
             </span>
           </div>
           {/* Notifications */}
-          <button
-            onClick={handleNotificationClick}
-            className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors"
-            aria-label="Notifications"
-          >
-            <Icon icon="ph:bell" className="w-6 h-6" />
-            {notificationCount > 0 && (
-              <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100">
-                {notificationCount > 9 ? "9+" : notificationCount}
-              </span>
-            )}
-          </button>
+          <div className="relative" ref={notificationRef}>
+            <button
+              onClick={handleNotificationClick}
+              className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors notification-button"
+              aria-label="Notifications"
+            >
+              <Icon icon="ph:bell" className="w-6 h-6" />
+              {notificationCount > 0 && (
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100">
+                  {notificationCount > 9 ? "9+" : notificationCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notification Dropdown */}
+            <AnimatePresence>
+              {isNotificationOpen && (
+                <NotificationDropdown
+                  notifications={notifications}
+                  onClose={() => setIsNotificationOpen(false)}
+                  onNavigateToAll={handleNavigateToNotifications}
+                />
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -694,7 +941,10 @@ const Header = () => {
                     <span className="font-medium">Settings</span>
                   </button>
                   <button
-                    onClick={handleNotificationClick}
+                    onClick={() => {
+                      handleNavigateToNotifications();
+                      setMobileMenuOpen(false);
+                    }}
                     className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors relative"
                   >
                     <Icon icon="ph:bell" className="w-5 h-5" />
