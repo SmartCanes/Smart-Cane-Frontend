@@ -24,7 +24,7 @@ import {
 import ManageGuardiansModal from "@/ui/components/ManageGuardians";
 
 const Devices = () => {
-  const { devices, fetchDevices, upsertDevice, removeDevice, hasFetchedOnce } =
+  const { devices, upsertDevice, removeDevice, hasFetchedOnce } =
     useDevicesStore();
   const { fetchGuardiansAndInvites, currentGuardianRole } = useGuardiansStore();
   const { user } = useUserStore();
@@ -70,18 +70,6 @@ const Devices = () => {
   const currentRole = currentGuardianRole(user.guardianId);
 
   const canManageVIP = currentRole === "primary" || currentRole === "secondary";
-
-  useEffect(() => {
-    fetchDevices();
-    fetchGuardiansAndInvites();
-
-    const interval = setInterval(() => {
-      fetchDevices();
-      fetchGuardiansAndInvites();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const handleResize = () => {

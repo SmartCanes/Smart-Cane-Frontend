@@ -1,11 +1,31 @@
 import { Outlet, Navigate } from "react-router-dom";
 import SidebarContent from "@/ui/components/SidebarContent";
-import { useUIStore, useUserStore } from "@/stores/useStore";
+import {
+  useDevicesStore,
+  useGuardiansStore,
+  useUIStore,
+  useUserStore
+} from "@/stores/useStore";
+import { useEffect } from "react";
 
 const ProtectedLayout = () => {
   // const navigate = useNavigate();
   // const [isAuthChecked, setIsAuthChecked] = useState(false);
   const { user } = useUserStore();
+  const { fetchDevices } = useDevicesStore();
+  const { fetchGuardiansAndInvites } = useGuardiansStore();
+
+  useEffect(() => {
+    fetchDevices();
+    fetchGuardiansAndInvites();
+
+    const interval = setInterval(() => {
+      fetchDevices();
+      fetchGuardiansAndInvites();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // useEffect(() => {z
   //   const checkAuth = async () => {
