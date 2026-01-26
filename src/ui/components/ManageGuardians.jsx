@@ -16,6 +16,8 @@ import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import DefaultProfile from "./DefaultProfile";
 import RoleBadge from "./RoleBadge";
 import { SelectRole } from "./SelectRole";
+import { validateField } from "@/utils/ValidationHelper";
+import TextField from "./TextField";
 
 const roleHierarchy = {
   primary: 3,
@@ -78,6 +80,28 @@ const EditRelationshipModal = ({
     guardian?.relationship || ""
   );
   const [customRelationship, setCustomRelationship] = useState("");
+  const [errors, setErrors] = useState({
+    relationship: ""
+  });
+
+  const isRelationshipUnchanged = () => {
+    if (!guardian) return true;
+
+    const currentValue = guardian.relationship || "";
+    const selectedValue =
+      relationship === "custom" ? customRelationship.trim() : relationship;
+
+    // If the selected relationship s "custom" but same as current, treat as unchanged
+    return currentValue === selectedValue;
+  };
+
+  const handleBlur = (name) => {
+    const error = validateField(
+      name,
+      relationship === "custom" ? customRelationship : relationship
+    );
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -109,7 +133,10 @@ const EditRelationshipModal = ({
     const finalRelationship =
       relationship === "custom" ? customRelationship.trim() : relationship;
 
-    if (!finalRelationship) {
+    const error = validateField("relationship", finalRelationship);
+    setErrors((prev) => ({ ...prev, relationship: error }));
+
+    if (error || !finalRelationship) {
       return;
     }
 
@@ -200,9 +227,10 @@ const EditRelationshipModal = ({
                       onClick={() => {
                         setRelationship(option.value);
                         setCustomRelationship("");
+                        setErrors((prev) => ({ ...prev, relationship: "" }));
                       }}
                       className={`
-                    p-4 rounded-xl border-2 text-left transition-all
+                    p-4 rounded-xl border-2 text-left transition-all cursor-pointer
                     ${
                       relationship === option.value
                         ? "border-blue-500 bg-blue-50"
@@ -253,11 +281,18 @@ const EditRelationshipModal = ({
 
                   {relationship === "custom" && (
                     <div className="mt-3">
-                      <input
+                      <TextField
                         type="text"
                         value={customRelationship}
-                        onChange={(e) => setCustomRelationship(e.target.value)}
+                        onChange={(e) => {
+                          setCustomRelationship(e.target.value);
+                          setErrors((prev) => ({ ...prev, relationship: "" }));
+                        }}
                         placeholder="Enter custom relationship"
+                        onBlur={() => {
+                          if (isOpen) handleBlur("relationship");
+                        }}
+                        error={errors.relationship}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         autoFocus
                       />
@@ -295,7 +330,10 @@ const EditRelationshipModal = ({
                 <button
                   onClick={handleSave}
                   disabled={
-                    isSubmitting || (!relationship && !customRelationship)
+                    isSubmitting ||
+                    (!relationship && !customRelationship) ||
+                    errors.relationship ||
+                    isRelationshipUnchanged()
                   }
                   className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium text-sm sm:text-base hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
