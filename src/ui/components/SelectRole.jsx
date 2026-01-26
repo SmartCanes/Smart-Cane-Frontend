@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@iconify/react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 const PERMISSION_CATEGORIES = [
   {
@@ -69,9 +69,15 @@ export const SelectRole = ({
   handleEditGuardianRole,
   isSubmitting
 }) => {
-  const [selectedRoleValue, setSelectedRoleValue] = useState(
-    selectedGuardian?.role || null
-  );
+  const [selectedRoleValue, setSelectedRoleValue] = useState(null);
+
+  const isRoleUnchanged = selectedGuardian?.role === selectedRoleValue;
+
+  useEffect(() => {
+    if (selectedGuardian?.role) {
+      setSelectedRoleValue(selectedGuardian.role);
+    }
+  }, [selectedGuardian]);
 
   const selectedRole = ROLE_OPTIONS.find(
     (role) => role.value === selectedRoleValue
@@ -498,9 +504,9 @@ export const SelectRole = ({
 
               <button
                 onClick={() => handleEditGuardianRole(selectedRoleValue)}
-                disabled={!selectedRoleValue || isSubmitting}
+                disabled={!selectedRoleValue || isSubmitting || isRoleUnchanged}
                 className={`flex justify-center items-center gap-2 flex-1 px-4 py-2.5 bg-[#11285A] hover:bg-[#0d1b3d] text-white font-semibold rounded-lg transition-all hover:shadow-lg ${
-                  !selectedRoleValue || isSubmitting
+                  !selectedRoleValue || isSubmitting || isRoleUnchanged
                     ? "cursor-not-allowed opacity-70"
                     : "cursor-pointer "
                 } text-white`}
