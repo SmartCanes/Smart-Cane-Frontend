@@ -12,6 +12,8 @@ import {
 } from "@/stores/useStore";
 import { logoutApi } from "@/api/authService";
 import DefaultProfile from "./DefaultProfile";
+import { capitalizeWords } from "@/utils/Capitalize";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
 function showLogoutModal(message = "Logging out...") {
   if (document.getElementById("logout-modal-overlay")) return;
@@ -244,7 +246,7 @@ function showLogoutModal(message = "Logging out...") {
 const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
-  const { clearDevices } = useDevicesStore();
+  const { devices, clearDevices } = useDevicesStore();
   const { clearAllGuardians } = useGuardiansStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const [notificationCount, setNotificationCount] = useState(0);
@@ -255,6 +257,27 @@ const Header = () => {
 
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [imageError, setImageError] = useState(false);
+
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [vipOpen, setVipOpen] = useState(false);
+  const vipRef = useRef(null);
+
+  useEffect(() => {
+    if (devices.length && !selectedDevice) {
+      setSelectedDevice(devices[0]);
+    }
+  }, [devices]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (vipRef.current && !vipRef.current.contains(e.target)) {
+        setVipOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => {
     setImageError(false);
@@ -343,8 +366,87 @@ const Header = () => {
           </div>
         </Link>
       </div>
-      {/* Right Section: Online Badge, Notification, User Avatar */}
+
       <div className="flex items-center gap-3 sm:gap-4">
+        <div ref={vipRef} className="relative">
+          <button
+            onClick={() => setVipOpen(!vipOpen)}
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition px-3 py-1.5 rounded-full w-full max-w-[120px] "
+          >
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 shrink-0">
+              {selectedDevice?.vip?.vipImageUrl ? (
+                <img
+                  src={resolveProfileImageSrc(selectedDevice?.vip?.vipImageUrl)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
+                  {selectedDevice?.deviceSerialNumber?.slice(-2)}
+                </div>
+              )}
+            </div>
+
+            <span className="text-sm font-medium text-white truncate max-w-[120px] sm:max-w-[100px]">
+              {(selectedDevice?.vip?.firstName &&
+                selectedDevice?.vip?.lastName &&
+                capitalizeWords(selectedDevice?.vip?.firstName)) ||
+                selectedDevice?.deviceSerialNumber ||
+                "No VIP"}
+            </span>
+
+            <Icon icon="ph:caret-down-bold" className="w-4 h-4 text-white" />
+          </button>
+
+          {/* Dropdown */}
+          {vipOpen && (
+            <div
+              className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl ring-1 ring-black/5 z-50 overflow-hidden min-w-full sm:min-w-[170px]"
+              style={{ minWidth: vipRef.current?.offsetWidth }}
+            >
+              <div className="py-2 max-h-80 overflow-y-auto">
+                {devices.map((device) => (
+                  <button
+                    key={device.deviceId}
+                    onClick={() => {
+                      setSelectedDevice(device);
+                      setVipOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition"
+                  >
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                      {device?.vip?.vipImageUrl ? (
+                        <img
+                          src={resolveProfileImageSrc(device?.vip?.vipImageUrl)}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
+                          {device?.deviceSerialNumber?.slice(-2)}
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-sm font-medium text-gray-800 truncate max-w-[150px] sm:max-w-[120px]">
+                      {(device.vip?.firstName &&
+                        device.vip?.lastName &&
+                        capitalizeWords(
+                          device?.vip?.firstName + " " + device?.vip?.lastName
+                        )) ||
+                        device?.deviceSerialNumber}
+                    </p>
+                  </button>
+                ))}
+
+                {devices.length === 0 && (
+                  <div className="py-8 text-center text-sm text-gray-400">
+                    No VIP available
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Online Status Badge */}
         <div
           className={
@@ -367,6 +469,7 @@ const Header = () => {
             </span>
           )}
         </button>
+
         {/* User Avatar with Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
