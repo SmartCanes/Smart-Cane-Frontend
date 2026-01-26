@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -33,7 +33,6 @@ const SetMapBounds = () => {
 
   useEffect(() => {
     const bounds = L.geoJSON(saintFrancis).getBounds();
-    // map.setMaxBounds(bounds);
     map.fitBounds(bounds);
     map.setMinZoom(15);
     map.setMaxZoom(18);
@@ -42,20 +41,26 @@ const SetMapBounds = () => {
   return null;
 };
 
-const ClickHandler = ({ onClickMap }) => {
-  useMapEvents({
+// Simple click handler component
+function MapClickHandler({ onMapClick }) {
+  const map = useMapEvents({
     click: (e) => {
-      onClickMap({
+      console.log("Map clicked!", e.latlng);
+      const mapContainer = map.getContainer();
+      const rect = mapContainer.getBoundingClientRect();
+
+      onMapClick({
         lat: e.latlng.lat,
         lng: e.latlng.lng,
         screenX: e.containerPoint.x,
-        screenY: e.containerPoint.y
+        screenY: e.containerPoint.y,
+        mapLeft: rect.left,
+        mapTop: rect.top
       });
     }
   });
-
   return null;
-};
+}
 
 function LiveMap({
   guardianPosition,
@@ -72,6 +77,39 @@ function LiveMap({
   const [clickMenuPos, setClickMenuPos] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Debug: log when clickMenuPos changes
+  useEffect(() => {
+    console.log("clickMenuPos changed:", clickMenuPos);
+  }, [clickMenuPos]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        clickMenuPos &&
+        !e.target.closest(".click-menu-container") &&
+        !e.target.closest(".leaflet-container")
+      ) {
+        setClickMenuPos(null);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [clickMenuPos]);
+
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && clickMenuPos) {
+        setClickMenuPos(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [clickMenuPos]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -112,21 +150,30 @@ function LiveMap({
     setSearchResults([]);
   };
 
-  const handleSetDestinationFromMenu = (type, pos) => {
+  const handleSetDestinationFromMenu = useCallback(
+    (type, pos) => {
+      console.log("Setting destination:", type, pos);
+      setClickMenuPos(null);
+      if (onSetDestination) {
+        onSetDestination({ [type]: pos });
+      }
+    },
+    [onSetDestination]
+  );
+
+  const handleMapClick = useCallback((pos) => {
+    console.log("handleMapClick called with:", pos);
+    setClickMenuPos(pos);
+  }, []);
+
+  const handleCloseMenu = useCallback(() => {
+    console.log("Closing menu");
     setClickMenuPos(null);
-
-    if (type === "from") {
-      onSetDestination?.({ from: pos });
-    }
-
-    if (type === "to") {
-      onSetDestination?.({ to: pos });
-    }
-  };
+  }, []);
 
   return (
     <div className="relative w-full h-full">
-      <div className="absolute top-4 left-4 right-4 sm:right-auto z-15 sm:w-[260px]">
+      <div className="absolute top-4 left-4 right-4 sm:right-auto z-[1000] sm:w-[260px]">
         <div className="relative">
           <input
             type="text"
@@ -223,14 +270,6 @@ function LiveMap({
           </Marker>
         )}
 
-        {/* <Marker position={destPos}>
-          <Popup>Ito ang destination: SM Novaliches</Popup>
-        </Marker> */}
-
-        {/* {shouldShowRoute && routePath && (
-          <Polyline positions={routePath} color="blue" weight={5} />
-        )} */}
-
         <SetMapBounds />
 
         <FitBoundsToRoute
@@ -242,43 +281,101 @@ function LiveMap({
           canePosition={canePosition}
         />
 
-        <ClickHandler onClickMap={setClickMenuPos} />
+        {/* Add the MapClickHandler component */}
+        <MapClickHandler onMapClick={handleMapClick} />
       </MapContainer>
-      <ClickMenu
-        clickPos={clickMenuPos}
-        onSetDestination={handleSetDestinationFromMenu}
-      />
+
+      {/* Render ClickMenu if clickMenuPos exists */}
+      {clickMenuPos && (
+        <ClickMenu
+          clickPos={clickMenuPos}
+          onSetDestination={handleSetDestinationFromMenu}
+          onClose={handleCloseMenu}
+        />
+      )}
     </div>
   );
 }
 
 export default LiveMap;
 
-const ClickMenu = ({ clickPos, onSetDestination }) => {
+const ClickMenu = ({ clickPos, canePosition, onSetDestination, onClose }) => {
   if (!clickPos) return null;
 
+  // Absolute screen position
+  const absoluteLeft = (clickPos.mapLeft || 0) + clickPos.screenX;
+  const absoluteTop = (clickPos.mapTop || 0) + clickPos.screenY;
+
+  // Menu dimensions
+  const menuWidth = 220;
+  const menuHeight = 120;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  // Adjust position
+  let left = absoluteLeft;
+  let top = absoluteTop;
+  if (absoluteLeft + menuWidth / 2 > viewportWidth)
+    left = viewportWidth - menuWidth / 2 - 10;
+  if (absoluteLeft - menuWidth / 2 < 0) left = menuWidth / 2 + 10;
+  top =
+    absoluteTop - menuHeight - 10 < 0
+      ? absoluteTop + 20
+      : absoluteTop - menuHeight - 10;
+
   return (
-    <div
-      className="absolute bg-white shadow-lg rounded-xl p-3 w-40 z-[9999]"
-      style={{
-        left: clickPos.screenX,
-        top: clickPos.screenY,
-        transform: "translate(-50%, -100%)"
-      }}
-    >
-      <p className="font-poppins text-sm text-gray-700 mb-2">Select Action</p>
-      <button
-        onClick={() => onSetDestination("from", [clickPos.lat, clickPos.lng])}
-        className="w-full h-fit bg-gray-200 text-gray-700 p-2 text-sm rounded-lg hover:bg-gray-300 transition "
+    <>
+      {window.innerWidth < 640 && (
+        <div className="fixed inset-0 bg-black/20 z-[9998]" onClick={onClose} />
+      )}
+
+      <div
+        className="click-menu-container fixed bg-white rounded-xl shadow-lg p-4 w-[220px] z-[9999] border border-gray-200"
+        style={{
+          left: `${left}px`,
+          top: `${top}px`,
+          transform: "translate(-50%, 0)"
+        }}
       >
-        From Here
-      </button>
-      <button
-        onClick={() => onSetDestination("to", [clickPos.lat, clickPos.lng])}
-        className="w-full h-fit bg-gray-200 text-gray-700 p-2 text-sm rounded-lg hover:bg-gray-300 transition mt-2"
-      >
-        To Here
-      </button>
-    </div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="font-medium text-sm text-gray-800">Choose Action</p>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition p-1 cursor-pointer"
+            aria-label="Close menu"
+          >
+            <Icon icon="mdi:close" className="text-lg" />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {/* Set as Destination */}
+          <button
+            onClick={() => {
+              onSetDestination("to", [clickPos.lat, clickPos.lng]);
+              onClose();
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-600 hover:bg-green-100 p-3 text-sm rounded-lg font-medium transition cursor-pointer"
+          >
+            <Icon icon="mdi:flag" className="text-base" />
+            <span>Set as Destination</span>
+          </button>
+
+          {/* Quick Set from canePosition */}
+          {canePosition && (
+            <button
+              onClick={() => {
+                onSetDestination("from", canePosition);
+                onClose();
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 hover:bg-blue-100 p-3 text-sm rounded-lg font-medium transition"
+            >
+              <Icon icon="mdi:map-marker-path" className="text-base" />
+              <span>Use VIP Location</span>
+            </button>
+          )}
+        </div>
+      </div>
+    </>
   );
 };
