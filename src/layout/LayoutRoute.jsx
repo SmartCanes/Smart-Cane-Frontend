@@ -27,6 +27,25 @@ const ProtectedLayout = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
+
+  useEffect(() => {
+    const main = document.getElementById("app-main");
+
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+      if (main) main.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      if (main) main.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      if (main) main.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
+
   // useEffect(() => {z
   //   const checkAuth = async () => {
   //     try {

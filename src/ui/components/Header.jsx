@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import icaneLogo from "@/assets/images/smartcane-logo.png";
@@ -8,6 +9,7 @@ import {
   useDevicesStore,
   useGuardiansStore,
   useRealtimeStore,
+  useUIStore,
   useUserStore
 } from "@/stores/useStore";
 import { logoutApi } from "@/api/authService";
@@ -246,6 +248,7 @@ function showLogoutModal(message = "Logging out...") {
 const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
+  const { setMobileMenuOpen, isMobileMenuOpen } = useUIStore();
   const { devices, clearDevices } = useDevicesStore();
   const { clearAllGuardians } = useGuardiansStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
@@ -274,7 +277,6 @@ const Header = () => {
         setVipOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
@@ -336,10 +338,8 @@ const Header = () => {
   };
 
   useEffect(() => {
-    // Placeholder: Replace with actual notification fetching logic
     const fetchNotifications = () => {
-      // Simulate fetching notification count
-      setNotificationCount(3); // Example static count
+      setNotificationCount(3);
     };
 
     fetchNotifications();
@@ -349,196 +349,376 @@ const Header = () => {
   const userInitial = user ? user.firstName?.charAt(0).toUpperCase() : "Z";
 
   return (
-    <header
-      className={`w-full max-h-[var(--header-height)] bg-primary-100 flex items-center px-5 sm:px-15 justify-between`}
-    >
-      <div className="h-[var(--header-height)] flex items-center justify-start ">
-        <Link to="/dashboard">
-          <div className="flex items-center gap-3">
+    <>
+      <header
+        className={`w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 xl:px-15 relative z-50`}
+      >
+        {/* Logo Section - Left */}
+        <div className="flex items-center h-full">
+          <Link to="/dashboard" className="flex items-center gap-2 md:gap-3">
             <BlinkingIcon
               src={icaneLogo}
               alt="iCane logo"
-              className="h-12 w-[60px] object-contain"
+              className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-[60px] object-contain"
             />
-            <span className="hidden sm:flex text-white text-4xl font-gabriela tracking-wide">
+            <span className="text-white text-2xl sm:text-3xl md:text-4xl font-gabriela tracking-wide hidden sm:inline">
               icane
             </span>
-          </div>
-        </Link>
-      </div>
+          </Link>
+        </div>
 
-      <div className="flex items-center gap-3 sm:gap-4">
-        <div ref={vipRef} className="relative">
-          <button
-            onClick={() => setVipOpen(!vipOpen)}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition px-3 py-1.5 rounded-full w-full max-w-[120px] "
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+        >
+          <motion.div
+            initial={false}
+            animate={{
+              rotate: isMobileMenuOpen ? 90 : 0,
+              scale: isMobileMenuOpen ? 1.1 : 1
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 20
+            }}
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 shrink-0">
-              {selectedDevice?.vip?.vipImageUrl ? (
-                <img
-                  src={resolveProfileImageSrc(selectedDevice?.vip?.vipImageUrl)}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
-                  {selectedDevice?.deviceSerialNumber?.slice(-2)}
-                </div>
-              )}
-            </div>
+            <Icon
+              icon={isMobileMenuOpen ? "ph:x" : "ph:list"}
+              className="w-6 h-6"
+            />
+          </motion.div>
+        </button>
 
-            <span className="text-sm font-medium text-white truncate max-w-[120px] sm:max-w-[100px]">
-              {(selectedDevice?.vip?.firstName &&
-                selectedDevice?.vip?.lastName &&
-                capitalizeWords(selectedDevice?.vip?.firstName)) ||
-                selectedDevice?.deviceSerialNumber ||
-                "No VIP"}
-            </span>
+        {/* Desktop Navigation Section - Center */}
+        <div className="hidden md:flex items-center flex-1 justify-center gap-4 lg:gap-6"></div>
 
-            <Icon icon="ph:caret-down-bold" className="w-4 h-4 text-white" />
-          </button>
-
-          {/* Dropdown */}
-          {vipOpen && (
-            <div
-              className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl ring-1 ring-black/5 z-50 overflow-hidden min-w-full sm:min-w-[170px]"
-              style={{ minWidth: vipRef.current?.offsetWidth }}
+        {/* Desktop Actions - Right */}
+        <div className="hidden md:flex items-center gap-3 lg:gap-4">
+          <div ref={vipRef} className="relative">
+            <button
+              onClick={() => setVipOpen(!vipOpen)}
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition px-3 py-1.5 rounded-full min-w-[140px] lg:min-w-[160px] max-w-[180px]"
             >
-              <div className="py-2 max-h-80 overflow-y-auto">
-                {devices.map((device) => (
-                  <button
-                    key={device.deviceId}
-                    onClick={() => {
-                      setSelectedDevice(device);
-                      setVipOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition"
-                  >
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0">
-                      {device?.vip?.vipImageUrl ? (
-                        <img
-                          src={resolveProfileImageSrc(device?.vip?.vipImageUrl)}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
-                          {device?.deviceSerialNumber?.slice(-2)}
-                        </div>
-                      )}
-                    </div>
-
-                    <p className="text-sm font-medium text-gray-800 truncate max-w-[150px] sm:max-w-[120px]">
-                      {(device.vip?.firstName &&
-                        device.vip?.lastName &&
-                        capitalizeWords(
-                          device?.vip?.firstName + " " + device?.vip?.lastName
-                        )) ||
-                        device?.deviceSerialNumber}
-                    </p>
-                  </button>
-                ))}
-
-                {devices.length === 0 && (
-                  <div className="py-8 text-center text-sm text-gray-400">
-                    No VIP available
+              <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                {selectedDevice?.vip?.vipImageUrl ? (
+                  <img
+                    src={resolveProfileImageSrc(
+                      selectedDevice?.vip?.vipImageUrl
+                    )}
+                    className="w-full h-full object-cover"
+                    alt="VIP"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
+                    {selectedDevice?.deviceSerialNumber?.slice(-2)}
                   </div>
                 )}
               </div>
-            </div>
-          )}
-        </div>
 
-        {/* Online Status Badge */}
-        <div
-          className={
-            "flex items-center gap-1.5 text-white px-3 py-1 rounded-full font-poppins text-xs font-medium " +
-            (connectionStatus ? "bg-[#55B938]" : "bg-gray-500")
-          }
-        >
-          <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-          {connectionStatus ? "Online" : "Offline"}
-        </div>
-        <button
-          onClick={handleNotificationClick}
-          className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors duration-200"
-          aria-label="Notifications"
-        >
-          <Icon icon="ph:bell" className="w-6 h-6" />
-          {notificationCount > 0 && (
-            <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100">
-              {notificationCount > 9 ? "9+" : notificationCount}
-            </span>
-          )}
-        </button>
+              <span className="text-sm font-medium text-white truncate flex-1 text-left">
+                {selectedDevice?.vip?.firstName
+                  ? capitalizeWords(selectedDevice.vip.firstName)
+                  : selectedDevice?.deviceSerialNumber || "No VIP"}
+              </span>
 
-        {/* User Avatar with Dropdown */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center transition-colors duration-200 cursor-pointer"
-            aria-label="User menu"
-          >
-            {showImage ? (
-              <img
-                loading="lazy"
-                src={profileImageUrl}
-                alt="Profile"
-                className="w-full h-full object-cover"
-                onError={() => setImageError(true)}
+              <Icon
+                icon="ph:caret-down-bold"
+                className="w-4 h-4 text-white shrink-0"
               />
-            ) : (
-              <DefaultProfile userInitial={userInitial} />
-              //   <div
-              //     className="w-full h-full bg-white hover:bg-gray-100 text-primary-100
-              //  flex items-center justify-center font-poppins font-semibold
-              //  text-sm sm:text-base"
-              //   >
-              //     {userInitial}
-              //   </div>
+            </button>
+
+            {/* VIP Dropdown */}
+            {vipOpen && (
+              <div
+                className="absolute left-1/2 -translate-x-1/2 top-12 bg-white rounded-2xl shadow-xl ring-1 ring-black/5 z-50 overflow-hidden min-w-full max-h-[60vh] flex flex-col"
+                style={{ minWidth: vipRef.current?.offsetWidth }}
+              >
+                <div className="py-2 max-h-80 overflow-y-auto">
+                  {devices.map((device) => (
+                    <button
+                      key={device.deviceId}
+                      onClick={() => {
+                        setSelectedDevice(device);
+                        setVipOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition"
+                    >
+                      <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                        {device?.vip?.vipImageUrl ? (
+                          <img
+                            src={resolveProfileImageSrc(
+                              device?.vip?.vipImageUrl
+                            )}
+                            className="w-full h-full object-cover"
+                            alt="VIP"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
+                            {device?.deviceSerialNumber?.slice(-2)}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-gray-800 truncate">
+                        {device.vip?.firstName && device.vip?.lastName
+                          ? capitalizeWords(
+                              device.vip.firstName + " " + device.vip.lastName
+                            )
+                          : device?.deviceSerialNumber}
+                      </p>
+                    </button>
+                  ))}
+                  {devices.length === 0 && (
+                    <div className="py-8 text-center text-sm text-gray-400">
+                      No VIP available
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <div
+            className={`flex items-center gap-1.5 text-white px-3 py-1.5 rounded-full font-poppins text-xs font-medium whitespace-nowrap ${
+              connectionStatus ? "bg-[#55B938]" : "bg-gray-500"
+            }`}
+          >
+            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+            <span className="hidden lg:inline">
+              {connectionStatus ? "Connected" : "Disconnected"}
+            </span>
+            <span className="lg:hidden">
+              {connectionStatus ? "Connected" : "Disconnected"}
+            </span>
+          </div>
+          {/* Notifications */}
+          <button
+            onClick={handleNotificationClick}
+            className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+            aria-label="Notifications"
+          >
+            <Icon icon="ph:bell" className="w-6 h-6" />
+            {notificationCount > 0 && (
+              <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100">
+                {notificationCount > 9 ? "9+" : notificationCount}
+              </span>
             )}
           </button>
 
-          {/* Dropdown Menu */}
-          {isDropdownOpen && (
-            <div className="absolute right-0 top-14 w-56 animate-[slideDown_0.2s_ease-out] z-[100]">
-              {/* Dropdown content */}
-              <div className="relative bg-white rounded-2xl shadow-lg">
-                {/* Arrow pointer - triangle pointing up to profile icon */}
-                <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white"></div>
+          {/* Profile Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-9 h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden flex items-center justify-center transition-colors hover:ring-2 hover:ring-white/30 cursor-pointer"
+              aria-label="User menu"
+            >
+              {showImage ? (
+                <img
+                  loading="lazy"
+                  src={profileImageUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <DefaultProfile userInitial={userInitial} />
+              )}
+            </button>
 
-                {/* Ito 'yung bagong container na nagse-center ng lahat */}
-                <div className="py-2 flex flex-col w-full">
+            {isDropdownOpen && (
+              <div className="absolute right-0 top-14 w-56 animate-[slideDown_0.2s_ease-out] z-20">
+                <div className="relative bg-white rounded-2xl shadow-lg">
+                  <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white"></div>
+                  <div className="py-2 flex flex-col w-full">
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate("/profile");
+                      }}
+                      className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
+                    >
+                      <Icon icon="ph:user" className="w-4 h-4" />
+                      Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate("/settings");
+                      }}
+                      className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
+                    >
+                      <Icon icon="ph:gear" className="w-4 h-4" />
+                      Settings
+                    </button>
+                    <button
+                      onClick={handleLogoutClick}
+                      className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-3"
+                    >
+                      <Icon icon="ph:sign-out" className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            <motion.div
+              initial={{ y: -16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -16, opacity: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 24
+              }}
+              className="fixed top-[var(--header-height)] left-0 right-0 bg-primary-100 z-40 md:hidden"
+            >
+              <motion.div
+                initial="hidden"
+                animate="show"
+                exit="hidden"
+                variants={{
+                  hidden: {},
+                  show: {
+                    transition: {
+                      staggerChildren: 0.04
+                    }
+                  }
+                }}
+                className="px-4 py-6 space-y-6 border-t border-white/10"
+              >
+                <div className="mb-6">
+                  <div className="text-white/80 text-sm font-medium mb-2 px-2">
+                    Select Device
+                  </div>
+                  <div className="space-y-2 max-h-[20vh] overflow-y-auto pr-1">
+                    {devices.map((device) => (
+                      <button
+                        key={device.deviceId}
+                        onClick={() => {
+                          setSelectedDevice(device);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                          selectedDevice?.deviceId === device.deviceId
+                            ? "bg-white/20"
+                            : "bg-white/10 hover:bg-white/15"
+                        }`}
+                      >
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                          {device?.vip?.vipImageUrl ? (
+                            <img
+                              src={resolveProfileImageSrc(
+                                device?.vip?.vipImageUrl
+                              )}
+                              className="w-full h-full object-cover"
+                              alt="VIP"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-500">
+                              {device?.deviceSerialNumber?.slice(-2)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="text-white font-medium">
+                            {device.vip?.firstName && device.vip?.lastName
+                              ? capitalizeWords(
+                                  device.vip.firstName +
+                                    " " +
+                                    device.vip.lastName
+                                )
+                              : device?.deviceSerialNumber}
+                          </p>
+                          <p className="text-white/60 text-xs">
+                            {device.deviceSerialNumber}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                    {devices.length === 0 && (
+                      <div className="text-center text-white/60 py-4">
+                        No VIP devices
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                  <span className="text-white font-medium">Connection</span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${connectionStatus ? "bg-green-400" : "bg-red-400"}`}
+                    />
+                    <span className="text-white/80 text-sm">
+                      {connectionStatus ? "Connected" : "Disconnected"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
                   <button
                     onClick={() => {
-                      setIsDropdownOpen(false);
+                      setMobileMenuOpen(false);
                       navigate("/profile");
                     }}
-                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 cursor-pointer"
+                    className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                   >
-                    Profile
+                    <Icon icon="ph:user" className="w-5 h-5" />
+                    <span className="font-medium">Profile</span>
                   </button>
                   <button
                     onClick={() => {
-                      setIsDropdownOpen(false);
+                      setMobileMenuOpen(false);
                       navigate("/settings");
                     }}
-                    disabled={isLoggingOut}
-                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 cursor-pointer"
+                    className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                   >
-                    Settings
+                    <Icon icon="ph:gear" className="w-5 h-5" />
+                    <span className="font-medium">Settings</span>
+                  </button>
+                  <button
+                    onClick={handleNotificationClick}
+                    className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors relative"
+                  >
+                    <Icon icon="ph:bell" className="w-5 h-5" />
+                    <span className="font-medium">Notifications</span>
+                    {notificationCount > 0 && (
+                      <span className="absolute right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                        {notificationCount > 9 ? "9+" : notificationCount}
+                      </span>
+                    )}
                   </button>
                   <button
                     onClick={handleLogoutClick}
-                    className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex gap-2 cursor-pointer"
+                    className="w-full flex items-center gap-3 p-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors"
                   >
-                    Logout
+                    <Icon icon="ph:sign-out" className="w-5 h-5" />
+                    <span className="font-medium">Logout</span>
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </header>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

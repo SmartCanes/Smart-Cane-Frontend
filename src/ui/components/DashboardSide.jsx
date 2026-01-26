@@ -1,8 +1,9 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback } from "react";
 import { HoverNavEffect } from "@/wrapper/MotionWrapper";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useUIStore } from "@/stores/useStore";
 
 const MenuButton = memo(({ item, isActive, onNavigate }) => (
   <HoverNavEffect
@@ -49,9 +50,9 @@ const MenuButton = memo(({ item, isActive, onNavigate }) => (
 ));
 
 const DashboardSide = ({ className = "" }) => {
+  const { setMobileMenuOpen } = useUIStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // 1. DESKTOP MENU ITEMS
   // Ito ang ORIGINAL na listahan. Hindi natin ito ginalaw para hindi magbago ang Desktop View.
@@ -130,8 +131,8 @@ const DashboardSide = ({ className = "" }) => {
 
   const handleNavigation = useCallback(
     (path) => {
+      setMobileMenuOpen(false);
       navigate(path);
-      setIsMobileMenuOpen(false);
     },
     [navigate]
   );

@@ -131,7 +131,10 @@ export const useUIStore = create(
 
       error: null,
       setError: (msg) => set({ error: msg }),
-      clearError: () => set({ error: null })
+      clearError: () => set({ error: null }),
+
+      isMobileMenuOpen: false,
+      setMobileMenuOpen: (open) => set({ isMobileMenuOpen: open })
     }),
     {
       name: "ui-storage",

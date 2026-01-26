@@ -126,7 +126,7 @@ function LiveMap({
 
   return (
     <div className="relative w-full h-full">
-      <div className="absolute top-4 left-4 right-4 sm:right-auto z-20 sm:w-[260px]">
+      <div className="absolute top-4 left-4 right-4 sm:right-auto z-15 sm:w-[260px]">
         <div className="relative">
           <input
             type="text"
