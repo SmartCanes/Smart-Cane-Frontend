@@ -5,7 +5,6 @@ import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import { validateField } from "@/utils/ValidationHelper";
 import TextField from "@/ui/components/TextField";
 import Toast from "./Toast";
-import SelectField from "./SelectField";
 
 const VIP_FIELDS = [
   "firstName",
