@@ -17,7 +17,26 @@ import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
 import { wsApi } from "@/api/ws-api";
 import "leaflet-polylinedecorator";
+import { useUserStore } from "@/stores/useStore";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
+const circleAvatarIcon = (imgUrl, size = 40) => {
+  return L.divIcon({
+    html: `<div style="
+      width: ${size}px;
+      height: ${size}px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid white;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    ">
+      <img src="${resolveProfileImageSrc(imgUrl)}" style="width: 100%; height: 100%; object-fit: cover;" />
+    </div>`,
+    className: "",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2]
+  });
+};
 const FitBoundsToRoute = ({ userPos, destPos }) => {
   const map = useMap();
 
@@ -62,6 +81,7 @@ function LiveMap({
   activeTab,
   onSetDestination
 }) {
+  const { user } = useUserStore();
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -260,33 +280,43 @@ function LiveMap({
             fillOpacity: 0.15
           }}
         />
+
         {guardianPosition && (
-          <Marker position={guardianPosition}>
+          <Marker
+            position={guardianPosition}
+            icon={circleAvatarIcon(user.guardianImageUrl)}
+          >
             <Popup>Your current location.</Popup>
           </Marker>
         )}
+
         {canePosition && (
           <Marker position={canePosition}>
             <Popup>VIP current location.</Popup>
           </Marker>
         )}
+
         <SetMapBounds />
         <FitBoundsToRoute userPos={guardianPosition} destPos={destinationPos} />
+
         <CustomZoomControl
           guardianPosition={guardianPosition}
           canePosition={canePosition}
         />
+
         {destinationPos && (
           <Marker position={destinationPos}>
             <Popup>Destination</Popup>
           </Marker>
         )}
+
         <MapSelectHandler
           onSelect={(pos) => {
             setPreviewPos(pos);
           }}
           menuOpen={!!previewPos}
         />
+
         {previewPos && (
           <Marker
             position={previewPos}
@@ -344,22 +374,6 @@ export default LiveMap;
 
 const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
   const map = useMap();
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    if (!menuRef.current || !map) return;
-
-    const mapContainer = map.getContainer();
-    mapContainer.style.pointerEvents = "none";
-
-    if (menuRef.current) {
-      menuRef.current.style.pointerEvents = "auto";
-    }
-
-    return () => {
-      mapContainer.style.pointerEvents = "auto";
-    };
-  }, [map]);
 
   if (!previewPos) return null;
 
@@ -409,7 +423,6 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
         top,
         transform
       }}
-      onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-3">
         <p className="font-medium text-sm text-gray-800">Choose Action</p>
@@ -422,10 +435,7 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
       </div>
 
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onSetDestination(previewPos);
-        }}
+        onClick={onSetDestination}
         className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-600 hover:bg-green-100 p-3 text-sm rounded-lg font-medium transition"
       >
         <Icon icon="mdi:flag" className="text-base" />
