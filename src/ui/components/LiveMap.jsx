@@ -62,6 +62,37 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
+function FloatingCursor({ isSelecting, isMenuOpen }) {
+  const [pos, setPos] = useState({ x: -100, y: -100 });
+
+  useEffect(() => {
+    if (!isSelecting) {
+      setPos({ x: -100, y: -100 }); // hide offscreen
+      return;
+    }
+
+    const handleMouseMove = (e) => {
+      setPos({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [isSelecting]);
+
+  return isSelecting ? (
+    <Icon
+      icon="mdi:map-marker"
+      className="text-red-500 text-5xl pointer-events-none fixed"
+      style={{
+        left: pos.x,
+        top: pos.y,
+        transform: "translate(-50%, -100%)",
+        zIndex: isMenuOpen ? 9997 : 9999
+      }}
+    />
+  ) : null;
+}
+
 function LiveMap({
   guardianPosition,
   canePosition,
@@ -77,8 +108,12 @@ function LiveMap({
   const [clickMenuPos, setClickMenuPos] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [previewPos, setPreviewPos] = useState(null);
+  const [destinationPos, setDestinationPos] = useState(null);
 
-  // Debug: log when clickMenuPos changes
+  const isMobile = window.innerWidth < 640;
+
   useEffect(() => {
     console.log("clickMenuPos changed:", clickMenuPos);
   }, [clickMenuPos]);
@@ -99,7 +134,6 @@ function LiveMap({
     return () => document.removeEventListener("click", handleClickOutside);
   }, [clickMenuPos]);
 
-  // Close on escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && clickMenuPos) {
@@ -154,21 +188,47 @@ function LiveMap({
     (type, pos) => {
       console.log("Setting destination:", type, pos);
       setClickMenuPos(null);
+
+      if (type === "to") {
+        setDestinationPos(pos);
+      }
+
       if (onSetDestination) {
         onSetDestination({ [type]: pos });
       }
+
+      setPreviewPos(null); // remove preview
     },
     [onSetDestination]
   );
 
-  const handleMapClick = useCallback((pos) => {
-    console.log("handleMapClick called with:", pos);
-    setClickMenuPos(pos);
-  }, []);
+  const handleMapClick = useCallback(
+    (pos) => {
+      // Always show the preview marker at click location
+      setPreviewPos([pos.lat, pos.lng]);
+
+      if (isMobile) {
+        // mobile: open menu immediately
+        setClickMenuPos(pos);
+        return;
+      }
+
+      // desktop: first click starts selection mode
+      if (!isSelecting) {
+        setIsSelecting(true);
+        return;
+      }
+
+      // second click: show menu
+      setClickMenuPos(pos);
+      setIsSelecting(false);
+    },
+    [isSelecting, isMobile]
+  );
 
   const handleCloseMenu = useCallback(() => {
-    console.log("Closing menu");
     setClickMenuPos(null);
+    setIsSelecting(false); // disable cursor pin
   }, []);
 
   return (
@@ -280,6 +340,11 @@ function LiveMap({
           guardianPosition={guardianPosition}
           canePosition={canePosition}
         />
+        {destinationPos && (
+          <Marker position={destinationPos}>
+            <Popup>Destination</Popup>
+          </Marker>
+        )}
 
         {/* Add the MapClickHandler component */}
         <MapClickHandler onMapClick={handleMapClick} />
@@ -293,6 +358,8 @@ function LiveMap({
           onClose={handleCloseMenu}
         />
       )}
+
+      <FloatingCursor isMenuOpen={!!clickMenuPos} isSelecting={isSelecting} />
     </div>
   );
 }
