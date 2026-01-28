@@ -811,163 +811,153 @@ const Header = () => {
             )}
           </div>
         </div>
-      </header>
-
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50 z-40 md:hidden"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-
-            <motion.div
-              initial={{ y: -16, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -16, opacity: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 260,
-                damping: 24
-              }}
-              className="fixed top-[var(--header-height)] left-0 right-0 bg-primary-100 z-40 md:hidden"
-            >
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
               <motion.div
-                initial="hidden"
-                animate="show"
-                exit="hidden"
-                variants={{
-                  hidden: {},
-                  show: {
-                    transition: {
-                      staggerChildren: 0.04
-                    }
-                  }
+                initial={{ y: -5, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -5, opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 320,
+                  damping: 24
                 }}
-                className="px-4 py-6 space-y-6 border-t border-white/10"
+                className="absolute top-full left-0 right-0 bg-primary-100 z-40 md:hidden"
               >
-                <div className="mb-6">
-                  <div className="text-white/80 text-sm font-medium mb-2 px-2">
-                    Select Device
-                  </div>
-                  <div className="space-y-2 max-h-[20vh] overflow-y-auto pr-1">
-                    {devices.map((device) => (
-                      <button
-                        key={device.deviceId}
-                        onClick={() => {
-                          setSelectedDevice(device);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
-                          selectedDevice?.deviceId === device.deviceId
-                            ? "bg-white/20"
-                            : "bg-white/10 hover:bg-white/15"
-                        }`}
-                      >
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
-                          {device?.vip?.vipImageUrl ? (
-                            <img
-                              src={resolveProfileImageSrc(
-                                device?.vip?.vipImageUrl
-                              )}
-                              className="w-full h-full object-cover"
-                              alt="VIP"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-500">
-                              {device?.deviceSerialNumber?.slice(-2)}
-                            </div>
-                          )}
+                <motion.div
+                  initial="hidden"
+                  animate="show"
+                  exit="hidden"
+                  variants={{
+                    hidden: {},
+                    show: {
+                      transition: {
+                        staggerChildren: 0.04
+                      }
+                    }
+                  }}
+                  className="px-4 py-6 space-y-6 border-t border-white/10"
+                >
+                  <div className="mb-6">
+                    <div className="text-white/80 text-sm font-medium mb-2 px-2">
+                      Select Device
+                    </div>
+                    <div className="space-y-2 max-h-[20vh] overflow-y-auto pr-1">
+                      {devices.map((device) => (
+                        <button
+                          key={device.deviceId}
+                          onClick={() => {
+                            setSelectedDevice(device);
+                            setMobileMenuOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                            selectedDevice?.deviceId === device.deviceId
+                              ? "bg-white/20"
+                              : "bg-white/10 hover:bg-white/15"
+                          }`}
+                        >
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                            {device?.vip?.vipImageUrl ? (
+                              <img
+                                src={resolveProfileImageSrc(
+                                  device?.vip?.vipImageUrl
+                                )}
+                                className="w-full h-full object-cover"
+                                alt="VIP"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-500">
+                                {device?.deviceSerialNumber?.slice(-2)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 text-left">
+                            <p className="text-white font-medium">
+                              {device.vip?.firstName && device.vip?.lastName
+                                ? capitalizeWords(
+                                    device.vip.firstName +
+                                      " " +
+                                      device.vip.lastName
+                                  )
+                                : device?.deviceSerialNumber}
+                            </p>
+                            <p className="text-white/60 text-xs">
+                              {device.deviceSerialNumber}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                      {devices.length === 0 && (
+                        <div className="text-center text-white/60 py-4">
+                          No VIP devices
                         </div>
-                        <div className="flex-1 text-left">
-                          <p className="text-white font-medium">
-                            {device.vip?.firstName && device.vip?.lastName
-                              ? capitalizeWords(
-                                  device.vip.firstName +
-                                    " " +
-                                    device.vip.lastName
-                                )
-                              : device?.deviceSerialNumber}
-                          </p>
-                          <p className="text-white/60 text-xs">
-                            {device.deviceSerialNumber}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                    {devices.length === 0 && (
-                      <div className="text-center text-white/60 py-4">
-                        No VIP devices
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                  <span className="text-white font-medium">Connection</span>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${connectionStatus ? "bg-green-400" : "bg-red-400"}`}
-                    />
-                    <span className="text-white/80 text-sm">
-                      {connectionStatus ? "Connected" : "Disconnected"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      navigate("/profile");
-                    }}
-                    className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
-                  >
-                    <Icon icon="ph:user" className="w-5 h-5" />
-                    <span className="font-medium">Profile</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      navigate("/settings");
-                    }}
-                    className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
-                  >
-                    <Icon icon="ph:gear" className="w-5 h-5" />
-                    <span className="font-medium">Settings</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleNavigateToNotifications();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors relative"
-                  >
-                    <Icon icon="ph:bell" className="w-5 h-5" />
-                    <span className="font-medium">Notifications</span>
-                    {notificationCount > 0 && (
-                      <span className="absolute right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                        {notificationCount > 9 ? "9+" : notificationCount}
+                  <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                    <span className="text-white font-medium">Connection</span>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${connectionStatus ? "bg-green-400" : "bg-red-400"}`}
+                      />
+                      <span className="text-white/80 text-sm">
+                        {connectionStatus ? "Connected" : "Disconnected"}
                       </span>
-                    )}
-                  </button>
-                  <button
-                    onClick={handleLogoutClick}
-                    className="w-full flex items-center gap-3 p-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors"
-                  >
-                    <Icon icon="ph:sign-out" className="w-5 h-5" />
-                    <span className="font-medium">Logout</span>
-                  </button>
-                </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        navigate("/profile");
+                      }}
+                      className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
+                    >
+                      <Icon icon="ph:user" className="w-5 h-5" />
+                      <span className="font-medium">Profile</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        navigate("/settings");
+                      }}
+                      className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
+                    >
+                      <Icon icon="ph:gear" className="w-5 h-5" />
+                      <span className="font-medium">Settings</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleNavigateToNotifications();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors relative"
+                    >
+                      <Icon icon="ph:bell" className="w-5 h-5" />
+                      <span className="font-medium">Notifications</span>
+                      {notificationCount > 0 && (
+                        <span className="absolute right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                          {notificationCount > 9 ? "9+" : notificationCount}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleLogoutClick}
+                      className="w-full flex items-center gap-3 p-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors"
+                    >
+                      <Icon icon="ph:sign-out" className="w-5 h-5" />
+                      <span className="font-medium">Logout</span>
+                    </button>
+                  </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+            </>
+          )}
+        </AnimatePresence>
+      </header>
     </>
   );
 };

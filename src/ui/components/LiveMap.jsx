@@ -198,8 +198,8 @@ function LiveMap({
   }, [previewPos]);
 
   return (
-    <div className="relative w-full h-full">
-      <div className="absolute top-4 left-4 right-4 sm:right-auto z-[998] sm:w-[260px]">
+    <div className="relative w-full h-full z-0">
+      <div className="absolute top-4 left-4 right-4 sm:right-auto z-30 sm:w-[260px]">
         <div className="relative">
           <input
             type="text"
@@ -255,17 +255,17 @@ function LiveMap({
           </div>
         )}
       </div>
-      {isLoading && (
+      {/* {isLoading && (
         <div className="absolute inset-0 z-[15] flex items-center justify-center bg-gray-50/90 backdrop-blur-[1px] rounded-2xl">
           <Loader />
         </div>
-      )}
+      )} */}
       <MapContainer
         center={guardianPosition}
         zoom={16}
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
-        className="z-10"
+        className="z-0"
         ref={mapRef}
       >
         <TileLayer
