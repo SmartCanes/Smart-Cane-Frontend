@@ -413,7 +413,8 @@ const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
   const { setMobileMenuOpen, isMobileMenuOpen } = useUIStore();
-  const { devices, clearDevices } = useDevicesStore();
+  const { devices, clearDevices, selectedDevice, setSelectedDevice } =
+    useDevicesStore();
   const { clearAllGuardians } = useGuardiansStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const [notificationCount, setNotificationCount] = useState(0);
@@ -425,7 +426,6 @@ const Header = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [imageError, setImageError] = useState(false);
 
-  const [selectedDevice, setSelectedDevice] = useState(null);
   const [vipOpen, setVipOpen] = useState(false);
   const vipRef = useRef(null);
 

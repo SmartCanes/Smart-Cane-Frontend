@@ -147,6 +147,7 @@ export const useDevicesStore = create(
   persist(
     (set, get) => ({
       devices: [],
+      selectedDevice: null,
       isLoading: false,
       lastFetchedAt: null,
       hasFetchedOnce: false,
@@ -201,13 +202,16 @@ export const useDevicesStore = create(
         })),
 
       clearDevices: () =>
-        set({ devices: [], lastFetchedAt: null, hasFetchedOnce: false })
+        set({ devices: [], lastFetchedAt: null, hasFetchedOnce: false }),
+
+      setSelectedDevice: (device) => set({ selectedDevice: device })
     }),
     {
       name: "devices-storage",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         devices: state.devices,
+        selectedDevice: state.selectedDevice,
         lastFetchedAt: state.lastFetchedAt,
         hasFetchedOnce: state.hasFetchedOnce
       })
