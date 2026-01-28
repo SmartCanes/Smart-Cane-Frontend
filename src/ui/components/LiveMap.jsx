@@ -97,7 +97,8 @@ function LiveMap({
     if (!guardianPosition || !destinationPos) return;
 
     wsApi.emit("requestRoute", {
-      from: [14.693, 121.02],
+      // from: [14.693, 121.02],
+      from: guardianPosition, // Cane Position
       to: destinationPos
     });
 
@@ -423,6 +424,7 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
         top,
         transform
       }}
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-3">
         <p className="font-medium text-sm text-gray-800">Choose Action</p>
@@ -435,7 +437,10 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
       </div>
 
       <button
-        onClick={onSetDestination}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSetDestination();
+        }}
         className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-600 hover:bg-green-100 p-3 text-sm rounded-lg font-medium transition"
       >
         <Icon icon="mdi:flag" className="text-base" />
