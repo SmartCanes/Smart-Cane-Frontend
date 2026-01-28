@@ -41,56 +41,14 @@ const SetMapBounds = () => {
   return null;
 };
 
-// Simple click handler component
-function MapClickHandler({ onMapClick }) {
-  const map = useMapEvents({
-    click: (e) => {
-      console.log("Map clicked!", e.latlng);
-      const mapContainer = map.getContainer();
-      const rect = mapContainer.getBoundingClientRect();
-
-      onMapClick({
-        lat: e.latlng.lat,
-        lng: e.latlng.lng,
-        screenX: e.containerPoint.x,
-        screenY: e.containerPoint.y,
-        mapLeft: rect.left,
-        mapTop: rect.top
-      });
+function MapSelectHandler({ onSelect }) {
+  useMapEvents({
+    click(e) {
+      onSelect([e.latlng.lat, e.latlng.lng]);
     }
   });
+
   return null;
-}
-
-function FloatingCursor({ isSelecting, isMenuOpen }) {
-  const [pos, setPos] = useState({ x: -100, y: -100 });
-
-  useEffect(() => {
-    if (!isSelecting) {
-      setPos({ x: -100, y: -100 }); // hide offscreen
-      return;
-    }
-
-    const handleMouseMove = (e) => {
-      setPos({ x: e.clientX, y: e.clientY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [isSelecting]);
-
-  return isSelecting ? (
-    <Icon
-      icon="mdi:map-marker"
-      className="text-red-500 text-5xl pointer-events-none fixed"
-      style={{
-        left: pos.x,
-        top: pos.y,
-        transform: "translate(-50%, -100%)",
-        zIndex: isMenuOpen ? 9997 : 9999
-      }}
-    />
-  ) : null;
 }
 
 function LiveMap({
@@ -108,42 +66,8 @@ function LiveMap({
   const [clickMenuPos, setClickMenuPos] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSelecting, setIsSelecting] = useState(false);
   const [previewPos, setPreviewPos] = useState(null);
   const [destinationPos, setDestinationPos] = useState(null);
-
-  const isMobile = window.innerWidth < 640;
-
-  useEffect(() => {
-    console.log("clickMenuPos changed:", clickMenuPos);
-  }, [clickMenuPos]);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        clickMenuPos &&
-        !e.target.closest(".click-menu-container") &&
-        !e.target.closest(".leaflet-container")
-      ) {
-        setClickMenuPos(null);
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [clickMenuPos]);
-
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && clickMenuPos) {
-        setClickMenuPos(null);
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [clickMenuPos]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -184,56 +108,27 @@ function LiveMap({
     setSearchResults([]);
   };
 
-  const handleSetDestinationFromMenu = useCallback(
-    (type, pos) => {
-      console.log("Setting destination:", type, pos);
-      setClickMenuPos(null);
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const map = mapRef.current;
 
-      if (type === "to") {
-        setDestinationPos(pos);
+    const handleMapMove = () => {
+      if (previewPos) {
+        setPreviewPos(null);
+        setClickMenuPos(null);
       }
+    };
 
-      if (onSetDestination) {
-        onSetDestination({ [type]: pos });
-      }
+    map.on("movestart", handleMapMove);
 
-      setPreviewPos(null); // remove preview
-    },
-    [onSetDestination]
-  );
-
-  const handleMapClick = useCallback(
-    (pos) => {
-      // Always show the preview marker at click location
-      setPreviewPos([pos.lat, pos.lng]);
-
-      if (isMobile) {
-        // mobile: open menu immediately
-        setClickMenuPos(pos);
-        return;
-      }
-
-      // desktop: first click starts selection mode
-      if (!isSelecting) {
-        setIsSelecting(true);
-        return;
-      }
-
-      // second click: show menu
-      setClickMenuPos(pos);
-      setIsSelecting(false);
-    },
-    [isSelecting, isMobile]
-  );
-
-  const handleCloseMenu = useCallback(() => {
-    setClickMenuPos(null);
-    setIsSelecting(false); // disable cursor pin
-  }, []);
+    return () => {
+      map.off("movestart", handleMapMove);
+    };
+  }, [previewPos]);
 
   return (
     <div className="relative w-full h-full">
-      <div className="absolute top-4 left-4 right-4 sm:right-auto z-[1000] sm:w-[260px]">
+      <div className="absolute top-4 left-4 right-4 sm:right-auto z-[998] sm:w-[260px]">
         <div className="relative">
           <input
             type="text"
@@ -289,13 +184,11 @@ function LiveMap({
           </div>
         )}
       </div>
-
       {isLoading && (
         <div className="absolute inset-0 z-[15] flex items-center justify-center bg-gray-50/90 backdrop-blur-[1px] rounded-2xl">
           <Loader />
         </div>
       )}
-
       <MapContainer
         center={guardianPosition}
         zoom={16}
@@ -332,10 +225,8 @@ function LiveMap({
 
         <SetMapBounds />
 
-        <FitBoundsToRoute
-          guardianPosition={guardianPosition}
-          destPos={destPos}
-        />
+        <FitBoundsToRoute userPos={guardianPosition} destPos={destPos} />
+
         <CustomZoomControl
           guardianPosition={guardianPosition}
           canePosition={canePosition}
@@ -346,103 +237,117 @@ function LiveMap({
           </Marker>
         )}
 
-        {/* Add the MapClickHandler component */}
-        <MapClickHandler onMapClick={handleMapClick} />
-      </MapContainer>
+        <MapSelectHandler
+          onSelect={(pos) => {
+            setPreviewPos(pos);
 
-      {/* Render ClickMenu if clickMenuPos exists */}
-      {clickMenuPos && (
-        <ClickMenu
-          clickPos={clickMenuPos}
-          onSetDestination={handleSetDestinationFromMenu}
-          onClose={handleCloseMenu}
+            setClickMenuPos({
+              lat: pos[0],
+              lng: pos[1]
+            });
+          }}
         />
-      )}
 
-      <FloatingCursor isMenuOpen={!!clickMenuPos} isSelecting={isSelecting} />
+        {previewPos && (
+          <Marker
+            position={previewPos}
+            draggable
+            eventHandlers={{
+              dragend: (e) => {
+                const p = e.target.getLatLng();
+                setPreviewPos([p.lat, p.lng]);
+              }
+            }}
+          >
+            <Popup>Adjust location</Popup>
+          </Marker>
+        )}
+
+        {previewPos && (
+          <ClickMenu
+            previewPos={previewPos}
+            onSetDestination={() => {
+              onSetDestination({ to: previewPos });
+              setPreviewPos(null);
+            }}
+            onClose={() => setPreviewPos(null)}
+          />
+        )}
+      </MapContainer>
     </div>
   );
 }
 
 export default LiveMap;
 
-const ClickMenu = ({ clickPos, canePosition, onSetDestination, onClose }) => {
-  if (!clickPos) return null;
+const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
+  const map = useMap();
 
-  // Absolute screen position
-  const absoluteLeft = (clickPos.mapLeft || 0) + clickPos.screenX;
-  const absoluteTop = (clickPos.mapTop || 0) + clickPos.screenY;
+  if (!previewPos) return null;
 
-  // Menu dimensions
+  const point = map.latLngToContainerPoint(previewPos);
+
   const menuWidth = 220;
   const menuHeight = 120;
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
+  const padding = 10;
+  const OFFSET = 75;
 
-  // Adjust position
-  let left = absoluteLeft;
-  let top = absoluteTop;
-  if (absoluteLeft + menuWidth / 2 > viewportWidth)
-    left = viewportWidth - menuWidth / 2 - 10;
-  if (absoluteLeft - menuWidth / 2 < 0) left = menuWidth / 2 + 10;
-  top =
-    absoluteTop - menuHeight - 10 < 0
-      ? absoluteTop + 20
-      : absoluteTop - menuHeight - 10;
+  const mapSize = map.getSize();
+
+  const MIN_TOP = 72;
+
+  let left = point.x;
+  let top = point.y - menuHeight - OFFSET;
+  let transform = "translate(-50%, 0)";
+
+  if (top < MIN_TOP) {
+    top = point.y + 12;
+  }
+
+  // Clamp horizontally
+  if (left - menuWidth / 2 < padding) left = menuWidth / 2 + padding;
+
+  if (left + menuWidth / 2 > mapSize.x - padding)
+    left = mapSize.x - menuWidth / 2 - padding;
+
+  // If still overlapping bottom → RIGHT
+  if (top + menuHeight > mapSize.y - padding) {
+    left = point.x + 12;
+    top = point.y - menuHeight / 2;
+    transform = "translate(0, -50%)";
+
+    // If right side overflows → LEFT
+    if (left + menuWidth > mapSize.x - padding) {
+      left = point.x - menuWidth - 12;
+    }
+  }
 
   return (
-    <>
-      {window.innerWidth < 640 && (
-        <div className="fixed inset-0 bg-black/20 z-[9998]" onClick={onClose} />
-      )}
-
-      <div
-        className="click-menu-container fixed bg-white rounded-xl shadow-lg p-4 w-[220px] z-[9999] border border-gray-200"
-        style={{
-          left: `${left}px`,
-          top: `${top}px`,
-          transform: "translate(-50%, 0)"
-        }}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <p className="font-medium text-sm text-gray-800">Choose Action</p>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition p-1 cursor-pointer"
-            aria-label="Close menu"
-          >
-            <Icon icon="mdi:close" className="text-lg" />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          {/* Set as Destination */}
-          <button
-            onClick={() => {
-              onSetDestination("to", [clickPos.lat, clickPos.lng]);
-              onClose();
-            }}
-            className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-600 hover:bg-green-100 p-3 text-sm rounded-lg font-medium transition cursor-pointer"
-          >
-            <Icon icon="mdi:flag" className="text-base" />
-            <span>Set as Destination</span>
-          </button>
-
-          {/* Quick Set from canePosition */}
-          {canePosition && (
-            <button
-              onClick={() => {
-                onSetDestination("from", canePosition);
-                onClose();
-              }}
-              className="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 hover:bg-blue-100 p-3 text-sm rounded-lg font-medium transition"
-            >
-              <Icon icon="mdi:map-marker-path" className="text-base" />
-              <span>Use VIP Location</span>
-            </button>
-          )}
-        </div>
+    <div
+      className="click-menu-container absolute bg-white rounded-xl shadow-lg p-4 w-[220px] z-[999] border border-gray-200"
+      style={{
+        left,
+        top,
+        transform
+      }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <p className="font-medium text-sm text-gray-800">Choose Action</p>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 transition p-1"
+        >
+          <Icon icon="mdi:close" className="text-lg" />
+        </button>
       </div>
-    </>
+
+      <button
+        onClick={onSetDestination}
+        className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-600 hover:bg-green-100 p-3 text-sm rounded-lg font-medium transition"
+      >
+        <Icon icon="mdi:flag" className="text-base" />
+        <span>Set as Destination</span>
+      </button>
+    </div>
   );
 };
