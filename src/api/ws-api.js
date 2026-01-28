@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const WS_URL =
-  import.meta.env.VITE_MIDDLEWARE_WS_URL || "https://localhost:4000";
+  import.meta.env.VITE_MIDDLEWARE_WS_URL || "https://localhost:3000";
 
 class SocketAPI {
   constructor() {

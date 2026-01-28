@@ -22,12 +22,12 @@ const DashboardLayout = () => {
   const [showNav, setShowNav] = useState(true);
   const lastScrollY = useRef(0);
 
-  // useEffect(() => {
-  //   connectWs();
-  //   return () => {
-  //     disconnectWs();
-  //   };
-  // }, []);
+  useEffect(() => {
+    connectWs();
+    return () => {
+      disconnectWs();
+    };
+  }, []);
 
   useEffect(() => {
     const hydrateUser = async () => {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -6,7 +6,8 @@ import {
   Popup,
   useMap,
   GeoJSON,
-  useMapEvents
+  useMapEvents,
+  Polyline
 } from "react-leaflet";
 import { Icon } from "@iconify/react";
 import L from "leaflet";
@@ -14,6 +15,7 @@ import CustomZoomControl from "./CustomZoomControl";
 import Loader from "./Loading";
 import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
+import { wsApi } from "@/api/ws-api";
 
 const FitBoundsToRoute = ({ userPos, destPos }) => {
   const map = useMap();
@@ -53,8 +55,7 @@ function MapSelectHandler({ onSelect }) {
 
 function LiveMap({
   guardianPosition,
-  canePosition,
-  destPos,
+  // canePosition,
   routePath,
   activeTab,
   onSetDestination
@@ -67,7 +68,56 @@ function LiveMap({
   const [markerPos, setMarkerPos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [previewPos, setPreviewPos] = useState(null);
+  const [canePosition, setCanePosition] = useState(null);
   const [destinationPos, setDestinationPos] = useState(null);
+  const [route, setRoute] = useState([]);
+
+  useEffect(() => {
+    if (!guardianPosition || !destinationPos) return;
+
+    wsApi.emit("requestRoute", {
+      from: [14.693, 121.02],
+      to: destinationPos
+    });
+
+    const handleRoute = (data) => {
+      const coords = data.route;
+
+      if (!Array.isArray(coords) || coords.length < 2) return;
+
+      const leafletCoords = coords.map(([lon, lat]) => [lat, lon]);
+
+      setRoute(leafletCoords);
+    };
+
+    const handleError = (err) => {
+      console.error("Route error:", err.message);
+      setRoute([]);
+    };
+
+    wsApi.on("routeResponse", handleRoute);
+    wsApi.on("routeError", handleError);
+
+    wsApi.on("location", (data) => {
+      if (data?.lat != null && data?.lng != null) {
+        const newPos = [data.lat, data.lng];
+        setCanePosition(newPos);
+
+        if (destinationPos) {
+          wsApi.emit("requestRoute", {
+            from: newPos,
+            to: destinationPos
+          });
+        }
+      }
+    });
+
+    return () => {
+      wsApi.off("routeResponse", handleRoute);
+      wsApi.off("routeError", handleError);
+      wsApi.off("location");
+    };
+  }, [guardianPosition, destinationPos]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -210,23 +260,18 @@ function LiveMap({
             fillOpacity: 0.15
           }}
         />
-
         {guardianPosition && (
           <Marker position={guardianPosition}>
             <Popup>Your current location.</Popup>
           </Marker>
         )}
-
         {canePosition && (
           <Marker position={canePosition}>
             <Popup>VIP current location.</Popup>
           </Marker>
         )}
-
         <SetMapBounds />
-
-        <FitBoundsToRoute userPos={guardianPosition} destPos={destPos} />
-
+        <FitBoundsToRoute userPos={guardianPosition} destPos={destinationPos} />
         <CustomZoomControl
           guardianPosition={guardianPosition}
           canePosition={canePosition}
@@ -236,7 +281,6 @@ function LiveMap({
             <Popup>Destination</Popup>
           </Marker>
         )}
-
         <MapSelectHandler
           onSelect={(pos) => {
             setPreviewPos(pos);
@@ -247,7 +291,6 @@ function LiveMap({
             });
           }}
         />
-
         {previewPos && (
           <Marker
             position={previewPos}
@@ -262,16 +305,39 @@ function LiveMap({
             <Popup>Adjust location</Popup>
           </Marker>
         )}
-
         {previewPos && (
           <ClickMenu
             previewPos={previewPos}
             onSetDestination={() => {
-              onSetDestination({ to: previewPos });
+              // onSetDestination({ to: previewPos });
+              setDestinationPos(previewPos);
               setPreviewPos(null);
             }}
             onClose={() => setPreviewPos(null)}
           />
+        )}
+        {route.length > 0 && (
+          <>
+            {/* Shadow / outline */}
+            <Polyline
+              positions={route}
+              weight={10}
+              color="#000"
+              opacity={0.25}
+              lineCap="round"
+              lineJoin="round"
+            />
+
+            {/* Main route */}
+            <Polyline
+              positions={route}
+              weight={6}
+              color="#2563eb"
+              opacity={1}
+              lineCap="round"
+              lineJoin="round"
+            />
+          </>
         )}
       </MapContainer>
     </div>
