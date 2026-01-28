@@ -16,6 +16,7 @@ import Loader from "./Loading";
 import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
 import { wsApi } from "@/api/ws-api";
+import "leaflet-polylinedecorator";
 
 const FitBoundsToRoute = ({ userPos, destPos }) => {
   const map = useMap();
@@ -43,9 +44,10 @@ const SetMapBounds = () => {
   return null;
 };
 
-function MapSelectHandler({ onSelect }) {
+function MapSelectHandler({ onSelect, menuOpen }) {
   useMapEvents({
     click(e) {
+      if (menuOpen) return;
       onSelect([e.latlng.lat, e.latlng.lng]);
     }
   });
@@ -64,7 +66,6 @@ function LiveMap({
   const ignoreNextFetch = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [clickMenuPos, setClickMenuPos] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [previewPos, setPreviewPos] = useState(null);
@@ -165,7 +166,6 @@ function LiveMap({
     const handleMapMove = () => {
       if (previewPos) {
         setPreviewPos(null);
-        setClickMenuPos(null);
       }
     };
 
@@ -284,12 +284,8 @@ function LiveMap({
         <MapSelectHandler
           onSelect={(pos) => {
             setPreviewPos(pos);
-
-            setClickMenuPos({
-              lat: pos[0],
-              lng: pos[1]
-            });
           }}
+          menuOpen={!!previewPos}
         />
         {previewPos && (
           <Marker
@@ -309,8 +305,8 @@ function LiveMap({
           <ClickMenu
             previewPos={previewPos}
             onSetDestination={() => {
-              // onSetDestination({ to: previewPos });
               setDestinationPos(previewPos);
+              onSetDestination({ to: previewPos });
               setPreviewPos(null);
             }}
             onClose={() => setPreviewPos(null)}
@@ -348,10 +344,27 @@ export default LiveMap;
 
 const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
   const map = useMap();
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuRef.current || !map) return;
+
+    const mapContainer = map.getContainer();
+    mapContainer.style.pointerEvents = "none";
+
+    if (menuRef.current) {
+      menuRef.current.style.pointerEvents = "auto";
+    }
+
+    return () => {
+      mapContainer.style.pointerEvents = "auto";
+    };
+  }, [map]);
 
   if (!previewPos) return null;
 
-  const point = map.latLngToContainerPoint(previewPos);
+  const latlng = L.latLng(previewPos[0], previewPos[1]);
+  const point = map.latLngToContainerPoint(latlng);
 
   const menuWidth = 220;
   const menuHeight = 120;
@@ -396,6 +409,7 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
         top,
         transform
       }}
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-3">
         <p className="font-medium text-sm text-gray-800">Choose Action</p>
@@ -408,7 +422,10 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
       </div>
 
       <button
-        onClick={onSetDestination}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSetDestination(previewPos);
+        }}
         className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-600 hover:bg-green-100 p-3 text-sm rounded-lg font-medium transition"
       >
         <Icon icon="mdi:flag" className="text-base" />
