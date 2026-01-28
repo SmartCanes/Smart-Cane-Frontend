@@ -3,6 +3,9 @@ import axios from "axios";
 const BASE_URL =
   import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000/api";
 
+const WS_URL =
+  import.meta.env.VITE_MIDDLEWARE_WS_URL || "http://localhost:3000";
+
 if (!BASE_URL) {
   throw new Error("VITE_BACKEND_API_URL is not defined");
 }
@@ -27,6 +30,11 @@ export const authCheckApi = axios.create({
 export const refreshApi = axios.create({
   baseURL: BASE_URL + "/auth",
   withCredentials: true,
+  headers: { "Content-Type": "application/json" }
+});
+
+export const middlewareApi = axios.create({
+  baseURL: WS_URL,
   headers: { "Content-Type": "application/json" }
 });
 

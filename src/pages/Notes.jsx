@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import FeedbackModal from "@/ui/components/feedbackmodal";
 
 const Notes = () => {
   const [message, setMessage] = useState("");
@@ -152,13 +151,13 @@ const Notes = () => {
         </div>
       </div>
 
-      <FeedbackModal
+      {/* <FeedbackModal
         isOpen={modalConfig.isOpen}
         onClose={() => setModalConfig((prev) => ({ ...prev, isOpen: false }))}
         title={modalConfig.title}
         message={modalConfig.message}
         variant={modalConfig.variant}
-      />
+      /> */}
     </>
   );
 };

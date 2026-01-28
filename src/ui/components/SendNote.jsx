@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import FeedbackModal from "./feedbackmodal";
+import { sendNotes } from "@/api/ws-api";
 
 const SendNote = () => {
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     title: "",
@@ -12,7 +13,7 @@ const SendNote = () => {
   });
   const maxLength = 500;
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!message.trim()) {
       setModalConfig({
         isOpen: true,
@@ -23,24 +24,39 @@ const SendNote = () => {
       return;
     }
 
-    // Simulate sending logic
-    const isSuccess = true; // Toggle this to test error state
+    try {
+      setIsSubmitting(true);
 
-    if (isSuccess) {
+      const response = await sendNotes(message);
+
+      console.log(response);
+
+      if (!response.status) {
+        throw new Error("Failed to send message");
+      }
+
+      const isSuccess = true;
+
+      if (isSuccess) {
+        setModalConfig({
+          isOpen: true,
+          title: "Sent!",
+          message: "Your message has been sent to Mr. Dela Cruz",
+          variant: "default"
+        });
+        setMessage("");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
       setModalConfig({
         isOpen: true,
-        title: "Sent!",
-        message: "Your message has been sent to Mr. Dela Cruz",
-        variant: "default" // Using default (dark blue) as per screenshot/request for primary look
-      });
-      setMessage("");
-    } else {
-      setModalConfig({
-        isOpen: true,
-        title: "Failed!",
-        message: "Something went wrong. Please try again.",
+        title: "Error!",
+        message:
+          "There was an error sending your message. Please try again later.",
         variant: "error"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -72,13 +88,11 @@ const SendNote = () => {
         </div>
 
         <div className="flex gap-3">
-          <button
-            className="flex-1 px-6 py-3 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
-            onClick={() => setMessage("")}
-          >
+          <button disabled={isSubmitting} onClick={() => setMessage("")}>
             Cancel
           </button>
           <button
+            disabled={isSubmitting}
             onClick={handleSend}
             className="flex items-center justify-center gap-2 flex-1 px-6 py-3 rounded-xl text-sm font-medium text-white bg-primary-100 hover:bg-primary-200 transition-colors"
           >
@@ -87,14 +101,6 @@ const SendNote = () => {
           </button>
         </div>
       </div>
-
-      <FeedbackModal
-        isOpen={modalConfig.isOpen}
-        onClose={() => setModalConfig((prev) => ({ ...prev, isOpen: false }))}
-        title={modalConfig.title}
-        message={modalConfig.message}
-        variant={modalConfig.variant}
-      />
     </>
   );
 };

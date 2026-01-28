@@ -1,7 +1,9 @@
 import { io } from "socket.io-client";
+import { handleRequest } from "./requestHandler";
+import { middlewareApi } from ".";
 
 const WS_URL =
-  import.meta.env.VITE_MIDDLEWARE_WS_URL || "https://localhost:3000";
+  import.meta.env.VITE_MIDDLEWARE_WS_URL || "http://localhost:3000";
 
 class SocketAPI {
   constructor() {
@@ -51,5 +53,8 @@ class SocketAPI {
     this.socket.emit(event, payload);
   }
 }
+
+export const sendNotes = (message) =>
+  handleRequest(() => middlewareApi.post(`/send-note`, { message }));
 
 export const wsApi = new SocketAPI();
