@@ -197,12 +197,21 @@ export const useDevicesStore = create(
         }),
 
       removeDevice: (deviceId) =>
-        set((state) => ({
-          devices: state.devices.filter((d) => d.deviceId !== deviceId)
-        })),
+        set((state) => {
+          const isSelected = state.selectedDevice?.deviceId === deviceId;
+          return {
+            devices: state.devices.filter((d) => d.deviceId !== deviceId),
+            selectedDevice: isSelected ? null : state.selectedDevice
+          };
+        }),
 
       clearDevices: () =>
-        set({ devices: [], lastFetchedAt: null, hasFetchedOnce: false }),
+        set({
+          devices: [],
+          lastFetchedAt: null,
+          hasFetchedOnce: false,
+          selectedDevice: null
+        }),
 
       setSelectedDevice: (device) => set({ selectedDevice: device })
     }),
