@@ -10,9 +10,9 @@ import {
   Polyline
 } from "react-leaflet";
 import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "framer-motion";
 import L from "leaflet";
 import CustomZoomControl from "./CustomZoomControl";
-import Loader from "./Loading";
 import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
 import { wsApi } from "@/api/ws-api";
@@ -75,11 +75,8 @@ function MapSelectHandler({ onSelect, menuOpen }) {
 }
 
 function LiveMap({
-  guardianPosition,
+  guardianPosition
   // canePosition,
-  routePath,
-  activeTab,
-  onSetDestination
 }) {
   const { user } = useUserStore();
   const mapRef = useRef(null);
@@ -144,6 +141,7 @@ function LiveMap({
   useEffect(() => {
     if (!searchQuery) {
       setSearchResults([]);
+      setIsLoading(false);
       return;
     }
 
@@ -152,19 +150,24 @@ function LiveMap({
       return;
     }
 
+    let cancelled = false;
+
+    setIsLoading(true);
     const delay = setTimeout(async () => {
-      setIsLoading(true);
       try {
         const data = await getLocation(searchQuery);
-        setSearchResults(data.features);
+        if (!cancelled) setSearchResults(data.features);
       } catch (err) {
         console.error(err);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }, 300);
 
-    return () => clearTimeout(delay);
+    return () => {
+      cancelled = true;
+      clearTimeout(delay);
+    };
   }, [searchQuery]);
 
   const handleResultClick = (item) => {
@@ -200,66 +203,97 @@ function LiveMap({
   return (
     <div className="relative w-full h-full z-0">
       <div className="absolute top-4 left-4 right-4 sm:right-auto z-30 sm:w-[260px]">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search location..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full h-12 pl-12 pr-10 font-poppins text-sm text-gray-800 placeholder-gray-400 shadow-md border-0
-            transition duration-200 ease-in-out focus:outline-none bg-white
-            ${searchQuery && searchResults.length > 0 ? "rounded-t-2xl" : "rounded-2xl"}`}
-          />
+        <input
+          type="text"
+          placeholder="Search location..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={`w-full h-12 pl-12 pr-12 font-poppins text-sm text-gray-800 placeholder-gray-400 border-0
+          shadow-md transition duration-200 ease-in-out focus:outline-none bg-white 
+          ${isLoading || (searchQuery && searchResults.length > 0) ? "rounded-t-2xl" : "rounded-2xl"}`}
+        />
+
+        <Icon
+          icon="mdi:magnify"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg pointer-events-none"
+        />
+
+        {/* {isLoading && (
           <Icon
-            icon="mdi:magnify"
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg pointer-events-none"
+            icon="mdi:loading"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-600 animate-spin"
           />
+        )} */}
 
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition cursor-pointer"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-        {/* Suggestions Dropdown */}
-        {searchResults.length > 0 && (
-          <div className="absolute top-12 left-0 w-full overflow-hidden rounded-b-2xl bg-white shadow-md pointer-events-auto z-20">
-            {searchResults.map((result, idx) => (
-              <div
-                key={idx}
-                onClick={() => handleResultClick(result)}
-                className="cursor-pointer hover:bg-blue-50 transition border-b border-gray-100 p-3 flex items-center gap-3"
-              >
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Icon
-                    icon="mdi:map-marker"
-                    className="text-blue-600 text-xl"
-                  />
-                </div>
-
-                <div>
-                  <p className="font-poppins font-medium text-sm text-gray-800">
-                    {result.properties.name}
-                  </p>
-                  <p className="font-poppins text-xs text-gray-500">
-                    {result.properties.city ||
-                      result.properties.state ||
-                      "Philippines"}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+        {searchQuery && !isLoading && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition cursor-pointer"
+          >
+            ✕
+          </button>
         )}
+
+        <AnimatePresence>
+          {(isLoading || searchResults.length > 0) && (
+            <motion.div
+              // initial={{ opacity: 0, y: -10 }}
+              // animate={{ opacity: 1, y: 0 }}
+              // exit={{ opacity: 0, y: -10 }}
+              className="absolute top-12 left-0 w-full bg-white shadow-md rounded-b-2xl overflow-hidden z-20"
+            >
+              {isLoading
+                ? Array(3)
+                    .fill(0)
+                    .map((_, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="h-12 px-3 flex items-center gap-3 border-b border-gray-100"
+                        initial={{ opacity: 0.3 }}
+                        animate={{ opacity: 1 }}
+                        transition={{
+                          repeat: Infinity,
+                          repeatType: "mirror",
+                          duration: 0.8,
+                          delay: idx * 0.1
+                        }}
+                      >
+                        <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                        <div className="flex-1 space-y-1 py-1">
+                          <div className="h-3 bg-gray-200 rounded w-3/4" />
+                          <div className="h-2 bg-gray-200 rounded w-1/2" />
+                        </div>
+                      </motion.div>
+                    ))
+                : // Actual results
+                  searchResults.map((result, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleResultClick(result)}
+                      className="cursor-pointer hover:bg-blue-50 transition border-b border-gray-100 p-3 flex items-center gap-3"
+                    >
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Icon
+                          icon="mdi:map-marker"
+                          className="text-blue-600 text-xl"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-poppins font-medium text-sm text-gray-800">
+                          {result.properties.name}
+                        </p>
+                        <p className="font-poppins text-xs text-gray-500">
+                          {result.properties.city ||
+                            result.properties.state ||
+                            "Philippines"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      {/* {isLoading && (
-        <div className="absolute inset-0 z-[15] flex items-center justify-center bg-gray-50/90 backdrop-blur-[1px] rounded-2xl">
-          <Loader />
-        </div>
-      )} */}
       <MapContainer
         center={guardianPosition}
         zoom={16}
@@ -337,7 +371,6 @@ function LiveMap({
             previewPos={previewPos}
             onSetDestination={() => {
               setDestinationPos(previewPos);
-              onSetDestination({ to: previewPos });
               setPreviewPos(null);
             }}
             onClose={() => setPreviewPos(null)}

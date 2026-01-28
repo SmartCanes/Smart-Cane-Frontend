@@ -3,7 +3,6 @@ import { Icon } from "@iconify/react";
 import LiveMap from "@/ui/components/LiveMap";
 import RecentAlerts from "@/ui/components/RecentAlert";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
-import WalkingDirections from "@/ui/components/WalkingDirections";
 import SendNote from "@/ui/components/SendNote";
 import Toast from "@/ui/components/Toast";
 import { useRealtimeStore } from "@/stores/useStore";
@@ -23,25 +22,23 @@ const Dashboard = () => {
     show: false
   });
   const [activeTab, setActiveTab] = useState("track");
-  const [startPoint, setStartPoint] = useState("");
   // const [route, setRoute] = useState(null);
-  const [destinationPoint, setDestinationPoint] = useState("");
   const controls = useAnimation();
 
-  const handleSwapLocations = () => {
-    setStartPoint(destinationPoint);
-    setDestinationPoint(startPoint);
-  };
+  // const handleSwapLocations = () => {
+  //   setStartPoint(destinationPoint);
+  //   setDestinationPoint(startPoint);
+  // };
 
-  const historyButtonStyle =
-    activeTab === "history"
-      ? {
-          backgroundColor: "var(--color-primary-100)",
-          color: "#FFFFFF",
-          borderColor: "#E5E7EB",
-          fill: "#F3F4F6"
-        }
-      : {};
+  // const historyButtonStyle =
+  //   activeTab === "history"
+  //     ? {
+  //         backgroundColor: "var(--color-primary-100)",
+  //         color: "#FFFFFF",
+  //         borderColor: "#E5E7EB",
+  //         fill: "#F3F4F6"
+  //       }
+  //     : {};
 
   // const handleRequestDirections = () => {
   //   if (!startPoint || !destinationPoint) {
@@ -198,7 +195,6 @@ const Dashboard = () => {
                   <LiveMap
                     guardianPosition={guardianLocation || [14.721, 121.051]}
                     canePosition={caneLocation}
-                    onSetDestination={setDestinationPoint}
                     activeTab={activeTab}
                   />
                   {/* 
