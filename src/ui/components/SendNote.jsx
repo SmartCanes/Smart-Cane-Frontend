@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { sendNotes } from "@/api/ws-api";
+import Toast from "./Toast";
+import { validateField } from "@/utils/ValidationHelper";
 
 const SendNote = () => {
   const [message, setMessage] = useState("");
@@ -11,14 +13,25 @@ const SendNote = () => {
     message: "",
     variant: "default"
   });
+  const [errors, setErrors] = useState({
+    message: ""
+  });
+
   const maxLength = 500;
 
+  const hasErrors = () => {
+    return Object.values(errors).some((error) => error);
+  };
+
   const handleSend = async () => {
-    if (!message.trim()) {
+    const error = validateField("message", message);
+    setErrors((prev) => ({ ...prev, message: error || "" }));
+
+    if (error && error.trim() !== "") {
       setModalConfig({
         isOpen: true,
         title: "Error!",
-        message: "Please enter a message before sending.",
+        message: error,
         variant: "error"
       });
       return;
@@ -31,21 +44,17 @@ const SendNote = () => {
 
       console.log(response);
 
-      if (!response.status) {
+      if (!response.success) {
         throw new Error("Failed to send message");
       }
 
-      const isSuccess = true;
-
-      if (isSuccess) {
-        setModalConfig({
-          isOpen: true,
-          title: "Sent!",
-          message: "Your message has been sent to Mr. Dela Cruz",
-          variant: "default"
-        });
-        setMessage("");
-      }
+      setModalConfig({
+        isOpen: true,
+        title: "Sent!",
+        message: "Your message has been sent successfully.",
+        variant: "success"
+      });
+      setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
       setModalConfig({
@@ -76,7 +85,20 @@ const SendNote = () => {
             className="w-full h-48 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent text-sm text-gray-700 placeholder-gray-400"
             placeholder="Type your message here..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            on
+            onChange={(e) => {
+              const value = e.target.value;
+              setMessage(value);
+
+              const error = validateField("message", value);
+              setErrors({ message: error || "" });
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
             maxLength={maxLength}
           ></textarea>
         </div>
@@ -88,19 +110,39 @@ const SendNote = () => {
         </div>
 
         <div className="flex gap-3">
-          <button disabled={isSubmitting} onClick={() => setMessage("")}>
+          <button
+            disabled={isSubmitting}
+            onClick={() => setMessage("")}
+            className={`flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-sm sm:text-base text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
             Cancel
           </button>
           <button
-            disabled={isSubmitting}
+            disabled={isSubmitting || hasErrors()}
             onClick={handleSend}
-            className="flex items-center justify-center gap-2 flex-1 px-6 py-3 rounded-xl text-sm font-medium text-white bg-primary-100 hover:bg-primary-200 transition-colors"
+            className="flex items-center justify-center gap-2 flex-1 px-6 py-3 rounded-xl text-sm font-medium text-white bg-primary-100 hover:bg-primary-200 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Icon icon="solar:plain-bold" className="text-lg rotate-45" />
-            Send
+            {isSubmitting ? "Sending..." : "Send Note"}
           </button>
         </div>
       </div>
+
+      {modalConfig.isOpen && (
+        <Toast
+          type={modalConfig.variant}
+          message={modalConfig.message}
+          position="bottom-right"
+          onClose={() =>
+            setModalConfig({
+              isOpen: false,
+              title: "",
+              message: "",
+              variant: "default"
+            })
+          }
+        />
+      )}
     </>
   );
 };

@@ -85,6 +85,22 @@ const VALIDATION_RULES = {
       message: "Should be at least 2 characters long"
     },
     { test: (v) => v.length <= 50, message: "Should not exceed 50 characters" }
+  ],
+  message: [
+    { test: (v) => v.trim() !== "", message: "Note cannot be empty" },
+    {
+      test: (v) => v.length >= 2,
+      message: "Notes should be at least 2 characters long"
+    },
+    {
+      test: (v) => v.length <= 500,
+      message: "Notes should not exceed 500 characters"
+    },
+    {
+      test: (v) => /^[a-zA-Z0-9\s.,!?'-]*$/.test(v),
+      message:
+        "Notes should only contain English letters, numbers, and basic punctuation"
+    }
   ]
 };
 
