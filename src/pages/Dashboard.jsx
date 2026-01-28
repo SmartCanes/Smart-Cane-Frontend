@@ -124,7 +124,7 @@ const Dashboard = () => {
           <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-4 sm:gap-8 items-start">
             <div className="flex flex-col gap-4 sm:gap-8">
               {/* Mobile Only: Walking Directions */}
-              <div className="lg:hidden">
+              {/* <div className="lg:hidden">
                 <WalkingDirections
                   startValue={startPoint}
                   destinationValue={destinationPoint}
@@ -133,7 +133,7 @@ const Dashboard = () => {
                   onSwapLocations={handleSwapLocations}
                   helperText="Preview walking routes customized for your cane"
                 />
-              </div>
+              </div> */}
 
               {/* Map Container */}
               <div className="bg-white rounded-2xl shadow-sm overflow-hidden w-full border border-[#F3F4F6]">
@@ -194,7 +194,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Map Area */}
-                <div className="w-full h-[350px] sm:h-[60vh] relative rounded-2xl overflow-hidden">
+                <div className="w-full h-[70vh] sm:h-[60vh] relative rounded-2xl overflow-hidden">
                   <LiveMap
                     guardianPosition={guardianLocation || [14.721, 121.051]}
                     canePosition={caneLocation}
@@ -236,7 +236,7 @@ const Dashboard = () => {
 
             <div className="flex flex-col gap-8 w-full lg:max-w-[340px]">
               <div className="hidden lg:block">
-                <WalkingDirections
+                {/* <WalkingDirections
                   startValue={startPoint}
                   destinationValue={destinationPoint}
                   onStartChange={setStartPoint}
@@ -244,7 +244,7 @@ const Dashboard = () => {
                   onSwapLocations={handleSwapLocations}
                   // onRequestDirections={handleRequestDirections}
                   helperText="Preview walking routes customized for your cane"
-                />
+                /> */}
               </div>
               <SendNote />
               {toast.show && (
