@@ -213,7 +213,14 @@ export const useDevicesStore = create(
           selectedDevice: null
         }),
 
-      setSelectedDevice: (device) => set({ selectedDevice: device })
+      setSelectedDevice: (device) => {
+        set({ selectedDevice: device });
+
+        if (device?.deviceSerialNumber) {
+          wsApi.emit("subscribe", { serial: device.deviceSerialNumber });
+          console.log("Switching to serial:", device.deviceSerialNumber);
+        }
+      }
     }),
     {
       name: "devices-storage",
