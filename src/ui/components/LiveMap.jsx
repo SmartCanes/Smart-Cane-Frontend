@@ -17,7 +17,7 @@ import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
 import { wsApi } from "@/api/ws-api";
 import "leaflet-polylinedecorator";
-import { useUserStore } from "@/stores/useStore";
+import { useRealtimeStore, useUserStore } from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
 const circleAvatarIcon = (imgUrl, size = 40) => {
@@ -74,11 +74,9 @@ function MapSelectHandler({ onSelect, menuOpen }) {
   return null;
 }
 
-function LiveMap({
-  guardianPosition
-  // canePosition,
-}) {
+function LiveMap({ guardianPosition }) {
   const { user } = useUserStore();
+  const { canePosition } = useRealtimeStore();
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,16 +84,14 @@ function LiveMap({
   const [markerPos, setMarkerPos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [previewPos, setPreviewPos] = useState(null);
-  const [canePosition, setCanePosition] = useState(null);
   const [destinationPos, setDestinationPos] = useState(null);
   const [route, setRoute] = useState([]);
 
   useEffect(() => {
-    if (!guardianPosition || !destinationPos) return;
+    if (!canePosition || !destinationPos) return;
 
     wsApi.emit("requestRoute", {
-      // from: [14.693, 121.02],
-      from: guardianPosition, // Cane Position
+      from: canePosition, // Cane Position
       to: destinationPos
     });
 
@@ -117,26 +113,25 @@ function LiveMap({
     wsApi.on("routeResponse", handleRoute);
     wsApi.on("routeError", handleError);
 
-    wsApi.on("location", (data) => {
-      if (data?.lat != null && data?.lng != null) {
-        const newPos = [data.lat, data.lng];
-        setCanePosition(newPos);
+    // wsApi.on("location", (data) => {
+    //   if (data?.lat != null && data?.lng != null) {
+    //     const newPos = [data.lat, data.lng];
+    //     setCanePosition(newPos);
 
-        if (destinationPos) {
-          wsApi.emit("requestRoute", {
-            from: newPos,
-            to: destinationPos
-          });
-        }
-      }
-    });
+    //     if (destinationPos) {
+    //       wsApi.emit("requestRoute", {
+    //         from: newPos,
+    //         to: destinationPos
+    //       });
+    //     }
+    //   }
+    // });
 
     return () => {
       wsApi.off("routeResponse", handleRoute);
       wsApi.off("routeError", handleError);
-      wsApi.off("location");
     };
-  }, [guardianPosition, destinationPos]);
+  }, [canePosition, destinationPos]);
 
   useEffect(() => {
     if (!searchQuery) {

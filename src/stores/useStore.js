@@ -46,7 +46,7 @@ export const useRealtimeStore = create((set, get) => ({
   _wsConnected: false,
   connectionStatus: false,
   emergency: false,
-  caneLocation: null,
+  canePosition: null,
   guardianLocation: null,
   componentHealth: {
     gpsStatus: false,
@@ -111,7 +111,7 @@ export const useRealtimeStore = create((set, get) => ({
 
     wsApi.on("location", (data) => {
       if (data?.lat != null && data?.lng != null) {
-        set({ caneLocation: [data.lat, data.lng] });
+        set({ canePosition: [data.lat, data.lng] });
       }
       resetHeartbeat();
     });
