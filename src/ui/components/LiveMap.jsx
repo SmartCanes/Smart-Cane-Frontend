@@ -17,7 +17,11 @@ import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
 import { wsApi } from "@/api/ws-api";
 import "leaflet-polylinedecorator";
-import { useRealtimeStore, useUserStore } from "@/stores/useStore";
+import {
+  useDevicesStore,
+  useRealtimeStore,
+  useUserStore
+} from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
 const circleAvatarIcon = (imgUrl, size = 40) => {
@@ -77,6 +81,7 @@ function MapSelectHandler({ onSelect, menuOpen }) {
 function LiveMap({ guardianPosition }) {
   const { user } = useUserStore();
   const { canePosition } = useRealtimeStore();
+  const { selectedDevice } = useDevicesStore();
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -321,7 +326,10 @@ function LiveMap({ guardianPosition }) {
         )}
 
         {canePosition && (
-          <Marker position={canePosition}>
+          <Marker
+            position={canePosition}
+            icon={circleAvatarIcon(selectedDevice?.vip?.vipImageUrl)}
+          >
             <Popup>VIP current location.</Popup>
           </Marker>
         )}
