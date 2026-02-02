@@ -219,6 +219,8 @@ export const useDevicesStore = create(
         if (device?.deviceSerialNumber) {
           wsApi.emit("subscribe", { serial: device.deviceSerialNumber });
           console.log("Switching to serial:", device.deviceSerialNumber);
+
+          wsApi.emit("requestStatus", { serial: device.deviceSerialNumber });
         }
       }
     }),
