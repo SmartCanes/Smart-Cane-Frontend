@@ -3,6 +3,7 @@ import SidebarContent from "@/ui/components/SidebarContent";
 import {
   useDevicesStore,
   useGuardiansStore,
+  useRealtimeStore,
   useUIStore,
   useUserStore
 } from "@/stores/useStore";
@@ -13,6 +14,7 @@ const ProtectedLayout = () => {
   // const [isAuthChecked, setIsAuthChecked] = useState(false);
   const { user } = useUserStore();
   const { fetchDevices } = useDevicesStore();
+  const { startGuardianTracking, stopGuardianTracking } = useRealtimeStore();
   const { fetchGuardiansAndInvites } = useGuardiansStore();
 
   useEffect(() => {
@@ -26,6 +28,13 @@ const ProtectedLayout = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    startGuardianTracking();
+    return () => {
+      stopGuardianTracking(); // clean up when layout unmounts
+    };
+  }, [startGuardianTracking, stopGuardianTracking]);
 
   const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
 

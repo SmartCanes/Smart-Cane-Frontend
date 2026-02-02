@@ -47,7 +47,7 @@ export const useRealtimeStore = create((set, get) => ({
   connectionStatus: false,
   emergency: false,
   canePosition: null,
-  guardianLocation: null,
+  guardianPosition: null,
   componentHealth: {
     gpsStatus: false,
     ultrasonicStatus: false,
@@ -117,6 +117,30 @@ export const useRealtimeStore = create((set, get) => ({
     });
   },
   setGuardianLocation: (loc) => set({ guardianLocation: loc }),
+  startGuardianTracking: () => {
+    if ("geolocation" in navigator && get()._guardianWatchId === null) {
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          set({ guardianPosition: [latitude, longitude] });
+        },
+        (error) => console.error("Failed to track guardian:", error.message),
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+      );
+      set({ _guardianWatchId: watchId });
+    } else if (!("geolocation" in navigator)) {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  },
+
+  stopGuardianTracking: () => {
+    const watchId = get()._guardianWatchId;
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      set({ _guardianWatchId: null });
+    }
+  },
+
   disconnectWs: () => {
     wsApi.disconnect();
     set({ _wsConnected: false, connectionStatus: false });

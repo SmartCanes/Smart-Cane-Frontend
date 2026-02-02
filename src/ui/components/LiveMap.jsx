@@ -78,9 +78,9 @@ function MapSelectHandler({ onSelect, menuOpen }) {
   return null;
 }
 
-function LiveMap({ guardianPosition }) {
+function LiveMap() {
   const { user } = useUserStore();
-  const { canePosition } = useRealtimeStore();
+  const { canePosition, guardianPosition } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);

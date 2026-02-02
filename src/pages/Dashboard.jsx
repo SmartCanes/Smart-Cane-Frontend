@@ -49,33 +49,33 @@ const Dashboard = () => {
   //   console.log("Requesting directions", { startPoint, destinationPoint });
   // };
 
-  useEffect(() => {
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setGuardianLocation([latitude, longitude]);
+  // useEffect(() => {
+  //   const watchId = navigator.geolocation.watchPosition(
+  //     (position) => {
+  //       const { latitude, longitude } = position.coords;
+  //       setGuardianLocation([latitude, longitude]);
 
-        // if (isMapLoading) {
-        //   setIsMapLoading(false);
-        // }
-      },
-      (error) => {
-        console.error("Failed to get location:", error.message);
-        // setIsMapLoading(false);
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 5000
-      }
-    );
+  //       // if (isMapLoading) {
+  //       //   setIsMapLoading(false);
+  //       // }
+  //     },
+  //     (error) => {
+  //       console.error("Failed to get location:", error.message);
+  //       // setIsMapLoading(false);
+  //     },
+  //     {
+  //       enableHighAccuracy: true,
+  //       maximumAge: 0,
+  //       timeout: 5000
+  //     }
+  //   );
 
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
+  //   return () => {
+  //     navigator.geolocation.clearWatch(watchId);
+  //   };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useEffect(() => {
     const showModal = location.state?.showModal;
@@ -192,11 +192,7 @@ const Dashboard = () => {
 
                 {/* Map Area */}
                 <div className="w-full h-[70vh] sm:h-[60vh] relative rounded-2xl overflow-hidden">
-                  <LiveMap
-                    guardianPosition={guardianLocation || [14.721, 121.051]}
-                    canePosition={caneLocation}
-                    activeTab={activeTab}
-                  />
+                  <LiveMap />
                   {/* 
                   {isMapLoading && (
                     <div className="absolute inset-0 z-[50] flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
