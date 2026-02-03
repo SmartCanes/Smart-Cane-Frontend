@@ -41,15 +41,25 @@ const circleAvatarIcon = (imgUrl, size = 40) => {
     iconAnchor: [size / 2, size / 2]
   });
 };
-const FitBoundsToRoute = ({ userPos, destPos }) => {
+
+const FitBoundsToRoute = ({ canePos, destPos, route }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!userPos || !destPos) return;
+    // Only fit bounds if we have a valid route and positions
+    if (
+      !map ||
+      !canePos ||
+      !destPos ||
+      !Array.isArray(route) ||
+      route.length === 0
+    )
+      return;
 
-    const bounds = L.latLngBounds([userPos, destPos]);
+    // Fit bounds including both the cane position and destination
+    const bounds = L.latLngBounds([canePos, destPos]);
     map.fitBounds(bounds, { padding: [50, 50] });
-  }, [userPos, destPos, map]);
+  }, [map, canePos, destPos, route]);
 
   return null;
 };
@@ -84,6 +94,7 @@ function LiveMap() {
   const { selectedDevice } = useDevicesStore();
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [markerPos, setMarkerPos] = useState(null);
@@ -101,14 +112,30 @@ function LiveMap() {
     });
 
     const handleRoute = (data) => {
-      console.log(data);
       const coords = data?.paths?.[0]?.points?.coordinates;
 
-      if (!Array.isArray(coords) || coords.length < 2) return;
+      if (!Array.isArray(coords) || coords.length < 2) {
+        setRoute([]);
+        setDestinationPos(null);
+        setPreviewPos(null);
+
+        // setToast({
+        //   show: true,
+        //   type: "warning",
+        //   message: "Route Out of bounds. Destination cleared."
+        // });
+        return;
+      }
 
       const leafletCoords = coords.map(([lon, lat]) => [lat, lon]);
 
       setRoute(leafletCoords);
+
+      // setToast({
+      //   show: true,
+      //   type: "success",
+      //   message: "Route calculated successfully."
+      // });
     };
 
     const handleError = (err) => {
@@ -195,6 +222,12 @@ function LiveMap() {
             setDestinationPos(null);
             setPreviewPos(null);
             setRoute([]);
+
+            setToast({
+              show: true,
+              type: "info",
+              message: "Destination cancelled."
+            });
           }}
           className="absolute top-4 right-4 z-40 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-xl shadow text-sm font-medium transition cursor-pointer"
         >
@@ -334,7 +367,11 @@ function LiveMap() {
         )}
 
         <SetMapBounds />
-        <FitBoundsToRoute userPos={canePosition} destPos={destinationPos} />
+        <FitBoundsToRoute
+          canePos={canePosition}
+          destPos={destinationPos}
+          route={route}
+        />
 
         <CustomZoomControl
           guardianPosition={guardianPosition}
