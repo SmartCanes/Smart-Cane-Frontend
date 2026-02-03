@@ -100,12 +100,19 @@ export const useRealtimeStore = create((set, get) => ({
           infraredStatus:
             data.infraredStatus === true || data.infraredStatus === "false",
           mpuStatus: data.mpuStatus === true || data.mpuStatus === "false",
-          esp32Status: data.status === "online",
-          raspberryPiStatus:
-            data.raspberryPiStatus === true ||
-            data.raspberryPiStatus === "false"
+          esp32Status: data.status === "online"
         }
       });
+      resetHeartbeat();
+    });
+
+    wsApi.on("piStatus", (data) => {
+      set((state) => ({
+        componentHealth: {
+          ...state.componentHealth,
+          raspberryPiStatus: data.alive === true || data.alive === "false"
+        }
+      }));
       resetHeartbeat();
     });
 

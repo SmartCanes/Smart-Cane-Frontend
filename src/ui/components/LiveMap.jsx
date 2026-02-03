@@ -45,10 +45,10 @@ const FitBoundsToRoute = ({ userPos, destPos }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (userPos && destPos) {
-      const bounds = L.latLngBounds([userPos, destPos]);
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
+    if (!userPos || !destPos) return;
+
+    const bounds = L.latLngBounds([userPos, destPos]);
+    map.fitBounds(bounds, { padding: [50, 50] });
   }, [userPos, destPos, map]);
 
   return null;
@@ -96,12 +96,13 @@ function LiveMap() {
     if (!canePosition || !destinationPos) return;
 
     wsApi.emit("requestRoute", {
-      from: canePosition, // Cane Position
-      to: destinationPos
+      serial: selectedDevice.deviceSerialNumber,
+      payload: { to: destinationPos }
     });
 
     const handleRoute = (data) => {
-      const coords = data.route;
+      console.log(data);
+      const coords = data?.paths?.[0]?.points?.coordinates;
 
       if (!Array.isArray(coords) || coords.length < 2) return;
 
@@ -118,25 +119,11 @@ function LiveMap() {
     wsApi.on("routeResponse", handleRoute);
     wsApi.on("routeError", handleError);
 
-    // wsApi.on("location", (data) => {
-    //   if (data?.lat != null && data?.lng != null) {
-    //     const newPos = [data.lat, data.lng];
-    //     setCanePosition(newPos);
-
-    //     if (destinationPos) {
-    //       wsApi.emit("requestRoute", {
-    //         from: newPos,
-    //         to: destinationPos
-    //       });
-    //     }
-    //   }
-    // });
-
     return () => {
       wsApi.off("routeResponse", handleRoute);
       wsApi.off("routeError", handleError);
     };
-  }, [canePosition, destinationPos]);
+  }, [canePosition, destinationPos, selectedDevice]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -202,6 +189,18 @@ function LiveMap() {
 
   return (
     <div className="relative w-full h-full z-0">
+      {destinationPos && (
+        <button
+          onClick={() => {
+            setDestinationPos(null);
+            setPreviewPos(null);
+            setRoute([]);
+          }}
+          className="absolute top-4 right-4 z-40 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-xl shadow text-sm font-medium transition cursor-pointer"
+        >
+          Cancel Destination
+        </button>
+      )}
       <div className="absolute top-4 left-4 right-4 sm:right-auto z-30 sm:w-[260px]">
         <input
           type="text"
@@ -219,7 +218,7 @@ function LiveMap() {
         />
 
         {/* {isLoading && (
-          <Icon
+          <Iconz
             icon="mdi:loading"
             className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-600 animate-spin"
           />
@@ -335,7 +334,7 @@ function LiveMap() {
         )}
 
         <SetMapBounds />
-        <FitBoundsToRoute userPos={guardianPosition} destPos={destinationPos} />
+        <FitBoundsToRoute userPos={canePosition} destPos={destinationPos} />
 
         <CustomZoomControl
           guardianPosition={guardianPosition}
