@@ -216,115 +216,123 @@ function LiveMap() {
 
   return (
     <div className="relative w-full h-full z-0">
-      {destinationPos && (
-        <button
-          onClick={() => {
-            setDestinationPos(null);
-            setPreviewPos(null);
-            setRoute([]);
-
-            setToast({
-              show: true,
-              type: "info",
-              message: "Destination cancelled."
-            });
-          }}
-          className="absolute top-4 right-4 z-40 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-xl shadow text-sm font-medium transition cursor-pointer"
-        >
-          Cancel Destination
-        </button>
-      )}
-      <div className="absolute top-4 left-4 right-4 sm:right-auto z-30 sm:w-[260px]">
-        <input
-          type="text"
-          placeholder="Search location..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className={`w-full h-12 pl-12 pr-12 font-poppins text-sm text-gray-800 placeholder-gray-400 border-0
+      <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between gap-2 ">
+        {/* Search container */}
+        <div className="flex-1 sm:max-w-sm relative">
+          <input
+            type="text"
+            placeholder="Search location..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={`w-full h-12 pl-12 pr-12 font-poppins text-sm text-gray-800 placeholder-gray-400 border-0
           shadow-md transition duration-200 ease-in-out focus:outline-none bg-white 
           ${isLoading || (searchQuery && searchResults.length > 0) ? "rounded-t-2xl" : "rounded-2xl"}`}
-        />
+          />
 
-        <Icon
-          icon="mdi:magnify"
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg pointer-events-none"
-        />
+          <Icon
+            icon="mdi:magnify"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg pointer-events-none"
+          />
 
-        {/* {isLoading && (
+          {/* {isLoading && (
           <Iconz
             icon="mdi:loading"
             className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-600 animate-spin"
           />
         )} */}
 
-        {searchQuery && !isLoading && (
+          {searchQuery && !isLoading && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition cursor-pointer"
+            >
+              ✕
+            </button>
+          )}
+
+          <AnimatePresence>
+            {(isLoading || searchResults.length > 0) && (
+              <motion.div
+                // initial={{ opacity: 0, y: -10 }}
+                // animate={{ opacity: 1, y: 0 }}
+                // exit={{ opacity: 0, y: -10 }}
+                className="absolute top-12 left-0 w-full bg-white shadow-md rounded-b-2xl overflow-hidden z-20"
+              >
+                {isLoading
+                  ? Array(3)
+                      .fill(0)
+                      .map((_, idx) => (
+                        <motion.div
+                          key={idx}
+                          className="h-12 px-3 flex items-center gap-3 border-b border-gray-100"
+                          initial={{ opacity: 0.3 }}
+                          animate={{ opacity: 1 }}
+                          transition={{
+                            repeat: Infinity,
+                            repeatType: "mirror",
+                            duration: 0.8,
+                            delay: idx * 0.1
+                          }}
+                        >
+                          <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                          <div className="flex-1 space-y-1 py-1">
+                            <div className="h-3 bg-gray-200 rounded w-3/4" />
+                            <div className="h-2 bg-gray-200 rounded w-1/2" />
+                          </div>
+                        </motion.div>
+                      ))
+                  : // Actual results
+                    searchResults.map((result, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => handleResultClick(result)}
+                        className="cursor-pointer hover:bg-blue-50 transition border-b border-gray-100 p-3 flex items-center gap-3"
+                      >
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Icon
+                            icon="mdi:map-marker"
+                            className="text-blue-600 text-xl"
+                          />
+                        </div>
+                        <div>
+                          <p className="font-poppins font-medium text-sm text-gray-800">
+                            {result.properties.name}
+                          </p>
+                          <p className="font-poppins text-xs text-gray-500">
+                            {result.properties.city ||
+                              result.properties.state ||
+                              "Philippines"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        {destinationPos && (
           <button
-            onClick={() => setSearchQuery("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition cursor-pointer"
+            onClick={() => {
+              setDestinationPos(null);
+              setPreviewPos(null);
+              setRoute([]);
+
+              setToast({
+                show: true,
+                type: "info",
+                message: "Destination cleared"
+              });
+            }}
+            className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 hover:text-red-600 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 hover:border-red-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
+            aria-label="Clear destination"
           >
-            ✕
+            <Icon
+              icon="mdi:close"
+              className="w-5 h-5 group-hover:scale-110 transition-transform"
+            />
+            <span className="hidden sm:inline ml-2">Clear Destination</span>
           </button>
         )}
-
-        <AnimatePresence>
-          {(isLoading || searchResults.length > 0) && (
-            <motion.div
-              // initial={{ opacity: 0, y: -10 }}
-              // animate={{ opacity: 1, y: 0 }}
-              // exit={{ opacity: 0, y: -10 }}
-              className="absolute top-12 left-0 w-full bg-white shadow-md rounded-b-2xl overflow-hidden z-20"
-            >
-              {isLoading
-                ? Array(3)
-                    .fill(0)
-                    .map((_, idx) => (
-                      <motion.div
-                        key={idx}
-                        className="h-12 px-3 flex items-center gap-3 border-b border-gray-100"
-                        initial={{ opacity: 0.3 }}
-                        animate={{ opacity: 1 }}
-                        transition={{
-                          repeat: Infinity,
-                          repeatType: "mirror",
-                          duration: 0.8,
-                          delay: idx * 0.1
-                        }}
-                      >
-                        <div className="w-10 h-10 bg-gray-200 rounded-full" />
-                        <div className="flex-1 space-y-1 py-1">
-                          <div className="h-3 bg-gray-200 rounded w-3/4" />
-                          <div className="h-2 bg-gray-200 rounded w-1/2" />
-                        </div>
-                      </motion.div>
-                    ))
-                : // Actual results
-                  searchResults.map((result, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => handleResultClick(result)}
-                      className="cursor-pointer hover:bg-blue-50 transition border-b border-gray-100 p-3 flex items-center gap-3"
-                    >
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Icon
-                          icon="mdi:map-marker"
-                          className="text-blue-600 text-xl"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-poppins font-medium text-sm text-gray-800">
-                          {result.properties.name}
-                        </p>
-                        <p className="font-poppins text-xs text-gray-500">
-                          {result.properties.city ||
-                            result.properties.state ||
-                            "Philippines"}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
       <MapContainer
         center={guardianPosition}
