@@ -42,24 +42,15 @@ const circleAvatarIcon = (imgUrl, size = 40) => {
   });
 };
 
-const FitBoundsToRoute = ({ canePos, destPos, route }) => {
+const FitBoundsToRoute = ({ canePos, destPos, route, shouldFit }) => {
   const map = useMap();
 
   useEffect(() => {
-    // Only fit bounds if we have a valid route and positions
-    if (
-      !map ||
-      !canePos ||
-      !destPos ||
-      !Array.isArray(route) ||
-      route.length === 0
-    )
-      return;
+    if (!map || !route || route.length === 0 || !shouldFit) return;
 
-    // Fit bounds including both the cane position and destination
     const bounds = L.latLngBounds([canePos, destPos]);
-    map.fitBounds(bounds, { padding: [50, 50] });
-  }, [map, canePos, destPos, route]);
+    map.fitBounds(bounds, { padding: [50, 50], animate: true });
+  }, [map, canePos, destPos, route, shouldFit]);
 
   return null;
 };
@@ -88,6 +79,21 @@ function MapSelectHandler({ onSelect, menuOpen }) {
   return null;
 }
 
+const haversine = (a, b) => {
+  const R = 6371000;
+
+  const φ1 = (a[0] * Math.PI) / 180;
+  const φ2 = (b[0] * Math.PI) / 180;
+
+  const Δφ = ((b[0] - a[0]) * Math.PI) / 180;
+  const Δλ = ((b[1] - a[1]) * Math.PI) / 180;
+
+  const s =
+    Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+
+  return 2 * R * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+};
+
 function LiveMap() {
   const { user } = useUserStore();
   const { canePosition, guardianPosition } = useRealtimeStore();
@@ -101,10 +107,21 @@ function LiveMap() {
   const [isLoading, setIsLoading] = useState(false);
   const [previewPos, setPreviewPos] = useState(null);
   const [destinationPos, setDestinationPos] = useState(null);
+  const [followTarget, setFollowTarget] = useState(null);
   const [route, setRoute] = useState([]);
+  const [isUserFollowingCane, setIsUserFollowingCane] = useState(false);
+  const [isFreeMode, setIsFreeMode] = useState(false);
+  const routeRequestedRef = useRef(false);
+  const routeCoordsRef = useRef([]);
+  const [completedRoute, setCompletedRoute] = useState([]);
+  const [remainingRoute, setRemainingRoute] = useState([]);
+  const activeIndexRef = useRef(0);
 
   useEffect(() => {
-    if (!canePosition || !destinationPos) return;
+    if (!destinationPos || !selectedDevice) return;
+    if (routeRequestedRef.current) return;
+
+    routeRequestedRef.current = true;
 
     wsApi.emit("requestRoute", {
       serial: selectedDevice.deviceSerialNumber,
@@ -113,33 +130,18 @@ function LiveMap() {
 
     const handleRoute = (data) => {
       const coords = data?.paths?.[0]?.points?.coordinates;
-
-      if (!Array.isArray(coords) || coords.length < 2) {
-        setRoute([]);
-        setDestinationPos(null);
-        setPreviewPos(null);
-
-        // setToast({
-        //   show: true,
-        //   type: "warning",
-        //   message: "Route Out of bounds. Destination cleared."
-        // });
-        return;
-      }
+      if (!Array.isArray(coords) || coords.length < 2) return;
 
       const leafletCoords = coords.map(([lon, lat]) => [lat, lon]);
+      routeCoordsRef.current = leafletCoords;
 
-      setRoute(leafletCoords);
-
-      // setToast({
-      //   show: true,
-      //   type: "success",
-      //   message: "Route calculated successfully."
-      // });
+      activeIndexRef.current = 0;
+      setCompletedRoute([]);
+      setRemainingRoute(leafletCoords);
     };
 
-    const handleError = (err) => {
-      console.error("Route error:", err.message);
+    const handleError = () => {
+      routeRequestedRef.current = false;
       setRoute([]);
     };
 
@@ -150,7 +152,120 @@ function LiveMap() {
       wsApi.off("routeResponse", handleRoute);
       wsApi.off("routeError", handleError);
     };
-  }, [canePosition, destinationPos, selectedDevice]);
+  }, [destinationPos, selectedDevice]);
+
+  const advanceRoute = (currentPos) => {
+    const coords = routeCoordsRef.current;
+    if (!coords.length) return;
+
+    let closestPointOnRoute = null;
+    let minDist = Infinity;
+    let segmentIndex = -1;
+    let t = 0;
+
+    for (let i = 0; i < coords.length - 1; i++) {
+      const a = coords[i];
+      const b = coords[i + 1];
+
+      // Find closest point on segment AB to current position
+      const closest = getClosestPointOnSegment(currentPos, a, b);
+      const dist = haversine(currentPos, closest);
+
+      if (dist < minDist) {
+        minDist = dist;
+        closestPointOnRoute = closest;
+        segmentIndex = i;
+        // Calculate interpolation factor
+        const segmentLength = haversine(a, b);
+        if (segmentLength > 0) {
+          t = haversine(a, closest) / segmentLength;
+        } else {
+          t = 0;
+        }
+      }
+    }
+
+    if (minDist <= 20 && segmentIndex >= 0) {
+      // Calculate virtual index: segmentIndex + interpolation factor
+      const virtualIndex = segmentIndex + t;
+
+      // Only update if we've progressed along the route
+      if (virtualIndex > activeIndexRef.current) {
+        activeIndexRef.current = virtualIndex;
+
+        // Split the route based on the virtual position
+        splitRouteAtVirtualIndex(virtualIndex);
+      }
+    }
+  };
+
+  // Helper function to find closest point on line segment AB to point P
+  const getClosestPointOnSegment = (p, a, b) => {
+    const ax = a[1];
+    const ay = a[0];
+    const bx = b[1];
+    const by = b[0];
+    const px = p[1];
+    const py = p[0];
+
+    // Vector AB
+    const abx = bx - ax;
+    const aby = by - ay;
+
+    // Vector AP
+    const apx = px - ax;
+    const apy = py - ay;
+
+    // Project AP onto AB
+    const ab2 = abx * abx + aby * aby;
+    const ap_ab = apx * abx + apy * aby;
+
+    // Normalized distance along AB
+    let t = ap_ab / ab2;
+
+    // Clamp to segment
+    t = Math.max(0, Math.min(1, t));
+
+    // Calculate closest point
+    return [ay + aby * t, ax + abx * t];
+  };
+
+  // Helper function to split route at virtual index
+  const splitRouteAtVirtualIndex = (virtualIndex) => {
+    const coords = routeCoordsRef.current;
+    const floorIndex = Math.floor(virtualIndex);
+    const fraction = virtualIndex - floorIndex;
+
+    if (floorIndex >= coords.length - 1) {
+      // At or beyond the end of route
+      setCompletedRoute(coords);
+      setRemainingRoute([]);
+    } else {
+      // Interpolate between points to get exact split position
+      const a = coords[floorIndex];
+      const b = coords[floorIndex + 1];
+
+      // Create interpolated point
+      const interpolatedPoint = [
+        a[0] + (b[0] - a[0]) * fraction,
+        a[1] + (b[1] - a[1]) * fraction
+      ];
+
+      // Split the route: completed portion + interpolated point
+      const completed = [...coords.slice(0, floorIndex + 1), interpolatedPoint];
+      // Remaining portion starts from interpolated point
+      const remaining = [interpolatedPoint, ...coords.slice(floorIndex + 1)];
+
+      setCompletedRoute(completed);
+      setRemainingRoute(remaining);
+    }
+  };
+
+  useEffect(() => {
+    if (!canePosition) return;
+
+    advanceRoute(canePosition);
+  }, [canePosition]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -195,6 +310,7 @@ function LiveMap() {
     ignoreNextFetch.current = true;
     setSearchQuery(item.properties.name);
     setSearchResults([]);
+    setIsFreeMode(true); // Enter free mode when user searches
   };
 
   useEffect(() => {
@@ -205,14 +321,61 @@ function LiveMap() {
       if (previewPos) {
         setPreviewPos(null);
       }
+      // setIsFreeMode(true);
+      setIsUserFollowingCane(false);
     };
 
+    // const handleZoom = () => {
+    //   // Zooming within bounds keeps free mode active
+    //   setIsFreeMode(true);
+    // };
+
     map.on("movestart", handleMapMove);
+    // map.on("zoomstart", handleZoom);
 
     return () => {
       map.off("movestart", handleMapMove);
+      // map.off("zoomstart", handleZoom);
     };
   }, [previewPos]);
+
+  useEffect(() => {
+    if (isUserFollowingCane && canePosition && mapRef.current) {
+      mapRef.current.flyTo(canePosition, mapRef.current.getZoom(), {
+        duration: 0.5
+      });
+    }
+  }, [isUserFollowingCane, canePosition]);
+
+  const handleFocusOnCane = () => {
+    if (!canePosition || !mapRef.current) return;
+
+    const targetZoom = 18; // zoom level when focusing on cane
+    mapRef.current.flyTo(canePosition, targetZoom, { duration: 0.5 });
+
+    setIsUserFollowingCane(true);
+    setIsFreeMode(false);
+  };
+
+  const handleFocusOnUser = () => {
+    if (!guardianPosition) return;
+    if (mapRef.current)
+      mapRef.current.flyTo(guardianPosition, mapRef.current.getZoom(), {
+        duration: 0.5
+      });
+    setIsUserFollowingCane(false);
+    setIsFreeMode(true);
+  };
+
+  const handleZoomIn = () => {
+    if (mapRef.current) mapRef.current.zoomIn();
+    setIsFreeMode(true);
+  };
+
+  const handleZoomOut = () => {
+    if (mapRef.current) mapRef.current.zoomOut();
+    setIsFreeMode(true);
+  };
 
   return (
     <div className="relative w-full h-full z-0">
@@ -234,13 +397,6 @@ function LiveMap() {
             className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg pointer-events-none"
           />
 
-          {/* {isLoading && (
-          <Iconz
-            icon="mdi:loading"
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-600 animate-spin"
-          />
-        )} */}
-
           {searchQuery && !isLoading && (
             <button
               onClick={() => setSearchQuery("")}
@@ -252,12 +408,7 @@ function LiveMap() {
 
           <AnimatePresence>
             {(isLoading || searchResults.length > 0) && (
-              <motion.div
-                // initial={{ opacity: 0, y: -10 }}
-                // animate={{ opacity: 1, y: 0 }}
-                // exit={{ opacity: 0, y: -10 }}
-                className="absolute top-12 left-0 w-full bg-white shadow-md rounded-b-2xl overflow-hidden z-20"
-              >
+              <motion.div className="absolute top-12 left-0 w-full bg-white shadow-md rounded-b-2xl overflow-hidden z-20">
                 {isLoading
                   ? Array(3)
                       .fill(0)
@@ -281,8 +432,7 @@ function LiveMap() {
                           </div>
                         </motion.div>
                       ))
-                  : // Actual results
-                    searchResults.map((result, idx) => (
+                  : searchResults.map((result, idx) => (
                       <div
                         key={idx}
                         onClick={() => handleResultClick(result)}
@@ -316,6 +466,10 @@ function LiveMap() {
               setDestinationPos(null);
               setPreviewPos(null);
               setRoute([]);
+              setIsUserFollowingCane(false);
+              setIsFreeMode(false);
+
+              routeRequestedRef.current = false;
 
               setToast({
                 show: true,
@@ -375,15 +529,26 @@ function LiveMap() {
         )}
 
         <SetMapBounds />
-        <FitBoundsToRoute
-          canePos={canePosition}
-          destPos={destinationPos}
-          route={route}
-        />
+
+        {/* Only apply bounds logic when there's a route */}
+        {route.length > 0 && !isUserFollowingCane && (
+          <FitBoundsToRoute
+            canePos={canePosition}
+            destPos={destinationPos}
+            route={route}
+            shouldFit={!isFreeMode && !isUserFollowingCane}
+          />
+        )}
 
         <CustomZoomControl
-          guardianPosition={guardianPosition}
-          canePosition={canePosition}
+          onFocusOnCane={handleFocusOnCane}
+          onFocusOnUser={handleFocusOnUser}
+          isFreeMode={isFreeMode}
+          setIsFreeMode={setIsFreeMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          isUserFollowingCane={isUserFollowingCane}
+          setIsUserFollowingCane={setIsUserFollowingCane}
         />
 
         {destinationPos && (
@@ -395,6 +560,7 @@ function LiveMap() {
         <MapSelectHandler
           onSelect={(pos) => {
             setPreviewPos(pos);
+            setIsFreeMode(true); // Enter free mode when selecting location
           }}
           menuOpen={!!previewPos}
         />
@@ -419,32 +585,31 @@ function LiveMap() {
             onSetDestination={() => {
               setDestinationPos(previewPos);
               setPreviewPos(null);
+              setIsFreeMode(false); // Exit free mode when setting destination
             }}
             onClose={() => setPreviewPos(null)}
           />
         )}
-        {route.length > 0 && (
-          <>
-            {/* Shadow / outline */}
-            <Polyline
-              positions={route}
-              weight={10}
-              color="#000"
-              opacity={0.25}
-              lineCap="round"
-              lineJoin="round"
-            />
+        {completedRoute.length > 0 && (
+          <Polyline
+            positions={completedRoute}
+            weight={6}
+            color="#999"
+            opacity={0.5}
+            lineCap="round"
+            lineJoin="round"
+          />
+        )}
 
-            {/* Main route */}
-            <Polyline
-              positions={route}
-              weight={6}
-              color="#2563eb"
-              opacity={1}
-              lineCap="round"
-              lineJoin="round"
-            />
-          </>
+        {remainingRoute.length > 0 && (
+          <Polyline
+            positions={remainingRoute}
+            weight={6}
+            color="#2563eb"
+            opacity={1}
+            lineCap="round"
+            lineJoin="round"
+          />
         )}
       </MapContainer>
     </div>
@@ -478,19 +643,16 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
     top = point.y + 12;
   }
 
-  // Clamp horizontally
   if (left - menuWidth / 2 < padding) left = menuWidth / 2 + padding;
 
   if (left + menuWidth / 2 > mapSize.x - padding)
     left = mapSize.x - menuWidth / 2 - padding;
 
-  // If still overlapping bottom → RIGHT
   if (top + menuHeight > mapSize.y - padding) {
     left = point.x + 12;
     top = point.y - menuHeight / 2;
     transform = "translate(0, -50%)";
 
-    // If right side overflows → LEFT
     if (left + menuWidth > mapSize.x - padding) {
       left = point.x - menuWidth - 12;
     }
