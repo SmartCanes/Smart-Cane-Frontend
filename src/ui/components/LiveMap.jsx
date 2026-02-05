@@ -190,10 +190,30 @@ function LiveMap() {
       });
     };
 
+    const handleDestinationCleared = () => {
+      clearRoute();
+
+      setPreviewPos(null);
+      setIsUserFollowingCane(false);
+      setIsFreeMode(false);
+
+      routeCoordsRef.current = [];
+      activeIndexRef.current = 0;
+      routeRequestedRef.current = false;
+
+      setToast({
+        show: true,
+        type: "info",
+        message: "Destination cleared"
+      });
+    };
+
     wsApi.on("destinationReached", handleDestinationReached);
+    wsApi.on("destinationCleared", handleDestinationCleared);
 
     return () => {
       wsApi.off("destinationReached", handleDestinationReached);
+      wsApi.off("destinationCleared", handleDestinationCleared);
     };
   }, []);
 
@@ -541,21 +561,10 @@ function LiveMap() {
         {destinationPos && (
           <button
             onClick={() => {
-              clearRoute();
+              if (!selectedDevice?.deviceSerialNumber) return;
 
-              setPreviewPos(null);
-              setIsUserFollowingCane(false);
-              setIsFreeMode(false);
-
-              routeCoordsRef.current = [];
-              activeIndexRef.current = 0;
-
-              routeRequestedRef.current = false;
-
-              setToast({
-                show: true,
-                type: "info",
-                message: "Destination cleared"
+              wsApi.emit("clearDestination", {
+                serial: selectedDevice.deviceSerialNumber
               });
             }}
             className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 hover:text-red-600 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 hover:border-red-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
