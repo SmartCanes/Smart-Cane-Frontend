@@ -812,7 +812,10 @@ const DeviceCard = ({
                     : device.deviceSerialNumber || "Unnamed Cane"}
                 </h3>
                 <button
-                  onClick={() => onEditDevice(device)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditDevice(device);
+                  }}
                   className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
                   title="Edit cane nickname"
                 >
@@ -1061,7 +1064,10 @@ const DevicesListView = ({
                           "Unnamed Cane"}
                       </h3>
                       <button
-                        onClick={() => onEditDevice(device)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditDevice(device);
+                        }}
                         className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
                         title="Edit cane nickname"
                       >
