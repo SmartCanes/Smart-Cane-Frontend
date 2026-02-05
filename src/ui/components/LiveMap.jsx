@@ -43,6 +43,43 @@ const circleAvatarIcon = (imgUrl, size = 40) => {
   });
 };
 
+const SmoothMarker = ({ position, icon, duration = 400 }) => {
+  const markerRef = useRef(null);
+  const [currentPos, setCurrentPos] = useState(position);
+
+  const animatePosition = (from, to, duration) => {
+    let start = null;
+
+    const step = (timestamp) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+
+      const lat = from[0] + (to[0] - from[0]) * progress;
+      const lng = from[1] + (to[1] - from[1]) * progress;
+
+      setCurrentPos([lat, lng]);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    requestAnimationFrame(step);
+  };
+
+  useEffect(() => {
+    if (
+      !position ||
+      (currentPos[0] === position[0] && currentPos[1] === position[1])
+    )
+      return;
+
+    animatePosition(currentPos, position, duration);
+  }, [position]);
+
+  return <Marker position={currentPos} icon={icon} ref={markerRef} />;
+};
+
 const FitBoundsToRoute = ({ canePos, destPos, route, shouldFit }) => {
   const map = useMap();
 
@@ -555,21 +592,19 @@ function LiveMap() {
         />
 
         {guardianPosition && (
-          <Marker
+          <SmoothMarker
             position={guardianPosition}
             icon={circleAvatarIcon(user.guardianImageUrl)}
-          >
-            <Popup>Your current location.</Popup>
-          </Marker>
+            popupText="Your current location."
+          />
         )}
 
         {canePosition && (
-          <Marker
+          <SmoothMarker
             position={canePosition}
             icon={circleAvatarIcon(selectedDevice?.vip?.vipImageUrl)}
-          >
-            <Popup>VIP current location.</Popup>
-          </Marker>
+            popupText="VIP current location."
+          />
         )}
 
         <SetMapBounds />
