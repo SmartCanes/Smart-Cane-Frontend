@@ -9,6 +9,7 @@ import {
   useDevicesStore,
   useGuardiansStore,
   useRealtimeStore,
+  useRouteStore,
   useUIStore,
   useUserStore
 } from "@/stores/useStore";
@@ -417,6 +418,7 @@ const Header = () => {
     useDevicesStore();
   const { clearAllGuardians } = useGuardiansStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
+  const { clearRoute } = useRouteStore();
   const [notificationCount, setNotificationCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -491,6 +493,7 @@ const Header = () => {
         clearDevices();
         clearAllGuardians();
         disconnectWs();
+        clearRoute();
         setIsDropdownOpen(false);
         setIsLoggingOut(false);
         navigate("/login");
