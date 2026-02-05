@@ -122,6 +122,11 @@ export const useRealtimeStore = create((set, get) => ({
       }
       resetHeartbeat();
     });
+
+    // wsApi.on("destinationReached", () => {
+    //   const { clearRoute } = useRouteStore.getState();
+    //   clearRoute();
+    // });
   },
   setGuardianLocation: (loc) => set({ guardianLocation: loc }),
   startGuardianTracking: () => {
@@ -423,6 +428,47 @@ export const useGuardiansStore = create(
         guardiansByDevice: state.guardiansByDevice,
         pendingInvitesByDevice: state.pendingInvitesByDevice
       })
+    }
+  )
+);
+
+export const useRouteStore = create(
+  persist(
+    (set, get) => ({
+      destinationPos: null,
+      routeCoords: [],
+      completedRoute: [],
+      remainingRoute: [],
+      activeIndex: 0,
+
+      setRoute: ({ destinationPos, routeCoords }) =>
+        set({
+          destinationPos,
+          routeCoords,
+          completedRoute: [],
+          remainingRoute: routeCoords,
+          activeIndex: 0
+        }),
+
+      updateProgress: ({ completedRoute, remainingRoute, activeIndex }) =>
+        set({
+          completedRoute,
+          remainingRoute,
+          activeIndex
+        }),
+
+      clearRoute: () =>
+        set({
+          destinationPos: null,
+          routeCoords: [],
+          completedRoute: [],
+          remainingRoute: [],
+          activeIndex: 0
+        })
+    }),
+    {
+      name: "route-storage",
+      storage: createJSONStorage(() => localStorage)
     }
   )
 );

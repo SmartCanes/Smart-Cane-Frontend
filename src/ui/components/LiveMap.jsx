@@ -20,6 +20,7 @@ import "leaflet-polylinedecorator";
 import {
   useDevicesStore,
   useRealtimeStore,
+  useRouteStore,
   useUserStore
 } from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
@@ -98,6 +99,17 @@ function LiveMap() {
   const { user } = useUserStore();
   const { canePosition, guardianPosition } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
+  const {
+    destinationPos,
+    routeCoords,
+    completedRoute,
+    remainingRoute,
+    activeIndex,
+    setRoute,
+    updateProgress,
+    clearRoute
+  } = useRouteStore();
+
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
@@ -106,15 +118,47 @@ function LiveMap() {
   const [markerPos, setMarkerPos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [previewPos, setPreviewPos] = useState(null);
-  const [destinationPos, setDestinationPos] = useState(null);
-  const [route, setRoute] = useState([]);
   const [isUserFollowingCane, setIsUserFollowingCane] = useState(false);
   const [isFreeMode, setIsFreeMode] = useState(false);
   const routeRequestedRef = useRef(false);
   const routeCoordsRef = useRef([]);
-  const [completedRoute, setCompletedRoute] = useState([]);
-  const [remainingRoute, setRemainingRoute] = useState([]);
   const activeIndexRef = useRef(0);
+
+  useEffect(() => {
+    if (routeCoords?.length) {
+      routeCoordsRef.current = routeCoords;
+      activeIndexRef.current = activeIndex || 0;
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleDestinationReached = () => {
+      const { clearRoute } = useRouteStore.getState();
+
+      clearRoute();
+
+      routeCoordsRef.current = [];
+      activeIndexRef.current = 0;
+
+      routeRequestedRef.current = false;
+
+      setPreviewPos(null);
+      setIsUserFollowingCane(false);
+      setIsFreeMode(false);
+
+      setToast({
+        show: true,
+        type: "info",
+        message: "Destination reached and cleared"
+      });
+    };
+
+    wsApi.on("destinationReached", handleDestinationReached);
+
+    return () => {
+      wsApi.off("destinationReached", handleDestinationReached);
+    };
+  }, []);
 
   useEffect(() => {
     if (!destinationPos || !selectedDevice) return;
@@ -132,16 +176,18 @@ function LiveMap() {
       if (!Array.isArray(coords) || coords.length < 2) return;
 
       const leafletCoords = coords.map(([lon, lat]) => [lat, lon]);
-      routeCoordsRef.current = leafletCoords;
 
+      routeCoordsRef.current = leafletCoords;
       activeIndexRef.current = 0;
-      setCompletedRoute([]);
-      setRemainingRoute(leafletCoords);
+      setRoute({
+        destinationPos,
+        routeCoords: leafletCoords
+      });
     };
 
     const handleError = () => {
       routeRequestedRef.current = false;
-      setRoute([]);
+      clearRoute();
     };
 
     wsApi.on("routeResponse", handleRoute);
@@ -231,8 +277,11 @@ function LiveMap() {
     const fraction = virtualIndex - floorIndex;
 
     if (floorIndex >= coords.length - 1) {
-      setCompletedRoute(coords);
-      setRemainingRoute([]);
+      updateProgress({
+        completedRoute: coords,
+        remainingRoute: [],
+        activeIndex: virtualIndex
+      });
     } else {
       const a = coords[floorIndex];
       const b = coords[floorIndex + 1];
@@ -245,8 +294,11 @@ function LiveMap() {
       const completed = [...coords.slice(0, floorIndex + 1), interpolatedPoint];
       const remaining = [interpolatedPoint, ...coords.slice(floorIndex + 1)];
 
-      setCompletedRoute(completed);
-      setRemainingRoute(remaining);
+      updateProgress({
+        completedRoute: completed,
+        remainingRoute: remaining,
+        activeIndex: virtualIndex
+      });
     }
   };
 
@@ -452,13 +504,12 @@ function LiveMap() {
         {destinationPos && (
           <button
             onClick={() => {
-              setDestinationPos(null);
+              clearRoute();
+
               setPreviewPos(null);
-              setRoute([]);
               setIsUserFollowingCane(false);
               setIsFreeMode(false);
-              remainingRoute.length = 0;
-              completedRoute.length = 0;
+
               routeCoordsRef.current = [];
               activeIndexRef.current = 0;
 
@@ -524,11 +575,11 @@ function LiveMap() {
         <SetMapBounds />
 
         {/* Only apply bounds logic when there's a route */}
-        {route.length > 0 && !isUserFollowingCane && (
+        {remainingRoute.length > 0 && !isUserFollowingCane && (
           <FitBoundsToRoute
             canePos={canePosition}
             destPos={destinationPos}
-            route={route}
+            route={remainingRoute}
             shouldFit={!isFreeMode && !isUserFollowingCane}
           />
         )}
@@ -576,7 +627,10 @@ function LiveMap() {
           <ClickMenu
             previewPos={previewPos}
             onSetDestination={() => {
-              setDestinationPos(previewPos);
+              setRoute({
+                destinationPos: previewPos,
+                routeCoords: []
+              });
               setPreviewPos(null);
               setIsFreeMode(false); // Exit free mode when setting destination
             }}
