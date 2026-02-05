@@ -107,7 +107,6 @@ function LiveMap() {
   const [isLoading, setIsLoading] = useState(false);
   const [previewPos, setPreviewPos] = useState(null);
   const [destinationPos, setDestinationPos] = useState(null);
-  const [followTarget, setFollowTarget] = useState(null);
   const [route, setRoute] = useState([]);
   const [isUserFollowingCane, setIsUserFollowingCane] = useState(false);
   const [isFreeMode, setIsFreeMode] = useState(false);
@@ -186,20 +185,16 @@ function LiveMap() {
     }
 
     if (minDist <= 20 && segmentIndex >= 0) {
-      // Calculate virtual index: segmentIndex + interpolation factor
       const virtualIndex = segmentIndex + t;
 
-      // Only update if we've progressed along the route
       if (virtualIndex > activeIndexRef.current) {
         activeIndexRef.current = virtualIndex;
 
-        // Split the route based on the virtual position
         splitRouteAtVirtualIndex(virtualIndex);
       }
     }
   };
 
-  // Helper function to find closest point on line segment AB to point P
   const getClosestPointOnSegment = (p, a, b) => {
     const ax = a[1];
     const ay = a[0];
@@ -230,30 +225,24 @@ function LiveMap() {
     return [ay + aby * t, ax + abx * t];
   };
 
-  // Helper function to split route at virtual index
   const splitRouteAtVirtualIndex = (virtualIndex) => {
     const coords = routeCoordsRef.current;
     const floorIndex = Math.floor(virtualIndex);
     const fraction = virtualIndex - floorIndex;
 
     if (floorIndex >= coords.length - 1) {
-      // At or beyond the end of route
       setCompletedRoute(coords);
       setRemainingRoute([]);
     } else {
-      // Interpolate between points to get exact split position
       const a = coords[floorIndex];
       const b = coords[floorIndex + 1];
 
-      // Create interpolated point
       const interpolatedPoint = [
         a[0] + (b[0] - a[0]) * fraction,
         a[1] + (b[1] - a[1]) * fraction
       ];
 
-      // Split the route: completed portion + interpolated point
       const completed = [...coords.slice(0, floorIndex + 1), interpolatedPoint];
-      // Remaining portion starts from interpolated point
       const remaining = [interpolatedPoint, ...coords.slice(floorIndex + 1)];
 
       setCompletedRoute(completed);
@@ -468,6 +457,10 @@ function LiveMap() {
               setRoute([]);
               setIsUserFollowingCane(false);
               setIsFreeMode(false);
+              remainingRoute.length = 0;
+              completedRoute.length = 0;
+              routeCoordsRef.current = [];
+              activeIndexRef.current = 0;
 
               routeRequestedRef.current = false;
 
