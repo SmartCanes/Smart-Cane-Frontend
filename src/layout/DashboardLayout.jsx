@@ -1,5 +1,9 @@
 import { getMyProfile, sendHeartbeat } from "@/api/backendService";
-import { useGuardiansStore, useRealtimeStore, useUserStore } from "@/stores/useStore";
+import {
+  useGuardiansStore,
+  useRealtimeStore,
+  useUserStore
+} from "@/stores/useStore";
 import DashboardSide from "@/ui/components/DashboardSide";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
 import Header from "@/ui/components/Header";
@@ -60,6 +64,18 @@ const DashboardLayout = () => {
     };
 
     hydrateUser();
+  }, []);
+
+  // Heartbeat for online status
+  useEffect(() => {
+    const heartbeatInterval = setInterval(() => {
+      sendHeartbeat();
+    }, 30000); // Send heartbeat every 30 seconds
+
+    // Send immediately on mount
+    sendHeartbeat();
+
+    return () => clearInterval(heartbeatInterval);
   }, []);
 
   useEffect(() => {

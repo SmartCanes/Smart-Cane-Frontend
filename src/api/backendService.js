@@ -14,6 +14,9 @@ export const updateGuardian = (payload) =>
 export const getMyProfile = () =>
   handleRequest(() => backendApi.get("/guardian/profile"));
 
+export const sendHeartbeat = () =>
+  handleRequest(() => backendApi.post("/guardian/heartbeat"));
+
 export const getVIPs = () => handleRequest(() => backendApi.get("/vip"));
 
 // VIP's
