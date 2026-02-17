@@ -57,6 +57,10 @@ const PasswordInput = ({
   value,
   onChange,
   placeholder,
+const PasswordInput = ({ 
+  value, 
+  onChange, 
+  placeholder, 
   label,
   error,
   success,
@@ -136,7 +140,6 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     if (newPassword) {
       setIsChecking(true);
       setShowRequirements(true);
-
       const timeout = setTimeout(() => {
         setPasswordRequirements({
           hasLowercase: /[a-z]/.test(newPassword),
@@ -147,7 +150,6 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         });
         setIsChecking(false);
       }, 200);
-
       return () => clearTimeout(timeout);
     } else {
       setPasswordRequirements({
@@ -178,17 +180,14 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
-
     if (!allRequirementsMet) {
       setErrorMessage("Please meet all password requirements!");
       return;
     }
-
     if (!passwordsMatch) {
       setErrorMessage("Passwords do not match!");
       return;
     }
-
     if (currentPassword === newPassword) {
       setErrorMessage("New password cannot be the same as current password!");
       return;
@@ -378,7 +377,6 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                       isChecking={isChecking && newPassword !== ""}
                     />
                   </div>
-
                   {newPassword && allRequirementsMet && (
                     <div className="mt-3 pt-3 border-t border-blue-200">
                       <p className="text-green-600 text-sm font-medium flex items-center gap-2">

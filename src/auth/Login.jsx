@@ -8,7 +8,7 @@ import { loginApi } from "@/api/authService";
 import { useUIStore, useUserStore } from "@/stores/useStore";
 import Modal from "@/ui/components/Modal";
 import ScannerCamera from "@/ui/components/Scanner";
-import ReCAPTCHA from "react-google-recaptcha";
+import ReCAPTCHA from "react-google-recaptcha"; // CAPTCHA: Importing ReCAPTCHA component
 
 const Login = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
@@ -24,8 +24,8 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null);
-  const [captchaLoading, setCaptchaLoading] = useState(true);
+  const [captchaValue, setCaptchaValue] = useState(null); // CAPTCHA: State for storing CAPTCHA verification value
+  const [captchaLoading, setCaptchaLoading] = useState(true); // CAPTCHA: State for CAPTCHA loading status
   const [retryAfter, setRetryAfter] = useState(0);
   const [redirectSeconds, setRedirectSeconds] = useState(null);
 
@@ -67,7 +67,7 @@ const Login = () => {
     if (!credentials.identifier.trim())
       newErrors.identifier = "Email or Username is required";
     if (!credentials.password) newErrors.password = "Password is required";
-    if (!captchaValue) newErrors.captcha = "Please complete the CAPTCHA";
+    if (!captchaValue) newErrors.captcha = "Please complete the CAPTCHA"; // CAPTCHA: Validation for CAPTCHA completion
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -173,13 +173,13 @@ const Login = () => {
 
   useEffect(() => {
     window.onloadCallback = () => {
-      setCaptchaLoading(false);
+      setCaptchaLoading(false); // CAPTCHA: Set loading to false when CAPTCHA is ready
       console.log("grecaptcha is ready!");
     };
 
     // Dynamically create and append the script tag
     const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/";
+    script.src = "https://www.google.com/recaptcha/"; // CAPTCHA: Loading Google reCAPTCHA script
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -269,6 +269,7 @@ const Login = () => {
                 </Link>
 
                 <div className="captcha-container">
+                  {/* CAPTCHA: Loading indicator for CAPTCHA */}
                   {captchaLoading && (
                     <p className="text-center text-gray-500 mb-2">
                       Loading CAPTCHA...
@@ -286,6 +287,7 @@ const Login = () => {
                     />
                 </div>
 
+                {/* CAPTCHA: Error message for CAPTCHA */}
                 {errors.captcha && (
                   <p className="font-poppins text-[#CE4B34] text-sm mt-2">
                     {errors.captcha}
@@ -297,7 +299,7 @@ const Login = () => {
                   bgColor="bg-primary-100"
                   text={loading ? "Signing in..." : "Sign In"}
                   type="submit"
-                  disabled={retryAfter > 0 || loading || captchaLoading}
+                  disabled={retryAfter > 0 || loading || captchaLoading} // CAPTCHA: Disable button while CAPTCHA is loading
                 />
 
                 <p className="font-poppins text-center text-[18px] mt-4">
