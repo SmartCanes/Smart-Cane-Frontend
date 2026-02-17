@@ -47,3 +47,12 @@ export const forgotPasswordResetApi = (email, new_password, confirm_password) =>
       confirm_password
     })
   );
+  
+export const changePasswordApi = (current_password, new_password, confirm_password) =>
+  handleRequest(() =>
+    authCheckApi.post("/auth/change-password", {
+      current_password,
+      new_password,
+      confirm_password
+    })
+  );
