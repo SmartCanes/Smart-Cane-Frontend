@@ -229,7 +229,7 @@ function LiveMap() {
     });
 
     const handleRoute = (data) => {
-      const coords = data?.paths?.[0]?.points?.coordinates;
+      const coords = data?.route.paths?.[0]?.points?.coordinates;
       if (!Array.isArray(coords) || coords.length < 2) return;
 
       const leafletCoords = coords.map(([lon, lat]) => [lat, lon]);
@@ -681,6 +681,7 @@ function LiveMap() {
             onClose={() => setPreviewPos(null)}
           />
         )}
+
         {completedRoute.length > 0 && (
           <Polyline
             positions={completedRoute}
