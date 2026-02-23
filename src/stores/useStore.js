@@ -76,6 +76,7 @@ export const useRealtimeStore = create((set, get) => ({
     wsApi.on("connect", () => {
       console.log("WebSocket connected:", wsApi.socket?.id);
       set({ _wsConnected: true });
+      useBluetoothStore.getState().connectBluetoothWs();
       resetHeartbeat();
     });
 
@@ -122,6 +123,16 @@ export const useRealtimeStore = create((set, get) => ({
       }
       resetHeartbeat();
     });
+
+    // wsApi.on("bluetoothDevices", (data) => {
+    //   const devices = data?.payload?.devices || data?.devices;
+
+    //   if (!devices) return;
+
+    //   useBluetoothStore.getState().handleBluetoothPayload({
+    //     payload: { devices }
+    //   });
+    // });
 
     // wsApi.on("destinationReached", () => {
     //   const { clearRoute } = useRouteStore.getState();
@@ -469,6 +480,53 @@ export const useRouteStore = create(
     {
       name: "route-storage",
       storage: createJSONStorage(() => localStorage)
+    }
+  )
+);
+
+export const useBluetoothStore = create(
+  persist(
+    (set, get) => ({
+      devices: [],
+      isScanning: false,
+      lastUpdatedAt: null,
+      _wsListenerAttached: false,
+
+      handleBluetoothPayload: (data) => {
+        if (!data?.payload?.devices) return;
+
+        const devices = data.payload.devices;
+
+        set(() => ({
+          devices,
+          lastUpdatedAt: Date.now(),
+          isScanning: false
+        }));
+      },
+
+      requestScan: () => {
+        set({ isScanning: true });
+        console.log("Requesting Bluetooth scan...");
+        wsApi.emit("scanBluetooth");
+      },
+
+      clearDevices: () =>
+        set({
+          devices: [],
+          lastUpdatedAt: null
+        }),
+
+      getDeviceByMac: (mac) => get().devices.find((d) => d.mac === mac),
+
+      getTrustedDevices: () => get().devices.filter((d) => d.trusted)
+    }),
+    {
+      name: "bluetooth-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        devices: state.devices,
+        lastUpdatedAt: state.lastUpdatedAt
+      })
     }
   )
 );

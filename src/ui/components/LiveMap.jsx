@@ -224,8 +224,7 @@ function LiveMap() {
     routeRequestedRef.current = true;
 
     wsApi.emit("requestRoute", {
-      serial: selectedDevice.deviceSerialNumber,
-      payload: { to: destinationPos }
+      to: destinationPos
     });
 
     const handleRoute = (data) => {
@@ -563,9 +562,7 @@ function LiveMap() {
             onClick={() => {
               if (!selectedDevice?.deviceSerialNumber) return;
 
-              wsApi.emit("clearDestination", {
-                serial: selectedDevice.deviceSerialNumber
-              });
+              wsApi.emit("clearDestination");
             }}
             className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 hover:text-red-600 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 hover:border-red-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
             aria-label="Clear destination"

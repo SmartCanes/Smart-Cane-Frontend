@@ -65,13 +65,21 @@ class SocketAPI {
     };
   }
 
-  emit(event, payload) {
+  emit(event, payload = {}) {
     if (!this.socket) {
       this.connect();
     }
 
+    const serial = this.getSerial?.() || null;
+
+    const message = {
+      event,
+      serial,
+      payload
+    };
+
     if (this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ event, ...payload }));
+      this.socket.send(JSON.stringify(message));
       return;
     }
 

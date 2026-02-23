@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
+import BluetoothManager from "@/ui/components/BluetoothManager";
 
 const ToggleItem = ({ icon, title, description, checked, onChange }) => (
   <div className="flex items-start justify-between py-3 gap-3">
@@ -149,6 +150,8 @@ const Setting = () => {
           </div>
         </div>
       </div>
+
+      <BluetoothManager />
     </main>
   );
 };
