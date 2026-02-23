@@ -110,7 +110,7 @@ const Dashboard = () => {
         <div className="w-full space-y-6 sm:space-y-8 max-w-5xl mx-auto md:max-w-none md:mx-0 md:pr-6">
           {/* Title Section */}
           <div className="mb-4 sm:mb-6">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 font-poppins mb-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
               Live Location
             </h1>
             <p className="text-gray-600 font-poppins text-xs sm:text-sm hidden sm:block">

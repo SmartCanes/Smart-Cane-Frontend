@@ -408,11 +408,14 @@ const Devices = () => {
     >
       <div className="mx-auto w-full space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 sm:mb-8">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
+          <div className="w-full">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
               Manage Devices
             </h2>
+            <p className="text-gray-500 text-xs md:text-sm">
+              View and manage your paired canes, assign VIP profiles, and more.
+            </p>
             <p className="text-gray-500 text-sm mt-1">
               {devices.length} cane{devices.length !== 1 ? "s" : ""} •{" "}
               {devices.filter((d) => d.isPaired).length} active

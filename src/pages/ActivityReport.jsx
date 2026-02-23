@@ -155,7 +155,7 @@ const ActivityReport = () => {
       <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
         {/* Header Section */}
         <div className="mb-4 md:mb-8">
-          <h2 className="text-xl md:text-2xl font-bold text-[#11285A] mb-1">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
             Activity Reports
           </h2>
           <p className="text-gray-500 text-xs md:text-sm">
