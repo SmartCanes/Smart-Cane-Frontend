@@ -84,13 +84,13 @@ const GuardianNetwork = () => {
     <>
       <div className="bg-white rounded-2xl shadow-sm p-6 w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
           <h3 className="text-xl font-semibold text-gray-800">
             Guardian Network
           </h3>
           <button
             onClick={() => setInviteModalOpen(true)}
-            className="bg-[#2ECC71] text-white px-3 sm:px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed md:w-auto whitespace-nowrap text-sm sm:text-base w-48"
+            className="bg-[#2ECC71] text-white px-3 sm:px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed md:w-auto whitespace-nowrap text-sm sm:text-base w-full sm:w-auto"
             disabled={isSubmitting}
           >
             <Icon icon="ph:user-plus-bold" className="w-5 h-5" />

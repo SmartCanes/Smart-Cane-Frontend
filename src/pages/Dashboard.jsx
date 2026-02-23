@@ -118,7 +118,7 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-4 sm:gap-8 items-start">
+          <div className="grid xl:grid-cols-[minmax(0,2fr)_300px] gap-4 sm:gap-8 items-start">
             <div className="flex flex-col gap-4 sm:gap-8">
               {/* Mobile Only: Walking Directions */}
               {/* <div className="lg:hidden">
@@ -216,9 +216,9 @@ const Dashboard = () => {
               </div>
 
               {/* Mobile Only: Quick Actions */}
-              <div className="lg:hidden">
+              {/* <div className="lg:hidden">
                 <QuickActions />
-              </div>
+              </div> */}
 
               <div className="grid gap-8 lg:grid-cols-2">
                 <GuardianNetwork />
@@ -226,9 +226,9 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-8 w-full lg:max-w-[340px]">
-              <div className="hidden lg:block">
-                {/* <WalkingDirections
+            <div className="flex flex-col gap-8 w-full ">
+              {/* <div className="hidden lg:block">
+                <WalkingDirections
                   startValue={startPoint}
                   destinationValue={destinationPoint}
                   onStartChange={setStartPoint}
@@ -236,8 +236,8 @@ const Dashboard = () => {
                   onSwapLocations={handleSwapLocations}
                   // onRequestDirections={handleRequestDirections}
                   helperText="Preview walking routes customized for your cane"
-                /> */}
-              </div>
+                />
+              </div> */}
               <SendNote />
               {toast.show && (
                 <Toast
