@@ -80,18 +80,22 @@ const BluetoothManager = () => {
 
     const pairListener = (data) => {
       handlePairStatus(data);
+      console.log("Received pair status update:", data);
     };
 
     const unpairListener = (data) => {
       handleUnpairStatus(data);
+      console.log("Received unpair status update:", data);
     };
 
     const connectListener = (data) => {
       handleConnectStatus(data);
+      console.log("Received connect status update:", data);
     };
 
     const disconnectListener = (data) => {
       handleDisconnectStatus(data);
+      console.log("Received disconnect status update:", data);
     };
 
     wsApi.on("bluetoothDevices", deviceListener);
@@ -388,7 +392,7 @@ const BluetoothDeviceCard = ({
   };
 
   const getConnectionStatus = () => {
-    if (!device.isPaired)
+    if (!device.paired)
       return { label: "Not Paired", color: "bg-gray-100 text-gray-700" };
     if (device.connected)
       return { label: "Connected", color: "bg-green-100 text-green-800" };
@@ -434,7 +438,7 @@ const BluetoothDeviceCard = ({
     >
       <div
         className={`h-1.5 w-full ${
-          !device.isPaired
+          !device.paired
             ? "bg-gray-300"
             : device.connected
               ? "bg-green-500"

@@ -516,6 +516,8 @@ export const useBluetoothStore = create(
 
       handlePairStatus: (data) => {
         const { status, mac } = data || {};
+        console.log("Pair status update:", data);
+
         if (!mac) return;
 
         if (status === "starting") {
@@ -526,7 +528,9 @@ export const useBluetoothStore = create(
         if (status === "success") {
           set((state) => ({
             devices: state.devices.map((d) =>
-              d.mac === mac ? { ...d, trusted: true } : d
+              d.mac === mac
+                ? { ...d, trusted: true, connected: true, paired: true }
+                : d
             ),
             isBluetoothProcessing: false,
             processingMac: null
@@ -544,6 +548,7 @@ export const useBluetoothStore = create(
 
       handleUnpairStatus: (data) => {
         const { status, mac } = data || {};
+        console.log("Unpair status update:", data);
         if (!mac) return;
 
         if (status === "starting") {
@@ -553,12 +558,12 @@ export const useBluetoothStore = create(
 
         if (status === "success") {
           set((state) => ({
-            devices: state.devices.map((d) =>
-              d.mac === mac ? { ...d, trusted: false, connected: false } : d
-            ),
+            devices: state.devices.filter((d) => d.mac !== mac),
             isBluetoothProcessing: false,
             processingMac: null
           }));
+
+          return;
         }
 
         if (status === "failed") {
