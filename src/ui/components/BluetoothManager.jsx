@@ -8,32 +8,29 @@ import {
   useBluetoothStore
 } from "@/stores/useStore";
 
-// API Service imports (you'll need to create these endpoints)
-// import {
-//   fetchAvailableBluetoothDevices,
-//   pairBluetoothDevice,
-//   unpairBluetoothDevice,
-//   forgetBluetoothDevice,
-//   connectBluetoothDevice,
-//   disconnectBluetoothDevice
-// } from "@/api/bluetoothService";
 import Toast from "./Toast";
 import Modal from "./Modal";
 import { wsApi } from "@/api/ws-api";
 
-const pairBluetoothDevice = () => {};
-const unpairBluetoothDevice = () => {};
-const forgetBluetoothDevice = () => {};
-const connectBluetoothDevice = () => {};
-const disconnectBluetoothDevice = () => {};
-
 const BluetoothManager = () => {
   const { user } = useUserStore();
   const { currentGuardianRole } = useGuardiansStore();
-  const { requestScan, devices, handleBluetoothPayload } = useBluetoothStore();
+  const {
+    requestScan,
+    devices,
+    handleBluetoothPayload,
+    pairDevice,
+    unpairDevice,
+    connectDevice,
+    disconnectDevice,
+    handlePairStatus,
+    handleUnpairStatus,
+    handleDisconnectStatus,
+    handleConnectStatus,
+    isBluetoothProcessing
+  } = useBluetoothStore();
 
   const [isScanning, setIsScanning] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [viewMode, setViewMode] = useState("all"); // 'all', 'paired', 'available'
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,7 +53,7 @@ const BluetoothManager = () => {
   const [connectionModal, setConnectionModal] = useState({
     show: false,
     device: null,
-    action: "connect" // 'connect' or 'disconnect'
+    action: "connect"
   });
 
   const timeoutRef = useRef(null);
@@ -65,7 +62,7 @@ const BluetoothManager = () => {
     currentRole === "primary" || currentRole === "secondary";
 
   useEffect(() => {
-    const listener = (data) => {
+    const deviceListener = (data) => {
       const devices = data?.payload?.devices || data?.devices;
       if (!devices) return;
 
@@ -81,20 +78,58 @@ const BluetoothManager = () => {
       }
     };
 
-    wsApi.on("bluetoothDevices", listener);
+    const pairListener = (data) => {
+      handlePairStatus(data);
+    };
+
+    const unpairListener = (data) => {
+      handleUnpairStatus(data);
+    };
+
+    const connectListener = (data) => {
+      handleConnectStatus(data);
+    };
+
+    const disconnectListener = (data) => {
+      handleDisconnectStatus(data);
+    };
+
+    wsApi.on("bluetoothDevices", deviceListener);
+    wsApi.on("pairStatus", pairListener);
+    wsApi.on("unpairStatus", unpairListener);
+    wsApi.on("connectStatus", connectListener);
+    wsApi.on("disconnectStatus", disconnectListener);
 
     return () => {
-      wsApi.off("bluetoothDevices", listener);
+      wsApi.off("bluetoothDevices", deviceListener);
+      wsApi.off("pairStatus", pairListener);
+      wsApi.off("unpairStatus", unpairListener);
+      wsApi.off("connectStatus", connectListener);
+      wsApi.off("disconnectStatus", disconnectListener);
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [handleBluetoothPayload]);
+  }, [
+    handleBluetoothPayload,
+    handlePairStatus,
+    handleUnpairStatus,
+    handleConnectStatus,
+    handleDisconnectStatus
+  ]);
 
   useEffect(() => {
-    scanForDevices();
-  }, []);
+    if (!isBluetoothProcessing) {
+      setPairModal({ show: false, device: null });
+      setUnpairModal({ show: false, device: null });
+      setConnectionModal({ show: false, device: null });
+    }
+  }, [isBluetoothProcessing]);
+
+  // useEffect(() => {
+  //   scanForDevices();
+  // }, []);
 
   const scanForDevices = async () => {
     setIsScanning(true);
@@ -106,143 +141,39 @@ const BluetoothManager = () => {
 
     timeoutRef.current = setTimeout(() => {
       setIsScanning(false);
-    }, 10000);
+    }, 12000);
   };
 
   // Handle device pairing
   const handlePairDevice = async (device) => {
-    // try {
-    //   setIsSubmitting(true);
-    //   const response = await pairBluetoothDevice(device.deviceId);
-    //   if (response.success) {
-    //     // Update device status
-    //     setAvailableDevices((prev) =>
-    //       prev.map((d) =>
-    //         d.deviceId === device.deviceId
-    //           ? { ...d, isPaired: true, pairedCane: response.data.cane }
-    //           : d
-    //       )
-    //     );
-    //     setPairModal({ show: false, device: null });
-    //     setToast({
-    //       show: true,
-    //       type: "success",
-    //       message: `Successfully paired with ${device.name || device.deviceId}`
-    //     });
-    //   }
-    // } catch (error) {
-    //   setToast({
-    //     show: true,
-    //     type: "error",
-    //     message: error.message || "Failed to pair device"
-    //   });
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+    pairDevice(device.mac);
   };
 
   // Handle device unpairing
   const handleUnpairDevice = async (device) => {
-    // try {
-    //   setIsSubmitting(true);
-    //   const response = await unpairBluetoothDevice(device.deviceId);
-    //   if (response.success) {
-    //     setAvailableDevices((prev) =>
-    //       prev.map((d) =>
-    //         d.deviceId === device.deviceId
-    //           ? { ...d, isPaired: false, pairedCane: null, isConnected: false }
-    //           : d
-    //       )
-    //     );
-    //     setUnpairModal({ show: false, device: null });
-    //     setToast({
-    //       show: true,
-    //       type: "success",
-    //       message: `Unpaired from ${device.name || device.deviceId}`
-    //     });
-    //   }
-    // } catch (error) {
-    //   setToast({
-    //     show: true,
-    //     type: "error",
-    //     message: error.message || "Failed to unpair device"
-    //   });
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+    unpairDevice(device.mac);
   };
 
   // Handle forgetting a device
-  const handleForgetDevice = async (device) => {
-    // try {
-    //   setIsSubmitting(true);
-    //   const response = await forgetBluetoothDevice(device.deviceId);
-    //   if (response.success) {
-    //     // Remove device from list
-    //     setAvailableDevices((prev) =>
-    //       prev.filter((d) => d.deviceId !== device.deviceId)
-    //     );
-    //     setForgetModal({ show: false, device: null });
-    //     setToast({
-    //       show: true,
-    //       type: "success",
-    //       message: `Forgot ${device.name || device.deviceId}`
-    //     });
-    //   }
-    // } catch (error) {
-    //   setToast({
-    //     show: true,
-    //     type: "error",
-    //     message: error.message || "Failed to forget device"
-    //   });
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
-  };
+  const handleForgetDevice = async (device) => {};
 
   // Handle connection/disconnection
   const handleConnectionToggle = async (device, action) => {
-    // try {
-    //   setIsSubmitting(true);
-    //   const apiCall =
-    //     action === "connect"
-    //       ? connectBluetoothDevice
-    //       : disconnectBluetoothDevice;
-    //   const response = await apiCall(device.deviceId);
-    //   if (response.success) {
-    //     setAvailableDevices((prev) =>
-    //       prev.map((d) =>
-    //         d.deviceId === device.deviceId
-    //           ? { ...d, isConnected: action === "connect" }
-    //           : d
-    //       )
-    //     );
-    //     setConnectionModal({ show: false, device: null, action: "connect" });
-    //     setToast({
-    //       show: true,
-    //       type: "success",
-    //       message: `${action === "connect" ? "Connected to" : "Disconnected from"} ${device.name || device.deviceId}`
-    //     });
-    //   }
-    // } catch (error) {
-    //   setToast({
-    //     show: true,
-    //     type: "error",
-    //     message: error.message || `Failed to ${action} device`
-    //   });
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
-  };
+    if (!device) return;
 
-  // Filter devices based on view mode and search
+    if (action === "connect") {
+      connectDevice(device.mac);
+    } else {
+      disconnectDevice(device.mac);
+    }
+  };
   const filteredDevices = devices.filter((device) => {
     const matchesSearch =
       device.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       device.deviceId?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    if (viewMode === "paired") return device.isPaired && matchesSearch;
-    if (viewMode === "available") return !device.isPaired && matchesSearch;
+    if (viewMode === "paired") return device.paired && matchesSearch;
+    if (viewMode === "available") return !device.paired && matchesSearch;
     return matchesSearch;
   });
 
@@ -263,8 +194,8 @@ const BluetoothManager = () => {
               system
             </p> */}
             <p className="text-gray-500 text-sm mt-1">
-              {devices.filter((d) => d.isPaired).length} paired •{" "}
-              {devices.filter((d) => d.isConnected).length} connected
+              {devices.filter((d) => d.paired).length} paired •{" "}
+              {devices.filter((d) => d.connected).length} connected
             </p>
           </div>
 
@@ -333,7 +264,7 @@ const BluetoothManager = () => {
                   setConnectionModal({
                     show: true,
                     device,
-                    action: device.isConnected ? "disconnect" : "connect"
+                    action: device.connected ? "disconnect" : "connect"
                   })
                 }
                 canManage={canManageBluetooth}
@@ -354,7 +285,7 @@ const BluetoothManager = () => {
           device={pairModal.device}
           onClose={() => setPairModal({ show: false, device: null })}
           onConfirm={() => handlePairDevice(pairModal.device)}
-          isSubmitting={isSubmitting}
+          isSubmitting={isBluetoothProcessing}
         />
 
         <UnpairDeviceModal
@@ -362,7 +293,7 @@ const BluetoothManager = () => {
           device={unpairModal.device}
           onClose={() => setUnpairModal({ show: false, device: null })}
           onConfirm={() => handleUnpairDevice(unpairModal.device)}
-          isSubmitting={isSubmitting}
+          isSubmitting={isBluetoothProcessing}
         />
 
         <ForgetDeviceModal
@@ -370,7 +301,7 @@ const BluetoothManager = () => {
           device={forgetModal.device}
           onClose={() => setForgetModal({ show: false, device: null })}
           onConfirm={() => handleForgetDevice(forgetModal.device)}
-          isSubmitting={isSubmitting}
+          isSubmitting={isBluetoothProcessing}
         />
 
         <ConnectionModal
@@ -386,7 +317,7 @@ const BluetoothManager = () => {
               connectionModal.action
             )
           }
-          isSubmitting={isSubmitting}
+          isSubmitting={isBluetoothProcessing}
         />
 
         {/* Toast Notification */}
@@ -459,7 +390,7 @@ const BluetoothDeviceCard = ({
   const getConnectionStatus = () => {
     if (!device.isPaired)
       return { label: "Not Paired", color: "bg-gray-100 text-gray-700" };
-    if (device.isConnected)
+    if (device.connected)
       return { label: "Connected", color: "bg-green-100 text-green-800" };
     return { label: "Disconnected", color: "bg-yellow-100 text-yellow-800" };
   };
@@ -505,7 +436,7 @@ const BluetoothDeviceCard = ({
         className={`h-1.5 w-full ${
           !device.isPaired
             ? "bg-gray-300"
-            : device.isConnected
+            : device.connected
               ? "bg-green-500"
               : "bg-yellow-500"
         }`}
@@ -520,9 +451,9 @@ const BluetoothDeviceCard = ({
             <div className="relative flex-shrink-0">
               <div
                 className={`p-3 rounded-xl transition-all duration-300 ${
-                  !device.isPaired
+                  !device.paired
                     ? "bg-gray-100"
-                    : device.isConnected
+                    : device.connected
                       ? "bg-green-100"
                       : "bg-yellow-100"
                 }`}
@@ -530,16 +461,16 @@ const BluetoothDeviceCard = ({
                 <Icon
                   icon={getDeviceTypeIcon(device.type)}
                   className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors ${
-                    !device.isPaired
+                    !device.paired
                       ? "text-gray-500"
-                      : device.isConnected
+                      : device.connected
                         ? "text-green-600"
                         : "text-yellow-600"
                   }`}
                 />
               </div>
               {/* Animated Pulse for Connected Devices */}
-              {device.isConnected && (
+              {device.connected && (
                 <span className="absolute -top-1 -right-1 flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
@@ -608,7 +539,7 @@ const BluetoothDeviceCard = ({
           </div>
 
           {/* Battery Level Card */}
-          {device.isPaired &&
+          {device.paired &&
           device.batteryLevel !== null &&
           device.batteryLevel !== undefined ? (
             <div className="bg-gray-50 rounded-xl p-3">
@@ -703,7 +634,7 @@ const BluetoothDeviceCard = ({
       <div className="relative px-4 sm:px-5 py-3 bg-gray-50 border-t border-gray-100">
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
           {/* Connection/Pair Button */}
-          {device.isPaired ? (
+          {device.paired ? (
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={(e) => {
@@ -711,20 +642,18 @@ const BluetoothDeviceCard = ({
                 onConnect();
               }}
               className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-1.5 text-sm font-medium rounded-xl sm:rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                device.isConnected
+                device.connected
                   ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
                   : "bg-green-100 text-green-700 hover:bg-green-200"
               }`}
             >
               <Icon
                 icon={
-                  device.isConnected
-                    ? "ph:plugs-connected-bold"
-                    : "ph:plugs-bold"
+                  device.connected ? "ph:plugs-connected-bold" : "ph:plugs-bold"
                 }
                 className="w-4 h-4"
               />
-              <span>{device.isConnected ? "Disconnect" : "Connect"}</span>
+              <span>{device.connected ? "Disconnect" : "Connect"}</span>
             </motion.button>
           ) : (
             <motion.button
@@ -772,7 +701,7 @@ const BluetoothDeviceCard = ({
                   }}
                 >
                   <div className="py-1">
-                    {device.isPaired ? (
+                    {device.paired ? (
                       <>
                         <button
                           onClick={(e) => {
