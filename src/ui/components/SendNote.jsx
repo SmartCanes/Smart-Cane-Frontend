@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import { sendNotes } from "@/api/ws-api";
 import Toast from "./Toast";
 import { validateField } from "@/utils/ValidationHelper";
+import { wsApi } from "@/api/ws-api";
 
 const SendNote = () => {
   const [message, setMessage] = useState("");
@@ -40,7 +40,7 @@ const SendNote = () => {
     try {
       setIsSubmitting(true);
 
-      const response = await sendNotes(message);
+      const response = await wsApi.sendNotes(message);
 
       console.log(response);
 

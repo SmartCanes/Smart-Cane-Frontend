@@ -1,7 +1,6 @@
-import { handleRequest } from "./requestHandler";
-import { middlewareApi } from ".";
 import { useDevicesStore } from "@/stores/useStore";
 const WS_URL = import.meta.env.VITE_MIDDLEWARE_WS_URL || "ws://localhost:3000";
+
 class SocketAPI {
   constructor(getSerial) {
     this.socket = null;
@@ -99,31 +98,55 @@ class SocketAPI {
     this.socket?.close();
     this.socket = null;
   }
+
+  sendNotes = (message) => {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.off("noteDelivered");
+        reject(new Error("Timeout waiting for delivery"));
+      }, 15000);
+
+      this.on("noteDelivered", (payload) => {
+        clearTimeout(timeout);
+        this.off("noteDelivered");
+
+        if (payload?.success) {
+          resolve({ success: true });
+        } else {
+          reject(new Error(payload?.error || "Delivery failed"));
+        }
+      });
+
+      this.emit("note", { message });
+    });
+  };
+
+  async updateDeviceState(configPayload) {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.off("configSaved");
+        reject(new Error("Config save timeout"));
+      }, 2000);
+
+      this.on("configSaved", (payload) => {
+        clearTimeout(timeout);
+        this.off("configSaved");
+
+        if (payload?.success) {
+          resolve(payload);
+        } else {
+          reject(new Error(payload?.error || "Config save failed"));
+        }
+      });
+
+      console.log(configPayload);
+
+      this.emit("updateDeviceState", configPayload);
+    });
+  }
 }
 
 export const wsApi = new SocketAPI(() => {
   const selected = useDevicesStore.getState().selectedDevice;
   return selected?.deviceSerialNumber || null;
 });
-
-export const sendNotes = (message) => {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      wsApi.off("noteDelivered");
-      reject(new Error("Timeout waiting for delivery"));
-    }, 15000);
-
-    wsApi.on("noteDelivered", (payload) => {
-      clearTimeout(timeout);
-      wsApi.off("noteDelivered");
-
-      if (payload?.success) {
-        resolve({ success: true });
-      } else {
-        reject(new Error(payload?.error || "Delivery failed"));
-      }
-    });
-
-    wsApi.emit("note", { message });
-  });
-};
