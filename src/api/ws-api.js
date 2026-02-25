@@ -106,5 +106,24 @@ export const wsApi = new SocketAPI(() => {
   return selected?.deviceSerialNumber || null;
 });
 
-export const sendNotes = (message) =>
-  handleRequest(() => middlewareApi.post(`/send-note`, { message }));
+export const sendNotes = (message) => {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      wsApi.off("noteDelivered");
+      reject(new Error("Timeout waiting for delivery"));
+    }, 15000);
+
+    wsApi.on("noteDelivered", (payload) => {
+      clearTimeout(timeout);
+      wsApi.off("noteDelivered");
+
+      if (payload?.success) {
+        resolve({ success: true });
+      } else {
+        reject(new Error(payload?.error || "Delivery failed"));
+      }
+    });
+
+    wsApi.emit("note", { message });
+  });
+};
