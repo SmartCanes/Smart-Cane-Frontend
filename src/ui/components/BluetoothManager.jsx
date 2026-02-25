@@ -80,22 +80,18 @@ const BluetoothManager = () => {
 
     const pairListener = (data) => {
       handlePairStatus(data);
-      console.log("Received pair status update:", data);
     };
 
     const unpairListener = (data) => {
       handleUnpairStatus(data);
-      console.log("Received unpair status update:", data);
     };
 
     const connectListener = (data) => {
       handleConnectStatus(data);
-      console.log("Received connect status update:", data);
     };
 
     const disconnectListener = (data) => {
       handleDisconnectStatus(data);
-      console.log("Received disconnect status update:", data);
     };
 
     wsApi.on("bluetoothDevices", deviceListener);
