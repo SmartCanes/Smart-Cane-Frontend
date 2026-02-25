@@ -1,9 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useRealtimeStore } from "@/stores/useStore";
 import { motion, AnimatePresence } from "framer-motion";
+import { wsApi } from "@/api/ws-api";
+import { interval } from "date-fns";
 
-// Component type definitions
+const DEVICE_CONFIG_SCHEMA = {
+  fallAngleThreshold: "fallAngleThreshold",
+  fallConfirmationDelay: "fallConfirmationDelay",
+  obstacleDistanceThreshold: "obstacleDistanceThreshold",
+  pointDownAngle: "pointDownAngle",
+  edgeBeepMin: "edgeBeepMin",
+  edgeBeepMax: "edgeBeepMax",
+  edgeContinuous: "edgeContinuous",
+
+  volume: "volumeLevel",
+  speechSpeed: "speechSpeed",
+  voiceType: "speakingVoice",
+
+  enableFallDetection: "enableFallDetection",
+  enableEdgeDetection: "enableEdgeDetection",
+  enableObstacleDetection: "enableObstacleDetection",
+  enableGPS: "enableGPS"
+};
+
 const componentIdMap = {
   1: "mpuStatus",
   2: "infraredStatus",
@@ -16,100 +36,490 @@ const componentIdMap = {
 const componentsData = [
   {
     id: 1,
-    name: "MPU-6050 Accelerometer",
+    name: "Fall Detection",
     type: "sensor",
-    description: "3-axis gyroscope and accelerometer",
-    icon: "mdi:axis-arrow",
+    description: "Detect cane tilt and fall events",
+    icon: "mdi:human-cane",
     configurable: true,
     configOptions: {
-      sampleRate: ["100 Hz", "250 Hz", "500 Hz", "1000 Hz"],
-      range: ["±2g", "±4g", "±8g", "±16g"],
-      filterBandwidth: [
-        "260 Hz",
-        "184 Hz",
-        "94 Hz",
-        "44 Hz",
-        "21 Hz",
-        "10 Hz",
-        "5 Hz"
+      fallAngleThreshold: [
+        "8° (Very Sensitive)",
+        "10° (Default)",
+        "15° (Stable Safety)",
+        "20° (Low Sensitivity)"
+      ],
+
+      fallConfirmationDelay: [
+        "2000 ms (Fast Alert)",
+        "3000 ms (Default)",
+        "5000 ms (Stable Confirmation)"
+      ],
+
+      buzzerPattern: [
+        "Continuous Alarm",
+        "Slow Pulse Alert",
+        "Fast Pulse Alert",
+        "Voice Alert Only"
       ]
     }
   },
   {
     id: 2,
-    name: "VL53L0X Time-of-Flight",
+    name: "Obstacle Detection",
     type: "sensor",
-    description: "Infrared laser distance sensor",
-    icon: "mdi:laser-pointer",
+    description: "Front obstacle distance monitoring",
+    icon: "mdi:radar",
     configurable: true,
     configOptions: {
-      distanceMode: ["Default", "High Accuracy", "Long Range", "High Speed"],
-      timingBudget: ["20 ms", "33 ms", "50 ms", "100 ms"],
-      interMeasurement: ["0 ms", "10 ms", "20 ms", "30 ms"],
-      roiSize: ["4x4", "8x8", "12x12", "16x16"]
+      detectionDistanceThreshold: [
+        "50 cm (High Safety)",
+        "100 cm (Default)",
+        "150 cm (Navigation Preview)",
+        "200 cm (Long Detection)"
+      ],
+
+      measurementInterval: [
+        "200 ms (Fast Scan)",
+        "300 ms (Default)",
+        "500 ms (Stable Scan)",
+        "1000 ms (Energy Saving)"
+      ],
+
+      buzzerResponsePattern: [
+        "Continuous Warning",
+        "Pulsing Warning",
+        "Voice Guidance Only"
+      ]
     }
   },
   {
     id: 3,
-    name: "Ultrasonic Sensor",
+    name: "Ground & Stair Safety",
     type: "sensor",
-    description: "HC-SR04 distance measurement",
-    icon: "mdi:radar",
+    description: "Detect stairs, holes, and dangerous ground elevation changes",
+    icon: "mdi:stairs",
     configurable: true,
     configOptions: {
-      range: [
-        "Default",
-        "Short (2-50cm)",
-        "Medium (20-200cm)",
-        "Long (100-400cm)",
-        "Custom"
+      stairSafetyDistance: [
+        "30 cm (Maximum Safety)",
+        "50 cm (Recommended Default)",
+        "70 cm (Normal Walking)",
+        "100 cm (Long Preview Cane)"
       ],
-      measurementInterval: ["100 ms", "250 ms", "500 ms", "1000 ms", "2000 ms"],
-      triggerPulse: ["10 µs", "20 µs", "30 µs"]
+      buzzerResponsePattern: [
+        "Continuous Alert",
+        "Pulsing Alert",
+        "Adaptive Distance Tone",
+        "Voice Guidance Only"
+      ]
     }
   },
   {
     id: 4,
-    name: "ESP32-WROOM-32D",
-    type: "controller",
-    description: "Dual-core WiFi & Bluetooth MCU",
-    icon: "mdi:chip",
+    name: "Visual Recognition",
+    type: "sensor",
+    description: "Real-time object recognition",
+    icon: "mdi:eye",
     configurable: true,
     configOptions: {
-      wifiMode: ["Station", "Access Point", "Station+AP"],
-      powerSave: ["None", "Light", "Modem Sleep", "Deep Sleep"],
-      cpuFrequency: ["80 MHz", "160 MHz", "240 MHz"],
-      flashSpeed: ["40 MHz", "80 MHz"]
+      alertType: ["Audio Alert", "Vibration Alert", "Voice Guidance"],
+      recognitionSensitivity: [
+        "High (More False Positives)",
+        "Medium (Balanced)",
+        "Low (Fewer False Positives)"
+      ],
+      interval: ["3s (Fast)", "5s (Default)", "8s (Slow)"]
     }
   },
   {
     id: 5,
-    name: "NEO-6M GPS Module",
+    name: "GPS Module",
     type: "sensor",
     description: "Global positioning system",
     icon: "mdi:satellite-variant",
-    configurable: true,
-    configOptions: {
-      updateRate: ["1 Hz", "5 Hz", "10 Hz"],
-      powerMode: ["Max Performance", "Eco", "Backup"],
-      measurementRate: ["1 per second", "2 per second", "5 per second"]
-    }
+    configurable: false
+    // configOptions: {
+    //   updateRate: ["1 Hz", "5 Hz", "10 Hz"],
+    //   powerMode: ["Max Performance", "Eco", "Backup"],
+    //   measurementRate: ["1 per second", "2 per second", "5 per second"]
+    // }
   },
   {
     id: 6,
+    name: "ESP32-WROOM-32D",
+    type: "controller",
+    description: "Dual-core WiFi & Bluetooth MCU",
+    icon: "mdi:chip",
+    configurable: false
+  },
+  {
+    id: 7,
     name: "Raspberry Pi 4",
     type: "controller",
     description: "Single-board computer",
     icon: "mdi:raspberry-pi",
-    configurable: true,
-    configOptions: {
-      cpuGovernor: ["Performance", "Ondemand", "Powersave", "Conservative"],
-      overclock: ["None", "Moderate (1.5GHz)", "High (1.8GHz)", "Custom"],
-      memorySplit: ["Default", "256MB GPU", "512MB GPU", "768MB GPU"]
-    }
+    configurable: false
   }
 ];
 
+// Voice Control Panel Component
+const VoiceControlPanel = ({ isOnline, onVoiceConfigChange }) => {
+  const [volume, setVolume] = useState(75);
+  const [speechSpeed, setSpeechSpeed] = useState(175);
+  const [selectedVoice, setSelectedVoice] = useState("en-us");
+  const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const debounceRef = useRef(null);
+  const [previewText, setPreviewText] = useState(
+    "Hello, this is a voice preview"
+  );
+
+  const voiceTypes = [
+    {
+      id: "en+f1",
+      name: "Female Voice 1",
+      icon: "mdi:microphone",
+      gender: "female"
+    },
+    {
+      id: "en+f2",
+      name: "Female Voice 2",
+      icon: "mdi:microphone",
+      gender: "female"
+    },
+    {
+      id: "en+f3",
+      name: "Female Voice 3",
+      icon: "mdi:microphone",
+      gender: "female"
+    },
+    {
+      id: "en+f4",
+      name: "Female Voice 4",
+      icon: "mdi:microphone",
+      gender: "female"
+    },
+    {
+      id: "en+f5",
+      name: "Female Voice 5",
+      icon: "mdi:microphone",
+      gender: "female"
+    },
+
+    {
+      id: "en+m1",
+      name: "Male Voice 1",
+      icon: "mdi:microphone",
+      gender: "male"
+    },
+    {
+      id: "en+m2",
+      name: "Male Voice 2",
+      icon: "mdi:microphone",
+      gender: "male"
+    },
+    {
+      id: "en+m3",
+      name: "Male Voice 3",
+      icon: "mdi:microphone",
+      gender: "male"
+    },
+    {
+      id: "en+m4",
+      name: "Male Voice 4",
+      icon: "mdi:microphone",
+      gender: "male"
+    },
+    {
+      id: "en+m5",
+      name: "Male Voice 5",
+      icon: "mdi:microphone",
+      gender: "male"
+    },
+    {
+      id: "en+m6",
+      name: "Male Voice 6",
+      icon: "mdi:microphone",
+      gender: "male"
+    },
+    {
+      id: "en+m7",
+      name: "Male Voice 7",
+      icon: "mdi:microphone",
+      gender: "male"
+    }
+  ];
+
+  useEffect(() => {
+    if (!isOnline) return;
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      onVoiceConfigChange?.({
+        volume,
+        speechSpeed,
+        speakingVoice: selectedVoice,
+        muted: isMuted
+      });
+    }, 600);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [volume, speechSpeed, selectedVoice, isMuted]);
+
+  const handleVolumeChange = (e) => {
+    const newVolume = parseInt(e.target.value);
+    setVolume(newVolume);
+    if (newVolume === 0) {
+      setIsMuted(true);
+    } else {
+      setIsMuted(false);
+    }
+    console.log("Volume changed:", newVolume);
+  };
+
+  const handleSpeedChange = (e) => {
+    const newSpeed = parseInt(e.target.value);
+    setSpeechSpeed(newSpeed);
+    console.log("Speech speed changed:", newSpeed);
+  };
+
+  const handleVoiceChange = (voiceId) => {
+    setSelectedVoice(voiceId);
+    console.log("Voice type changed:", voiceId);
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (!isMuted) {
+      setVolume(0);
+    } else {
+      setVolume(75);
+    }
+    console.log("Mute toggled:", !isMuted);
+  };
+
+  const playPreview = () => {
+    setIsPlaying(true);
+    console.log("Playing preview:", previewText);
+    setTimeout(() => setIsPlaying(false), 2000);
+  };
+
+  const getVolumeIcon = () => {
+    if (isMuted || volume === 0) return "mdi:volume-off";
+    if (volume < 30) return "mdi:volume-low";
+    if (volume < 70) return "mdi:volume-medium";
+    return "mdi:volume-high";
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`rounded-2xl border-2 p-4 sm:p-6 ${
+        isOnline
+          ? "border-primary-200 bg-gradient-to-br from-primary-50/50 to-white"
+          : "border-gray-200 bg-gray-50"
+      }`}
+    >
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <div className="flex items-center gap-3">
+          <div
+            className={`p-2 sm:p-3 rounded-xl ${
+              isOnline ? "bg-primary-100" : "bg-gray-200"
+            }`}
+          >
+            <Icon
+              icon="mdi:voice"
+              className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                isOnline ? "text-primary-600" : "text-gray-500"
+              }`}
+            />
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+              Voice Control
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-500">
+              Adjust speech and audio settings
+            </p>
+          </div>
+        </div>
+        <div
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            isOnline
+              ? "bg-green-100 text-green-700"
+              : "bg-gray-100 text-gray-500"
+          }`}
+        >
+          {isOnline ? "Active" : "Offline"}
+        </div>
+      </div>
+
+      {/* Volume Control */}
+      <div className="mb-5 sm:mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
+            <Icon icon="mdi:volume-high" className="w-4 h-4 text-gray-500" />
+            Volume Level
+          </label>
+          <span className="text-xs sm:text-sm font-semibold text-primary-600 bg-primary-50 px-2 py-1 rounded">
+            {volume}%
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleMute}
+            className={`p-2 rounded-lg transition-colors ${
+              isMuted
+                ? "bg-red-100 text-red-600"
+                : "hover:bg-gray-100 text-gray-600"
+            }`}
+            aria-label={isMuted ? "Unmute" : "Mute"}
+          >
+            <Icon icon={getVolumeIcon()} className="w-5 h-5" />
+          </button>
+          <div className="flex-1 relative">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={volume}
+              onChange={handleVolumeChange}
+              disabled={!isOnline}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: `linear-gradient(to right, #2563eb 0%, #2563eb ${volume}%, #e5e7eb ${volume}%, #e5e7eb 100%)`
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Speech Speed Control */}
+      <div className="mb-5 sm:mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
+            <Icon icon="mdi:speedometer" className="w-4 h-4 text-gray-500" />
+            Speech Speed
+          </label>
+          <span className="text-xs sm:text-sm font-semibold text-primary-600 bg-primary-50 px-2 py-1 rounded">
+            {speechSpeed} WPM
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Icon icon="mdi:turtle" className="w-5 h-5 text-gray-400" />
+          <input
+            type="range"
+            min="80"
+            max="350"
+            value={speechSpeed}
+            onChange={handleSpeedChange}
+            disabled={!isOnline}
+            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: `linear-gradient(to right, #2563eb 0%, #2563eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb 100%)`
+            }}
+          />
+          <Icon icon="mdi:rabbit" className="w-5 h-5 text-gray-400" />
+        </div>
+        <div className="flex justify-between text-xs text-gray-500 mt-1 px-2">
+          <span>Slow</span>
+          <span>Normal</span>
+          <span>Fast</span>
+        </div>
+      </div>
+
+      {/* Voice Type Selection */}
+      <div className="mb-5 sm:mb-6">
+        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-3">
+          <div className="flex items-center gap-2">
+            <Icon icon="mdi:account-voice" className="w-4 h-4 text-gray-500" />
+            Voice Type
+          </div>
+        </label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {voiceTypes.map((voice) => (
+            <button
+              key={voice.id}
+              onClick={() => handleVoiceChange(voice.id)}
+              disabled={!isOnline}
+              className={`p-2 sm:p-3 rounded-xl border-2 transition-all ${
+                selectedVoice === voice.id
+                  ? "border-primary-500 bg-primary-50 shadow-sm"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+              } ${!isOnline && "opacity-50 cursor-not-allowed"}`}
+            >
+              <div className="flex items-center gap-2">
+                <Icon icon={voice.icon} />
+                <div className="text-left">
+                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+                    {voice.name}
+                  </p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {voice.gender}
+                  </p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Preview Section */}
+      <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
+        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+          Preview Text
+        </label>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            value={previewText}
+            onChange={(e) => setPreviewText(e.target.value)}
+            disabled={!isOnline}
+            placeholder="Enter text to preview..."
+            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
+          />
+          <button
+            onClick={playPreview}
+            disabled={!isOnline || isPlaying}
+            className={`px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all ${
+              isPlaying
+                ? "bg-green-500 text-white"
+                : "bg-primary-600 text-white hover:bg-primary-700"
+            } ${(!isOnline || isPlaying) && "opacity-50 cursor-not-allowed"}`}
+          >
+            <Icon
+              icon={isPlaying ? "mdi:loading" : "mdi:play"}
+              className={`w-4 h-4 ${isPlaying ? "animate-spin" : ""}`}
+            />
+            {isPlaying ? "Playing..." : "Preview"}
+          </button>
+        </div>
+      </div>
+
+      {/* Status Bar */}
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+        <div className="flex items-center gap-1">
+          <Icon icon="mdi:check-circle" className="w-4 h-4 text-green-500" />
+          <span>Connected to audio device</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Icon icon="mdi:microphone" className="w-4 h-4 text-gray-400" />
+          <span>Speech ready</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Config Modal (keep existing code)
 const ConfigModal = ({ component, isOpen, onClose, onSave }) => {
   const [config, setConfig] = useState({});
   const [customRange, setCustomRange] = useState({ min: 2, max: 400 });
@@ -124,32 +534,18 @@ const ConfigModal = ({ component, isOpen, onClose, onSave }) => {
   }, [component]);
 
   const handleSave = async () => {
-    try {
-      await fetch("/api/component/configure", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({
-          componentId: component.id,
-          componentName: component.name,
-          configuration: config,
-          customValues: {
-            range: config.range === "Custom" ? customRange : null,
-            frequency: config.overclock === "Custom" ? customFrequency : null
-          },
-          timestamp: new Date().toISOString()
-        })
-      });
-
-      onSave(component.id, config);
-      onClose();
-
-      console.log("Configuration saved successfully");
-    } catch (error) {
-      console.error("Failed to save configuration:", error);
-    }
+    await onSave({
+      componentId: component.id,
+      config: {
+        ...config,
+        voice: {
+          volume,
+          speed: speechSpeed,
+          type: selectedVoice,
+          muted: isMuted
+        }
+      }
+    });
   };
 
   if (!isOpen || !component) return null;
@@ -355,7 +751,7 @@ const ConfigModal = ({ component, isOpen, onClose, onSave }) => {
   );
 };
 
-// Component Card
+// Component Card (keep existing code)
 const ComponentCard = ({ component, isOnline, onTogglePower, onConfigure }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -368,7 +764,7 @@ const ComponentCard = ({ component, isOnline, onTogglePower, onConfigure }) => {
           : "border-gray-200 bg-white"
       }`}
     >
-      <div className="p-4 sm:p-5">
+      <div className="p-3 sm:p-4 w-full">
         <div className="flex items-start justify-between mb-3 sm:mb-4">
           <div className="flex items-center gap-3">
             <div
@@ -384,9 +780,7 @@ const ComponentCard = ({ component, isOnline, onTogglePower, onConfigure }) => {
               <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                 {component.name}
               </h3>
-              <p className="text-xs text-gray-500 truncate">
-                {component.description}
-              </p>
+              <p className="text-xs text-gray-500 ">{component.description}</p>
             </div>
           </div>
 
@@ -439,25 +833,28 @@ const ComponentCard = ({ component, isOnline, onTogglePower, onConfigure }) => {
               </span>
             </div>
           </div>
-
-          <button
-            onClick={() => onTogglePower(component.id)}
-            className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center justify-center gap-2 transition-all text-sm font-medium ${
-              isOnline
-                ? "bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200"
-                : "bg-green-50 text-green-600 hover:bg-green-100 active:bg-green-200"
-            }`}
-            aria-label={`${isOnline ? "Power off" : "Power on"} ${component.name}`}
-          >
-            <Icon
-              icon={isOnline ? "mdi:power" : "mdi:power-off"}
-              className="w-4 h-4"
-            />
-            <span className="hidden sm:inline">
-              {isOnline ? "Power Off" : "Power On"}
-            </span>
-            <span className="inline sm:hidden">{isOnline ? "Off" : "On"}</span>
-          </button>
+          {component.configurable && (
+            <button
+              onClick={() => onTogglePower(component.id)}
+              className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center justify-center gap-2 transition-all text-sm font-medium ${
+                isOnline
+                  ? "bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200"
+                  : "bg-green-50 text-green-600 hover:bg-green-100 active:bg-green-200"
+              }`}
+              aria-label={`${isOnline ? "Power off" : "Power on"} ${component.name}`}
+            >
+              <Icon
+                icon={isOnline ? "mdi:power" : "mdi:power-off"}
+                className="w-4 h-4"
+              />
+              <span className="hidden sm:inline">
+                {isOnline ? "Power Off" : "Power On"}
+              </span>
+              <span className="inline sm:hidden">
+                {isOnline ? "Off" : "On"}
+              </span>
+            </button>
+          )}
         </div>
 
         <AnimatePresence>
@@ -515,46 +912,6 @@ const ComponentCard = ({ component, isOnline, onTogglePower, onConfigure }) => {
   );
 };
 
-const api = {
-  togglePower: async (componentId, powerState) => {
-    return fetch("/api/component/power", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({
-        componentId,
-        powerState,
-        timestamp: new Date().toISOString()
-      })
-    });
-  },
-
-  saveConfiguration: async (componentId, config) => {
-    return fetch("/api/component/configure", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({
-        componentId,
-        config,
-        timestamp: new Date().toISOString()
-      })
-    });
-  },
-
-  getComponentMetrics: async (componentId) => {
-    return fetch(`/api/component/${componentId}/metrics`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
-    }).then((res) => res.json());
-  }
-};
-
 function Advanced() {
   const [components, setComponents] = useState(componentsData);
   const [selectedComponent, setSelectedComponent] = useState(null);
@@ -580,73 +937,80 @@ function Advanced() {
     );
   }, [componentHealth]);
 
-  const handleTogglePower = async (componentId) => {
-    setIsLoading(true);
-    try {
-      const component = components.find((c) => c.id === componentId);
-      const newPowerState = !component.isOnline;
-
-      setComponents((prev) =>
-        prev.map((c) =>
-          c.id === componentId
-            ? {
-                ...c,
-                isOnline: newPowerState,
-                status: newPowerState ? "Starting..." : "Stopping..."
-              }
-            : c
-        )
-      );
-
-      await api.togglePower(componentId, newPowerState);
-
-      setComponents((prev) =>
-        prev.map((c) =>
-          c.id === componentId
-            ? {
-                ...c,
-                isOnline: newPowerState,
-                status: newPowerState ? "Online" : "Offline"
-              }
-            : c
-        )
-      );
-    } catch (error) {
-      console.error("Failed to toggle power:", error);
-      setComponents((prev) =>
-        prev.map((c) =>
-          c.id === componentId
-            ? {
-                ...c,
-                isOnline: !components.find((comp) => comp.id === componentId)
-                  .isOnline,
-                status: components.find((comp) => comp.id === componentId)
-                  .isOnline
-                  ? "Online"
-                  : "Offline"
-              }
-            : c
-        )
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleConfigure = (component) => {
     setSelectedComponent(component);
     setIsConfigModalOpen(true);
   };
 
-  const handleSaveConfig = async (componentId, config) => {
+  const handleDeviceStateUpdate = async (partialState) => {
     setIsLoading(true);
+
     try {
-      await api.saveConfiguration(componentId, config);
-      // You can add a toast notification here
-      console.log("Configuration saved successfully");
+      await wsApi.updateDeviceState({
+        timestamp: new Date().toISOString(),
+        ...partialState
+      });
+
+      console.log("Device state updated");
     } catch (error) {
-      console.error("Failed to save config:", error);
-      // You can add error toast here
+      console.error("Device state update failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const volumeToMiddlewareScale = (v) => {
+    return Math.max(0, Math.min(1, v / 100));
+  };
+
+  const normalizeConfigPayload = (localConfig) => {
+    return {
+      fallAngleThreshold: parseFloat(localConfig.fallAngleThreshold) || 10.0,
+
+      fallConfirmationDelay:
+        parseInt(localConfig.fallConfirmationDelay) || 3000,
+
+      obstacleDistanceThreshold:
+        parseFloat(localConfig.obstacleDistanceThreshold) || 100.0,
+
+      pointDownAngle: parseFloat(localConfig.pointDownAngle) || 30.0,
+
+      edgeBeepMin: parseInt(localConfig.edgeBeepMin) || 400,
+
+      edgeBeepMax: parseInt(localConfig.edgeBeepMax) || 708,
+
+      edgeContinuous: parseInt(localConfig.edgeContinuous) || 709,
+
+      volumeLevel: volumeToMiddlewareScale(localConfig.volume ?? 0.3),
+
+      speechSpeed: localConfig.speechSpeed ?? 150,
+
+      speakingVoice: localConfig.speakingVoice || "f5",
+
+      enableFallDetection: Boolean(localConfig.enableFallDetection),
+
+      enableEdgeDetection: Boolean(localConfig.enableEdgeDetection),
+
+      enableObstacleDetection: Boolean(localConfig.enableObstacleDetection),
+
+      enableGPS: Boolean(localConfig.enableGPS)
+    };
+  };
+
+  const handleSaveConfig = async (payload) => {
+    setIsLoading(true);
+
+    try {
+      const normalizedConfig = normalizeConfigPayload(payload.config);
+
+      await wsApi.saveDeviceConfig({
+        componentId: payload.componentId,
+        config: normalizedConfig
+      });
+
+      console.log("Configuration saved");
+    } catch (error) {
+      console.error("Config save failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -655,8 +1019,8 @@ function Advanced() {
   const onlineCount = components.filter((c) => c.isOnline).length;
 
   return (
-    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
-      <div className="mx-auto w-full space-y-4 sm:space-y-6">
+    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6 overflow-x-hidden">
+      <div className="mx-auto w-full space-y-4 sm:space-y-6 ">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
@@ -695,20 +1059,6 @@ function Advanced() {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          {/* <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl p-4 border border-primary-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary-100 rounded-lg">
-                <Icon icon="mdi:flash" className="w-5 h-5 text-primary-600" />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Power Consumption
-                </p>
-                <p className="text-base sm:text-lg font-semibold">12.4W</p>
-              </div>
-            </div>
-          </div> */}
-
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -743,17 +1093,32 @@ function Advanced() {
             </div>
           </div>
         </div>
+
+        {/* Voice Control Panel */}
+        <VoiceControlPanel
+          isOnline={onlineCount > 0 || true}
+          onVoiceConfigChange={(config) =>
+            handleDeviceStateUpdate({
+              voiceConfig: config
+            })
+          }
+        />
       </div>
 
       {/* Component Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mt-6 overflow-hidden">
         <AnimatePresence>
           {components.map((component) => (
             <ComponentCard
               key={component.id}
               component={component}
               isOnline={component.isOnline}
-              onTogglePower={handleTogglePower}
+              onTogglePower={() =>
+                handleDeviceStateUpdate({
+                  componentId: component.id,
+                  power: !component.isOnline
+                })
+              }
               onConfigure={handleConfigure}
             />
           ))}
@@ -761,7 +1126,7 @@ function Advanced() {
       </div>
 
       {/* Loading Overlay */}
-      {isLoading && (
+      {/* {isLoading && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 flex flex-col items-center gap-4">
             <Icon
@@ -771,7 +1136,7 @@ function Advanced() {
             <p className="text-gray-700">Processing request...</p>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Empty State */}
       {components.length === 0 && (
