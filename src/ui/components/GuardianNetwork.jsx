@@ -124,12 +124,12 @@ const GuardianNetwork = () => {
                   </p>
                   <div className="flex items-center gap-1.5 mt-1">
                     <span
-                      className={`w-2 h-2 rounded-full ${guardian.status === "active" ? "bg-green-500" : "bg-gray-400"}`}
+                      className={`w-2 h-2 rounded-full ${guardian.activeStatus === "online" ? "bg-green-500" : "bg-gray-400"}`}
                     ></span>
                     <p
-                      className={`text-xs font-medium ${guardian.status === "active" ? "text-green-600" : "text-gray-500"}`}
+                      className={`text-xs font-medium ${guardian.activeStatus === "online" ? "text-green-600" : "text-gray-500"}`}
                     >
-                      {guardian.status === "active" ? "Active" : "Offline"}
+                      {guardian.activeStatus === "online" ? "Online" : "Offline"}
                     </p>
                   </div>
                 </div>

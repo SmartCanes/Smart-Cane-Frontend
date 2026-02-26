@@ -1,5 +1,5 @@
-import { getMyProfile } from "@/api/backendService";
-import { useRealtimeStore, useUserStore } from "@/stores/useStore";
+import { getMyProfile, sendHeartbeat } from "@/api/backendService";
+import { useGuardiansStore, useRealtimeStore, useUserStore } from "@/stores/useStore";
 import DashboardSide from "@/ui/components/DashboardSide";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
 import Header from "@/ui/components/Header";
@@ -12,6 +12,7 @@ const ScrollContext = createContext();
 const DashboardLayout = () => {
   const { setUser } = useUserStore();
   const { emergency, connectWs, disconnectWs } = useRealtimeStore();
+  const { fetchGuardiansAndInvites } = useGuardiansStore();
   const [toast, setToast] = useState({
     message: "",
     type: "",
@@ -27,6 +28,23 @@ const DashboardLayout = () => {
     return () => {
       disconnectWs();
     };
+  }, []);
+
+  // Send heartbeat every 30 s so the backend keeps active_status accurate
+  useEffect(() => {
+    sendHeartbeat(); // immediate on mount
+    const heartbeatInterval = setInterval(() => {
+      sendHeartbeat();
+    }, 30_000);
+    return () => clearInterval(heartbeatInterval);
+  }, []);
+
+  // Refresh guardian list every 30 s to pick up status changes from other guardians
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      fetchGuardiansAndInvites();
+    }, 30_000);
+    return () => clearInterval(refreshInterval);
   }, []);
 
   useEffect(() => {

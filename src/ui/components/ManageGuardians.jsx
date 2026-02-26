@@ -443,11 +443,9 @@ const GuardianTile = ({
             {/* Status dot */}
             <span
               className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-white ${
-                guardian.status === "active"
+                guardian.activeStatus === "online"
                   ? "bg-green-500"
-                  : guardian.status === "pending"
-                    ? "bg-yellow-400"
-                    : "bg-gray-400"
+                  : "bg-gray-400"
               }`}
             />
           </div>
@@ -474,14 +472,12 @@ const GuardianTile = ({
               {/* Status */}
               <span
                 className={`inline-flex shrink-0 px-3 py-1 text-xs rounded-full font-semibold ${
-                  guardian.status === "active"
+                  guardian.activeStatus === "online"
                     ? "bg-green-50 text-green-800"
-                    : guardian.status === "pending"
-                      ? "bg-yellow-50 text-yellow-800"
-                      : "bg-gray-100 text-gray-600"
+                    : "bg-gray-100 text-gray-600"
                 }`}
               >
-                {guardian.status || "inactive"}
+                {guardian.activeStatus === "online" ? "Online" : "Offline"}
               </span>
 
               {/* Role Badge */}
@@ -689,14 +685,12 @@ const GuardianListItem = ({
 
                 <span
                   className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                    guardian.status === "active"
+                    guardian.activeStatus === "online"
                       ? "bg-green-100 text-green-800"
-                      : guardian.status === "pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-gray-100 text-gray-700"
+                      : "bg-gray-100 text-gray-700"
                   }`}
                 >
-                  {guardian.status || "Inactive"}
+                  {guardian.activeStatus === "online" ? "Online" : "Offline"}
                 </span>
               </div>
 
@@ -1170,7 +1164,7 @@ const ManageGuardiansModal = ({
 
   const stats = {
     total: currentGuardians.length,
-    active: currentGuardians.filter((g) => g.status === "active").length,
+    active: currentGuardians.filter((g) => g.activeStatus === "online").length,
     pending: pendingInvitesCount(deviceId)
   };
 

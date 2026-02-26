@@ -164,3 +164,7 @@ export const uploadVIPImage = (vipId, imageFile) => {
     })
   );
 };
+
+// Heartbeat — keeps guardian active_status accurate
+export const sendHeartbeat = () =>
+  handleRequest(() => backendApi.post("/auth/heartbeat"));

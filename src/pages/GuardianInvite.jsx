@@ -144,7 +144,7 @@ const GuardianInvite = () => {
           navigate(`/register?invite_token=${encodeURIComponent(token)}`)
         );
       } catch (err) {
-        handleError(err.response);
+        handleError(err);
       }
     };
 
@@ -154,13 +154,18 @@ const GuardianInvite = () => {
 
   const handleError = (err) => {
     console.error("Invitation processing error:", err);
-    if (!err) return;
-    if ([404, 400].includes(err.status)) setStatus("invalid_token");
-    else if (err.status === 410) setStatus("expired");
+    const errResponse = err?.response;
+    if (!errResponse) {
+      setStatus("error");
+      setMessage("Could not reach the server. Please check your connection and try again.");
+      return;
+    }
+    if ([404, 400].includes(errResponse.status)) setStatus("invalid_token");
+    else if (errResponse.status === 410) setStatus("expired");
     else setStatus("error");
 
     setMessage(
-      err?.data?.message ||
+      errResponse?.data?.message ||
         "An unexpected error occurred while processing your invitation."
     );
   };
