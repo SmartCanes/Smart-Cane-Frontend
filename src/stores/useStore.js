@@ -42,133 +42,153 @@ export const useUserStore = create(
   )
 );
 
-export const useRealtimeStore = create((set, get) => ({
-  _wsConnected: false,
-  connectionStatus: false,
-  emergency: false,
-  canePosition: null,
-  guardianPosition: null,
-  componentHealth: {
-    gpsStatus: false,
-    ultrasonicStatus: false,
-    infraredStatus: false,
-    accelerometerStatus: false,
-    esp32Status: false,
-    raspberryPiStatus: false
-  },
-  connectWs: () => {
-    wsApi.off("status");
-    wsApi.off("location");
-    wsApi.off("connect");
-    wsApi.off("disconnect");
-    wsApi.connect();
+export const useRealtimeStore = create(
+  persist(
+    (set, get) => ({
+      _wsConnected: false,
+      connectionStatus: false,
+      emergency: false,
+      canePosition: null,
+      guardianPosition: null,
+      deviceConfig: {},
+      componentHealth: {
+        gpsStatus: false,
+        ultrasonicStatus: false,
+        infraredStatus: false,
+        accelerometerStatus: false,
+        esp32Status: false,
+        raspberryPiStatus: false
+      },
+      connectWs: () => {
+        wsApi.off("status");
+        wsApi.off("location");
+        wsApi.off("connect");
+        wsApi.off("disconnect");
+        wsApi.connect();
 
-    let heartbeatTimeout;
+        let heartbeatTimeout;
 
-    const resetHeartbeat = () => {
-      if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
-      heartbeatTimeout = setTimeout(() => {
-        set({ connectionStatus: false });
-        console.log("WebSocket connection lost (timeout)");
-      }, 12000);
-    };
+        const resetHeartbeat = () => {
+          if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
+          heartbeatTimeout = setTimeout(() => {
+            set({ connectionStatus: false });
+            console.log("WebSocket connection lost (timeout)");
+          }, 12000);
+        };
 
-    wsApi.on("connect", () => {
-      console.log("WebSocket connected:", wsApi.socket?.id);
-      set({ _wsConnected: true });
-      useBluetoothStore.getState().connectBluetoothWs();
-      resetHeartbeat();
-    });
+        wsApi.on("connect", () => {
+          console.log("WebSocket connected:", wsApi.socket?.id);
+          set({ _wsConnected: true });
+          useBluetoothStore.getState().connectBluetoothWs();
+          resetHeartbeat();
+        });
 
-    wsApi.on("disconnect", () => {
-      console.log("WebSocket disconnected");
-      set({ _wsConnected: false, connectionStatus: false });
-      clearTimeout(heartbeatTimeout);
+        wsApi.on("disconnect", () => {
+          console.log("WebSocket disconnected");
+          set({ _wsConnected: false, connectionStatus: false });
+          clearTimeout(heartbeatTimeout);
 
-      setTimeout(() => {
-        get().connectWs();
-      }, 5000);
-    });
+          setTimeout(() => {
+            get().connectWs();
+          }, 5000);
+        });
 
-    wsApi.on("status", (data) => {
-      set({
-        connectionStatus: data.status === "online",
-        emergency: data.emergency,
-        componentHealth: {
-          gpsStatus: Number(data.gpsStatus) === 2,
-          ultrasonicStatus:
-            data.ultrasonicStatus === true || data.ultrasonicStatus === "false",
-          infraredStatus:
-            data.infraredStatus === true || data.infraredStatus === "false",
-          mpuStatus: data.mpuStatus === true || data.mpuStatus === "false",
-          esp32Status: data.status === "online"
+        wsApi.on("status", (data) => {
+          set({
+            connectionStatus: data.status === "online",
+            emergency: data.emergency,
+            componentHealth: {
+              gpsStatus: Number(data.gpsStatus) === 2,
+              ultrasonicStatus:
+                data.ultrasonicStatus === true ||
+                data.ultrasonicStatus === "false",
+              infraredStatus:
+                data.infraredStatus === true || data.infraredStatus === "false",
+              mpuStatus: data.mpuStatus === true || data.mpuStatus === "false",
+              esp32Status: data.status === "online"
+            }
+          });
+          resetHeartbeat();
+        });
+
+        wsApi.on("piStatus", (data) => {
+          set((state) => ({
+            componentHealth: {
+              ...state.componentHealth,
+              raspberryPiStatus: data.alive === true || data.alive === "false"
+            }
+          }));
+          resetHeartbeat();
+        });
+
+        wsApi.on("location", (data) => {
+          if (data?.lat != null && data?.lng != null) {
+            set({ canePosition: [data.lat, data.lng] });
+          }
+          resetHeartbeat();
+        });
+
+        wsApi.on("deviceConfig", (data) => {
+          if (!data) return;
+
+          set((state) => ({
+            deviceConfig: {
+              ...data
+            }
+          }));
+
+          resetHeartbeat();
+        });
+      },
+
+      setGuardianLocation: (loc) => set({ guardianLocation: loc }),
+
+      startGuardianTracking: () => {
+        if ("geolocation" in navigator && get()._guardianWatchId === null) {
+          const watchId = navigator.geolocation.watchPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              set({ guardianPosition: [latitude, longitude] });
+            },
+            (error) =>
+              console.error("Failed to track guardian:", error.message),
+            { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+          );
+          set({ _guardianWatchId: watchId });
+        } else if (!("geolocation" in navigator)) {
+          console.error("Geolocation is not supported by this browser.");
         }
-      });
-      resetHeartbeat();
-    });
+      },
 
-    wsApi.on("piStatus", (data) => {
-      set((state) => ({
-        componentHealth: {
-          ...state.componentHealth,
-          raspberryPiStatus: data.alive === true || data.alive === "false"
+      stopGuardianTracking: () => {
+        const watchId = get()._guardianWatchId;
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+          set({ _guardianWatchId: null });
         }
-      }));
-      resetHeartbeat();
-    });
+      },
 
-    wsApi.on("location", (data) => {
-      if (data?.lat != null && data?.lng != null) {
-        set({ canePosition: [data.lat, data.lng] });
-      }
-      resetHeartbeat();
-    });
+      disconnectWs: () => {
+        wsApi.disconnect();
+        set({ _wsConnected: false, connectionStatus: false });
+      },
 
-    // wsApi.on("bluetoothDevices", (data) => {
-    //   const devices = data?.payload?.devices || data?.devices;
-
-    //   if (!devices) return;
-
-    //   useBluetoothStore.getState().handleBluetoothPayload({
-    //     payload: { devices }
-    //   });
-    // });
-
-    // wsApi.on("destinationReached", () => {
-    //   const { clearRoute } = useRouteStore.getState();
-    //   clearRoute();
-    // });
-  },
-  setGuardianLocation: (loc) => set({ guardianLocation: loc }),
-  startGuardianTracking: () => {
-    if ("geolocation" in navigator && get()._guardianWatchId === null) {
-      const watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          set({ guardianPosition: [latitude, longitude] });
-        },
-        (error) => console.error("Failed to track guardian:", error.message),
-        { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
-      );
-      set({ _guardianWatchId: watchId });
-    } else if (!("geolocation" in navigator)) {
-      console.error("Geolocation is not supported by this browser.");
+      setDeviceConfig: (config) =>
+        set((state) => ({
+          deviceConfig: {
+            ...config
+          }
+        }))
+    }),
+    {
+      name: "realtime-storage",
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({
+        deviceConfig: state.deviceConfig
+      })
     }
-  },
-
-  stopGuardianTracking: () => {
-    const watchId = get()._guardianWatchId;
-    if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
-      set({ _guardianWatchId: null });
-    }
-  },
-
-  disconnectWs: () => {
-    wsApi.disconnect();
-    set({ _wsConnected: false, connectionStatus: false });
-  }
-}));
+  )
+);
 
 export const useUIStore = create(
   persist(
@@ -263,11 +283,14 @@ export const useDevicesStore = create(
       setSelectedDevice: (device) => {
         set({ selectedDevice: device });
 
-        if (device?.deviceSerialNumber) {
-          wsApi.emit("subscribe", { serial: device.deviceSerialNumber });
-          console.log("Switching to serial:", device.deviceSerialNumber);
+        const serial = device?.deviceSerialNumber;
 
-          wsApi.emit("requestStatus", { serial: device.deviceSerialNumber });
+        if (serial) {
+          wsApi.emit("subscribe", { serial });
+          console.log("Switching to serial:", serial);
+
+          wsApi.emit("requestStatus", { serial });
+          wsApi.emit("requestDeviceConfig", { serial });
         }
       }
     }),
