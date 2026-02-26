@@ -17,6 +17,7 @@ import Setting from "./pages/Setting";
 import DashboardLayout from "./layout/DashboardLayout";
 import WeatherBoard from "./pages/WeatherBoard";
 import ActivityReport from "./pages/ActivityReport";
+import ActivityLogs from "./pages/ActivityLogs";
 import Notes from "./pages/Notes.jsx";
 import GetStarted from "./pages/GetStarted.jsx";
 import { GuardianProfile } from "./pages/GuardianProfile";
@@ -45,6 +46,7 @@ createRoot(document.getElementById("root")).render(
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/activity-report" element={<ActivityReport />} />
+            <Route path="/activity-logs" element={<ActivityLogs />} />
             <Route path="/devices" element={<Devices />} />
             <Route path="/weather-board" element={<WeatherBoard />} />
             <Route path="/settings" element={<Setting />} />
