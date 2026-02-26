@@ -24,6 +24,7 @@ import Devices from "./pages/Devices";
 import GuardianInvite from "./pages/GuardianInvite";
 import Advanced from "./pages/Advanced.jsx";
 import Notifications from "./pages/Notifications";
+import EmergencyDetails from "./pages/EmergencyDetails.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -40,6 +41,7 @@ createRoot(document.getElementById("root")).render(
         </Route>
 
         <Route element={<ProtectedLayout />}>
+          <Route path="/emergency" element={<EmergencyDetails />} />
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/activity-report" element={<ActivityReport />} />

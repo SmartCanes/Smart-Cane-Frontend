@@ -275,15 +275,15 @@ const Login = () => {
                     </p>
                   )}
 
-                  <ReCAPTCHA
-                    sitekey={import.meta.env.VITE_CAPTCHA_KEY}
-                    onChange={(value) => {
-                      setCaptchaValue(value);
-                      if (errors.captcha)
-                        setErrors((prev) => ({ ...prev, captcha: "" }));
-                    }}
-                    asyncScriptOnLoad={() => setCaptchaLoading(false)}
-                  />
+                    <ReCAPTCHA
+                      sitekey={import.meta.env.VITE_CAPTCHA_KEY}
+                      onChange={(value) => {
+                        setCaptchaValue(value);
+                        if (errors.captcha)
+                          setErrors((prev) => ({ ...prev, captcha: "" }));
+                      }}
+                      asyncScriptOnLoad={() => setCaptchaLoading(false)}
+                    />
                 </div>
 
                 {errors.captcha && (
