@@ -160,10 +160,10 @@ export const SelectRole = ({
                         key={role.value}
                         type="button"
                         onClick={() => {
-                          setSelectedGuardian((prev) => ({
-                            ...prev,
-                            role: role.value
-                          }));
+                          // setSelectedGuardian((prev) => ({
+                          //   ...prev,
+                          //   role: role.value
+                          // }));
                           setSelectedRoleValue(role.value);
                         }}
                         whileHover={{ y: -4, scale: 1.01 }}
