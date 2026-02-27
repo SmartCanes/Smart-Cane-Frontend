@@ -2,171 +2,268 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HoverIcon, ScaleIn, SlideUp } from "@/wrapper/MotionWrapper";
+import africaImg from "@/assets/images/team/africa.jpg";
+import arrojoImg from "@/assets/images/team/arrojo.jpg";
+import barbaImg from "@/assets/images/team/barba.jpg";
+import belasImg from "@/assets/images/team/belas.jpg";
+import casipeImg from "@/assets/images/team/casipe.jpg";
+import delacruzImg from "@/assets/images/team/delacruz.jpg";
+import diolaImg from "@/assets/images/team/diola.jpg";
+import ibanezImg from "@/assets/images/team/ibañez.jpg";
+import mabatoImg from "@/assets/images/team/mabato.jpg";
+import madriagaImg from "@/assets/images/team/madriaga.jpg";
+import morreImg from "@/assets/images/team/morre.jpg";
+import patacsilImg from "@/assets/images/team/patacsil.jpg";
+import perezImg from "@/assets/images/team/perez.jpg";
+import villamoraImg from "@/assets/images/team/villamora.jpg";
 
-// Team member data structure
 const teamMembers = [
   {
     id: 1,
     name: "Christine D. Africa",
     role: "Lead Product Designer & UI/UX Specialist",
-    bio: "Passionate about creating inclusive designs that empower people with disabilities. Alex brings 8+ years of UX expertise to iCane.",
-    image: "@/assets/images/team/africa.jpg",
+    bio: "Leads iCane’s product experience from concept to prototype, translating user needs into accessible, intuitive interfaces and consistent design systems.",
+    image: africaImg,
     social: {
       linkedin: "https://linkedin.com/in/alexrivera",
       twitter: "https://twitter.com/alexrivera",
       github: "https://github.com/alexrivera"
     },
-    expertise: ["UI/UX", "Accessibility", "User Research"],
+    expertise: [
+      "UI/UX Design",
+      "Prototyping",
+      "Workflow Management",
+      "Branding",
+      "Project Coordination",
+      "Graphic Design"
+    ],
     color: "#122550"
   },
   {
     id: 2,
     name: "Jestro Marcus T. Arrojo",
     role: "Head Documentation & Research Specialist",
-    bio: "Specializes in computer vision and machine learning. Sarah leads the development of iCane's visual recognition system.",
-    image: "@/assets/images/team/arrojo.jpg",
+    bio: "Leads research and documentation for iCane, consolidating technical findings into clear reports, diagrams, and annotated visuals to support development and evaluation.",
+    image: arrojoImg,
     social: {
       linkedin: "https://linkedin.com/in/sarahchen",
       twitter: "https://twitter.com/sarahchen",
       github: "https://github.com/sarahchen"
     },
-    expertise: ["AI/ML", "Computer Vision", "IoT"],
+    expertise: [
+      "Technical Writing",
+      "Research Methods",
+      "Documentation Standards",
+      "Workflow Management",
+      "Citation/Formatting",
+      "Project Coordination",
+      "Research"
+    ],
     color: "#1C253C"
   },
   {
     id: 3,
     name: "Luigi B. Barba",
     role: "Web & UI Engineer",
-    bio: "Expert in embedded systems and sensor integration. Marcus ensures iCane's hardware is reliable, durable, and user-friendly.",
-    image: "@/assets/images/team/barba.jpg",
+    bio: "Builds iCane’s web UI with a focus on clean components, responsive layouts, and smooth user interactions for both users and guardians.",
+    image: barbaImg,
     social: {
       linkedin: "https://linkedin.com/in/marcusthompson",
       twitter: "https://twitter.com/marcusthompson",
       github: "https://github.com/marcusthompson"
     },
-    expertise: ["Embedded Systems", "Sensors", "IoT"],
+    expertise: [
+      "Responsive UI",
+      "Component Architecture",
+      "Frontend Development",
+      "Developers"
+    ],
     color: "#122550"
   },
   {
     id: 4,
     name: "Ma. Eloisa B. Belas",
     role: "Assistant Documentation & Product Manager",
-    bio: "Works directly with visually impaired communities to ensure iCane meets real-world needs. Elena advocates for inclusive technology.",
-    image: "@/assets/images/team/belas.jpg",
+    bio: "Supports product planning and documentation by coordinating requirements, keeping progress aligned, and ensuring deliverables are clearly written and well-structured.",
+    image: belasImg,
     social: {
       linkedin: "https://linkedin.com/in/elenarodriguez",
       twitter: "https://twitter.com/elenarodriguez",
       github: "https://github.com/elenarodriguez"
     },
-    expertise: ["Accessibility", "User Testing", "Community"],
+    expertise: [
+      "Branding",
+      "Requirements Gathering",
+      "Project Coordination",
+      "Documentation",
+      "Prototyping",
+      "Stakeholder Communication",
+      "Workflow Management",
+      "Research Methods",
+      "Research",
+      "Graphic Design"
+    ],
     color: "#1C253C"
   },
   {
     id: 5,
     name: "Ryan C. Casipe",
     role: "Web Developer & Hardware Engineer",
-    bio: "Builds the companion web app and backend services. David focuses on creating seamless connectivity between iCane and guardians.",
-    image: "@/assets/images/team/casipe.jpg",
+    bio: "Bridges software and hardware by developing web features while helping integrate sensors and device components for reliable end-to-end functionality.",
+    image: casipeImg,
     social: {
       linkedin: "https://linkedin.com/in/davidkim",
       twitter: "https://twitter.com/davidkim",
       github: "https://github.com/davidkim"
     },
-    expertise: ["React", "Node.js", "Cloud", "IoT"],
+    expertise: [
+      "Web Development",
+      "Frontend Development",
+      "Hardware Engineering",
+      "Troubleshooting",
+      "Developers",
+      "Responsive UI",
+      "Component Architecture"
+    ],
     color: "#122550"
   },
   {
     id: 6,
     name: "John Mark G. Dela Cruz",
     role: "Full Stack Web Developer & Visually Impaired User",
-    bio: "Provides medical expertise on visual impairment. Dr. Patel ensures iCane's features align with clinical needs and best practices.",
-    image: "@/assets/images/team/delacruz.jpg",
+    bio: "Develops full-stack features while providing direct user perspective, helping validate flows, feedback, and accessibility decisions from real-world usage.",
+    image: delacruzImg,
     social: {
       linkedin: "https://linkedin.com/in/mayapatel",
       twitter: "https://twitter.com/mayapatel",
       github: "https://github.com/mayapatel"
     },
-    expertise: ["Ophthalmology", "Research", "Medical Ethics"],
+    expertise: [
+      "Web Development",
+      "Frontend Development",
+      "Backend Development",
+      "Developers",
+      "UI/UX Design",
+      "Responsive UI",
+      "Component Architecture"
+    ],
     color: "#1C253C"
   },
   {
     id: 7,
     name: "Zimon L. Diola",
     role: "UI/UX Designer & Layout Specialist",
-    bio: "Focuses on real-time connectivity and middleware integrations to keep iCane data flowing reliably from device to cloud to web.",
-    image: "@/assets/images/team/diola.jpg",
+    bio: "Designs layouts and presentation materials for iCane, ensuring screens, reports, and visuals communicate information clearly and consistently.",
+    image: diolaImg,
     social: { linkedin: "", twitter: "", github: "" },
-    expertise: ["WebSockets", "APIs", "Cloud Integration"],
+    expertise: [
+      "UI/UX Design",
+      "Layout Design",
+      "Technical Writing",
+      "Graphic Design"
+    ],
     color: "#122550"
   },
   {
     id: 8,
     name: "Gil Andrei Paul B. Ibañez",
     role: "Researcher & Documentation Specialist",
-    bio: "Works on object detection performance and edge deployment to ensure fast, accurate recognition on the Raspberry Pi.",
-    image: "@/assets/images/team/ibañez.jpg",
+    bio: "Supports iCane research and testing, documenting experiments, results, and implementation notes to keep the team aligned and the project reproducible.",
+    image: ibanezImg,
     social: { linkedin: "", twitter: "", github: "" },
-    expertise: ["YOLO", "Edge AI", "Optimization"],
+    expertise: [
+      "Requirements Gathering",
+      "Research",
+      "Report Writing",
+      "Citation/Formatting"
+    ],
     color: "#1C253C"
   },
   {
     id: 9,
     name: "Ralph Christian P. Mabato",
     role: "Project Manager & Quality Assurance",
-    bio: "Builds robust ESP32 firmware and device communication flows for reliable sensor capture and telemetry.",
-    image: "@/assets/images/team/mabato.jpg",
+    bio: "Leads planning and quality assurance for iCane, organizing tasks, tracking progress, and verifying features through structured testing and validation.",
+    image: mabatoImg,
     social: { linkedin: "", twitter: "", github: "" },
-    expertise: ["ESP32", "Firmware", "Serial Comms"],
+    expertise: [
+      "Requirements Gathering",
+      "Stakeholder Communication",
+      "Quality Assurance Testing",
+      "Workflow Management",
+      "Project Coordination",
+      "Technical Writing",
+      "Research"
+    ],
     color: "#122550"
   },
   {
     id: 10,
     name: "Jomari O. Madriaga",
     role: "Graphic Designer & UI/UX Designer",
-    bio: "Ensures iCane works smoothly through systematic testing, validation, and real-world scenario checks.",
-    image: "@/assets/images/team/madriaga.jpg",
+    bio: "Creates iCane’s visual assets and UI polish, combining branding, graphic design, and interface design to produce a cohesive look and feel.",
+    image: madriagaImg,
     social: { linkedin: "", twitter: "", github: "" },
-    expertise: ["Testing", "Validation", "Bug Triage"],
+    expertise: ["Graphic Design", "Visual Assets"],
     color: "#1C253C"
   },
   {
     id: 11,
     name: "Herlyn Morre",
-    role: "Project Coordinator",
-    bio: "Coordinates timelines, documentation, and team alignment to keep iCane deliverables on track.",
-    image: "@/assets/images/team/morre.jpg",
+    role: "Researcher & Documentation Specialist",
+    bio: "Coordinates documentation and research tasks, keeping project notes organized and ensuring outputs are clear, consistent, and ready for submission.",
+    image: morreImg,
     social: { linkedin: "", twitter: "", github: "" },
-    expertise: ["Planning", "Documentation", "Coordination"],
+    expertise: [
+      "Research Support",
+      "Citation/Formatting",
+      "Requirements Gathering",
+      "Research"
+    ],
     color: "#122550"
   },
   {
     id: 12,
     name: "Adrian V. Patacsil",
     role: "Researcher & Documentation Specialist",
-    bio: "Builds responsive UI experiences and ensures iCane looks great and works well across devices, especially mobile.",
-    image: "@/assets/images/team/patacsil.jpg",
+    bio: "Assists in research and documentation, translating technical work into understandable write-ups and maintaining clear records of implementation decisions.",
+    image: patacsilImg,
     social: { linkedin: "", twitter: "", github: "" },
-    expertise: ["React", "Responsive UI", "UX Implementation"],
+    expertise: [
+      "Technical Writing",
+      "Requirements Gathering",
+      "Research Support",
+      "Citation/Formatting",
+      "Stakeholder Communication",
+      "Research"
+    ],
     color: "#1C253C"
   },
   {
     id: 13,
     name: "Valerine Anne S. Perez",
     role: "Researcher & Technical Writer",
-    bio: "Conducts user research and testing to make sure iCane stays human-centered and accessibility-first.",
-    image: "@/assets/images/team/perez.jpg",
+    bio: "Writes and edits iCane’s technical content, ensuring the paper, captions, and documentation are readable, consistent, and properly structured.",
+    image: perezImg,
     social: { linkedin: "", twitter: "", github: "" },
-    expertise: ["User Research", "Accessibility", "Prototyping"],
+    expertise: [
+      "Technical Writing",
+      "Documentation",
+      "Citation/Formatting",
+      "Research Support",
+      "Stakeholder Communication",
+      "Research"
+    ],
     color: "#122550"
   },
   {
     id: 14,
     name: "Ivan Ren M. Villamora",
     role: "Lead Developer",
-    bio: "Leads full-stack development and system architecture for iCane, focusing on secure, scalable, real-time features.",
-    image: "@/assets/images/team/villamora.jpg",
+    bio: "Leads system architecture and implementation, bringing components together into a reliable, secure, and scalable real-time solution.",
+    image: villamoraImg,
     social: { linkedin: "", twitter: "", github: "" },
-    expertise: ["System Design", "Full Stack", "Cloud"],
+    expertise: ["System Architecture", "IoT/Edge Systems", "Developers"],
     color: "#1C253C"
   }
 ];
@@ -216,12 +313,19 @@ const TeamMemberCard = ({ member, index }) => {
               transition={{ duration: 0.4 }}
               className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 relative"
             >
-              {/* Placeholder for actual image - replace with <img> when you have real images */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <Icon
-                  icon="ph:user-circle-fill"
-                  className="w-20 h-20 text-gray-400"
-                />
+                {member.image ? (
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <Icon
+                    icon="ph:user-circle-fill"
+                    className="w-20 h-20 text-gray-400"
+                  />
+                )}
               </div>
 
               {/* Overlay gradient */}

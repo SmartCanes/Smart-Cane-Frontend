@@ -13,11 +13,13 @@ import twitterIcon from "@/assets/images/twitter-icon.png";
 import instagramIcon from "@/assets/images/instagram-icon.png";
 import callIcon from "@/assets/images/call-icon.png";
 import emailIcon from "@/assets/images/email-icon.png";
-import teamPhoto from "@/assets/images/team-photo.png";
+import teamPhoto from "@/assets/images/team-photo.jpg";
 import FeatureCard from "@/ui/components/FeatureCard";
 import FAQItem from "@/ui/components/FAQItem";
+import CaneViewer from "@/ui/components/CaneViewer";
+import { motion, AnimatePresence } from "framer-motion";
+
 import {
-  BlinkIcon,
   BlinkingIcon,
   FadeIn,
   HoverIcon,
@@ -355,6 +357,34 @@ const GuestPage = () => {
   const autoScrollEnabled = true;
   const isProgrammaticScrollRef = useRef(false);
   const [isCarouselVisible, setIsCarouselVisible] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 768) setIsMobileMenuOpen(false); // md breakpoint
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setIsMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const updateActiveCard = useCallback(() => {
     if (isProgrammaticScrollRef.current) return;
@@ -511,51 +541,173 @@ const GuestPage = () => {
   return (
     <div className="min-h-screen w-full bg-[#FDFCF9] text-[#1C253C] overflow-x-hidden">
       {/* Navigation */}
-      <header className="w-full bg-white/95 backdrop-blur shadow-sm sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-          <div className="flex items-center gap-3">
-            <ScrollLink targetId="home">
-              <BlinkingIcon
-                src={icaneLogo}
-                alt="iCane logo"
-                className="h-11 w-11"
-              />
-            </ScrollLink>
+      <header
+        id="header"
+        className="w-full bg-white/95 backdrop-blur shadow-sm sticky top-0 z-20"
+      >
+        <div className="max-w-6xl mx-auto px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center">
+            {/* LEFT: Logo (fixed width) */}
+            <div className="flex items-center gap-3 w-[220px]">
+              <ScrollLink targetId="home" className="inline-flex items-center">
+                {/* <BlinkingIcon
+                  src={icaneLogo}
+                  alt="iCane logo"
+                  className="h-11 w-11"
+                /> */}
+                <img src={icaneLogo} alt="iCane logo" className="h-11 w-11" />
+              </ScrollLink>
+            </div>
+
+            {/* CENTER: Desktop nav (true centered) */}
+            <nav className="hidden md:flex flex-1 justify-center items-center gap-10 font-montserrat text-sm tracking-wide">
+              <ScrollLink
+                targetId="home"
+                className="hover:text-[#11285A] transition-colors duration-200"
+              >
+                <HoverNavEffect>Home</HoverNavEffect>
+              </ScrollLink>
+
+              <ScrollLink
+                targetId="features"
+                className="hover:text-[#11285A] transition-colors duration-200"
+              >
+                <HoverNavEffect>iCane</HoverNavEffect>
+              </ScrollLink>
+
+              <ScrollLink
+                targetId="about"
+                className="hover:text-[#11285A] transition-colors duration-200 truncate"
+              >
+                <HoverNavEffect>About Us</HoverNavEffect>
+              </ScrollLink>
+
+              <ScrollLink
+                targetId="contact"
+                className="hover:text-[#11285A] transition-colors duration-200 truncate"
+              >
+                <HoverNavEffect>Contact Us</HoverNavEffect>
+              </ScrollLink>
+            </nav>
+
+            {/* RIGHT: Desktop CTA (fixed width) */}
+            <div className="hidden md:flex justify-end w-[220px]">
+              <button
+                onClick={() => navigate("/get-started")}
+                className="flex items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f]"
+              >
+                Log In
+              </button>
+            </div>
+
+            {/* MOBILE: burger */}
+            <div className="md:hidden ml-auto flex items-center">
+              <button
+                type="button"
+                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-menu"
+                onClick={() => setIsMobileMenuOpen((v) => !v)}
+                className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#1C253C]
+                     transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2"
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {isMobileMenuOpen ? (
+                    <motion.span
+                      key="close"
+                      initial={{ opacity: 0, rotate: -90, scale: 0.92 }}
+                      animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                      exit={{ opacity: 0, rotate: 90, scale: 0.92 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="absolute"
+                    >
+                      <Icon icon="mingcute:close-line" className="text-2xl" />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="menu"
+                      initial={{ opacity: 0, rotate: 90, scale: 0.92 }}
+                      animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                      exit={{ opacity: 0, rotate: -90, scale: 0.92 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="absolute"
+                    >
+                      <Icon icon="mingcute:menu-line" className="text-2xl" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-10 font-montserrat text-sm tracking-wide">
-            <ScrollLink
-              targetId="home"
-              className="hover:text-[#11285A] transition-colors duration-200"
-            >
-              <HoverNavEffect>Home</HoverNavEffect>
-            </ScrollLink>
-            <ScrollLink
-              targetId="features"
-              className="hover:text-[#11285A] transition-colors duration-200"
-            >
-              <HoverNavEffect>iCane</HoverNavEffect>
-            </ScrollLink>
-            <ScrollLink
-              targetId="about"
-              className="hover:text-[#11285A] transition-colors duration-200"
-            >
-              <HoverNavEffect>About Us</HoverNavEffect>
-            </ScrollLink>
-            <ScrollLink
-              targetId="contact"
-              className="hover:text-[#11285A] transition-colors duration-200"
-            >
-              <HoverNavEffect>Contact Us</HoverNavEffect>
-            </ScrollLink>
-          </nav>
+          {/* MOBILE DROPDOWN (Framer Motion) */}
+          <AnimatePresence initial={false}>
+            {isMobileMenuOpen && (
+              <motion.div
+                id="mobile-menu"
+                key="mobile-menu"
+                initial={{ height: 0, opacity: 0, y: -6 }}
+                animate={{ height: "auto", opacity: 1, y: 0 }}
+                exit={{ height: 0, opacity: 0, y: -6 }}
+                transition={{ duration: 0.28, ease: "easeOut" }}
+                className="md:hidden overflow-hidden border-t border-black/10 bg-white mt-2"
+              >
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18, ease: "easeOut", delay: 0.05 }}
+                  className="max-w-6xl mx-auto px-4 sm:px-6 py-3"
+                >
+                  <div className="flex flex-col gap-2 font-montserrat text-sm">
+                    <ScrollLink
+                      targetId="home"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                    >
+                      Home
+                    </ScrollLink>
 
-          <button
-            onClick={() => navigate("/get-started")}
-            className="flex items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f] sm:px-10 sm:py-3.5"
-          >
-            Log In
-          </button>
+                    <ScrollLink
+                      targetId="features"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                    >
+                      iCane
+                    </ScrollLink>
+
+                    <ScrollLink
+                      targetId="about"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                    >
+                      About Us
+                    </ScrollLink>
+
+                    <ScrollLink
+                      targetId="contact"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                    >
+                      Contact Us
+                    </ScrollLink>
+
+                    <div className="pt-2">
+                      <button
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          navigate("/get-started");
+                        }}
+                        className="w-full rounded-xl bg-[#1C253C] px-4 py-3 text-white font-medium hover:bg-[#0d1c3f] transition cursor-pointer"
+                      >
+                        Log In
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
       {/* Hero Section */}
@@ -747,12 +899,12 @@ const GuestPage = () => {
         className="px-4 sm:px-6"
       >
         <ScaleIn delay={0.2}>
-          <div className="flex justify-center rounded-2xl bg-[#dfdfdf] min-h-36 w-full overflow-hidden sm:min-h-[200px] md:min-h-[240px]">
+          <div className="flex justify-center rounded-2xl bg-[#dfdfdf] overflow-hidden">
             <img
               loading="lazy"
               src={teamPhoto}
               alt="Team Photo"
-              className="object-cover w-full rounded-2xl"
+              className="w-full h-full object-contain object-center rounded-2xl"
             />
           </div>
         </ScaleIn>
@@ -883,7 +1035,8 @@ const GuestPage = () => {
           <div className=" border-white/15 pt-10 grid gap-10 md:grid-cols-4">
             <div className="space-y-4">
               <div className="flex items-center gap-3 ">
-                <BlinkIcon src={icaneLogoWhite} alt="iCane emblem" size={12} />
+                {/* <BlinkIcon src={icaneLogoWhite} alt="iCane emblem" size={12} /> */}
+                <img src={icaneLogoWhite} alt="iCane emblem" size={12} />
                 <img
                   loading="lazy"
                   src={icaneLabel}
@@ -995,6 +1148,29 @@ const GuestPage = () => {
           © 2026 iCane · All Rights Reserved
         </div>
       </footer>
+
+      <button
+        type="button"
+        aria-label="Back to top"
+        onClick={() => {
+          const el = document.getElementById("header");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }}
+        className={[
+          "fixed bottom-6 right-6 z-50",
+          "h-12 w-12 rounded-full",
+          "bg-[#11285A] text-white shadow-lg",
+          "flex items-center justify-center",
+          "transition-all duration-200",
+          "hover:scale-105 hover:bg-[#0d1c3f]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2",
+          showScrollTop
+            ? "opacity-100 translate-y-0"
+            : "pointer-events-none opacity-0 translate-y-3"
+        ].join(" ")}
+      >
+        <Icon icon="mingcute:arrow-up-line" className="text-2xl" />
+      </button>
     </div>
   );
 };
