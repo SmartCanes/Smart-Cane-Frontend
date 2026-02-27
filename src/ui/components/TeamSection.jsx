@@ -375,7 +375,7 @@ const TeamMemberCard = ({ member, index }) => {
             </div>
 
             {/* Bio - Expanded/Collapsed */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.p
                 key={isExpanded ? "expanded" : "collapsed"}
                 initial={{ opacity: 0, height: 0 }}
@@ -537,7 +537,7 @@ const TeamSection = () => {
           layout
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {filteredMembers.map((member, index) => (
               <motion.div
                 key={member.id}

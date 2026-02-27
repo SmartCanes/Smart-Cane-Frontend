@@ -516,9 +516,6 @@ const GuestPage = () => {
     };
   }, []);
 
-  const isFirstCardActive = activeCardIndex === 0;
-  const isLastCardActive = activeCardIndex === featureCards.length - 1;
-
   const ScrollLink = ({ targetId, children, className }) => {
     const handleClick = () => {
       const el = document.getElementById(targetId);
@@ -617,7 +614,7 @@ const GuestPage = () => {
                 className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#1C253C]
                      transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2"
               >
-                <AnimatePresence mode="wait" initial={false}>
+                <AnimatePresence initial={false}>
                   {isMobileMenuOpen ? (
                     <motion.span
                       key="close"
