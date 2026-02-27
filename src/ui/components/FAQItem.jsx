@@ -2,16 +2,16 @@ import { useState } from "react";
 import chevronIcon from "@/assets/images/chevron.svg";
 import { motion, AnimatePresence } from "framer-motion";
 
-const FAQItem = ({ question, answer }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+const FAQItem = ({ question, answer, isOpen, onToggle }) => {
   return (
     <div className="border-b border-gray-300 py-4 max-w-7xl">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
         className="w-full flex justify-between items-center cursor-pointer"
       >
-        <span className="font-semibold text-card-100">{question}</span>
+        <span className="font-semibold text-card-100 text-left">
+          {question}
+        </span>
         <motion.div
           animate={{ rotate: isOpen ? 0 : 180 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}

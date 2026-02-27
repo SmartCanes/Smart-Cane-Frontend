@@ -20,7 +20,6 @@ import CaneViewer from "@/ui/components/CaneViewer";
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
-  BlinkingIcon,
   FadeIn,
   HoverIcon,
   HoverNavEffect,
@@ -359,6 +358,7 @@ const GuestPage = () => {
   const [isCarouselVisible, setIsCarouselVisible] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -577,14 +577,20 @@ const GuestPage = () => {
 
               <ScrollLink
                 targetId="about"
-                className="hover:text-[#11285A] transition-colors duration-200 truncate"
+                className="hover:text-[#11285A] transition-colors duration-200 text-nowrap"
               >
                 <HoverNavEffect>About Us</HoverNavEffect>
+              </ScrollLink>
+              <ScrollLink
+                targetId="faq"
+                className="hover:text-[#11285A] transition-colors duration-200 text-nowrap"
+              >
+                <HoverNavEffect>FAQs</HoverNavEffect>
               </ScrollLink>
 
               <ScrollLink
                 targetId="contact"
-                className="hover:text-[#11285A] transition-colors duration-200 truncate"
+                className="hover:text-[#11285A] transition-colors duration-200 text-nowrap"
               >
                 <HoverNavEffect>Contact Us</HoverNavEffect>
               </ScrollLink>
@@ -593,8 +599,8 @@ const GuestPage = () => {
             {/* RIGHT: Desktop CTA (fixed width) */}
             <div className="hidden md:flex justify-end w-[220px]">
               <button
-                onClick={() => navigate("/get-started")}
-                className="flex items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f]"
+                onClick={() => navigate("/login")}
+                className="flex items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f] cursor-pointer"
               >
                 Log In
               </button>
@@ -685,6 +691,14 @@ const GuestPage = () => {
                     </ScrollLink>
 
                     <ScrollLink
+                      targetId="faq"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                    >
+                      FAQs
+                    </ScrollLink>
+
+                    <ScrollLink
                       targetId="contact"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
@@ -752,7 +766,7 @@ const GuestPage = () => {
           <ScaleIn delay={1.3}>
             <div className="mx-auto max-w-xs pt-4 sm:max-w-none">
               <Link
-                to="/welcome"
+                to="/get-started"
                 className="mx-auto w-full rounded-[10px] bg-white px-6 py-3 text-[#11285A] font-semibold shadow-[0_12px_25px_rgba(0,0,0,0.15)] hover:bg-[#F0F4FF] sm:w-[170px]"
               >
                 Get Started
@@ -956,6 +970,10 @@ const GuestPage = () => {
                 key={index}
                 question={faq.question}
                 answer={faq.answer}
+                isOpen={openFaqIndex === index}
+                onToggle={() =>
+                  setOpenFaqIndex((prev) => (prev === index ? null : index))
+                }
               />
             ))}
           </div>
@@ -1071,6 +1089,12 @@ const GuestPage = () => {
                   className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
                   <HoverNavEffect direction="right">About Us</HoverNavEffect>
+                </ScrollLink>
+                <ScrollLink
+                  targetId="faq"
+                  className="hover:text-white transition-colors duration-200 block cursor-pointer"
+                >
+                  <HoverNavEffect direction="right">FAQs</HoverNavEffect>
                 </ScrollLink>
                 <ScrollLink
                   targetId="contact"

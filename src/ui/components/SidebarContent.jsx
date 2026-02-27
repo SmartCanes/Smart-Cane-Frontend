@@ -163,7 +163,7 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
                 clearRegisterStore();
                 navigate("/");
               }}
-              className="w-[120px] sm:w-[220px] md:w-[290px] mx-auto"
+              className="w-[120px] sm:w-[220px] md:w-[290px] mx-auto cursor-pointer"
             />
 
             {/* Text: iCane */}
