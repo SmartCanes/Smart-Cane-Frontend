@@ -29,6 +29,7 @@ import {
   TextFade,
   TextReveal
 } from "@/wrapper/MotionWrapper";
+import TeamSection from "@/ui/components/TeamSection";
 
 const FEATURE_CARD_ACTIVE_CLASS = "opacity-100 scale-100 sm:scale-[1.02]";
 const FEATURE_CARD_INACTIVE_CLASS = "opacity-40 sm:opacity-60 scale-[0.92]";
@@ -724,8 +725,12 @@ const GuestPage = () => {
           iCane
         </h3>
       </div>
-      {/* iCane placeholder */}
-      <div className="mx-auto flex w-full  h-[500px] bg-[#dfdfdf] px-4 py-10 sm:min-h-[200px] sm:px-8 md:min-h-[240px] md:px-12"></div>
+
+      {/* iCane 3d placeholder */}
+      <div className="mx-auto w-full h-[85vh] bg-[#dfdfdf]">
+        <CaneViewer />
+      </div>
+
       {/* Section divider for About */}
       <div
         id="about"
@@ -771,6 +776,8 @@ const GuestPage = () => {
           keep improving to make iCane even better.
         </p>
       </SlideUp>
+
+      <TeamSection />
 
       <div
         id="faq"
