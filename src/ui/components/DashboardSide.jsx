@@ -64,10 +64,10 @@ const DashboardSide = ({ className = "" }) => {
       path: "/dashboard"
     },
     {
-      id: "activity-report",
-      label: "Activity Reports",
-      icon: "oui:nav-reports",
-      path: "/activity-report"
+      id: "activity-logs",
+      label: "Activity Logs",
+      icon: "solar:history-linear",
+      path: "/activity-logs"
     },
     {
       id: "weather-board",
@@ -104,10 +104,10 @@ const DashboardSide = ({ className = "" }) => {
       path: "/weather-board"
     },
     {
-      id: "activity-report",
+      id: "activity-logs",
       label: "Activity",
-      icon: "oui:nav-reports",
-      path: "/activity-report"
+      icon: "solar:history-linear",
+      path: "/activity-logs"
     },
     {
       id: "mobile-home",
@@ -148,11 +148,10 @@ const DashboardSide = ({ className = "" }) => {
             <HoverNavEffect delay={0.1} key={item.id}>
               <button
                 onClick={() => handleNavigation(item.path)}
-                className={`flex flex-col items-center justify-center w-16 py-3 transition-all duration-300 cursor-pointer  ${
-                  location.pathname === item.path
-                    ? "bg-white text-primary-100 font-bold shadow-md" // Active: White BG, Dark Text
-                    : "text-gray-400 hover:text-white" // Inactive: Grayish
-                }`}
+                className={`flex flex-col items-center justify-center w-16 py-3 transition-all duration-300 cursor-pointer  ${location.pathname === item.path
+                  ? "bg-white text-primary-100 font-bold shadow-md" // Active: White BG, Dark Text
+                  : "text-gray-400 hover:text-white" // Inactive: Grayish
+                  }`}
               >
                 <Icon icon={item.icon} className="text-2xl" />
                 <span className="text-xs mt-1 font-poppins">{item.label}</span>

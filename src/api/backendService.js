@@ -164,3 +164,7 @@ export const uploadVIPImage = (vipId, imageFile) => {
     })
   );
 };
+
+// account history
+export const getAccountHistory = () =>
+  handleRequest(() => backendApi.get("/guardian/history"));
