@@ -25,8 +25,8 @@ const teamMembers = [
     bio: "Leads iCane’s product experience from concept to prototype, translating user needs into accessible, intuitive interfaces and consistent design systems.",
     image: africaImg,
     social: {
+      facebook: "",
       linkedin: "https://linkedin.com/in/alexrivera",
-      twitter: "https://twitter.com/alexrivera",
       github: "https://github.com/alexrivera"
     },
     expertise: [
@@ -46,9 +46,9 @@ const teamMembers = [
     bio: "Leads research and documentation for iCane, consolidating technical findings into clear reports, diagrams, and annotated visuals to support development and evaluation.",
     image: arrojoImg,
     social: {
-      linkedin: "https://linkedin.com/in/sarahchen",
-      twitter: "https://twitter.com/sarahchen",
-      github: "https://github.com/sarahchen"
+      linkedin: "https://www.linkedin.com/in/arrojo-jestro-marcus-t-6080433b4",
+      facebook: "https://www.facebook.com/jestr.arrojo",
+      instagram: "https://www.instagram.com/marcusxcz?igsh=MWhwc2ZwOXR6cnp4eg=="
     },
     expertise: [
       "Technical Writing",
@@ -57,7 +57,8 @@ const teamMembers = [
       "Workflow Management",
       "Citation/Formatting",
       "Project Coordination",
-      "Research"
+      "Research",
+      "Requirements Gathering"
     ],
     color: "#1C253C"
   },
@@ -68,9 +69,8 @@ const teamMembers = [
     bio: "Builds iCane’s web UI with a focus on clean components, responsive layouts, and smooth user interactions for both users and guardians.",
     image: barbaImg,
     social: {
-      linkedin: "https://linkedin.com/in/marcusthompson",
-      twitter: "https://twitter.com/marcusthompson",
-      github: "https://github.com/marcusthompson"
+      facebook: "https://www.facebook.com/BarbaLuigi14/",
+      github: "https://github.com/Barbaluigi"
     },
     expertise: [
       "Responsive UI",
@@ -87,8 +87,8 @@ const teamMembers = [
     bio: "Supports product planning and documentation by coordinating requirements, keeping progress aligned, and ensuring deliverables are clearly written and well-structured.",
     image: belasImg,
     social: {
+      facebook: "",
       linkedin: "https://linkedin.com/in/elenarodriguez",
-      twitter: "https://twitter.com/elenarodriguez",
       github: "https://github.com/elenarodriguez"
     },
     expertise: [
@@ -112,9 +112,9 @@ const teamMembers = [
     bio: "Bridges software and hardware by developing web features while helping integrate sensors and device components for reliable end-to-end functionality.",
     image: casipeImg,
     social: {
-      linkedin: "https://linkedin.com/in/davidkim",
-      twitter: "https://twitter.com/davidkim",
-      github: "https://github.com/davidkim"
+      facebook: "https://www.facebook.com/share/14ZWaCSLntW/",
+      instagram: "https://www.instagram.com/defc.ry?igsh=bWNwMGllYndjMW1w",
+      github: "https://github.com/casixx"
     },
     expertise: [
       "Web Development",
@@ -134,6 +134,7 @@ const teamMembers = [
     bio: "Develops full-stack features while providing direct user perspective, helping validate flows, feedback, and accessibility decisions from real-world usage.",
     image: delacruzImg,
     social: {
+      facebook: "",
       linkedin: "https://linkedin.com/in/mayapatel",
       twitter: "https://twitter.com/mayapatel",
       github: "https://github.com/mayapatel"
@@ -155,7 +156,7 @@ const teamMembers = [
     role: "UI/UX Designer & Layout Specialist",
     bio: "Designs layouts and presentation materials for iCane, ensuring screens, reports, and visuals communicate information clearly and consistently.",
     image: diolaImg,
-    social: { linkedin: "", twitter: "", github: "" },
+    social: { facebook: "", linkedin: "", github: "" },
     expertise: [
       "UI/UX Design",
       "Layout Design",
@@ -170,7 +171,7 @@ const teamMembers = [
     role: "Researcher & Documentation Specialist",
     bio: "Supports iCane research and testing, documenting experiments, results, and implementation notes to keep the team aligned and the project reproducible.",
     image: ibanezImg,
-    social: { linkedin: "", twitter: "", github: "" },
+    social: { facebook: "", linkedin: "", github: "" },
     expertise: [
       "Requirements Gathering",
       "Research",
@@ -185,7 +186,7 @@ const teamMembers = [
     role: "Project Manager & Quality Assurance",
     bio: "Leads planning and quality assurance for iCane, organizing tasks, tracking progress, and verifying features through structured testing and validation.",
     image: mabatoImg,
-    social: { linkedin: "", twitter: "", github: "" },
+    social: { facebook: "", linkedin: "", github: "" },
     expertise: [
       "Requirements Gathering",
       "Stakeholder Communication",
@@ -203,7 +204,7 @@ const teamMembers = [
     role: "Graphic Designer & UI/UX Designer",
     bio: "Creates iCane’s visual assets and UI polish, combining branding, graphic design, and interface design to produce a cohesive look and feel.",
     image: madriagaImg,
-    social: { linkedin: "", twitter: "", github: "" },
+    social: { facebook: "", linkedin: "", github: "" },
     expertise: ["Graphic Design", "Visual Assets"],
     color: "#1C253C"
   },
@@ -213,13 +214,8 @@ const teamMembers = [
     role: "Researcher & Documentation Specialist",
     bio: "Coordinates documentation and research tasks, keeping project notes organized and ensuring outputs are clear, consistent, and ready for submission.",
     image: morreImg,
-    social: { linkedin: "", twitter: "", github: "" },
-    expertise: [
-      "Research Support",
-      "Citation/Formatting",
-      "Requirements Gathering",
-      "Research"
-    ],
+    social: { facebook: "", linkedin: "", github: "" },
+    expertise: ["Citation/Formatting", "Requirements Gathering", "Research"],
     color: "#122550"
   },
   {
@@ -228,11 +224,11 @@ const teamMembers = [
     role: "Researcher & Documentation Specialist",
     bio: "Assists in research and documentation, translating technical work into understandable write-ups and maintaining clear records of implementation decisions.",
     image: patacsilImg,
-    social: { linkedin: "", twitter: "", github: "" },
+    social: { facebook: "", linkedin: "", github: "" },
     expertise: [
       "Technical Writing",
       "Requirements Gathering",
-      "Research Support",
+
       "Citation/Formatting",
       "Stakeholder Communication",
       "Research"
@@ -245,12 +241,12 @@ const teamMembers = [
     role: "Researcher & Technical Writer",
     bio: "Writes and edits iCane’s technical content, ensuring the paper, captions, and documentation are readable, consistent, and properly structured.",
     image: perezImg,
-    social: { linkedin: "", twitter: "", github: "" },
+    social: { facebook: "", linkedin: "", github: "" },
     expertise: [
       "Technical Writing",
       "Documentation",
       "Citation/Formatting",
-      "Research Support",
+
       "Stakeholder Communication",
       "Research"
     ],
@@ -262,7 +258,11 @@ const teamMembers = [
     role: "Lead Developer",
     bio: "Leads system architecture and implementation, bringing components together into a reliable, secure, and scalable real-time solution.",
     image: villamoraImg,
-    social: { linkedin: "", twitter: "", github: "" },
+    social: {
+      facebook: "https://www.facebook.com/ivrnren/",
+      linkedin: "https://www.linkedin.com/in/ivan-ren-villamora-589a06365",
+      github: "https://github.com/ivrnDev"
+    },
     expertise: ["System Architecture", "IoT/Edge Systems", "Developers"],
     color: "#1C253C"
   }
@@ -417,9 +417,13 @@ const TeamMemberCard = ({ member, index }) => {
                       icon={
                         platform === "linkedin"
                           ? "mdi:linkedin"
-                          : platform === "twitter"
-                            ? "mdi:twitter"
-                            : "mdi:github"
+                          : platform === "facebook"
+                            ? "mdi:facebook"
+                            : platform === "instagram"
+                              ? "mdi:instagram"
+                              : platform === "github"
+                                ? "mdi:github"
+                                : "mdi:link"
                       }
                       className="w-4 h-4 text-gray-600 group-hover/social:text-white transition-colors duration-200"
                     />
