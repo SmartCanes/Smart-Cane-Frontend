@@ -57,10 +57,6 @@ const PasswordInput = ({
   value,
   onChange,
   placeholder,
-const PasswordInput = ({ 
-  value, 
-  onChange, 
-  placeholder, 
   label,
   error,
   success,
