@@ -14,8 +14,8 @@ export const updateGuardian = (payload) =>
 export const getMyProfile = () =>
   handleRequest(() => backendApi.get("/guardian/profile"));
 
-// export const sendHeartbeat = () =>
-//   handleRequest(() => backendApi.post("/guardian/heartbeat"));
+export const sendHeartbeat = () =>
+  handleRequest(() => backendApi.post("/guardian/heartbeat"));
 
 export const getVIPs = () => handleRequest(() => backendApi.get("/vip"));
 
@@ -167,10 +167,6 @@ export const uploadVIPImage = (vipId, imageFile) => {
     })
   );
 };
-
-// Heartbeat — keeps guardian active_status accurate
-export const sendHeartbeat = () =>
-  handleRequest(() => backendApi.post("/auth/heartbeat"));
 
 // account history
 export const getAccountHistory = () =>

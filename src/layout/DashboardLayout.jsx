@@ -34,20 +34,20 @@ const DashboardLayout = () => {
     };
   }, []);
 
-  // Send heartbeat every 30 s so the backend keeps active_status accurate
+  // Send heartbeat every 45 s so the backend keeps last_seen_at accurate (1-min window)
   useEffect(() => {
     sendHeartbeat(); // immediate on mount
     const heartbeatInterval = setInterval(() => {
       sendHeartbeat();
-    }, 30_000);
+    }, 45_000);
     return () => clearInterval(heartbeatInterval);
   }, []);
 
-  // Refresh guardian list every 30 s to pick up status changes from other guardians
+  // Poll guardian list every 60 s to pick up online/offline changes from co-guardians
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       fetchGuardiansAndInvites();
-    }, 30_000);
+    }, 60_000);
     return () => clearInterval(refreshInterval);
   }, []);
 
@@ -64,18 +64,6 @@ const DashboardLayout = () => {
     };
 
     hydrateUser();
-  }, []);
-
-  // Heartbeat for online status
-  useEffect(() => {
-    const heartbeatInterval = setInterval(() => {
-      sendHeartbeat();
-    }, 30000); // Send heartbeat every 30 seconds
-
-    // Send immediately on mount
-    sendHeartbeat();
-
-    return () => clearInterval(heartbeatInterval);
   }, []);
 
   useEffect(() => {

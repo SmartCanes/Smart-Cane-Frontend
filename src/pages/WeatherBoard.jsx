@@ -1,19 +1,70 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 
-import { fetchFullWeatherForecast } from "@/api/weatherService";
+import {
+  DEFAULT_LOCATION,
+  fetchFullWeatherForecast,
+  fetchWeatherForDate,
+  getWeatherIcon,
+  searchLocations
+} from "@/api/weatherService";
 
 const WeatherBoard = () => {
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
+  // Location search state
+  const [location, setLocation] = useState(DEFAULT_LOCATION);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const searchRef = useRef(null);
+  const debounceRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Debounced geocoding search
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!searchQuery.trim() || searchQuery.length < 2) {
+      setSearchResults([]);
+      setIsDropdownOpen(false);
+      return;
+    }
+    setIsSearching(true);
+    debounceRef.current = setTimeout(async () => {
+      const results = await searchLocations(searchQuery);
+      setSearchResults(results);
+      setIsDropdownOpen(results.length > 0);
+      setIsSearching(false);
+    }, 400);
+    return () => clearTimeout(debounceRef.current);
+  }, [searchQuery]);
+
+  const handleSelectLocation = (result) => {
+    setLocation({ lat: result.lat, lon: result.lon, name: result.display });
+    setSearchQuery("");
+    setSearchResults([]);
+    setIsDropdownOpen(false);
+  };
+
   useEffect(() => {
     let isMounted = true;
     const loadForecast = async () => {
       setLoading(true);
 
-      const data = await fetchFullWeatherForecast();
+      const data = await fetchFullWeatherForecast(location.lat, location.lon);
 
       if (isMounted && data) {
         setForecast(data);
@@ -31,7 +82,7 @@ const WeatherBoard = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [location]);
 
   // Format Date Logic
   const formattedDate = useMemo(() => {
@@ -104,8 +155,59 @@ const WeatherBoard = () => {
           </h1>
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <Icon icon="carbon:location-filled" />
-            <span>Assisi St., Novaliches (Synchronized)</span>
+            <span>{location.name}</span>
           </div>
+        </div>
+
+        {/* LOCATION SEARCH BAR */}
+        <div ref={searchRef} className="relative">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 transition-all">
+            <Icon icon="carbon:search" className="text-gray-400 text-lg shrink-0" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
+              placeholder="Search a city or place..."
+              className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
+            />
+            {isSearching && (
+              <Icon
+                icon="eos-icons:loading"
+                className="text-gray-400 animate-spin shrink-0"
+              />
+            )}
+            {searchQuery && !isSearching && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setIsDropdownOpen(false);
+                }}
+                className="text-gray-400 hover:text-gray-600 shrink-0"
+              >
+                <Icon icon="ph:x-bold" className="text-sm" />
+              </button>
+            )}
+          </div>
+
+          {/* AUTOCOMPLETE DROPDOWN */}
+          {isDropdownOpen && searchResults.length > 0 && (
+            <ul className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+              {searchResults.map((result) => (
+                <li
+                  key={result.id}
+                  onClick={() => handleSelectLocation(result)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer transition-colors"
+                >
+                  <Icon
+                    icon="carbon:location-filled"
+                    className="text-blue-400 shrink-0"
+                  />
+                  <span>{result.display}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {loading ? (
@@ -296,13 +398,26 @@ const WeatherBoard = () => {
       <CalendarOverlay
         isOpen={isCalendarOpen}
         onClose={() => setIsCalendarOpen(false)}
+        forecast={forecast}
+        location={location}
       />
     </main>
   );
 };
 
-const CalendarOverlay = ({ isOpen, onClose }) => {
+const CalendarOverlay = ({ isOpen, onClose, forecast, location }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
+  const [dateWeather, setDateWeather] = useState(null);
+  const [isLoadingDate, setIsLoadingDate] = useState(false);
+
+  // Reset selection when closed
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedDate(null);
+      setDateWeather(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -311,54 +426,84 @@ const CalendarOverlay = ({ isOpen, onClose }) => {
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; // Mon start
-
+  const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
   const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-  const handlePrev = () => setCurrentMonth(new Date(year, month - 1, 1));
-  const handleNext = () => setCurrentMonth(new Date(year, month + 1, 1));
+  const handlePrev = () => {
+    setSelectedDate(null);
+    setDateWeather(null);
+    setCurrentMonth(new Date(year, month - 1, 1));
+  };
+  const handleNext = () => {
+    setSelectedDate(null);
+    setDateWeather(null);
+    setCurrentMonth(new Date(year, month + 1, 1));
+  };
+
+  const toDateStr = (y, m, d) =>
+    `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+  const handleDayClick = async (day) => {
+    const dateStr = toDateStr(year, month, day);
+    setSelectedDate(dateStr);
+    setDateWeather(null);
+    setIsLoadingDate(true);
+    const data = await fetchWeatherForDate(location?.lat, location?.lon, dateStr);
+    setDateWeather(data);
+    setIsLoadingDate(false);
+  };
 
   const renderCells = () => {
     const cells = [];
-    // Prev Month
+    const today = new Date();
+    const todayStr = toDateStr(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
     for (let i = 0; i < startDay; i++) {
       const d = daysInPrevMonth - startDay + i + 1;
       cells.push(
         <div
           key={`prev-${d}`}
-          className="h-14 flex items-center justify-center text-gray-400 bg-white"
+          className="h-12 flex items-center justify-center text-gray-300 bg-white text-sm"
         >
           {d}
         </div>
       );
     }
-    // Current Month
-    const today = new Date();
+
     for (let i = 1; i <= daysInMonth; i++) {
-      const isToday =
-        today.getDate() === i &&
-        today.getMonth() === month &&
-        today.getFullYear() === year;
+      const dateStr = toDateStr(year, month, i);
+      const isToday = dateStr === todayStr;
+      const isSelected = dateStr === selectedDate;
+
       cells.push(
         <div
           key={`curr-${i}`}
-          className={`h-14 flex items-center justify-center text-sm font-medium transition-colors
-          ${isToday ? "bg-[#4B5EAA] text-white" : "bg-white text-gray-700 hover:bg-gray-50"}
-        `}
+          onClick={() => handleDayClick(i)}
+          className={`h-12 flex items-center justify-center text-sm font-medium transition-all cursor-pointer select-none
+            ${
+              isSelected
+                ? "bg-[#11285A] text-white"
+                : isToday
+                  ? "bg-[#4B5EAA] text-white"
+                  : "bg-white text-gray-700 hover:bg-blue-50"
+            }`}
         >
           {i}
         </div>
       );
     }
-    // Next Month
+
     const totalSlots = 42;
-    const filled = startDay + daysInMonth;
-    const remaining = totalSlots - filled;
+    const remaining = totalSlots - startDay - daysInMonth;
     for (let i = 1; i <= remaining; i++) {
       cells.push(
         <div
           key={`next-${i}`}
-          className="h-14 flex items-center justify-center text-gray-300 bg-gray-50/50"
+          className="h-12 flex items-center justify-center text-gray-300 bg-gray-50/50 text-sm"
         >
           {i}
         </div>
@@ -367,55 +512,190 @@ const CalendarOverlay = ({ isOpen, onClose }) => {
     return cells;
   };
 
+  const selectedLabel = selectedDate
+    ? new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      })
+    : null;
+
+  const { icon: dIcon, color: dColor } = selectedDate && dateWeather
+    ? getWeatherIcon(dateWeather.weatherCode)
+    : { icon: "solar:sun-fog-bold-duotone", color: "text-gray-300" };
+
   return (
     <div
-      className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[999] flex items-start md:items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-[2rem] p-6 w-full max-w-[400px] shadow-2xl animate-in zoom-in-95 duration-200"
+        className={`bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-300 w-full my-auto ${
+          selectedDate ? "max-w-[780px]" : "max-w-[420px]"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8 px-2">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {currentMonth.toLocaleDateString("en-US", {
-              month: "long",
-              year: "numeric"
-            })}
-          </h2>
-          <div className="flex gap-1">
-            <button
-              onClick={handlePrev}
-              className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
-            >
-              <Icon icon="solar:alt-arrow-left-linear" className="text-xl" />
-            </button>
-            <button
-              onClick={handleNext}
-              className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
-            >
-              <Icon icon="solar:alt-arrow-right-linear" className="text-xl" />
-            </button>
-          </div>
-        </div>
-
-        {/* Days Header */}
-        <div className="grid grid-cols-7 mb-2">
-          {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
-            <div
-              key={d}
-              className="text-center font-bold text-gray-900 text-sm py-2"
-            >
-              {d}
+        {/* ── LEFT: Calendar ── */}
+        <div className="p-6 flex-shrink-0 w-full md:w-[420px]">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6 px-1">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {currentMonth.toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric"
+              })}
+            </h2>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handlePrev}
+                className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
+              >
+                <Icon icon="solar:alt-arrow-left-linear" className="text-xl" />
+              </button>
+              <button
+                onClick={handleNext}
+                className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
+              >
+                <Icon icon="solar:alt-arrow-right-linear" className="text-xl" />
+              </button>
+              <button
+                onClick={onClose}
+                className="ml-1 p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-500 transition-colors"
+                aria-label="Close"
+              >
+                <Icon icon="ph:x-bold" className="text-xl" />
+              </button>
             </div>
-          ))}
+          </div>
+
+          {/* Day labels */}
+          <div className="grid grid-cols-7 mb-2">
+            {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
+              <div
+                key={d}
+                className="text-center font-bold text-gray-900 text-sm py-2"
+              >
+                {d}
+              </div>
+            ))}
+          </div>
+
+          {/* Grid */}
+          <div className="grid grid-cols-7 border border-gray-200 rounded-xl overflow-hidden bg-gray-200 gap-[1px]">
+            {renderCells()}
+          </div>
+
+          {!selectedDate && (
+            <p className="text-center text-xs text-gray-400 mt-4">
+              Tap any date to see its weather
+            </p>
+          )}
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-7 border border-gray-200 rounded-xl overflow-hidden bg-gray-200 gap-[1px]">
-          {renderCells()}
-        </div>
+        {/* ── RIGHT: Date Detail Panel ── */}
+        {selectedDate && (
+          <div className="flex-1 bg-[#f9fafb] border-t md:border-t-0 md:border-l border-gray-100 p-6 flex flex-col gap-4 min-w-0">
+            {isLoadingDate ? (
+              <div className="flex flex-col items-center justify-center h-full gap-3 py-10">
+                <Icon
+                  icon="eos-icons:loading"
+                  className="text-4xl text-[#4B5EAA] animate-spin"
+                />
+                <p className="text-sm text-gray-400">Loading weather...</p>
+              </div>
+            ) : dateWeather ? (
+              <>
+                {/* Date label + icon */}
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0">
+                    <Icon icon={dIcon} className={`text-4xl ${dColor}`} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                      {selectedLabel}
+                    </p>
+                    <p className="text-xl font-bold text-[#11285A]">
+                      {dateWeather.label}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {dateWeather.tempMax}°C ↑ &nbsp; {dateWeather.tempMin}°C ↓
+                    </p>
+                  </div>
+                </div>
+
+                {/* Detail grid */}
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  {[
+                    {
+                      label: "Sunrise",
+                      value: dateWeather.sunrise,
+                      icon: "solar:sunrise-bold-duotone",
+                      color: "text-orange-400"
+                    },
+                    {
+                      label: "Sunset",
+                      value: dateWeather.sunset,
+                      icon: "solar:sunset-bold-duotone",
+                      color: "text-orange-500"
+                    },
+                    {
+                      label: "Feels Like",
+                      value: dateWeather.feelsLike,
+                      icon: "solar:temperature-bold-duotone",
+                      color: "text-red-400"
+                    },
+                    {
+                      label: "Wind Max",
+                      value: dateWeather.windMax,
+                      icon: "solar:wind-bold-duotone",
+                      color: "text-blue-400"
+                    },
+                    {
+                      label: "Rain Chance",
+                      value: dateWeather.precipProbability,
+                      icon: "solar:cloud-rain-bold-duotone",
+                      color: "text-blue-500"
+                    },
+                    {
+                      label: "Precipitation",
+                      value: dateWeather.precipSum,
+                      icon: "solar:drop-bold-duotone",
+                      color: "text-cyan-500"
+                    },
+                    {
+                      label: "UV Index",
+                      value: dateWeather.uvIndex,
+                      icon: "solar:sun-bold-duotone",
+                      color: "text-yellow-500"
+                    }
+                  ].map(({ label, value, icon, color }) => (
+                    <div
+                      key={label}
+                      className="bg-white rounded-xl p-3 flex items-center gap-2.5 border border-gray-100"
+                    >
+                      <Icon icon={icon} className={`text-2xl shrink-0 ${color}`} />
+                      <div>
+                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+                          {label}
+                        </p>
+                        <p className="text-sm font-bold text-gray-700">{value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-2 py-10">
+                <Icon
+                  icon="solar:cloud-cross-bold-duotone"
+                  className="text-5xl text-gray-300"
+                />
+                <p className="text-sm text-gray-400">No data available</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
