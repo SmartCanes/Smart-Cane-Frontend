@@ -13,6 +13,7 @@ const ACTION_TYPE_MAP = {
   INVITE: "settings",
   REMOVE_GUARDIAN: "alert",
   UPDATE_ROLE: "settings",
+  ACCEPT_INVITE: "login",
 };
 
 const ActivityReport = () => {
