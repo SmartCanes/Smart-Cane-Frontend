@@ -1006,44 +1006,62 @@ const GuestPage = () => {
         </p>
       </FadeIn>
 
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-y-10 px-4 text-center text-[12px] sm:grid-cols-2 sm:text-left">
-        <SlideInFromLeft
-          delay={0.6}
-          className="flex flex-col items-center gap-3 sm:items-start"
-        >
-          <h3 className="text-[14px] mt-1 font-semibold  text-card-100">
-            Call Us
-          </h3>
-          <p className="mt-2">
-            We’re just a call away for any questions or support you need.
-          </p>
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-y-10 px-4 text-center text-[12px] sm:grid-cols-2 sm:items-stretch sm:gap-x-12 sm:text-left">
+        {/* LEFT */}
+        <div>
+          <SlideInFromLeft
+            delay={0.6}
+            className="flex h-full flex-col items-center sm:items-start sm:justify-between"
+          >
+            {/* top content */}
+            <div className="flex flex-col items-center gap-3 sm:items-start">
+              <h3 className="text-lg font-semibold text-card-100">Call Us</h3>
 
-          <div className="flex min-w-40 mt-3 items-center justify-start gap-3">
-            <HoverIcon src={callIcon} alt="Call" size={10} />
-            <p>09696273011</p>
-          </div>
-        </SlideInFromLeft>
+              <p className="max-w-md text-sm">
+                We’re just a call away for any questions or support you need.
+              </p>
+            </div>
 
-        <SlideInFromRight
-          delay={0.6}
-          className="flex flex-col items-center gap-3 sm:items-start"
-        >
-          <h3 className="text-[14px] font-semibold  text-card-100">Email Us</h3>
-          <p>Send us an email and we’ll get back to you as soon as possible.</p>
+            {/* bottom row (aligned) */}
+            <div className="mt-4 flex items-center justify-center gap-3 sm:justify-start">
+              <span className="flex h-10 w-10 items-center justify-center">
+                <HoverIcon src={callIcon} alt="Call" size={10} />
+              </span>
+              <p className="leading-none text-sm">09696273011</p>
+            </div>
+          </SlideInFromLeft>
+        </div>
 
-          <div className="flex min-w-36 items-center justify-start gap-3">
-            <a
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <HoverIcon src={emailIcon} alt="Email" size={10} />
-            </a>
-            <p>iCane@gmail.com</p>
-          </div>
-        </SlideInFromRight>
+        {/* RIGHT */}
+        <div>
+          <SlideInFromRight
+            delay={0.6}
+            className="flex h-full flex-col items-center sm:items-start sm:justify-between"
+          >
+            {/* top content */}
+            <div className="flex flex-col items-center gap-3 sm:items-start">
+              <h3 className="text-lg font-semibold text-card-100">Email Us</h3>
+
+              <p className="max-w-md text-sm">
+                Send us an email and we’ll get back to you as soon as possible.
+              </p>
+            </div>
+
+            {/* bottom row (aligned) */}
+            <div className="mt-4 flex items-center justify-center gap-3 sm:justify-start">
+              <a
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-10 w-10 items-center justify-center"
+              >
+                <HoverIcon src={emailIcon} alt="Email" size={10} />
+              </a>
+              <p className="leading-none text-sm">iCane@gmail.com</p>
+            </div>
+          </SlideInFromRight>
+        </div>
       </div>
-
       {/* Footer */}
       <footer className="mt-8 bg-[#11285A] text-white">
         <div className="max-w-5xl mx-auto px-6 py-14 space-y-12">
