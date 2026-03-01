@@ -341,8 +341,9 @@ const NotificationDropdown = ({ notifications, onClose, onNavigateToAll }) => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => handleNotificationClick(notification)}
-                className={`w-full text-left p-4 hover:bg-gray-50 transition-colors cursor-pointer ${!notification.read ? "bg-blue-50/50" : ""
-                  }`}
+                className={`w-full text-left p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
+                  !notification.read ? "bg-blue-50/50" : ""
+                }`}
               >
                 <div className="flex items-start gap-3">
                   <div className={`mt-1 ${getTypeColor(notification.type)}`}>
@@ -700,8 +701,8 @@ const Header = () => {
                       <p className="text-sm font-medium text-gray-800 truncate">
                         {device.vip?.firstName && device.vip?.lastName
                           ? capitalizeWords(
-                            device.vip.firstName + " " + device.vip.lastName
-                          )
+                              device.vip.firstName + " " + device.vip.lastName
+                            )
                           : device?.deviceSerialNumber}
                       </p>
                     </button>
@@ -716,8 +717,9 @@ const Header = () => {
             )}
           </div>
           <div
-            className={`flex items-center gap-1.5 text-white px-3 py-1.5 rounded-full font-poppins text-xs font-medium whitespace-nowrap ${connectionStatus ? "bg-[#55B938]" : "bg-gray-500"
-              }`}
+            className={`flex items-center gap-1.5 text-white px-3 py-1.5 rounded-full font-poppins text-xs font-medium whitespace-nowrap ${
+              connectionStatus ? "bg-[#55B938]" : "bg-gray-500"
+            }`}
           >
             <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
             <span className="hidden lg:inline">
@@ -797,8 +799,9 @@ const Header = () => {
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="oui:nav-reports" className="w-4 h-4" />
-                      Account History
+                      History
                     </button>
+
                     <button
                       onClick={() => {
                         setIsDropdownOpen(false);
@@ -809,6 +812,7 @@ const Header = () => {
                       <Icon icon="ph:gear" className="w-4 h-4" />
                       Settings
                     </button>
+
                     <button
                       onClick={handleLogoutClick}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-3"
@@ -862,10 +866,11 @@ const Header = () => {
                             setSelectedDevice(device);
                             setMobileMenuOpen(false);
                           }}
-                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${selectedDevice?.deviceId === device.deviceId
-                            ? "bg-white/20"
-                            : "bg-white/10 hover:bg-white/15"
-                            }`}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                            selectedDevice?.deviceId === device.deviceId
+                              ? "bg-white/20"
+                              : "bg-white/10 hover:bg-white/15"
+                          }`}
                         >
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
                             {device?.vip?.vipImageUrl ? (
@@ -886,10 +891,10 @@ const Header = () => {
                             <p className="text-white font-medium">
                               {device.vip?.firstName && device.vip?.lastName
                                 ? capitalizeWords(
-                                  device.vip.firstName +
-                                  " " +
-                                  device.vip.lastName
-                                )
+                                    device.vip.firstName +
+                                      " " +
+                                      device.vip.lastName
+                                  )
                                 : device?.deviceSerialNumber}
                             </p>
                             <p className="text-white/60 text-xs">
@@ -937,7 +942,7 @@ const Header = () => {
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="oui:nav-reports" className="w-5 h-5" />
-                      <span className="font-medium">Account History</span>
+                      <span className="font-medium">History</span>
                     </button>
                     <button
                       onClick={() => {
