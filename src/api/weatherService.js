@@ -10,7 +10,8 @@ export const DEFAULT_LOCATION = {
 const BASE_URL = "https://api.open-meteo.com/v1/forecast";
 const GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
 
-// Helper: List ng Weather Codes na bawal lumabas (Ulan/Bagyo)
+
+// Helper for determining if a weather code indicates rain (for alerts and recommendations)
 const RAIN_CODES = [
   51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99
 ];
