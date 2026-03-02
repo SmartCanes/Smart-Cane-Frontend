@@ -1,4 +1,5 @@
 import {
+  getAccountHistory,
   getAllDeviceGuardians,
   getDevices,
   getPendingInvites
@@ -255,10 +256,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -351,10 +352,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                  g.guardianId === guardian.guardianId
-                    ? { ...g, ...guardian }
-                    : g
-                )
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
                 : [...d.guardians, guardian]
             };
           })
@@ -373,11 +374,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                ...d,
-                guardians: d.guardians.filter(
-                  (g) => g.guardianId !== guardianId
-                )
-              }
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
               : d
           )
         })),
@@ -699,6 +700,77 @@ export const useBluetoothStore = create(
       partialize: (state) => ({
         lastUpdatedAt: state.lastUpdatedAt
       })
+    }
+  )
+);
+
+export const useActivityReportsStore = create(
+  persist(
+    (set, get) => ({
+      history: [],
+      isLoading: false,
+      isRefreshing: false,
+      error: null,
+      lastFetchedAt: null,
+      hasHydrated: false,
+
+      fetchHistory: async () => {
+        const { history } = get();
+        const hasCache = Array.isArray(history) && history.length > 0;
+
+        // if cache exists -> refresh silently (keeps UI)
+        // else -> show loading
+        await get().fetch({ silent: hasCache });
+      },
+      fetch: async ({ silent } = { silent: false }) => {
+        const { isLoading, isRefreshing } = get();
+
+        // block only if the same mode is already running
+        if (!silent && isLoading) return;
+        if (silent && isRefreshing) return;
+
+        if (silent) set({ isRefreshing: true, error: null });
+        else set({ isLoading: true, error: null });
+
+        try {
+          const response = await getAccountHistory();
+          if (!response?.success) throw new Error("Failed");
+
+          const history =
+            response.data?.history || response.data?.data?.history || [];
+
+          set({
+            history,
+            lastFetchedAt: Date.now(),
+            error: null
+          });
+        } catch (e) {
+          set({ error: "Failed to load activity history" });
+        } finally {
+          if (silent) set({ isRefreshing: false });
+          else set({ isLoading: false });
+        }
+      },
+
+      clear: () =>
+        set({
+          history: [],
+          isLoading: false,
+          isRefreshing: false,
+          error: null,
+          lastFetchedAt: null
+        })
+    }),
+    {
+      name: "activity-reports-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        history: state.history,
+        lastFetchedAt: state.lastFetchedAt
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setState?.({ hasHydrated: true });
+      }
     }
   )
 );

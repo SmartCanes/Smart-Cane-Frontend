@@ -20,6 +20,16 @@ const variants = {
     label: "Alert",
     icon: "ph:warning-fill",
     style: "bg-[#FFE4E4] text-[#D92D20]"
+  },
+  emergency: {
+    label: "Emergency",
+    icon: "ph:phone-fill",
+    style: "bg-[#FFE4E4] text-[#D92D20]"
+  },
+  relationship: {
+    label: "Relationship",
+    icon: "ph:users-three-fill",
+    style: "bg-[#D8E6FD] text-[#1B3B8C]"
   }
 };
 

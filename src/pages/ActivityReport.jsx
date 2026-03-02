@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import ActivityActions from "@/ui/components/ActivityActions";
-import { getAccountHistory } from "@/api/backendService";
+import { useActivityReportsStore } from "@/stores/useStore";
 
 // Map backend action strings to ActivityActions types
 const ACTION_TYPE_MAP = {
@@ -14,41 +14,24 @@ const ACTION_TYPE_MAP = {
   REMOVE_GUARDIAN: "alert",
   UPDATE_ROLE: "settings",
   ACCEPT_INVITE: "login",
-  LOGIN: "login"
+  LOGIN: "login",
+  SET_EMERGENCY: "emergency",
+  UPDATE_RELATIONSHIP: "relationship"
 };
 
 const ActivityReport = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [activities, setActivities] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const itemsPerPage = 10;
 
+  const { history, isLoading, isRefreshing, error, fetchHistory } =
+    useActivityReportsStore();
+
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await getAccountHistory();
-        if (response.success) {
-          setActivities(
-            response.data.history || response.data?.data?.history || []
-          );
-        } else {
-          setError("Failed to load activity history");
-        }
-      } catch (err) {
-        setError("Failed to load activity history");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchHistory();
-  }, []);
+  }, [fetchHistory]);
 
-  const filteredActivities = activities.filter(
+  const filteredActivities = history.filter(
     (activity) =>
       (activity.guardianName || "")
         .toLowerCase()
@@ -101,31 +84,6 @@ const ActivityReport = () => {
     }
     return pages;
   };
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
-        <div className="w-full font-poppins max-w-5xl mx-auto space-y-6">
-          <div className="mb-4 md:mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
-              Activity Reports
-            </h2>
-            <p className="text-gray-500 text-xs md:text-sm">
-              Monitor and track all user activities in your system
-            </p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center justify-center gap-3">
-            <Icon
-              icon="ph:circle-notch-bold"
-              className="w-8 h-8 text-[#11285A] animate-spin"
-            />
-            <p className="text-gray-500 text-sm">Loading activity history...</p>
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   // Error state
   if (error) {
@@ -191,7 +149,7 @@ const ActivityReport = () => {
           </div>
         </div>
 
-        {totalItems === 0 ? (
+        {!isLoading && totalItems === 0 ? (
           <div className="bg-white rounded-b-2xl shadow-sm p-8 md:p-16 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
               <Icon icon="ph:files" className="text-3xl text-gray-400" />
@@ -236,41 +194,68 @@ const ActivityReport = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {paginatedActivities.map((activity, index) => (
-                      <tr
-                        key={activity.historyId ?? index}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="py-4 px-6">
-                          <p className="font-semibold text-sm text-gray-900">
-                            {activity.guardianName || "—"}
-                          </p>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="scale-75 origin-left">
-                            <ActivityActions
-                              type={
-                                ACTION_TYPE_MAP[activity.action] || "settings"
-                              }
-                            />
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <p className="text-sm text-gray-600">
-                            {activity.description || "—"}
-                          </p>
-                        </td>
-                        <td className="py-4 px-6 text-right">
-                          <p className="text-sm text-gray-500 font-medium">
-                            {activity.createdAt
-                              ? activity.createdAt
-                                  .replace("T", " ")
-                                  .split(".")[0]
-                              : "—"}
-                          </p>
-                        </td>
-                      </tr>
-                    ))}
+                    {isLoading
+                      ? Array.from({ length: itemsPerPage }).map((_, index) => (
+                          <tr key={`sk-${index}`} className="animate-pulse">
+                            <td className="py-4 px-6">
+                              <div className="h-4 w-40 bg-gray-200 rounded" />
+                            </td>
+
+                            <td className="py-4 px-6">
+                              <div className="h-7 w-24 bg-gray-200 rounded-full" />
+                            </td>
+
+                            <td className="py-4 px-6">
+                              <div className="space-y-2">
+                                <div className="h-4 w-full bg-gray-200 rounded" />
+                                <div className="h-4 w-4/5 bg-gray-200 rounded" />
+                              </div>
+                            </td>
+
+                            <td className="py-4 px-6 text-right">
+                              <div className="h-4 w-28 bg-gray-200 rounded ml-auto" />
+                            </td>
+                          </tr>
+                        ))
+                      : paginatedActivities.map((activity, index) => (
+                          <tr
+                            key={activity.historyId ?? index}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="py-4 px-6">
+                              <p className="font-semibold text-sm text-gray-900">
+                                {activity.guardianName || "—"}
+                              </p>
+                            </td>
+
+                            <td className="py-4 px-6">
+                              <div className="scale-75 origin-left">
+                                <ActivityActions
+                                  type={
+                                    ACTION_TYPE_MAP[activity.action] ||
+                                    "settings"
+                                  }
+                                />
+                              </div>
+                            </td>
+
+                            <td className="py-4 px-6">
+                              <p className="text-sm text-gray-600">
+                                {activity.description || "—"}
+                              </p>
+                            </td>
+
+                            <td className="py-4 px-6 text-right">
+                              <p className="text-sm text-gray-500 font-medium">
+                                {activity.createdAt
+                                  ? activity.createdAt
+                                      .replace("T", " ")
+                                      .split(".")[0]
+                                  : "—"}
+                              </p>
+                            </td>
+                          </tr>
+                        ))}
                   </tbody>
                 </table>
               </div>
