@@ -1,8 +1,186 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
 import BluetoothManager from "@/ui/components/BluetoothManager";
 import { changePasswordApi, logoutApi } from "@/api/authService";
 import { useNavigate } from "react-router-dom";
+import Modal from "@/ui/components/Modal";
+import {
+  useActivityReportsStore,
+  useDevicesStore,
+  useGuardiansStore,
+  useRealtimeStore,
+  useRouteStore,
+  useUIStore,
+  useUserStore
+} from "@/stores/useStore";
+
+// src/ui/utils/logoutModal.js
+function showLogoutModal(message = "Logging out...") {
+  if (document.getElementById("logout-modal-overlay")) return () => {};
+
+  const overlay = document.createElement("div");
+  overlay.id = "logout-modal-overlay";
+
+  const styleEl = document.createElement("style");
+  styleEl.innerHTML = `
+    #logout-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: all;
+    }
+
+    #logout-modal-overlay .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    #logout-modal-overlay .modal-content {
+      position: relative;
+      z-index: 10;
+      background: white;
+      border-radius: 1rem;
+      padding: 2.5rem;
+      min-width: 300px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      border: 1px solid #f3f4f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      animation: slideUp 0.3s ease-out 0.1s forwards;
+    }
+
+    #logout-modal-overlay .spinner-container {
+      position: relative;
+      width: 4rem;
+      height: 4rem;
+    }
+
+    #logout-modal-overlay .spinner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #11285A;
+      animation: spin 1s linear infinite;
+    }
+
+    #logout-modal-overlay .message {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+      margin: 0;
+    }
+
+    #logout-modal-overlay .submessage {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    #logout-modal-overlay .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #f3f4f6;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    #logout-modal-overlay .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #11285A, #3b82f6);
+      border-radius: 2px;
+      width: 0%;
+      animation: progress 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes slideDown { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(20px) scale(0.95); } }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes progress { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+
+    body.logout-modal-open {
+      overflow: hidden;
+      pointer-events: none;
+      user-select: none;
+    }
+    body.logout-modal-open * { pointer-events: none; }
+    body.logout-modal-open #logout-modal-overlay,
+    body.logout-modal-open #logout-modal-overlay * { pointer-events: all; }
+  `;
+  document.head.appendChild(styleEl);
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "backdrop";
+
+  const modalContent = document.createElement("div");
+  modalContent.className = "modal-content";
+
+  const spinnerContainer = document.createElement("div");
+  spinnerContainer.className = "spinner-container";
+
+  const spinner = document.createElement("div");
+  spinner.className = "spinner";
+  spinnerContainer.appendChild(spinner);
+
+  const messageContainer = document.createElement("div");
+  const mainMessage = document.createElement("h3");
+  mainMessage.className = "message";
+  mainMessage.textContent = message;
+
+  const subMessage = document.createElement("p");
+  subMessage.className = "submessage";
+  subMessage.textContent = "Please wait while we secure your session...";
+
+  messageContainer.appendChild(mainMessage);
+  messageContainer.appendChild(subMessage);
+
+  const progressBar = document.createElement("div");
+  progressBar.className = "progress-bar";
+  const progressFill = document.createElement("div");
+  progressFill.className = "progress-fill";
+  progressBar.appendChild(progressFill);
+
+  modalContent.appendChild(spinnerContainer);
+  modalContent.appendChild(messageContainer);
+  modalContent.appendChild(progressBar);
+
+  overlay.appendChild(backdrop);
+  overlay.appendChild(modalContent);
+
+  document.body.appendChild(overlay);
+  document.body.classList.add("logout-modal-open");
+
+  return function hideLogoutModal() {
+    if (!overlay.parentNode) return;
+    backdrop.style.animation = "fadeOut 0.2s ease-out forwards";
+    modalContent.style.animation = "slideDown 0.2s ease-out forwards";
+    setTimeout(() => {
+      overlay.remove();
+      styleEl.remove();
+      document.body.classList.remove("logout-modal-open");
+    }, 200);
+  };
+}
 
 const ToggleItem = ({ icon, title, description, checked, onChange }) => (
   <div className="flex items-start justify-between py-3 gap-3">
@@ -111,10 +289,19 @@ const PasswordInput = ({
 };
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
+  const { clearUser } = useUserStore();
+  const { clearDevices } = useDevicesStore();
+  const { clearHistory } = useActivityReportsStore();
+  const { clearAllGuardians } = useGuardiansStore();
+  const { disconnectWs } = useRealtimeStore();
+  const { clearRoute } = useRouteStore();
+
   const navigate = useNavigate();
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [passwordRequirements, setPasswordRequirements] = useState({
     hasLowercase: false,
     hasUppercase: false,
@@ -122,32 +309,27 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     hasSpecialChar: false,
     hasMinLength: false
   });
+
   const [isChecking, setIsChecking] = useState(false);
   const [showRequirements, setShowRequirements] = useState(false);
+
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [logoutMessage, setLogoutMessage] = useState("");
+
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
-    if (newPassword) {
-      setIsChecking(true);
-      setShowRequirements(true);
-      const timeout = setTimeout(() => {
-        setPasswordRequirements({
-          hasLowercase: /[a-z]/.test(newPassword),
-          hasUppercase: /[A-Z]/.test(newPassword),
-          hasNumber: /[0-9]/.test(newPassword),
-          hasSpecialChar: /[!@#$%^&*]/.test(newPassword),
-          hasMinLength: newPassword.length >= 8
-        });
-        setIsChecking(false);
-      }, 200);
-      return () => clearTimeout(timeout);
-    } else {
+    if (!newPassword) {
       setPasswordRequirements({
         hasLowercase: false,
         hasUppercase: false,
@@ -155,7 +337,29 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         hasSpecialChar: false,
         hasMinLength: false
       });
+      setShowRequirements(false);
+      setIsChecking(false);
+      return;
     }
+
+    setIsChecking(true);
+    setShowRequirements(true);
+
+    const timeoutId = setTimeout(() => {
+      if (!isMountedRef.current) return;
+
+      setPasswordRequirements({
+        hasLowercase: /[a-z]/.test(newPassword),
+        hasUppercase: /[A-Z]/.test(newPassword),
+        hasNumber: /[0-9]/.test(newPassword),
+        hasSpecialChar: /[!@#$%^&*]/.test(newPassword),
+        hasMinLength: newPassword.length >= 8
+      });
+
+      setIsChecking(false);
+    }, 200);
+
+    return () => clearTimeout(timeoutId);
   }, [newPassword]);
 
   const allRequirementsMet = Object.values(passwordRequirements).every(Boolean);
@@ -163,19 +367,35 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     newPassword === confirmPassword && confirmPassword !== "";
   const confirmPasswordError = confirmPassword && !passwordsMatch;
 
-  const handleLogout = async () => {
-    try {
-      await logoutApi();
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-      navigate("/login");
-    }
+  const resetForm = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setErrorMessage("");
+    setShowRequirements(false);
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setIsChecking(false);
+    setPasswordRequirements({
+      hasLowercase: false,
+      hasUppercase: false,
+      hasNumber: false,
+      hasSpecialChar: false,
+      hasMinLength: false
+    });
+  };
+
+  const handleClose = () => {
+    if (isSubmitting) return;
+    resetForm();
+    onClose();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+
     if (!allRequirementsMet) {
       setErrorMessage("Please meet all password requirements!");
       return;
@@ -192,36 +412,45 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
 
     try {
-      console.log("Sending password change request...");
-
-      const response = await changePasswordApi(
+      const changedResponse = await changePasswordApi(
         currentPassword,
         newPassword,
         confirmPassword
       );
 
-      console.log("Change password response:", response);
+      if (changedResponse.success) {
+        resetForm();
+        onClose();
+      }
 
-      setLogoutMessage("Password changed successfully! Logging you out...");
-      setShowSuccessModal(true);
+      const hide = showLogoutModal("Password changed. Logging out...");
 
-      setTimeout(async () => {
-        await handleLogout();
-      }, 2000);
+      try {
+        const response = await logoutApi();
+        if (response.success) {
+          clearUser();
+          clearDevices();
+          clearAllGuardians();
+          disconnectWs();
+          clearRoute();
+          clearHistory();
+          navigate("/login", { replace: true });
+        }
+      } finally {
+        hide?.();
+      }
     } catch (error) {
-      console.error("Password change error details:", error);
-
-      if (error.response) {
+      if (error?.response) {
         setErrorMessage(
           error.response?.data?.message ||
             error.message ||
             "Failed to change password"
         );
-      } else if (error.request) {
+      } else if (error?.request) {
         setErrorMessage("Network error. Please check your connection.");
       } else {
         setErrorMessage(
-          error.message || "An error occurred. Please try again."
+          error?.message || "An error occurred. Please try again."
         );
       }
     } finally {
@@ -229,217 +458,165 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const resetForm = () => {
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setErrorMessage("");
-    setShowRequirements(false);
-    setShowCurrentPassword(false);
-    setShowNewPassword(false);
-    setShowConfirmPassword(false);
-  };
-
-  const handleClose = () => {
-    if (!isSubmitting) {
-      resetForm();
-      onClose();
-    }
-  };
-
-  if (!isOpen) return null;
-
   return (
-    <>
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Icon
-                icon="mdi:check-circle"
-                className="text-4xl text-green-600"
-              />
-            </div>
-            <h3 className="text-xl font-bold text-[#11285A] mb-2">Success!</h3>
-            <p className="text-gray-600">{logoutMessage}</p>
-            <div className="mt-4 flex justify-center">
-              <Icon
-                icon="eos-icons:loading"
-                className="text-2xl text-[#11285A]"
-              />
-            </div>
-          </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Change Password"
+      message="Enter your current and new password"
+      modalType={errorMessage ? "error" : "info"}
+      variant="dialog"
+      closeTimer={0}
+      isSubmitting={isSubmitting}
+      icon="mage:key-fill"
+      width="max-w-md"
+      footer={
+        <div className="flex gap-3 w-full">
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className={`flex-1 px-4 py-2 border rounded-lg transition ${
+              isSubmitting
+                ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                : "border-gray-300 hover:bg-gray-200 cursor-pointer"
+            }`}
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            form="change-password-form"
+            disabled={!allRequirementsMet || !passwordsMatch || isSubmitting}
+            className={`flex-1 px-4 py-2 rounded-lg font-bold text-white transition-colors flex items-center justify-center gap-2 ${
+              allRequirementsMet && passwordsMatch && !isSubmitting
+                ? "bg-[#11285A] hover:bg-[#0d1f4a] cursor-pointer"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
+          >
+            {isSubmitting ? (
+              <>
+                <Icon
+                  icon="ph:circle-notch-bold"
+                  className="w-5 h-5 animate-spin"
+                />
+                Changing...
+              </>
+            ) : (
+              "Change Password"
+            )}
+          </button>
         </div>
-      )}
+      }
+    >
+      <form
+        id="change-password-form"
+        onSubmit={handleSubmit}
+        className="space-y-4"
+      >
+        {errorMessage && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-red-600 text-sm flex items-center gap-2">
+              <Icon icon="mdi:alert-circle" className="text-lg" />
+              {errorMessage}
+            </p>
+          </div>
+        )}
 
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-200 cursor-pointer"
-        onClick={handleClose}
-      />
+        <PasswordInput
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          placeholder="Enter current password"
+          label="Current Password"
+          showPassword={showCurrentPassword}
+          onTogglePassword={() => setShowCurrentPassword((v) => !v)}
+          className="border-gray-300 focus:border-[#11285A] focus:ring-[#11285A]/20"
+          disabled={isSubmitting}
+        />
 
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="bg-white rounded-2xl shadow-xl w-full max-w-md transform transition-all duration-200 scale-100 opacity-100"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="p-6 sm:p-8">
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl font-bold text-[#11285A]">
-                  Change Password
-                </h3>
-                <button
-                  onClick={handleClose}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
-                  disabled={isSubmitting}
-                >
-                  <Icon icon="mdi:close" className="text-xl text-gray-500" />
-                </button>
-              </div>
-              <p className="text-sm text-gray-500">
-                Enter your current and new password
-              </p>
+        <PasswordInput
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder="Enter new password"
+          label="New Password"
+          showPassword={showNewPassword}
+          onTogglePassword={() => setShowNewPassword((v) => !v)}
+          className={
+            newPassword && !allRequirementsMet
+              ? "border-red-300 focus:border-red-400 focus:ring-red-200"
+              : newPassword && allRequirementsMet
+                ? "border-green-300 focus:border-green-400 focus:ring-green-200"
+                : "border-gray-300 focus:border-[#11285A] focus:ring-[#11285A]/20"
+          }
+          disabled={isSubmitting}
+        />
+
+        {showRequirements && (
+          <div className="bg-blue-50 p-4 rounded-xl">
+            <p className="text-sm font-medium text-[#11285A] mb-3">
+              Password requirements:
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <PasswordRequirement
+                label="Lowercase (a-z)"
+                isValid={passwordRequirements.hasLowercase}
+                isChecking={isChecking && newPassword !== ""}
+              />
+              <PasswordRequirement
+                label="Uppercase (A-Z)"
+                isValid={passwordRequirements.hasUppercase}
+                isChecking={isChecking && newPassword !== ""}
+              />
+              <PasswordRequirement
+                label="Number (0-9)"
+                isValid={passwordRequirements.hasNumber}
+                isChecking={isChecking && newPassword !== ""}
+              />
+              <PasswordRequirement
+                label="Special Character (!@#$%^&*)"
+                isValid={passwordRequirements.hasSpecialChar}
+                isChecking={isChecking && newPassword !== ""}
+              />
+              <PasswordRequirement
+                label="At least 8 Characters"
+                isValid={passwordRequirements.hasMinLength}
+                isChecking={isChecking && newPassword !== ""}
+              />
             </div>
 
-            {errorMessage && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-red-600 text-sm flex items-center gap-2">
-                  <Icon icon="mdi:alert-circle" className="text-lg" />
-                  {errorMessage}
+            {newPassword && allRequirementsMet && (
+              <div className="mt-3 pt-3 border-t border-blue-200">
+                <p className="text-green-600 text-sm font-medium flex items-center gap-2">
+                  <Icon icon="mdi:check-circle" className="text-lg" />
+                  All requirements met!
                 </p>
               </div>
             )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <PasswordInput
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password"
-                label="Current Password"
-                showPassword={showCurrentPassword}
-                onTogglePassword={() =>
-                  setShowCurrentPassword(!showCurrentPassword)
-                }
-                className="border-gray-300 focus:border-[#11285A] focus:ring-[#11285A]/20"
-                disabled={isSubmitting}
-              />
-
-              <PasswordInput
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
-                label="New Password"
-                showPassword={showNewPassword}
-                onTogglePassword={() => setShowNewPassword(!showNewPassword)}
-                className={
-                  newPassword && !allRequirementsMet
-                    ? "border-red-300 focus:border-red-400 focus:ring-red-200"
-                    : newPassword && allRequirementsMet
-                      ? "border-green-300 focus:border-green-400 focus:ring-green-200"
-                      : "border-gray-300 focus:border-[#11285A] focus:ring-[#11285A]/20"
-                }
-                disabled={isSubmitting}
-              />
-
-              {showRequirements && (
-                <div className="bg-blue-50 p-4 rounded-xl">
-                  <p className="text-sm font-medium text-[#11285A] mb-3">
-                    Password requirements:
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <PasswordRequirement
-                      label="Lowercase (a-z)"
-                      isValid={passwordRequirements.hasLowercase}
-                      isChecking={isChecking && newPassword !== ""}
-                    />
-                    <PasswordRequirement
-                      label="Uppercase (A-Z)"
-                      isValid={passwordRequirements.hasUppercase}
-                      isChecking={isChecking && newPassword !== ""}
-                    />
-                    <PasswordRequirement
-                      label="Number (0-9)"
-                      isValid={passwordRequirements.hasNumber}
-                      isChecking={isChecking && newPassword !== ""}
-                    />
-                    <PasswordRequirement
-                      label="Special Character (!@#$%^&*)"
-                      isValid={passwordRequirements.hasSpecialChar}
-                      isChecking={isChecking && newPassword !== ""}
-                    />
-                    <PasswordRequirement
-                      label="At least 8 Characters"
-                      isValid={passwordRequirements.hasMinLength}
-                      isChecking={isChecking && newPassword !== ""}
-                    />
-                  </div>
-                  {newPassword && allRequirementsMet && (
-                    <div className="mt-3 pt-3 border-t border-blue-200">
-                      <p className="text-green-600 text-sm font-medium flex items-center gap-2">
-                        <Icon icon="mdi:check-circle" className="text-lg" />
-                        All requirements met!
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <PasswordInput
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter new password"
-                label="Confirm New Password"
-                showPassword={showConfirmPassword}
-                onTogglePassword={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
-                error={confirmPasswordError ? "Passwords do not match" : ""}
-                success={passwordsMatch ? "Passwords match" : ""}
-                className={
-                  confirmPasswordError
-                    ? "border-red-300 focus:border-red-400 focus:ring-red-200"
-                    : confirmPassword && passwordsMatch
-                      ? "border-green-300 focus:border-green-400 focus:ring-green-200"
-                      : "border-gray-300 focus:border-[#11285A] focus:ring-[#11285A]/20"
-                }
-                disabled={isSubmitting}
-              />
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  disabled={isSubmitting}
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={
-                    !allRequirementsMet || !passwordsMatch || isSubmitting
-                  }
-                  className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    allRequirementsMet && passwordsMatch && !isSubmitting
-                      ? "bg-[#11285A] text-white hover:bg-[#0d1f4a] hover:shadow-lg"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Icon icon="eos-icons:loading" className="text-lg" />
-                      Changing...
-                    </>
-                  ) : (
-                    "Change Password"
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      </div>
-    </>
+        )}
+
+        <PasswordInput
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Re-enter new password"
+          label="Confirm New Password"
+          showPassword={showConfirmPassword}
+          onTogglePassword={() => setShowConfirmPassword((v) => !v)}
+          error={confirmPasswordError ? "Passwords do not match" : ""}
+          success={passwordsMatch ? "Passwords match" : ""}
+          className={
+            confirmPasswordError
+              ? "border-red-300 focus:border-red-400 focus:ring-red-200"
+              : confirmPassword && passwordsMatch
+                ? "border-green-300 focus:border-green-400 focus:ring-green-200"
+                : "border-gray-300 focus:border-[#11285A] focus:ring-[#11285A]/20"
+          }
+          disabled={isSubmitting}
+        />
+      </form>
+    </Modal>
   );
 };
 

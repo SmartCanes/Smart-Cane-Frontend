@@ -256,10 +256,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                  d.deviceId === updatedDevice.deviceId
-                    ? { ...d, ...updatedDevice }
-                    : d
-                )
+                d.deviceId === updatedDevice.deviceId
+                  ? { ...d, ...updatedDevice }
+                  : d
+              )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -352,10 +352,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                    g.guardianId === guardian.guardianId
-                      ? { ...g, ...guardian }
-                      : g
-                  )
+                  g.guardianId === guardian.guardianId
+                    ? { ...g, ...guardian }
+                    : g
+                )
                 : [...d.guardians, guardian]
             };
           })
@@ -374,11 +374,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                  ...d,
-                  guardians: d.guardians.filter(
-                    (g) => g.guardianId !== guardianId
-                  )
-                }
+                ...d,
+                guardians: d.guardians.filter(
+                  (g) => g.guardianId !== guardianId
+                )
+              }
               : d
           )
         })),
@@ -394,7 +394,9 @@ export const useGuardiansStore = create(
 
       clearAllGuardians: () =>
         set({
-          guardiansByDevice: []
+          guardiansByDevice: [],
+          pendingInvitesByDevice: []
+
         }),
 
       setPendingInvitesCount: (deviceId, count) =>
@@ -752,7 +754,7 @@ export const useActivityReportsStore = create(
         }
       },
 
-      clear: () =>
+      clearHistory: () =>
         set({
           history: [],
           isLoading: false,
