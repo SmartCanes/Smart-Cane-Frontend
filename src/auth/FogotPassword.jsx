@@ -358,8 +358,62 @@ const ForgotPassword = () => {
             isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
           }
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6"
+          className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-8 pb-8 px-6"
         >
+          {/* Header (outside form, like Login/Register) */}
+          <div className="text-center space-y-2">
+            <h1 className="hidden sm:block text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
+              {step === 1 && "Forgot Password"}
+              {step === 2 && "Verification Code"}
+              {step === 3 && "Change Password"}
+            </h1>
+
+            <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
+              {step === 1 &&
+                "Enter your email address and we'll send you a code."}
+
+              {step === 2 && (
+                <>
+                  We've sent a verification code to:{" "}
+                  <span className="font-semibold">{userEmail}</span>.{" "}
+                  <span className="text-sm text-gray-600">
+                    (Expires in 5 minutes)
+                  </span>
+                </>
+              )}
+
+              {step === 3 &&
+                "Your code has been verified. Enter your new password."}
+            </p>
+
+            {/* Mobile header */}
+            <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
+              {step === 1 && "Forgot Password"}
+              {step === 2 && "Verification Code"}
+              {step === 3 && "Change Password"}
+            </p>
+
+            {/* Mobile description */}
+            <p className="sm:hidden font-poppins text-[#1C253C] text-sm">
+              {step === 1 &&
+                "Enter your email address and we'll send you a code."}
+
+              {step === 2 && (
+                <>
+                  We've sent a verification code to:{" "}
+                  <span className="font-semibold">{userEmail}</span>
+                  <br />
+                  <span className="text-xs text-gray-600">
+                    (Expires in 5 minutes)
+                  </span>
+                </>
+              )}
+
+              {step === 3 &&
+                "Your code has been verified. Enter your new password."}
+            </p>
+          </div>
+
           <motion.form
             initial={{ opacity: 0, y: 50 }}
             animate={
@@ -370,40 +424,6 @@ const ForgotPassword = () => {
             onSubmit={handleNext}
             noValidate
           >
-            {/* HEADER */}
-            <div className="w-full flex flex-col items-center text-center mb-6 sm:mb-10">
-              <h1 className="font-poppins text-4xl sm:text-5xl lg:text-[64px] font-bold text-[#1C253C] mb-6">
-                {step === 1 && "Forgot Password"}
-                {step === 2 && "Verification Code"}
-                {step === 3 && "Change Password"}
-              </h1>
-
-              <div className="mb-4 sm:mb-6">
-                <p className="font-poppins text-[#1C253C] text-paragraph">
-                  {step === 1 &&
-                    "Enter your email address and we'll send you a code."}
-
-                  {step === 2 && (
-                    <>
-                      We've sent a verification code to: <br />
-                      <span className="font-semibold">{userEmail}</span>
-                      <br />
-                      <span className="text-sm text-gray-600">
-                        (Expires in 5 minutes)
-                      </span>
-                    </>
-                  )}
-
-                  {step === 3 && (
-                    <>
-                      Your code has been verified. <br />
-                      Enter your new password.
-                    </>
-                  )}
-                </p>
-              </div>
-            </div>
-
             {/* STEP 1 — EMAIL */}
             {step === 1 && (
               <div className="space-y-4">
@@ -537,7 +557,6 @@ const ForgotPassword = () => {
         </motion.div>
       </div>
 
-      {/* MODAL */}
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}

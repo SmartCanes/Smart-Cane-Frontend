@@ -24,10 +24,13 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null); // CAPTCHA: State for storing CAPTCHA verification value
-  const [captchaLoading, setCaptchaLoading] = useState(true); // CAPTCHA: State for CAPTCHA loading status
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const [captchaLoading, setCaptchaLoading] = useState(true);
   const [retryAfter, setRetryAfter] = useState(0);
   const [redirectSeconds, setRedirectSeconds] = useState(null);
+
+  const shouldShowCaptcha =
+    credentials.identifier.trim().length > 0 && credentials.password.length > 0;
 
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
@@ -67,7 +70,8 @@ const Login = () => {
     if (!credentials.identifier.trim())
       newErrors.identifier = "Email or Username is required";
     if (!credentials.password) newErrors.password = "Password is required";
-    if (!captchaValue) newErrors.captcha = "Please complete the CAPTCHA"; // CAPTCHA: Validation for CAPTCHA completion
+    if (shouldShowCaptcha && !captchaValue)
+      newErrors.captcha = "Please complete the CAPTCHA";
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -203,19 +207,23 @@ const Login = () => {
               isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
             }
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-0 pb-8 sm:pb-0 px-6"
+            className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-8 pb-8 px-6"
           >
-            <div className="flex flex-col gap-5 text-center">
-              <h1 className="hidden sm:block text-5xl sm:text-5xl lg:text-6xl font-bold text-[#1C253C]">
-                Welcome!
+            {/* Header (match Register style) */}
+            <div className="text-center space-y-2">
+              <h1 className="hidden sm:block text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
+                Welcome
               </h1>
-              <p className="hidden sm:block text-[#1C253C] text-paragraph text-1xl">
+
+              <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
                 Ready to go? Log in and jump straight into your dashboard.
               </p>
+
               <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
                 Login to your account
               </p>
             </div>
+
             <motion.form
               initial={{ opacity: 0, y: 50 }}
               animate={
@@ -267,14 +275,13 @@ const Login = () => {
                 >
                   Forgot password?
                 </Link>
-
-                <div className="captcha-container">
-                  {/* CAPTCHA: Loading indicator for CAPTCHA */}
-                  {captchaLoading && (
-                    <p className="text-center text-gray-500 mb-2">
-                      Loading CAPTCHA...
-                    </p>
-                  )}
+                {shouldShowCaptcha && (
+                  <div className="captcha-container">
+                    {captchaLoading && (
+                      <p className="text-center text-gray-500 mb-2">
+                        Loading CAPTCHA...
+                      </p>
+                    )}
 
                     <ReCAPTCHA
                       sitekey={import.meta.env.VITE_CAPTCHA_KEY}
@@ -285,13 +292,13 @@ const Login = () => {
                       }}
                       asyncScriptOnLoad={() => setCaptchaLoading(false)}
                     />
-                </div>
 
-                {/* CAPTCHA: Error message for CAPTCHA */}
-                {errors.captcha && (
-                  <p className="font-poppins text-[#CE4B34] text-sm mt-2">
-                    {errors.captcha}
-                  </p>
+                    {errors.captcha && (
+                      <p className="font-poppins text-[#CE4B34] text-sm mt-2">
+                        {errors.captcha}
+                      </p>
+                    )}
+                  </div>
                 )}
 
                 <PrimaryButton
@@ -299,22 +306,24 @@ const Login = () => {
                   bgColor="bg-primary-100"
                   text={loading ? "Signing in..." : "Sign In"}
                   type="submit"
-                  disabled={retryAfter > 0 || loading || captchaLoading} // CAPTCHA: Disable button while CAPTCHA is loading
+                  disabled={retryAfter > 0 || loading || captchaLoading}
                 />
-
-                <p className="font-poppins text-center text-[18px] mt-4">
-                  Didn't have an account?{" "}
-                  <Link
-                    to="/register"
-                    className="font-poppins text-blue-500 hover:underline text-[18px] text-nowrap"
-                  >
-                    Sign Up
-                  </Link>
-                </p>
               </div>
             </motion.form>
+
+            {/* Footer (match Register placement) */}
+            <p className="text-center text-[18px]">
+              Didn't have an account?{" "}
+              <Link
+                to="/register"
+                className="font-poppins text-blue-500 hover:underline text-[18px]"
+              >
+                Sign Up
+              </Link>
+            </p>
           </motion.div>
         )}
+
         {showScanner && (
           <div className="flex flex-col gap-7 sm:justify-center items-center pt-[30px] sm:pt-5 pb-8 sm:pb-5 px-6">
             <div className="space-y-2">

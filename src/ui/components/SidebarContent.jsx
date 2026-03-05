@@ -16,6 +16,19 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
   // Phase sequence: 'start' (Blue) -> 'white' (Expansion) -> 'final' (Header/Sidebar Reveal)
   const [animationPhase, setAnimationPhase] = useState("start");
 
+  const [vh, setVh] = useState(() =>
+    typeof window !== "undefined" ? window.innerHeight : 800
+  );
+
+  useEffect(() => {
+    const onResize = () => setVh(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Desktop-only scaling (no scaling on mobile)
+  const desktopLogoScale = !isMobile ? Math.min(1, Math.max(0.7, vh / 820)) : 1;
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
@@ -111,6 +124,10 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
             lineHeight: isMobile && animationPhase === "final" ? "1" : "inherit"
           }}
           className="font-gabriela text-6xl sm:text-h1 text-[#FDFCFA]"
+          onClick={() => {
+            clearRegisterStore();
+            navigate("/", { replace: true });
+          }}
         >
           iCane
         </motion.h1>
@@ -137,6 +154,7 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
             src={SmartCaneLogo}
             alt="Background Pattern"
             initial={{ opacity: 0.05 }}
+            style={{ scale: desktopLogoScale, transformOrigin: "center" }}
             animate={
               isMobile && animationPhase !== "start"
                 ? { opacity: 0 }
@@ -154,6 +172,7 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
               loading="lazy"
               src={SmartCaneLogo}
               alt="Smart Cane Logo"
+              style={{ scale: desktopLogoScale, transformOrigin: "center" }}
               animate={
                 isMobile && animationPhase === "final"
                   ? { opacity: 0, height: 0, marginBottom: 0 }
@@ -161,7 +180,7 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
               }
               onClick={() => {
                 clearRegisterStore();
-                navigate("/");
+                navigate("/", { replace: true });
               }}
               className="w-[120px] sm:w-[220px] md:w-[290px] mx-auto cursor-pointer"
             />
