@@ -540,7 +540,7 @@ const GuestPage = () => {
       {/* Navigation */}
       <header
         id="header"
-        className="w-full bg-white/95 backdrop-blur shadow-sm sticky top-0 z-20"
+        className="w-full bg-white/95 backdrop-blur shadow-sm fixed top-0 z-20"
       >
         <div className="max-w-6xl mx-auto px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center">
@@ -1192,7 +1192,7 @@ const GuestPage = () => {
         type="button"
         aria-label="Back to top"
         onClick={() => {
-          const el = document.getElementById("header");
+          const el = document.getElementById("home");
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
         }}
         className={[
@@ -1202,13 +1202,13 @@ const GuestPage = () => {
           "flex items-center justify-center",
           "transition-all duration-200",
           "hover:scale-105 hover:bg-[#0d1c3f]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2 cursor-pointer",
           showScrollTop
             ? "opacity-100 translate-y-0"
             : "pointer-events-none opacity-0 translate-y-3"
         ].join(" ")}
       >
-        <Icon icon="mingcute:arrow-up-line" className="text-2xl" />
+        <Icon icon="mingcute:arrow-up-line" className="text-2xl " />
       </button>
     </div>
   );
