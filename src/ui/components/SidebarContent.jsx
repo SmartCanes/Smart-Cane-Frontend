@@ -26,12 +26,12 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
     // --- TIMING ADJUSTMENTS ---
     const timer1 = setTimeout(() => {
       setAnimationPhase("white");
-    }, 1000);
+    }, 800);
 
     const timer2 = setTimeout(() => {
       setAnimationPhase("final");
       if (onAnimationComplete) onAnimationComplete();
-    }, 1800);
+    }, 800);
 
     return () => {
       window.removeEventListener("resize", handleResize);
