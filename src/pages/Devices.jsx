@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
-import Toast from "../ui/components/Toast";
 import Modal from "../ui/components/Modal";
 import VipProfileModal from "@/ui/components/VipProfileModal";
 import ScannerCamera from "@/ui/components/Scanner";
 import { motion } from "framer-motion";
+import { useToast } from "@/context/ToastContext";
 
 import {
   assignVipToDevice,
@@ -28,11 +28,10 @@ const Devices = () => {
     useDevicesStore();
   const { fetchGuardiansAndInvites, currentGuardianRole } = useGuardiansStore();
   const { user } = useUserStore();
+  const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nicknameSubmitting, setNicknameSubmitting] = useState(false);
   const [resetNicknameSubmitting, setResetNicknameSubmitting] = useState(false);
-
-  const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [showScanner, setShowScanner] = useState(false);
   const [viewMode, setViewMode] = useState("tiles");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 764);
@@ -123,19 +122,16 @@ const Devices = () => {
       });
 
       setEditDeviceModal({
-        show: false,
         deviceId: null,
         deviceName: ""
       });
 
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "Cane nickname updated"
       });
     } catch (error) {
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message:
           error.response?.data?.message ||
@@ -158,14 +154,12 @@ const Devices = () => {
 
       removeDevice(deviceId);
       setUnpairConfirm({ show: false, deviceId: null });
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "Cane unpaired and removed from your account"
       });
     } catch (error) {
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message:
           error.response?.data?.message ||
@@ -291,15 +285,13 @@ const Devices = () => {
 
       setVipModal({ show: false, mode: "view", device: null, vipData: null });
 
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "VIP profile created for cane"
       });
       return true;
     } catch (error) {
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message: error.response?.data?.message || error.message
       });
@@ -349,15 +341,13 @@ const Devices = () => {
 
       setVipModal({ show: false, mode: "view", device: null, vipData: null });
 
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "VIP profile updated for cane"
       });
       return true;
     } catch (error) {
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message: error.response?.data?.message || error.message
       });
@@ -382,14 +372,12 @@ const Devices = () => {
       });
 
       setDeleteVIPConfirm({ show: false, deviceId: null });
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "VIP profile removed from cane"
       });
     } catch (error) {
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message:
           error.response?.data?.message ||
@@ -653,8 +641,7 @@ const Devices = () => {
             <ScannerCamera
               onSuccess={() => {
                 setShowScanner(false);
-                setToast({
-                  show: true,
+                showToast({
                   type: "success",
                   message: "Cane successfully paired to your account"
                 });
@@ -740,15 +727,6 @@ const Devices = () => {
           </div>
         )}
       </div>
-
-      {toast.show && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          position="bottom-right"
-          onClose={() => setToast({ show: false, type: "", message: "" })}
-        />
-      )}
     </main>
   );
 };

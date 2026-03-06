@@ -1,26 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Icon } from "@iconify/react";
 import LiveMap from "@/ui/components/LiveMap";
 import RecentAlerts from "@/ui/components/RecentAlert";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import SendNote from "@/ui/components/SendNote";
-import Toast from "@/ui/components/Toast";
-import { useRealtimeStore } from "@/stores/useStore";
-import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import QuickActions from "@/ui/components/QuickActions";
 import { useAnimation } from "framer-motion";
 
 const Dashboard = () => {
-  const { emergency, caneLocation, guardianLocation, setGuardianLocation } =
-    useRealtimeStore();
-  const location = useLocation();
-  const [toast, setToast] = useState({
-    message: "",
-    type: "",
-    position: "",
-    show: false
-  });
   const [activeTab, setActiveTab] = useState("track");
   // const [route, setRoute] = useState(null);
   const controls = useAnimation();
@@ -76,29 +64,6 @@ const Dashboard = () => {
 
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
-
-  useEffect(() => {
-    const showModal = location.state?.showModal;
-    if (showModal && !emergency) {
-      setToast({
-        show: true,
-        message: "You have successfully logged into your account.",
-        type: "success",
-        position: "top-right"
-      });
-
-      window.history.replaceState({}, document.title);
-
-      const timer = setTimeout(() => {
-        setToast((prev) => ({ ...prev, show: false }));
-      }, 3000);
-
-      return () => {
-        clearTimeout(timer);
-        setToast((prev) => ({ ...prev, show: false }));
-      };
-    }
-  }, [location]);
 
   return (
     <>
@@ -239,21 +204,6 @@ const Dashboard = () => {
                 />
               </div> */}
               <SendNote />
-              {toast.show && (
-                <Toast
-                  message={toast.message}
-                  type={toast.type}
-                  position={toast.position}
-                  onClose={() => setToast((prev) => ({ ...prev, show: false }))}
-                />
-              )}
-              {emergency && (
-                <Toast
-                  message="Emergency Alert! Please check the live location immediately."
-                  type="error"
-                  position="bottom-right"
-                />
-              )}
             </div>
           </div>
         </div>

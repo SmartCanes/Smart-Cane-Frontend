@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import Modal from "@/ui/components/Modal";
-import Toast from "@/ui/components/Toast";
+import { useToast } from "@/context/ToastContext";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   inviteGuardianLink,
@@ -108,7 +108,6 @@ const EditRelationshipModal = ({
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
-      // setToast({ show: false, type: "", message: "" });
     }
 
     return () => {
@@ -443,9 +442,7 @@ const GuardianTile = ({
             {/* Status dot */}
             <span
               className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-white ${
-                guardian.isOnline
-                  ? "bg-green-500"
-                  : "bg-gray-400"
+                guardian.isOnline ? "bg-green-500" : "bg-gray-400"
               }`}
             />
           </div>
@@ -869,12 +866,7 @@ const ManageGuardiansModal = ({
     guardianId: null,
     guardianName: ""
   });
-
-  const [toast, setToast] = useState({
-    show: false,
-    type: "",
-    message: ""
-  });
+  const { showToast } = useToast();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState("tiles");
@@ -888,7 +880,6 @@ const ManageGuardiansModal = ({
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
-      // setToast({ show: false, type: "", message: "" });
     }
 
     return () => {
@@ -907,8 +898,7 @@ const ManageGuardiansModal = ({
 
   const handleSendInvite = async () => {
     if (!email || !email.includes("@")) {
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message: "Please enter a valid email address"
       });
@@ -924,8 +914,7 @@ const ManageGuardiansModal = ({
         throw new Error(response.message || "Invitation failed");
       }
 
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "Invitation sent successfully"
       });
@@ -937,8 +926,7 @@ const ManageGuardiansModal = ({
         error.response?.data?.message ||
         error.message ||
         "Failed to send invitation";
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message: errorMessage
       });
@@ -965,8 +953,7 @@ const ManageGuardiansModal = ({
       removeGuardian(deviceId, deleteConfirm.guardianId);
       setDeleteConfirm({ show: false, guardianId: null, guardianName: "" });
 
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "Guardian removed successfully"
       });
@@ -976,8 +963,7 @@ const ManageGuardiansModal = ({
         error.message ||
         "Failed to remove guardian";
       setDeleteConfirm({ show: false, guardianId: null, guardianName: "" });
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message: errorMessage
       });
@@ -1013,8 +999,7 @@ const ManageGuardiansModal = ({
       setSelectedGuardian(null);
       setIsSetRoleOpen(false);
 
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "Guardian role updated successfully"
       });
@@ -1023,8 +1008,7 @@ const ManageGuardiansModal = ({
         error.response?.data?.message ||
         error.message ||
         "Failed to update guardian role";
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message: errorMessage
       });
@@ -1049,8 +1033,7 @@ const ManageGuardiansModal = ({
         relationship: newRelationship
       });
 
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: "Relationship updated successfully"
       });
@@ -1062,8 +1045,7 @@ const ManageGuardiansModal = ({
         error.response?.data?.message ||
         error.message ||
         "Failed to update relationship";
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message: errorMessage
       });
@@ -1085,8 +1067,7 @@ const ManageGuardiansModal = ({
         currentEmergencyContacts[0].guardianId === guardianId;
 
       if (isOnlyEmergencyContact) {
-        setToast({
-          show: true,
+        showToast({
           type: "error",
           message: "There must always be at least one emergency contact."
         });
@@ -1122,8 +1103,7 @@ const ManageGuardiansModal = ({
         }
       }
 
-      setToast({
-        show: true,
+      showToast({
         type: "success",
         message: isEmergencyContact
           ? "Set as emergency contact"
@@ -1134,8 +1114,7 @@ const ManageGuardiansModal = ({
         error.response?.data?.message ||
         error.message ||
         "Failed to update emergency contact";
-      setToast({
-        show: true,
+      showToast({
         type: "error",
         message: errorMessage
       });
@@ -1525,16 +1504,6 @@ const ManageGuardiansModal = ({
           setDeleteConfirm({ show: false, guardianId: null, guardianName: "" });
         }}
       />
-
-      {toast.show && (
-        <Toast
-          key="toast-modal"
-          type={toast.type}
-          message={toast.message}
-          position="bottom-right"
-          onClose={() => setToast({ show: false, type: "", message: "" })}
-        />
-      )}
     </AnimatePresence>
   );
 };

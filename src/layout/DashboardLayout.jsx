@@ -1,28 +1,19 @@
 import { getMyProfile } from "@/api/backendService";
-import {
-  useGuardiansStore,
-  useRealtimeStore,
-  useUserStore
-} from "@/stores/useStore";
+import { ToastProvider, useToast } from "@/context/ToastContext";
+import { useRealtimeStore, useUserStore } from "@/stores/useStore";
 import DashboardSide from "@/ui/components/DashboardSide";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
 import Header from "@/ui/components/Header";
-import Toast from "@/ui/components/Toast";
 import { createContext, useEffect, useRef, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 const ScrollContext = createContext();
 
-const DashboardLayout = () => {
+const DashboardLayoutContent = () => {
   const { setUser } = useUserStore();
   const { emergency, connectWs, disconnectWs } = useRealtimeStore();
-  const [toast, setToast] = useState({
-    message: "",
-    type: "",
-    position: "",
-    show: false,
-    duration: 3000
-  });
+  const location = useLocation();
+  const { showToast } = useToast();
   const [showNav, setShowNav] = useState(true);
   const lastScrollY = useRef(0);
 
@@ -50,17 +41,28 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     if (emergency) {
-      setToast({
+      showToast({
         message: "Emergency Alert! Please check the live location immediately.",
         type: "error",
         position: "bottom-right",
-        show: true,
         duration: 500000
       });
-    } else {
-      setToast((prev) => ({ ...prev, show: false }));
     }
-  }, [emergency]);
+  }, [emergency, showToast]);
+
+  useEffect(() => {
+    const showModal = location.state?.showModal;
+    if (showModal && !emergency) {
+      showToast({
+        message: "You have successfully logged into your account.",
+        type: "success",
+        position: "top-right",
+        duration: 3000
+      });
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location, emergency, showToast]);
 
   const handleScroll = (currentScrollY) => {
     if (window.innerWidth >= 768) {
@@ -83,14 +85,6 @@ const DashboardLayout = () => {
     <ScrollContext.Provider value={{ handleScroll }}>
       <div className="min-h-screen flex flex-col overflow-y-hidden bg-primary-100">
         <EmergencyOverlay emergency={emergency} />
-        {toast.show && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            position={toast.position}
-            duration={toast.duration}
-          />
-        )}
 
         <div
           className={`transition-all duration-300 ease-in-out z-20 w-full md:mt-0 ${showNav ? "mt-0" : "-mt-[var(--header-height)]"}`}
@@ -108,5 +102,11 @@ const DashboardLayout = () => {
     </ScrollContext.Provider>
   );
 };
+
+const DashboardLayout = () => (
+  <ToastProvider>
+    <DashboardLayoutContent />
+  </ToastProvider>
+);
 
 export default DashboardLayout;

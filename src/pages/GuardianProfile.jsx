@@ -4,7 +4,6 @@ import avatarPlaceholder from "@/assets/images/default-profile.jpg";
 import { Icon } from "@iconify/react";
 import TextField from "@/ui/components/TextField";
 import SelectField from "@/ui/components/SelectField";
-import Toast from "@/ui/components/Toast";
 import {
   updateGuardian,
   uploadProfileImage,
@@ -14,6 +13,7 @@ import {
 import DefaultProfile from "@/ui/components/DefaultProfile";
 import { validateField } from "@/utils/ValidationHelper";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import { useToast } from "@/context/ToastContext";
 
 const PROFILE_FIELDS = [
   "firstName",
@@ -34,6 +34,7 @@ export const GuardianProfile = () => {
   const originalProfileRef = useRef(null);
   const { user, setUser } = useUserStore();
   const formRef = useRef(null);
+  const { showToast } = useToast();
 
   const [profile, setProfile] = useState({
     firstName: user.firstName,
@@ -51,11 +52,6 @@ export const GuardianProfile = () => {
   });
 
   const [isEditMode, setIsEditMode] = useState(false);
-  const [toastConfig, setToastConfig] = useState({
-    show: false,
-    message: "",
-    type: "info"
-  });
 
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -185,8 +181,7 @@ export const GuardianProfile = () => {
     setImageFile(file);
     setImageRemoved(false);
 
-    setToastConfig({
-      show: true,
+    showToast({
       message: "Profile image selected. Click Save to upload.",
       type: "success"
     });
@@ -233,18 +228,12 @@ export const GuardianProfile = () => {
     };
 
     setIsEditMode(true);
-    // setToastConfig({
-    //   show: true,
-    //   message: "Edit mode activated",
-    //   type: "info"
-    // });
   };
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!hasProfileChanged()) {
-      setToastConfig({
-        show: true,
+      showToast({
         message: "No changes detected",
         type: "info"
       });
@@ -254,8 +243,7 @@ export const GuardianProfile = () => {
     }
 
     if (!validateForm()) {
-      setToastConfig({
-        show: true,
+      showToast({
         message: "Please fix validation errors before saving",
         type: "error"
       });
@@ -277,8 +265,7 @@ export const GuardianProfile = () => {
       }));
 
       setIsEditMode(false);
-      setToastConfig({
-        show: true,
+      showToast({
         message: "Profile saved locally (backend disabled)",
         type: "success"
       });
@@ -310,8 +297,7 @@ export const GuardianProfile = () => {
           otpInputRefs.current[0]?.focus();
         }, 100);
 
-        setToastConfig({
-          show: true,
+        showToast({
           message: "OTP sent to your new email address",
           type: "success"
         });
@@ -321,8 +307,7 @@ export const GuardianProfile = () => {
       setOtpError(
         error.response?.data?.message || error.message || "Failed to send OTP"
       );
-      setToastConfig({
-        show: true,
+      showToast({
         message:
           error.response?.data?.message ||
           error.message ||
@@ -374,12 +359,6 @@ export const GuardianProfile = () => {
       const response = await verifyEmailChangeOTP(profile.email, otpCode);
 
       if (response.success) {
-        // setToastConfig({
-        //   show: true,
-        //   message: "Email verified successfully",
-        //   type: "success"
-        // });
-
         setShowOTPModal(false);
         setOriginalEmail(profile.email);
         setIsVerifyingEmail(false);
@@ -392,8 +371,7 @@ export const GuardianProfile = () => {
         error.response?.data?.message || error.message || "Invalid OTP code"
       );
 
-      setToastConfig({
-        show: true,
+      showToast({
         message:
           error.response?.data?.message ||
           error.message ||
@@ -412,12 +390,6 @@ export const GuardianProfile = () => {
   };
 
   const saveProfileData = async () => {
-    setToastConfig({
-      show: false,
-      message: "",
-      type: "info"
-    });
-
     try {
       let uploadedImageUrl;
 
@@ -433,8 +405,7 @@ export const GuardianProfile = () => {
           }
         } catch (imageError) {
           console.error("Failed to upload image:", imageError);
-          setToastConfig({
-            show: true,
+          showToast({
             message:
               "Profile saved, but image upload failed. Please try uploading the image again.",
             type: "warning"
@@ -484,15 +455,13 @@ export const GuardianProfile = () => {
       setImageRemoved(false);
       setIsEditMode(false);
 
-      setToastConfig({
-        show: true,
+      showToast({
         message: "Profile saved successfully",
         type: "success"
       });
     } catch (error) {
       console.error("Error saving profile:", error);
-      setToastConfig({
-        show: true,
+      showToast({
         message:
           error.response?.data?.message ||
           error.message ||
@@ -521,8 +490,7 @@ export const GuardianProfile = () => {
     setIsSendingOTP(false);
     setIsVerifyingOTP(false);
 
-    setToastConfig({
-      show: true,
+    showToast({
       message: "Email verification cancelled",
       type: "warning"
     });
@@ -555,11 +523,6 @@ export const GuardianProfile = () => {
     });
 
     setIsEditMode(false);
-    // setToastConfig({
-    //   show: true,
-    //   message: "Changes cancelled",
-    //   type: "warning"
-    // });
   };
 
   const formatTime = (seconds) => {
@@ -950,18 +913,6 @@ export const GuardianProfile = () => {
                 </div>
                 <button type="submit" className="hidden" />
               </form>
-
-              {toastConfig.show && (
-                <Toast
-                  message={toastConfig.message}
-                  type={toastConfig.type}
-                  duration={3000}
-                  position="bottom-right"
-                  onClose={() =>
-                    setToastConfig((prev) => ({ ...prev, show: false }))
-                  }
-                />
-              )}
             </div>
           </main>
 
