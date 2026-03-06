@@ -30,6 +30,55 @@ const AD_TEXTS = [
   }
 ];
 
+const BG_THEMES = [
+  // Clean whites
+  { bg: "#FFFFFF" },
+  { bg: "#FDFCF9" },
+  { bg: "linear-gradient(180deg, #FFFFFF 0%, #F6F9FF 100%)" },
+  { bg: "linear-gradient(135deg, #FFFFFF 0%, #F2F7FF 55%, #FFFFFF 100%)" },
+
+  // Soft blue “glass” feel
+  {
+    bg: "radial-gradient(circle at 20% 15%, rgba(91,141,239,0.18) 0%, rgba(255,255,255,1) 55%, rgba(255,255,255,1) 100%)"
+  },
+  {
+    bg: "radial-gradient(circle at 80% 20%, rgba(91,141,239,0.16) 0%, rgba(255,255,255,1) 50%, rgba(14,45,107,0.06) 100%)"
+  },
+  {
+    bg: "radial-gradient(circle at 35% 25%, rgba(91,141,239,0.20) 0%, rgba(255,255,255,1) 58%, rgba(14,45,107,0.08) 100%)"
+  },
+
+  // Modern “aurora” without leaving brand
+  { bg: "linear-gradient(135deg, #FFFFFF 0%, #EAF2FF 45%, #FFFFFF 100%)" },
+  { bg: "linear-gradient(135deg, #EAF2FF 0%, #FFFFFF 55%, #DCEBFF 100%)" },
+  {
+    bg: "linear-gradient(120deg, rgba(91,141,239,0.22) 0%, rgba(255,255,255,1) 45%, rgba(14,45,107,0.08) 100%)"
+  },
+
+  // Deep brand blues (premium)
+  { bg: "linear-gradient(135deg, #09132B 0%, #112248 45%, #0E2D6B 100%)" },
+  {
+    bg: "radial-gradient(circle at 30% 20%, rgba(91,141,239,0.22) 0%, #112248 45%, #09132B 100%)"
+  },
+  {
+    bg: "radial-gradient(circle at 70% 25%, rgba(91,141,239,0.18) 0%, #0E2D6B 40%, #09132B 100%)"
+  },
+
+  // High-end “spotlight” background
+  {
+    bg: "radial-gradient(1200px circle at 40% 20%, rgba(91,141,239,0.25) 0%, rgba(255,255,255,1) 45%, rgba(14,45,107,0.05) 100%)"
+  },
+  {
+    bg: "radial-gradient(900px circle at 60% 30%, rgba(91,141,239,0.18) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,1) 100%)"
+  },
+
+  // Brand accent sweep (feels “product landing page”)
+  { bg: "linear-gradient(135deg, #5B8DEF 0%, #EAF2FF 55%, #FFFFFF 100%)" },
+  {
+    bg: "linear-gradient(135deg, rgba(91,141,239,0.28) 0%, rgba(255,255,255,1) 50%, rgba(91,141,239,0.10) 100%)"
+  }
+];
+
 // Small hook for responsive logic
 const useMediaQuery = (query) => {
   const [matches, setMatches] = useState(() =>
@@ -59,6 +108,14 @@ const CaneViewer = () => {
   const [adIndex, setAdIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const isMobile = useMediaQuery("(max-width: 767px)");
+  const [bgIndex, setBgIndex] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setBgIndex((i) => (i + 1) % BG_THEMES.length);
+    }, 2000);
+    return () => clearInterval(t);
+  }, []);
 
   // Cycle through ad texts with fade in/out
   useEffect(() => {
@@ -131,7 +188,7 @@ const CaneViewer = () => {
 
     // Camera framing
     const dist = (3 / 2 / Math.tan((50 * Math.PI) / 180 / 2)) * 0.9;
-    camera.position.set(0.5, 0, dist);
+    camera.position.set(0.5, 0, dist * 1.15);
     camera.lookAt(0, 0, 0);
 
     // --- Controls ---
@@ -175,7 +232,7 @@ const CaneViewer = () => {
     let animFrameId;
     const animate = () => {
       animFrameId = requestAnimationFrame(animate);
-      model.rotation.y += isMobile ? 0.004 : 0.008;
+      model.rotation.y += isMobile ? 0.004 : 0.006;
       controls.update();
       renderer.render(scene, camera);
     };
@@ -206,12 +263,9 @@ const CaneViewer = () => {
   return (
     <div
       className="relative w-full h-full overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(135deg, #09132b 0%, #112248 45%, #0e2d6b 100%)"
-      }}
+      style={{ background: BG_THEMES[bgIndex].bg }}
     >
-      {/* 3D canvas */}
+      <h1 className="text-center text-2xl text-emerald-800">{bgIndex + 1}</h1>
       <div
         ref={mountRef}
         className="w-full h-full cursor-grab active:cursor-grabbing"
@@ -220,7 +274,7 @@ const CaneViewer = () => {
       {/* Top-left branding (responsive) */}
       <div className="absolute top-4 sm:top-6 left-4 sm:left-8 pointer-events-none flex items-center gap-2">
         <img src="/icane.svg" alt="iCane Logo" className="h-7 sm:h-8 w-auto" />
-        <span className="text-white/70 text-[10px] sm:text-xs tracking-[0.35em] uppercase font-medium">
+        <span className="text-black/70 text-[10px] sm:text-xs tracking-[0.35em] uppercase font-medium">
           iCane — Smart Cane
         </span>
       </div>
@@ -240,10 +294,10 @@ const CaneViewer = () => {
           <span className="text-[#5b8def] text-xs tracking-[0.3em] uppercase font-semibold">
             {ad.label}
           </span>
-          <h2 className="text-white text-3xl sm:text-4xl font-bold mt-1 mb-2 leading-tight">
+          <h2 className="text-black text-3xl sm:text-4xl font-bold mt-1 mb-2 leading-tight">
             {ad.headline}
           </h2>
-          <p className="text-white/60 text-sm sm:text-base leading-relaxed">
+          <p className="text-black/60 text-sm sm:text-base leading-relaxed">
             {ad.sub}
           </p>
         </div>
@@ -257,7 +311,7 @@ const CaneViewer = () => {
           }}
         >
           <div
-            className="rounded-2xl border border-white/10 bg-black/35 backdrop-blur-md p-4"
+            className="rounded-2xl border border-black/10 bg-black/35 backdrop-blur-md p-4"
             style={{
               boxShadow: "0 20px 60px rgba(0,0,0,0.35)"
             }}
@@ -266,15 +320,15 @@ const CaneViewer = () => {
               <span className="text-[#5b8def] text-[10px] tracking-[0.35em] uppercase font-semibold">
                 {ad.label}
               </span>
-              <span className="text-white/45 text-[11px]">
+              <span className="text-black/45 text-[11px]">
                 Hold &amp; drag to rotate
               </span>
             </div>
 
-            <h2 className="text-white text-xl font-bold mt-2 leading-snug">
+            <h2 className="text-black text-xl font-bold mt-2 leading-snug">
               {ad.headline}
             </h2>
-            <p className="text-white/65 text-sm mt-1 leading-relaxed">
+            <p className="text-black/65 text-sm mt-1 leading-relaxed">
               {ad.sub}
             </p>
 
@@ -315,13 +369,13 @@ const CaneViewer = () => {
       )}
 
       {/* Subtle vignette overlay */}
-      <div
+      {/* <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
             "radial-gradient(ellipse at center, transparent 50%, rgba(5,10,25,0.55) 100%)"
         }}
-      />
+      /> */}
     </div>
   );
 };
