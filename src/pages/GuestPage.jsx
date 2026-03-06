@@ -31,6 +31,7 @@ import {
   TextReveal
 } from "@/wrapper/MotionWrapper";
 import TeamSection from "@/ui/components/TeamSection";
+import FeatureCarousel from "@/ui/components/FeatureCarousel";
 
 const FEATURE_CARD_ACTIVE_CLASS = "opacity-100 scale-100 sm:scale-[1.02]";
 const FEATURE_CARD_INACTIVE_CLASS = "opacity-40 sm:opacity-60 scale-[0.92]";
@@ -351,11 +352,7 @@ const faqs = [
 const GuestPage = () => {
   const carouselRef = useRef(null);
   const cardRefs = useRef([]);
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
   const navigate = useNavigate();
-  const autoScrollEnabled = true;
-  const isProgrammaticScrollRef = useRef(false);
-  const [isCarouselVisible, setIsCarouselVisible] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
@@ -384,136 +381,6 @@ const GuestPage = () => {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
-  const updateActiveCard = useCallback(() => {
-    if (isProgrammaticScrollRef.current) return;
-
-    const container = carouselRef.current;
-    if (!container) return;
-
-    const scrollLeft = container.scrollLeft;
-    const scrollWidth = container.scrollWidth;
-    const clientWidth = container.clientWidth;
-
-    if (scrollLeft < 10) {
-      setActiveCardIndex(0);
-      return;
-    }
-
-    if (Math.ceil(scrollLeft + clientWidth) >= scrollWidth) {
-      setActiveCardIndex(featureCards.length - 1);
-      return;
-    }
-
-    const { left, width } = container.getBoundingClientRect();
-    const containerCenter = left + width / 2;
-
-    let closestIndex = 0;
-    let smallestDistance = Number.POSITIVE_INFINITY;
-
-    cardRefs.current.forEach((card, index) => {
-      if (!card) return;
-      const cardRect = card.getBoundingClientRect();
-      const cardCenter = cardRect.left + cardRect.width / 2;
-      const distance = Math.abs(containerCenter - cardCenter);
-
-      if (distance < smallestDistance) {
-        smallestDistance = distance;
-        closestIndex = index;
-      }
-    });
-
-    setActiveCardIndex(closestIndex);
-  }, [featureCards.length]);
-
-  useEffect(() => {
-    updateActiveCard();
-    window.addEventListener("resize", updateActiveCard);
-    return () => window.removeEventListener("resize", updateActiveCard);
-  }, [updateActiveCard]);
-
-  const scrollToCard = useCallback(
-    (index) => {
-      const container = carouselRef.current;
-      if (!container) return;
-
-      isProgrammaticScrollRef.current = true;
-
-      const clampedIndex = Math.max(
-        0,
-        Math.min(index, featureCards.length - 1)
-      );
-      const targetCard = cardRefs.current[clampedIndex];
-      if (!targetCard) {
-        isProgrammaticScrollRef.current = false;
-        return;
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const cardRect = targetCard.getBoundingClientRect();
-
-      const scrollLeft = container.scrollLeft;
-      const cardOffset = cardRect.left - containerRect.left;
-      const centerOffset = (containerRect.width - cardRect.width) / 2;
-
-      const targetScrollPosition = scrollLeft + cardOffset - centerOffset;
-
-      container.scrollTo({
-        left: targetScrollPosition,
-        behavior: "smooth"
-      });
-
-      setTimeout(() => {
-        setActiveCardIndex(clampedIndex);
-
-        setTimeout(() => {
-          isProgrammaticScrollRef.current = false;
-        }, 100);
-      }, 400);
-    },
-    [featureCards.length]
-  );
-
-  const handleCarouselScroll = (direction) => {
-    let targetIndex = activeCardIndex + direction;
-
-    if (targetIndex < 0) {
-      targetIndex = featureCards.length - 1;
-    } else if (targetIndex >= featureCards.length) {
-      targetIndex = 0;
-    }
-
-    scrollToCard(targetIndex);
-  };
-
-  cardRefs.current = cardRefs.current.slice(0, featureCards.length);
-
-  useEffect(() => {
-    if (!autoScrollEnabled || !isCarouselVisible) return;
-
-    const intervalId = setInterval(() => {
-      scrollToCard(
-        activeCardIndex === featureCards.length - 1 ? 0 : activeCardIndex + 1
-      );
-    }, 5000);
-
-    return () => clearInterval(intervalId);
-  }, [autoScrollEnabled, activeCardIndex, scrollToCard, isCarouselVisible]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsCarouselVisible(entry.isIntersecting);
-      },
-      { threshold: 0.3 } // triggers when 30% visible
-    );
-
-    if (carouselRef.current) observer.observe(carouselRef.current);
-
-    return () => {
-      if (carouselRef.current) observer.unobserve(carouselRef.current);
-    };
   }, []);
 
   const ScrollLink = ({ targetId, children, className }) => {
@@ -773,114 +640,7 @@ const GuestPage = () => {
         </div>
       </section>
       {/* Feature carousel */}
-      <section
-        id="features"
-        aria-label="iCane feature carousel"
-        className="px-4 sm:px-6"
-      >
-        <div className="relative mt-12">
-          <button
-            type="button"
-            onClick={() => handleCarouselScroll(-1)}
-            className="group absolute left-4 top-1/2 hidden -translate-y-1/2 items-center justify-center text-black transition-all duration-200 hover:text-gray-600 md:flex z-10"
-            aria-label="Show previous feature"
-          >
-            <Icon
-              icon="mingcute:left-line"
-              className="text-5xl transition-transform duration-200 group-hover:-translate-x-0.5"
-            />
-          </button>
-
-          <div
-            ref={carouselRef}
-            onScroll={updateActiveCard}
-            className="flex snap-x snap-proximity gap-6 overflow-x-auto pb-6 pt-4 px-2 scroll-smooth sm:gap-8 lg:gap-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-            style={{
-              scrollPaddingLeft: "min(10%, 72px)",
-              scrollPaddingRight: "min(10%, 72px)"
-            }}
-          >
-            {featureCards.map((card, index) => (
-              <FeatureCard
-                key={card.id}
-                ref={(el) => {
-                  cardRefs.current[index] = el;
-                }}
-                icon={card.icon}
-                title={card.title}
-                description={card.description}
-                mainImage={card.mainImage}
-                mainImageAlt={card.mainImageAlt}
-                backgroundColor={card.backgroundColor}
-                textColor={card.textColor}
-                descriptionColor={card.descriptionColor}
-                backgroundImage={card.backgroundImage}
-                backgroundImageOpacity={card.backgroundImageOpacity}
-                backgroundImagePosition={card.backgroundImagePosition}
-                backgroundImageSize={card.backgroundImageSize}
-                backgroundImageClassName={card.backgroundImageClassName}
-                backgroundImageStyle={card.backgroundImageStyle}
-                backgroundIcon={card.backgroundIcon}
-                backgroundIconProps={card.backgroundIconProps}
-                backgroundIconClassName={card.backgroundIconClassName}
-                backgroundIconStyle={card.backgroundIconStyle}
-                backgroundIconContainerClassName={
-                  card.backgroundIconContainerClassName
-                }
-                backgroundIconContainerStyle={card.backgroundIconContainerStyle}
-                overlayGradient={card.overlayGradient ?? true}
-                iconWrapperClassName={card.iconWrapperClassName}
-                iconWrapperWidth={card.iconWrapperWidth}
-                iconWrapperHeight={card.iconWrapperHeight}
-                iconWrapperRounded={card.iconWrapperRounded}
-                iconWrapperShadow={card.iconWrapperShadow}
-                iconClassName={card.iconClassName}
-                badge={card.badge}
-                badgeClassName={card.badgeClassName}
-                footer={card.footer}
-                footerClassName={card.footerClassName}
-                isActive={activeCardIndex === index}
-                className={`w-[90vw] sm:w-80 md:w-96 flex-shrink-0 snap-center transition-all duration-300 ease-out ${card.className ?? ""}`}
-                activeClassName={
-                  card.activeClassName ?? FEATURE_CARD_ACTIVE_CLASS
-                }
-                inactiveClassName={
-                  card.inactiveClassName ?? FEATURE_CARD_INACTIVE_CLASS
-                }
-              />
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => handleCarouselScroll(1)}
-            className="group absolute right-4 top-1/2 hidden -translate-y-1/2 items-center justify-center text-black transition-all duration-200 hover:text-gray-600 md:flex z-10"
-            aria-label="Show next feature"
-          >
-            <Icon
-              icon="mingcute:right-line"
-              className="text-5xl transition-transform duration-200 group-hover:translate-x-0.5"
-            />
-          </button>
-        </div>
-
-        <div className="mt-6 flex justify-center gap-2 sm:gap-3">
-          {featureCards.map((card, index) => (
-            <button
-              key={`${card.id}-indicator`}
-              type="button"
-              onClick={() => scrollToCard(index)}
-              className={`h-2.5 rounded-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2 ${
-                activeCardIndex === index
-                  ? "w-8 bg-[#11285A]"
-                  : "w-2.5 bg-[#d7dde9]"
-              }`}
-              aria-label={`Show ${card.title} feature`}
-              aria-pressed={activeCardIndex === index}
-            />
-          ))}
-        </div>
-      </section>
+      <FeatureCarousel cards={featureCards} autoScroll autoScrollMs={5000} />
       {/* Section divider for iCane */}
       <div className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16">
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
