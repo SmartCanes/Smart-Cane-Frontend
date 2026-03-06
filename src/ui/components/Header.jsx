@@ -438,10 +438,21 @@ const Header = () => {
   const notificationRef = useRef(null);
 
   useEffect(() => {
-    if (devices.length && !selectedDevice) {
+    if (!devices.length) return;
+
+    if (!selectedDevice) {
       setSelectedDevice(devices[0]);
+      return;
     }
-  }, [devices]);
+
+    const latestSelectedDevice = devices.find(
+      (device) => device.deviceId === selectedDevice.deviceId
+    );
+
+    if (latestSelectedDevice) {
+      setSelectedDevice(latestSelectedDevice);
+    }
+  }, [devices, selectedDevice, setSelectedDevice]);
 
   useEffect(() => {
     const handler = (e) => {
