@@ -48,6 +48,7 @@ export const useRealtimeStore = create(
     (set, get) => ({
       _wsConnected: false,
       connectionStatus: false,
+      _guardianWatchId: null,
       emergency: false,
       canePosition: null,
       guardianPosition: null,
@@ -142,7 +143,7 @@ export const useRealtimeStore = create(
         });
       },
 
-      setGuardianLocation: (loc) => set({ guardianLocation: loc }),
+      setGuardianLocation: (loc) => set({ guardianPosition: loc }),
 
       startGuardianTracking: () => {
         if ("geolocation" in navigator && get()._guardianWatchId === null) {
