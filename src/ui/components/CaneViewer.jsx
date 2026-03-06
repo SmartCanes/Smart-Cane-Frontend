@@ -30,56 +30,6 @@ const AD_TEXTS = [
   }
 ];
 
-const BG_THEMES = [
-  // Clean whites
-  { bg: "#FFFFFF" },
-  { bg: "#FDFCF9" },
-  { bg: "linear-gradient(180deg, #FFFFFF 0%, #F6F9FF 100%)" },
-  { bg: "linear-gradient(135deg, #FFFFFF 0%, #F2F7FF 55%, #FFFFFF 100%)" },
-
-  // Soft blue “glass” feel
-  {
-    bg: "radial-gradient(circle at 20% 15%, rgba(91,141,239,0.18) 0%, rgba(255,255,255,1) 55%, rgba(255,255,255,1) 100%)"
-  },
-  {
-    bg: "radial-gradient(circle at 80% 20%, rgba(91,141,239,0.16) 0%, rgba(255,255,255,1) 50%, rgba(14,45,107,0.06) 100%)"
-  },
-  {
-    bg: "radial-gradient(circle at 35% 25%, rgba(91,141,239,0.20) 0%, rgba(255,255,255,1) 58%, rgba(14,45,107,0.08) 100%)"
-  },
-
-  // Modern “aurora” without leaving brand
-  { bg: "linear-gradient(135deg, #FFFFFF 0%, #EAF2FF 45%, #FFFFFF 100%)" },
-  { bg: "linear-gradient(135deg, #EAF2FF 0%, #FFFFFF 55%, #DCEBFF 100%)" },
-  {
-    bg: "linear-gradient(120deg, rgba(91,141,239,0.22) 0%, rgba(255,255,255,1) 45%, rgba(14,45,107,0.08) 100%)"
-  },
-
-  // Deep brand blues (premium)
-  { bg: "linear-gradient(135deg, #09132B 0%, #112248 45%, #0E2D6B 100%)" },
-  {
-    bg: "radial-gradient(circle at 30% 20%, rgba(91,141,239,0.22) 0%, #112248 45%, #09132B 100%)"
-  },
-  {
-    bg: "radial-gradient(circle at 70% 25%, rgba(91,141,239,0.18) 0%, #0E2D6B 40%, #09132B 100%)"
-  },
-
-  // High-end “spotlight” background
-  {
-    bg: "radial-gradient(1200px circle at 40% 20%, rgba(91,141,239,0.25) 0%, rgba(255,255,255,1) 45%, rgba(14,45,107,0.05) 100%)"
-  },
-  {
-    bg: "radial-gradient(900px circle at 60% 30%, rgba(91,141,239,0.18) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,1) 100%)"
-  },
-
-  // Brand accent sweep (feels “product landing page”)
-  { bg: "linear-gradient(135deg, #5B8DEF 0%, #EAF2FF 55%, #FFFFFF 100%)" },
-  {
-    bg: "linear-gradient(135deg, rgba(91,141,239,0.28) 0%, rgba(255,255,255,1) 50%, rgba(91,141,239,0.10) 100%)"
-  }
-];
-
-// Small hook for responsive logic
 const useMediaQuery = (query) => {
   const [matches, setMatches] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia(query).matches : false
@@ -108,16 +58,7 @@ const CaneViewer = () => {
   const [adIndex, setAdIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const isMobile = useMediaQuery("(max-width: 767px)");
-  const [bgIndex, setBgIndex] = useState(0);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setBgIndex((i) => (i + 1) % BG_THEMES.length);
-    }, 2000);
-    return () => clearInterval(t);
-  }, []);
-
-  // Cycle through ad texts with fade in/out
   useEffect(() => {
     const interval = setInterval(() => {
       setVisible(false);
@@ -263,9 +204,11 @@ const CaneViewer = () => {
   return (
     <div
       className="relative w-full h-full overflow-hidden"
-      style={{ background: BG_THEMES[bgIndex].bg }}
+      style={{
+        background:
+          "linear-gradient(135deg, #5B8DEF 0%, #EAF2FF 55%, #FFFFFF 100%)"
+      }}
     >
-      <h1 className="text-center text-2xl text-emerald-800">{bgIndex + 1}</h1>
       <div
         ref={mountRef}
         className="w-full h-full cursor-grab active:cursor-grabbing"
