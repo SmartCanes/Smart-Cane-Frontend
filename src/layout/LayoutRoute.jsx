@@ -32,7 +32,7 @@ const ProtectedLayout = () => {
   useEffect(() => {
     startGuardianTracking();
     return () => {
-      stopGuardianTracking(); // clean up when layout unmounts
+      stopGuardianTracking();
     };
   }, [startGuardianTracking, stopGuardianTracking]);
 

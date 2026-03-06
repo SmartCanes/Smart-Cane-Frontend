@@ -1,4 +1,4 @@
-import { getMyProfile, sendHeartbeat } from "@/api/backendService";
+import { getMyProfile } from "@/api/backendService";
 import {
   useGuardiansStore,
   useRealtimeStore,
@@ -16,7 +16,6 @@ const ScrollContext = createContext();
 const DashboardLayout = () => {
   const { setUser } = useUserStore();
   const { emergency, connectWs, disconnectWs } = useRealtimeStore();
-  const { fetchGuardiansAndInvites } = useGuardiansStore();
   const [toast, setToast] = useState({
     message: "",
     type: "",
@@ -32,23 +31,6 @@ const DashboardLayout = () => {
     return () => {
       disconnectWs();
     };
-  }, []);
-
-  // Send heartbeat every 45 s so the backend keeps last_seen_at accurate (1-min window)
-  useEffect(() => {
-    sendHeartbeat(); // immediate on mount
-    const heartbeatInterval = setInterval(() => {
-      sendHeartbeat();
-    }, 45_000);
-    return () => clearInterval(heartbeatInterval);
-  }, []);
-
-  // Poll guardian list every 60 s to pick up online/offline changes from co-guardians
-  useEffect(() => {
-    const refreshInterval = setInterval(() => {
-      fetchGuardiansAndInvites();
-    }, 60_000);
-    return () => clearInterval(refreshInterval);
   }, []);
 
   useEffect(() => {

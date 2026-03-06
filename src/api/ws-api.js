@@ -24,6 +24,9 @@ class SocketAPI {
     this.socket.onopen = () => {
       console.log("Connected to WebSocket server");
 
+      const connectCb = this.listeners.get("connect");
+      if (connectCb) connectCb();
+
       const serial = this.getSerial?.();
       if (serial) {
         const subscribeMessage = { event: "subscribe", serial };

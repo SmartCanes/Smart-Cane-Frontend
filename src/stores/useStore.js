@@ -66,6 +66,10 @@ export const useRealtimeStore = create(
         wsApi.off("location");
         wsApi.off("connect");
         wsApi.off("disconnect");
+        wsApi.off("guardianPresence");
+        wsApi.off("guardianPresenceSnapshot");
+        wsApi.off("piStatus");
+        wsApi.off("deviceConfig");
         wsApi.connect();
 
         let heartbeatTimeout;
@@ -79,10 +83,15 @@ export const useRealtimeStore = create(
         };
 
         wsApi.on("connect", () => {
-          console.log("WebSocket connected:", wsApi.socket?.id);
           set({ _wsConnected: true });
-          useBluetoothStore.getState().connectBluetoothWs();
-          resetHeartbeat();
+          const user = useUserStore.getState().user;
+          if (user?.guardianId) {
+            wsApi.emit("guardian:join", {
+              guardianId: user.guardianId
+            });
+          }
+
+          wsApi.emit("requestGuardianPresence");
         });
 
         wsApi.on("disconnect", () => {
@@ -93,6 +102,21 @@ export const useRealtimeStore = create(
           setTimeout(() => {
             get().connectWs();
           }, 5000);
+        });
+
+        wsApi.on("guardianPresence", (data) => {
+          const payload = data?.payload || data;
+          useGuardiansStore
+            .getState()
+            .updateGuardianPresence(payload.guardianId, payload.status);
+        });
+
+        wsApi.on("guardianPresenceSnapshot", (payload) => {
+          const onlineIds = new Set(
+            (payload?.onlineGuardianIds || []).map(Number)
+          );
+
+          useGuardiansStore.getState().setGuardianPresenceSnapshot(onlineIds);
         });
 
         wsApi.on("status", (data) => {
@@ -397,7 +421,6 @@ export const useGuardiansStore = create(
         set({
           guardiansByDevice: [],
           pendingInvitesByDevice: []
-
         }),
 
       setPendingInvitesCount: (deviceId, count) =>
@@ -434,12 +457,28 @@ export const useGuardiansStore = create(
             return { success: false, message: response.message };
           }
 
-          const guardiansByDevice = response.data.guardiansByDevice.map(
-            (d) => ({
+          const existing = get().guardiansByDevice;
+
+          const guardiansByDevice = response.data.guardiansByDevice.map((d) => {
+            const existingGroup = existing.find(
+              (group) => Number(group.deviceId) === Number(d.deviceId)
+            );
+
+            return {
               deviceId: d.deviceId,
-              guardians: d.guardians || []
-            })
-          );
+              guardians: (d.guardians || []).map((guardian) => {
+                const existingGuardian = existingGroup?.guardians?.find(
+                  (g) => Number(g.guardianId) === Number(guardian.guardianId)
+                );
+
+                return {
+                  ...guardian,
+                  isOnline: existingGuardian?.isOnline ?? false
+                };
+              })
+            };
+          });
+
           set({ guardiansByDevice });
 
           const inviteRes = await getPendingInvites();
@@ -457,7 +496,29 @@ export const useGuardiansStore = create(
           console.error("Error fetching guardians and invites:", error);
           return { success: false, message: error.message || "Failed" };
         }
-      }
+      },
+
+      updateGuardianPresence: (guardianId, isOnline) =>
+        set((state) => ({
+          guardiansByDevice: state.guardiansByDevice.map((group) => ({
+            ...group,
+            guardians: group.guardians.map((guardian) =>
+              Number(guardian.guardianId) === Number(guardianId)
+                ? { ...guardian, isOnline }
+                : guardian
+            )
+          }))
+        })),
+      setGuardianPresenceSnapshot: (onlineIds) =>
+        set((state) => ({
+          guardiansByDevice: state.guardiansByDevice.map((group) => ({
+            ...group,
+            guardians: group.guardians.map((guardian) => ({
+              ...guardian,
+              isOnline: onlineIds.has(Number(guardian.guardianId))
+            }))
+          }))
+        }))
     }),
     {
       name: "guardians-storage",

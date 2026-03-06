@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { Icon } from "@iconify/react";
 import Modal from "./Modal";
 import Toast from "./Toast";
