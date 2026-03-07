@@ -1043,11 +1043,17 @@ const buildFullSnapshot = (globalConfig, deviceId) => {
   };
 };
 
+const TABS = [
+  { id: "components", label: "Components", icon: "mdi:chip" },
+  { id: "voice", label: "Voice & Audio", icon: "mdi:account-voice" }
+];
+
 function Advanced() {
   const [components, setComponents] = useState(componentsData);
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("components");
   const { componentHealth, deviceConfig, setDeviceConfig } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
 
@@ -1077,7 +1083,6 @@ function Advanced() {
   const handleDeviceStateUpdate = async (partialUpdate = {}) => {
     if (!selectedDevice?.deviceSerialNumber) return;
 
-    // setIsLoading(true);
     console.log("Partial Update:", partialUpdate);
 
     try {
@@ -1118,160 +1123,143 @@ function Advanced() {
       }
     });
   };
+
   useEffect(() => {
     wsApi.emit("requestDeviceConfig");
   }, []);
 
   const onlineCount = components.filter((c) => c.isOnline).length;
+  const healthPct = Math.round((onlineCount / components.length) * 100);
 
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6 overflow-x-hidden">
-      <div className="mx-auto w-full space-y-4 sm:space-y-6 ">
-        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
+      <div className="mx-auto w-full space-y-5">
+
+        {/* ── Header ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
               Component Management
             </h2>
-            <p className="text-gray-500 text-xs md:text-sm">
+            <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
               Monitor and configure your device components in real-time
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 shadow-sm border w-full md:w-auto">
-            <div className="flex items-center justify-around md:justify-start md:gap-6">
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-primary-600">
-                  {onlineCount}
-                </div>
-                <div className="text-xs sm:text-sm text-gray-500">Online</div>
-              </div>
-              <div className="h-10 w-px bg-gray-200 hidden md:block" />
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {components.length}
-                </div>
-                <div className="text-xs sm:text-sm text-gray-500">Total</div>
-              </div>
-              <div className="h-10 w-px bg-gray-200 hidden md:block" />
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-yellow-600">
-                  {Math.round((onlineCount / components.length) * 100)}%
-                </div>
-                <div className="text-xs sm:text-sm text-gray-500">Health</div>
-              </div>
+          {/* Compact inline stats */}
+          <div className="flex items-center gap-3 bg-white border rounded-xl px-4 py-2.5 shadow-sm self-start sm:self-auto">
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${onlineCount > 0 ? "bg-green-500 animate-pulse" : "bg-gray-300"}`}
+              />
+              <span className="text-sm font-semibold text-gray-800">
+                {onlineCount}
+                <span className="font-normal text-gray-400">
+                  /{components.length}
+                </span>
+              </span>
+              <span className="text-xs text-gray-400">Online</span>
+            </div>
+            <div className="h-5 w-px bg-gray-200" />
+            <div className="flex items-center gap-1.5">
+              <Icon icon="mdi:heart-pulse" className="w-4 h-4 text-yellow-500" />
+              <span className="text-sm font-semibold text-gray-800">
+                {healthPct}%
+              </span>
+              <span className="text-xs text-gray-400">Health</span>
             </div>
           </div>
         </div>
 
-        {/* Stats Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="w-5 h-5 text-green-600"
-                />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  System Health
-                </p>
-                <p className="text-base sm:text-lg font-semibold">Excellent</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 border border-orange-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Icon
-                  icon="mdi:alert-circle"
-                  className="w-5 h-5 text-orange-600"
-                />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Active Alerts
-                </p>
-                <p className="text-base sm:text-lg font-semibold">0</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Voice Control Panel */}
-        <VoiceControlPanel
-          isOnline={onlineCount > 0 || true}
-          deviceConfig={deviceConfig["VOICE_ENGINE"] || {}}
-          onVoiceConfigChange={(config) =>
-            handleDeviceStateUpdate({
-              components: {
-                ...deviceConfig?.components,
-                VOICE_ENGINE: {
-                  ...deviceConfig?.components?.VOICE_ENGINE,
-                  config: {
-                    volume: config.volume,
-                    speechSpeed: config.speechSpeed,
-                    voiceType: config.voiceType
-                  }
-                }
-              }
-            })
-          }
-        />
-      </div>
-
-      {/* Component Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mt-6 overflow-hidden">
-        <AnimatePresence>
-          {components.map((component) => (
-            <ComponentCard
-              key={component.id}
-              component={component}
-              deviceConfig={deviceConfig?.[component.codeName]?.config || {}}
-              onTogglePower={handleToggle}
-              onConfigure={handleConfigure}
-            />
+        {/* ── Tab Navigation ── */}
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-full sm:w-fit">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === tab.id
+                  ? "bg-white shadow-sm text-primary-600"
+                  : "text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              <Icon icon={tab.icon} className="w-4 h-4" />
+              {tab.label}
+            </button>
           ))}
+        </div>
+
+        {/* ── Tab Content ── */}
+        <AnimatePresence mode="wait">
+          {activeTab === "components" && (
+            <motion.div
+              key="components"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+            >
+              {components.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 mx-auto mb-5 bg-gray-100 rounded-full flex items-center justify-center">
+                    <Icon icon="mdi:chip" className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    No Components Found
+                  </h3>
+                  <p className="text-sm text-gray-500 max-w-xs mx-auto">
+                    Connect your hardware components to start monitoring.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {components.map((component) => (
+                    <ComponentCard
+                      key={component.id}
+                      component={component}
+                      deviceConfig={
+                        deviceConfig?.[component.codeName]?.config || {}
+                      }
+                      onTogglePower={handleToggle}
+                      onConfigure={handleConfigure}
+                    />
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {activeTab === "voice" && (
+            <motion.div
+              key="voice"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+            >
+              <VoiceControlPanel
+                isOnline={onlineCount > 0 || true}
+                deviceConfig={deviceConfig["VOICE_ENGINE"] || {}}
+                onVoiceConfigChange={(config) =>
+                  handleDeviceStateUpdate({
+                    components: {
+                      ...deviceConfig?.components,
+                      VOICE_ENGINE: {
+                        ...deviceConfig?.components?.VOICE_ENGINE,
+                        config: {
+                          volume: config.volume,
+                          speechSpeed: config.speechSpeed,
+                          voiceType: config.voiceType
+                        }
+                      }
+                    }
+                  })
+                }
+              />
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
-
-      {/* Loading Overlay */}
-      {/* {isLoading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 flex flex-col items-center gap-4">
-            <Icon
-              icon="mdi:loading"
-              className="w-8 h-8 text-primary-600 animate-spin"
-            />
-            <p className="text-gray-700">Processing request...</p>
-          </div>
-        </div>
-      )} */}
-
-      {/* Empty State */}
-      {components.length === 0 && (
-        <div className="text-center py-12 sm:py-16">
-          <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-            <Icon
-              icon="mdi:chip"
-              className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400"
-            />
-          </div>
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-            No Components Found
-          </h3>
-          <p className="text-gray-600 max-w-md mx-auto text-sm sm:text-base">
-            Connect your hardware components to get started with monitoring and
-            configuration.
-          </p>
-          <button className="mt-4 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm sm:text-base">
-            <Icon icon="mdi:plus" className="inline mr-2 w-4 h-4" />
-            Add Component
-          </button>
-        </div>
-      )}
 
       {/* Configuration Modal */}
       <ConfigModal

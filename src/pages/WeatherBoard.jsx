@@ -9,6 +9,54 @@ import {
   searchLocations
 } from "@/api/weatherService";
 
+const WeatherBoardSkeleton = () => (
+  <div className="animate-pulse space-y-6">
+    {/* Header */}
+    <div>
+      <div className="h-7 w-48 bg-gray-200 rounded-lg mb-2" />
+      <div className="h-4 w-32 bg-gray-100 rounded-lg" />
+    </div>
+
+    {/* Search bar */}
+    <div className="h-11 w-full bg-gray-200 rounded-xl" />
+
+    {/* Recommendation card — mobile */}
+    <div className="md:hidden h-[108px] w-full bg-gray-200 rounded-[2rem]" />
+
+    {/* Recommendation card — desktop */}
+    <div className="hidden md:flex h-[140px] w-full bg-gray-200 rounded-3xl" />
+
+    {/* Date selector */}
+    <div className="h-11 w-52 bg-gray-200 rounded-xl" />
+
+    {/* Section heading */}
+    <div>
+      <div className="h-5 w-40 bg-gray-200 rounded-lg mb-1" />
+      <div className="h-3 w-64 bg-gray-100 rounded-lg" />
+    </div>
+
+    {/* Details grid — 8 tiles */}
+    <div className="grid grid-cols-4 gap-4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="bg-gray-100 rounded-2xl p-5 h-20 border border-gray-100" />
+      ))}
+    </div>
+
+    {/* Section heading */}
+    <div>
+      <div className="h-5 w-36 bg-gray-200 rounded-lg mb-1" />
+      <div className="h-3 w-56 bg-gray-100 rounded-lg" />
+    </div>
+
+    {/* Weekly forecast — 7 tiles */}
+    <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
+      {Array.from({ length: 7 }).map((_, i) => (
+        <div key={i} className="bg-gray-100 rounded-2xl p-4 h-24 border border-gray-100" />
+      ))}
+    </div>
+  </div>
+);
+
 const WeatherBoard = () => {
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -211,13 +259,7 @@ const WeatherBoard = () => {
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-[300px] gap-3">
-            <Icon
-              icon="eos-icons:loading"
-              className="text-4xl text-primary-100 animate-spin"
-            />
-            <p className="text-gray-400 text-sm">Checking forecast...</p>
-          </div>
+          <WeatherBoardSkeleton />
         ) : forecast ? (
           <div className="flex flex-col gap-6">
             {/* MOBILE RECOMMENDATION CARD */}
