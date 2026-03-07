@@ -1,8 +1,8 @@
-import { memo, useRef, useState, useCallback, useEffect } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import icaneLogo from "@/assets/images/smartcane-logo-blue.png";
-import heroBackground from "@/assets/images/background.webp";
+import heroBackground from "@/assets/images/background.png";
 import gpsCardArrow from "@/assets/images/gps-card-arrow.png";
 import SwitchFilled from "@/assets/images/SwitchFilled.png";
 import Document from "@/assets/images/document.png";
@@ -13,7 +13,7 @@ import twitterIcon from "@/assets/images/twitter-icon.png";
 import instagramIcon from "@/assets/images/instagram-icon.png";
 import callIcon from "@/assets/images/call-icon.png";
 import emailIcon from "@/assets/images/email-icon.png";
-import teamPhoto from "@/assets/images/team-photo.webp";
+import teamPhoto from "@/assets/images/team-photo.jpg";
 import FAQItem from "@/ui/components/FAQItem";
 import CaneViewer from "@/ui/components/CaneViewer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -273,8 +273,6 @@ const faqs = [
 ];
 
 const GuestPage = () => {
-  const carouselRef = useRef(null);
-  const cardRefs = useRef([]);
   const navigate = useNavigate();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -570,7 +568,11 @@ const GuestPage = () => {
         </div>
       </section>
       {/* Feature carousel */}
-      <MemoFeatureCarousel cards={featureCards} autoScroll autoScrollMs={5000} />
+      <MemoFeatureCarousel
+        cards={featureCards}
+        autoScroll
+        autoScrollMs={5000}
+      />
       {/* Section divider for iCane */}
       <div className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16">
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
