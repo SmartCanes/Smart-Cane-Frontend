@@ -14,7 +14,6 @@ import instagramIcon from "@/assets/images/instagram-icon.png";
 import callIcon from "@/assets/images/call-icon.png";
 import emailIcon from "@/assets/images/email-icon.png";
 import teamPhoto from "@/assets/images/team-photo.jpg";
-import FeatureCard from "@/ui/components/FeatureCard";
 import FAQItem from "@/ui/components/FAQItem";
 import CaneViewer from "@/ui/components/CaneViewer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -383,20 +382,29 @@ const GuestPage = () => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const ScrollLink = ({ targetId, children, className }) => {
+  const ScrollLink = ({ targetId, children, className, onClick }) => {
     const handleClick = () => {
-      const el = document.getElementById(targetId);
-      const header = document.querySelector("header"); // get sticky header
-      if (el) {
+      onClick?.();
+
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        const header = document.querySelector("header");
+
+        if (!el) return;
+
         const headerHeight = header ? header.offsetHeight : 0;
         const elementTop = el.getBoundingClientRect().top + window.scrollY;
         const scrollPosition = elementTop - headerHeight;
-        window.scrollTo({ top: scrollPosition, behavior: "smooth" });
-      }
+
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: "smooth"
+        });
+      }, 250);
     };
 
     return (
-      <button onClick={handleClick} className={className}>
+      <button type="button" onClick={handleClick} className={className}>
         {children}
       </button>
     );
@@ -436,7 +444,7 @@ const GuestPage = () => {
               </ScrollLink>
 
               <ScrollLink
-                targetId="features"
+                targetId="iCane"
                 className="hover:text-[#11285A] transition-colors duration-200"
               >
                 <HoverNavEffect>iCane</HoverNavEffect>
@@ -542,7 +550,7 @@ const GuestPage = () => {
                     </ScrollLink>
 
                     <ScrollLink
-                      targetId="features"
+                      targetId="iCane"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
                     >
@@ -653,7 +661,7 @@ const GuestPage = () => {
       </div>
 
       {/* iCane 3d placeholder */}
-      <div className="mx-auto w-full h-[85vh] bg-[#dfdfdf]">
+      <div id="iCane" className="mx-auto w-full h-[85vh] bg-[#dfdfdf]">
         <CaneViewer />
       </div>
 
