@@ -292,7 +292,7 @@ export default function FeatureCarousel({
         <button
           type="button"
           onClick={prev}
-          className="hidden md:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md ring-1 ring-black/5 backdrop-blur transition hover:scale-[1.03] active:scale-[0.98]"
+          className="hidden md:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md ring-1 ring-black/5 backdrop-blur transition hover:scale-[1.03] active:scale-[0.98]"
           aria-label="Previous feature"
         >
           <Icon icon="mingcute:left-line" className="text-2xl" />
@@ -301,7 +301,7 @@ export default function FeatureCarousel({
         <button
           type="button"
           onClick={next}
-          className="hidden md:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md ring-1 ring-black/5 backdrop-blur transition hover:scale-[1.03] active:scale-[0.98]"
+          className="hidden md:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md ring-1 ring-black/5 backdrop-blur transition hover:scale-[1.03] active:scale-[0.98]"
           aria-label="Next feature"
         >
           <Icon icon="mingcute:right-line" className="text-2xl" />

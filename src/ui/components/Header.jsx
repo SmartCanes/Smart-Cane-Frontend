@@ -306,7 +306,7 @@ const NotificationDropdown = ({ notifications, onClose, onNavigateToAll }) => {
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 overflow-hidden animate-[slideDown_0.2s_ease-out]"
+      className="fixed right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 overflow-hidden animate-[slideDown_0.2s_ease-out]"
     >
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">

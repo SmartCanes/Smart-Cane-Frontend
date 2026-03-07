@@ -40,7 +40,6 @@ const useMediaQuery = (query) => {
     const onChange = () => setMatches(mq.matches);
     onChange();
 
-    // Support older Safari
     if (mq.addEventListener) mq.addEventListener("change", onChange);
     else mq.addListener(onChange);
 
@@ -57,16 +56,21 @@ const CaneViewer = () => {
   const mountRef = useRef(null);
   const [adIndex, setAdIndex] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [isInteractMode, setIsInteractMode] = useState(false);
   const isMobile = useMediaQuery("(max-width: 767px)");
 
   useEffect(() => {
     const interval = setInterval(() => {
       setVisible(false);
-      setTimeout(() => {
+
+      const timeoutId = setTimeout(() => {
         setAdIndex((i) => (i + 1) % AD_TEXTS.length);
         setVisible(true);
       }, 700);
+
+      return () => clearTimeout(timeoutId);
     }, 4000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -74,7 +78,6 @@ const CaneViewer = () => {
     const mount = mountRef.current;
     if (!mount) return;
 
-    // --- Scene / Camera / Renderer ---
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(
@@ -83,121 +86,143 @@ const CaneViewer = () => {
       0.1,
       1000
     );
-    camera.position.set(0, 0, 10); // placeholder, overridden after model loads
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    });
+
     renderer.setSize(mount.clientWidth, mount.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mount.appendChild(renderer.domElement);
 
-    // --- Lights ---
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.display = "block";
+    renderer.domElement.style.touchAction = isInteractMode ? "none" : "pan-y";
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
+
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
     directionalLight.position.set(5, 10, 7.5);
     scene.add(directionalLight);
 
-    // --- Load model ---
     const loader = new THREE.ObjectLoader();
     const model = loader.parse(icaneData.scene);
 
-    // Remove floor (if present)
     const floor = model.getObjectByName("Box");
     if (floor) floor.removeFromParent();
 
-    // Auto-center & scale
-    const box = new THREE.Box3().setFromObject(model);
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-
-    const scale = 3 / maxDim;
-    model.scale.setScalar(scale);
-
-    model.position.set(
-      -center.x * scale - 0.1,
-      -center.y * scale - 0.2,
-      -center.z * scale
-    );
-
-    // Tilt group for slanted presentation
     const tiltGroup = new THREE.Group();
     tiltGroup.rotation.z = -Math.PI / 5;
-    tiltGroup.position.x = -0.2;
-    tiltGroup.add(model);
     scene.add(tiltGroup);
+    tiltGroup.add(model);
 
-    // Camera framing
-    const dist = (3 / 2 / Math.tan((50 * Math.PI) / 180 / 2)) * 0.9;
-    camera.position.set(0.5, 0, dist * 1.15);
-    camera.lookAt(0, 0, 0);
-
-    // --- Controls ---
     const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enablePan = true;
+    controls.panSpeed = 0.8;
+    controls.enableZoom = true;
+    controls.zoomSpeed = 0.9;
+    controls.enableRotate = true;
+    controls.rotateSpeed = 0.8;
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.target.set(0, 0, 0);
-    controls.enablePan = false;
-    controls.enableZoom = false;
-
-    // Desktop: locked unless holding click; Mobile: always enabled (better UX)
-    controls.enabled = isMobile ? true : false;
+    controls.screenSpacePanning = true;
+    controls.enabled = isInteractMode;
     controls.update();
 
-    const handlePointerDown = () => {
-      if (!isMobile) controls.enabled = true;
-    };
-    const handlePointerUp = () => {
-      if (!isMobile) controls.enabled = false;
-    };
-    const handleMouseLeave = () => {
-      if (!isMobile) controls.enabled = false;
-    };
+    const fitModelToView = () => {
+      const width = mount.clientWidth;
+      const height = mount.clientHeight;
 
-    renderer.domElement.addEventListener("pointerdown", handlePointerDown, {
-      capture: true
-    });
-    window.addEventListener("pointerup", handlePointerUp);
-    mount.addEventListener("mouseleave", handleMouseLeave);
-
-    // --- Resize ---
-    const handleResize = () => {
-      if (!mount) return;
-      camera.aspect = mount.clientWidth / mount.clientHeight;
+      camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      renderer.setSize(mount.clientWidth, mount.clientHeight);
+      renderer.setSize(width, height);
+
+      model.scale.set(1, 1, 1);
+      model.position.set(0, 0, 0);
+      model.rotation.set(0, 0, 0);
+      tiltGroup.position.set(0, 0, 0);
+
+      const rawBox = new THREE.Box3().setFromObject(model);
+      const rawCenter = rawBox.getCenter(new THREE.Vector3());
+      const rawSize = rawBox.getSize(new THREE.Vector3());
+
+      model.position.set(-rawCenter.x, -rawCenter.y, -rawCenter.z);
+
+      const targetHeight = isMobile ? 4.8 : 5.8;
+      const scale = targetHeight / Math.max(rawSize.y, 0.0001);
+      model.scale.setScalar(scale);
+
+      const box = new THREE.Box3().setFromObject(tiltGroup);
+      const center = box.getCenter(new THREE.Vector3());
+
+      tiltGroup.position.set(-center.x, -center.y, -center.z);
+
+      const fittedBox = new THREE.Box3().setFromObject(tiltGroup);
+      const fittedSize = fittedBox.getSize(new THREE.Vector3());
+
+      const maxSizeY = fittedSize.y;
+      const maxSizeX = fittedSize.x;
+
+      const fov = THREE.MathUtils.degToRad(camera.fov);
+      const distanceForHeight = maxSizeY / 2 / Math.tan(fov / 2);
+      const distanceForWidth =
+        maxSizeX / 2 / (Math.tan(fov / 2) * camera.aspect);
+
+      const fitDistance = Math.max(distanceForHeight, distanceForWidth);
+      const offset = isMobile ? 1.18 : 1.15;
+      const initialDistance = fitDistance * offset;
+
+      camera.position.set(0, 0, initialDistance);
+      camera.lookAt(0, 0, 0);
+      controls.target.set(0, 0, 0);
+
+      controls.minDistance = initialDistance * 0.65;
+      controls.maxDistance = initialDistance * 1.8;
+
+      controls.update();
     };
+
+    fitModelToView();
+
+    const handleResize = () => {
+      renderer.domElement.style.touchAction = isInteractMode ? "none" : "pan-y";
+      controls.enabled = isInteractMode;
+      fitModelToView();
+    };
+
     window.addEventListener("resize", handleResize);
 
-    // --- Render loop ---
     let animFrameId;
+
     const animate = () => {
       animFrameId = requestAnimationFrame(animate);
-      model.rotation.y += isMobile ? 0.004 : 0.006;
+
+      if (!isInteractMode) {
+        model.rotation.y += isMobile ? 0.004 : 0.006;
+      }
+
+      controls.enabled = isInteractMode;
       controls.update();
       renderer.render(scene, camera);
     };
+
     animate();
 
-    // --- Cleanup ---
     return () => {
       cancelAnimationFrame(animFrameId);
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("pointerup", handlePointerUp);
-      renderer.domElement.removeEventListener(
-        "pointerdown",
-        handlePointerDown,
-        { capture: true }
-      );
-      mount.removeEventListener("mouseleave", handleMouseLeave);
 
       if (mount && renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);
       }
 
+      controls.dispose();
       renderer.dispose();
     };
-  }, [isMobile]);
+  }, [isMobile, isInteractMode]);
 
   const ad = AD_TEXTS[adIndex];
 
@@ -211,21 +236,80 @@ const CaneViewer = () => {
     >
       <div
         ref={mountRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        className="w-full h-full"
+        style={{ touchAction: isInteractMode ? "none" : "pan-y" }}
       />
 
-      {/* Top-left branding (responsive) */}
-      <div className="absolute top-4 sm:top-6 left-4 sm:left-8 pointer-events-none flex items-center gap-2">
-        <img src="/icane.svg" alt="iCane Logo" className="h-7 sm:h-8 w-auto" />
-        <span className="text-black/70 text-[10px] sm:text-xs tracking-[0.35em] uppercase font-medium">
+      <div className="absolute top-4 left-4 pointer-events-none flex items-center gap-2 z-10 max-w-[calc(100%-2rem)] sm:max-w-none">
+        <img
+          src="/icane.svg"
+          alt="iCane Logo"
+          className="h-6 w-auto shrink-0"
+        />
+        <span className="text-black/70 text-[9px] tracking-[0.22em] uppercase font-medium leading-none">
           iCane — Smart Cane
         </span>
       </div>
 
-      {/* Ad text: Desktop floating vs Mobile bottom card */}
+      {isMobile ? (
+        <div className="absolute top-14 left-4 z-20">
+          <button
+            type="button"
+            onClick={() => setIsInteractMode((prev) => !prev)}
+            className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[10px] tracking-[0.12em] font-semibold uppercase transition-all duration-300"
+            style={{
+              borderColor: isInteractMode
+                ? "rgba(255,255,255,0.2)"
+                : "rgba(255,255,255,0.4)",
+              background: isInteractMode
+                ? "rgba(0,0,0,0.9)"
+                : "rgba(255,255,255,0.9)",
+              color: isInteractMode ? "#ffffff" : "#111111",
+              boxShadow: isInteractMode
+                ? "0 10px 24px rgba(0,0,0,0.22)"
+                : "0 10px 24px rgba(91,141,239,0.16)"
+            }}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                isInteractMode ? "bg-green-400" : "bg-[#5B8DEF]"
+              }`}
+            />
+            {isInteractMode ? "Exit 3D" : "Explore 3D"}
+          </button>
+        </div>
+      ) : (
+        <div className="absolute top-4 right-4">
+          <button
+            type="button"
+            onClick={() => setIsInteractMode((prev) => !prev)}
+            className="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-[11px] tracking-[0.14em] font-semibold uppercase transition-all duration-300"
+            style={{
+              borderColor: isInteractMode
+                ? "rgba(255,255,255,0.2)"
+                : "rgba(255,255,255,0.4)",
+              background: isInteractMode
+                ? "rgba(0,0,0,0.9)"
+                : "rgba(255,255,255,0.9)",
+              color: isInteractMode ? "#ffffff" : "#111111",
+              boxShadow: isInteractMode
+                ? "0 10px 24px rgba(0,0,0,0.22)"
+                : "0 10px 24px rgba(91,141,239,0.16)"
+            }}
+          >
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${
+                isInteractMode ? "bg-green-400" : "bg-[#5B8DEF]"
+              }`}
+            />
+            {isInteractMode ? "Exit 3D" : "Explore 3D"}
+          </button>
+        </div>
+      )}
+
       {!isMobile ? (
         <div
-          className="absolute pointer-events-none max-w-md"
+          className="absolute pointer-events-none max-w-md z-10"
           style={{
             ...ad.position,
             opacity: visible ? 1 : 0,
@@ -246,7 +330,7 @@ const CaneViewer = () => {
         </div>
       ) : (
         <div
-          className="absolute left-0 right-0 bottom-0 px-4 pb-5 pt-3 pointer-events-none"
+          className="absolute left-0 right-0 bottom-0 px-4 pb-5 pt-3 pointer-events-none z-10"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(10px)",
@@ -254,28 +338,27 @@ const CaneViewer = () => {
           }}
         >
           <div
-            className="rounded-2xl border border-black/10 bg-black/35 backdrop-blur-md p-4"
+            className="rounded-2xl border border-white/10 bg-black/55 p-4"
             style={{
               boxShadow: "0 20px 60px rgba(0,0,0,0.35)"
             }}
           >
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[#5b8def] text-[10px] tracking-[0.35em] uppercase font-semibold">
+              <span className="text-[#8fb4ff] text-[10px] tracking-[0.35em] uppercase font-semibold">
                 {ad.label}
               </span>
-              <span className="text-black/45 text-[11px]">
-                Hold &amp; drag to rotate
+              <span className="text-white/70 text-[11px]">
+                {isInteractMode ? "Drag, zoom, and pan" : "Tap Explore 3D"}
               </span>
             </div>
 
-            <h2 className="text-black text-xl font-bold mt-2 leading-snug">
+            <h2 className="text-white text-xl font-bold mt-2 leading-snug">
               {ad.headline}
             </h2>
-            <p className="text-black/65 text-sm mt-1 leading-relaxed">
+            <p className="text-white/85 text-sm mt-1 leading-relaxed">
               {ad.sub}
             </p>
 
-            {/* Dots inside card on mobile */}
             <div className="mt-3 flex justify-center gap-2">
               {AD_TEXTS.map((_, i) => (
                 <span
@@ -294,9 +377,8 @@ const CaneViewer = () => {
         </div>
       )}
 
-      {/* Desktop dot indicators (hidden on mobile) */}
       {!isMobile && (
-        <div className="absolute bottom-14 right-10 flex gap-2 pointer-events-none">
+        <div className="absolute bottom-14 right-10 flex gap-2 pointer-events-none z-10">
           {AD_TEXTS.map((_, i) => (
             <span
               key={i}
@@ -310,15 +392,6 @@ const CaneViewer = () => {
           ))}
         </div>
       )}
-
-      {/* Subtle vignette overlay */}
-      {/* <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 50%, rgba(5,10,25,0.55) 100%)"
-        }}
-      /> */}
     </div>
   );
 };
