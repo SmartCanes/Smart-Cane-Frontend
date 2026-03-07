@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HoverIcon, ScaleIn, SlideUp } from "@/wrapper/MotionWrapper";
+import { SlideUp } from "@/wrapper/MotionWrapper";
 import africaImg from "@/assets/images/team/africa.jpg";
 import arrojoImg from "@/assets/images/team/arrojo.jpg";
 import barbaImg from "@/assets/images/team/barba.jpg";
@@ -26,8 +26,8 @@ const teamMembers = [
     image: africaImg,
     social: {
       facebook: "",
-      linkedin: "https://linkedin.com/in/alexrivera",
-      github: "https://github.com/alexrivera"
+      linkedin: "",
+      github: ""
     },
     expertise: [
       "UI/UX Design",
@@ -76,7 +76,7 @@ const teamMembers = [
       "Responsive UI",
       "Component Architecture",
       "Frontend Development",
-      "Developers"
+      "Developer"
     ],
     color: "#122550"
   },
@@ -87,9 +87,9 @@ const teamMembers = [
     bio: "Supports product planning and documentation by coordinating requirements, keeping progress aligned, and ensuring deliverables are clearly written and well-structured.",
     image: belasImg,
     social: {
-      facebook: "",
-      linkedin: "https://linkedin.com/in/elenarodriguez",
-      github: "https://github.com/elenarodriguez"
+      facebook: "https://www.facebook.com/share/1Ay2JtRxr2/",
+      linkedin: "https://www.linkedin.com/in/eloisa-belas-a249843b5",
+      twitter: "https://x.com/Eloy_sa"
     },
     expertise: [
       "Branding",
@@ -121,7 +121,7 @@ const teamMembers = [
       "Frontend Development",
       "Hardware Engineering",
       "Troubleshooting",
-      "Developers",
+      "Developer",
       "Responsive UI",
       "Component Architecture"
     ],
@@ -135,15 +135,15 @@ const teamMembers = [
     image: delacruzImg,
     social: {
       facebook: "",
-      linkedin: "https://linkedin.com/in/mayapatel",
-      twitter: "https://twitter.com/mayapatel",
-      github: "https://github.com/mayapatel"
+      linkedin: "",
+      twitter: "",
+      github: ""
     },
     expertise: [
       "Web Development",
       "Frontend Development",
       "Backend Development",
-      "Developers",
+      "Developer",
       "UI/UX Design",
       "Responsive UI",
       "Component Architecture"
@@ -189,12 +189,11 @@ const teamMembers = [
     social: { facebook: "", linkedin: "", github: "" },
     expertise: [
       "Requirements Gathering",
+      "Research",
       "Stakeholder Communication",
       "Quality Assurance Testing",
       "Workflow Management",
-      "Project Coordination",
-      "Technical Writing",
-      "Research"
+      "Project Coordination"
     ],
     color: "#122550"
   },
@@ -263,105 +262,143 @@ const teamMembers = [
       linkedin: "https://www.linkedin.com/in/ivan-ren-villamora-589a06365",
       github: "https://github.com/ivrnDev"
     },
-    expertise: ["System Architecture", "IoT/Edge Systems", "Developers"],
+    expertise: ["System Architecture", "IoT/Edge Systems", "Developer"],
     color: "#1C253C"
   }
 ];
+
+const TEAM_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "developers", label: "Developers" },
+  { id: "designers", label: "Designers" },
+  { id: "documentation", label: "Documentation" }
+];
+
+const FILTER_KEYWORDS = {
+  developers: [
+    "developer",
+    "engineer",
+    "frontend",
+    "backend",
+    "web",
+    "system architecture",
+    "component architecture",
+    "hardware",
+    "iot",
+    "troubleshooting"
+  ],
+  designers: [
+    "design",
+    "ui/ux",
+    "graphic",
+    "branding",
+    "layout",
+    "prototype",
+    "visual assets"
+  ],
+  documentation: [
+    "documentation",
+    "technical writing",
+    "research",
+    "citation",
+    "report writing",
+    "requirements",
+    "stakeholder communication"
+  ]
+};
+
+const memberMatchesFilter = (member, filterId) => {
+  if (filterId === "all") return true;
+  const searchable = `${member.role} ${member.expertise.join(" ")}`
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+  return FILTER_KEYWORDS[filterId].some((keyword) =>
+    searchable.includes(keyword)
+  );
+};
 
 const TeamMemberCard = ({ member, index }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  const collapsedSkills = member.expertise.slice(0, 2);
+  const hiddenSkills = member.expertise.slice(2);
+
+  const visibleSocials = Object.entries(member.social).filter(([, url]) =>
+    Boolean(url)
+  );
+
   return (
     <motion.div
+      layout="position"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      transition={{ duration: 0.45, delay: index * 0.06 }}
       viewport={{ once: true, margin: "-50px" }}
-      className="relative group"
+      className="relative group h-full"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      {/* Main Card */}
       <div
+        onClick={() => setIsExpanded((prev) => !prev)}
         className={`
-          relative bg-white rounded-2xl overflow-hidden
-          transition-all duration-500 ease-out cursor-pointer
-          ${isExpanded ? "shadow-2xl scale-105 z-10" : "shadow-lg hover:shadow-xl"}
+          relative bg-white rounded-2xl overflow-hidden cursor-pointer
+          h-full min-h-[620px] flex flex-col
+          transition-[box-shadow] duration-300
+          ${isExpanded ? "shadow-2xl ring-1 ring-black/5" : "shadow-lg hover:shadow-xl"}
         `}
         style={{
           boxShadow: isExpanded
             ? `0 25px 50px -12px ${member.color}40`
             : "0 10px 25px -5px rgba(0,0,0,0.1)"
         }}
-        onClick={() => setIsExpanded(!isExpanded)}
       >
         {/* Background Pattern */}
         <div
-          className="absolute inset-0 opacity-5 transition-opacity duration-500"
+          className="absolute inset-0 opacity-5 transition-opacity duration-500 pointer-events-none"
           style={{
             background: `radial-gradient(circle at 20% 50%, ${member.color} 0%, transparent 50%)`
           }}
         />
 
-        {/* Card Content */}
-        <div className="relative p-6">
-          {/* Profile Image Container */}
-          <div className="relative mb-6 overflow-hidden rounded-xl">
-            <motion.div
-              animate={{ scale: isHovered ? 1.05 : 1 }}
-              transition={{ duration: 0.4 }}
-              className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 relative"
-            >
-              <div className="absolute inset-0 flex items-center justify-center">
+        {/* Fixed image section */}
+        <div className="relative p-6 pb-0">
+          <div className="relative overflow-hidden rounded-xl">
+            <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+              <motion.div
+                animate={{ scale: isExpanded ? 1.08 : isHovered ? 1.03 : 1 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="absolute inset-0"
+              >
                 {member.image ? (
                   <img
                     src={member.image}
                     alt={member.name}
-                    className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover object-center"
                   />
                 ) : (
-                  <Icon
-                    icon="ph:user-circle-fill"
-                    className="w-20 h-20 text-gray-400"
-                  />
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Icon
+                      icon="ph:user-circle-fill"
+                      className="w-20 h-20 text-gray-400"
+                    />
+                  </div>
                 )}
-              </div>
+              </motion.div>
 
-              {/* Overlay gradient */}
               <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500"
+                className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
                 style={{
                   background: `linear-gradient(135deg, ${member.color} 0%, transparent 100%)`
                 }}
               />
-            </motion.div>
-
-            {/* Expertise Tags - Floating on image */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
-              className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-2"
-            >
-              {member.expertise.slice(0, 2).map((skill, i) => (
-                <span
-                  key={i}
-                  className="px-2 py-1 text-xs font-medium bg-white/90 backdrop-blur-sm rounded-full shadow-sm"
-                  style={{ color: member.color }}
-                >
-                  {skill}
-                </span>
-              ))}
-              {member.expertise.length > 2 && (
-                <span className="px-2 py-1 text-xs font-medium bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-gray-600">
-                  +{member.expertise.length - 2}
-                </span>
-              )}
-            </motion.div>
+            </div>
           </div>
+        </div>
 
-          {/* Member Info */}
-          <div className="space-y-3">
+        {/* Content area fills remaining height */}
+        <div className="relative p-6 pt-5 flex-1 flex flex-col min-h-0">
+          <div className="space-y-3 flex-1 flex flex-col min-h-0">
             <div>
               <h3 className="text-xl font-semibold text-[#1C253C]">
                 {member.name}
@@ -374,69 +411,130 @@ const TeamMemberCard = ({ member, index }) => {
               </p>
             </div>
 
-            {/* Bio - Expanded/Collapsed */}
-            <AnimatePresence>
-              <motion.p
-                key={isExpanded ? "expanded" : "collapsed"}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{
-                  opacity: 1,
-                  height: isExpanded ? "auto" : "4.5rem"
-                }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`text-sm text-gray-600 leading-relaxed ${
-                  !isExpanded && "line-clamp-3"
-                }`}
-              >
-                {member.bio}
-              </motion.p>
-            </AnimatePresence>
-
-            {/* Social Links */}
-            <motion.div
-              className="flex items-center gap-3 pt-3"
-              animate={{ opacity: isExpanded || isHovered ? 1 : 0.5 }}
-              transition={{ duration: 0.2 }}
-            >
-              {Object.entries(member.social).map(([platform, url]) => (
-                <a
-                  key={platform}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group/social"
-                  onClick={(e) => e.stopPropagation()}
-                >
+            {/* Scroll-safe content container */}
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <div className="h-full overflow-y-auto pr-1 space-y-3">
+                {/* BIO */}
+                <div className="overflow-hidden">
                   <motion.div
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#11285A] transition-colors duration-200 group-hover/social:bg-[#11285A]"
+                    initial={false}
+                    animate={{
+                      height: isExpanded ? "auto" : "4.5rem"
+                    }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
                   >
-                    <Icon
-                      icon={
-                        platform === "linkedin"
-                          ? "mdi:linkedin"
-                          : platform === "facebook"
-                            ? "mdi:facebook"
-                            : platform === "instagram"
-                              ? "mdi:instagram"
-                              : platform === "github"
-                                ? "mdi:github"
-                                : "mdi:link"
-                      }
-                      className="w-4 h-4 text-gray-600 group-hover/social:text-white transition-colors duration-200"
-                    />
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {member.bio}
+                    </p>
                   </motion.div>
-                </a>
-              ))}
-            </motion.div>
 
-            {/* Expand/Collapse Indicator */}
+                  {!isExpanded && (
+                    <div className="pointer-events-none relative -mt-6 h-6 bg-gradient-to-t from-white to-transparent" />
+                  )}
+                </div>
+
+                {/* EXPERTISE */}
+                <div className="mt-1">
+                  <div className="flex flex-wrap gap-2">
+                    {collapsedSkills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-2.5 py-1 text-[11px] font-medium rounded-full bg-gray-100"
+                        style={{ color: member.color }}
+                      >
+                        {skill}
+                      </span>
+                    ))}
+
+                    {!isExpanded && hiddenSkills.length > 0 && (
+                      <span className="px-2.5 py-1 text-[11px] font-medium rounded-full bg-gray-100 text-gray-600">
+                        +{hiddenSkills.length}
+                      </span>
+                    )}
+                  </div>
+
+                  <AnimatePresence initial={false}>
+                    {isExpanded && hiddenSkills.length > 0 && (
+                      <motion.div
+                        key="extra-skills"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{
+                          duration: 0.3,
+                          ease: [0.22, 1, 0.36, 1]
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {hiddenSkills.map((skill) => (
+                            <motion.span
+                              key={skill}
+                              initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                              transition={{ duration: 0.2 }}
+                              className="px-2.5 py-1 text-[11px] font-medium rounded-full bg-gray-100"
+                              style={{ color: member.color }}
+                            >
+                              {skill}
+                            </motion.span>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+
+            {/* Socials pinned lower */}
+            {visibleSocials.length > 0 && (
+              <motion.div
+                className="flex items-center gap-3 pt-3"
+                animate={{ opacity: isExpanded || isHovered ? 1 : 0.65 }}
+                transition={{ duration: 0.2 }}
+              >
+                {visibleSocials.map(([platform, url]) => (
+                  <a
+                    key={platform}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/social"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <motion.div
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.96 }}
+                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#11285A] transition-colors duration-200 group-hover/social:bg-[#11285A]"
+                    >
+                      <Icon
+                        icon={
+                          platform === "linkedin"
+                            ? "mdi:linkedin"
+                            : platform === "facebook"
+                              ? "mdi:facebook"
+                              : platform === "instagram"
+                                ? "mdi:instagram"
+                                : platform === "github"
+                                  ? "mdi:github"
+                                  : "mdi:link"
+                        }
+                        className="w-4 h-4 text-gray-600 group-hover/social:text-white transition-colors duration-200"
+                      />
+                    </motion.div>
+                  </a>
+                ))}
+              </motion.div>
+            )}
+
+            {/* Expand icon pinned bottom */}
             <motion.div
               className="flex justify-center pt-2"
               animate={{ rotate: isExpanded ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <Icon icon="mdi:chevron-down" className="w-5 h-5 text-gray-400" />
             </motion.div>
@@ -445,11 +543,12 @@ const TeamMemberCard = ({ member, index }) => {
 
         {/* Decorative Corner */}
         <motion.div
-          className="absolute top-0 right-0 w-16 h-16 overflow-hidden"
+          className="absolute top-0 right-0 w-16 h-16 overflow-hidden pointer-events-none"
           animate={{
             opacity: isHovered ? 1 : 0.3,
-            scale: isHovered ? 1.1 : 1
+            scale: isHovered ? 1.06 : 1
           }}
+          transition={{ duration: 0.3 }}
         >
           <div
             className="absolute top-0 right-0 w-32 h-32 rotate-45 translate-x-16 -translate-y-16"
@@ -467,14 +566,15 @@ const TeamMemberCard = ({ member, index }) => {
 // Main Team Grid Component
 const TeamSection = () => {
   const [filter, setFilter] = useState("all");
+  const teamGridRef = useRef(null);
 
-  // Get unique expertise areas for filtering
-  const allExpertise = [...new Set(teamMembers.flatMap((m) => m.expertise))];
+  const filteredMembers = useMemo(() => {
+    return teamMembers.filter((member) => memberMatchesFilter(member, filter));
+  }, [filter]);
 
-  const filteredMembers =
-    filter === "all"
-      ? teamMembers
-      : teamMembers.filter((m) => m.expertise.includes(filter));
+  const handleFilterChange = (selectedFilter) => {
+    setFilter(selectedFilter);
+  };
 
   return (
     <section className="py-16 px-4 sm:px-6 bg-[#FDFCF9]">
@@ -496,60 +596,47 @@ const TeamSection = () => {
         </div>
 
         {/* Filter Chips */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setFilter("all")}
-            className={`
-              px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-              ${
-                filter === "all"
-                  ? "bg-[#11285A] text-white shadow-lg"
-                  : "bg-white text-gray-600 hover:bg-gray-100 shadow"
-              }
-            `}
-          >
-            All
-          </motion.button>
-
-          {allExpertise.map((skill, index) => (
-            <motion.button
-              key={skill}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setFilter(skill)}
-              className={`
-                px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${
-                  filter === skill
-                    ? "bg-[#11285A] text-white shadow-lg"
-                    : "bg-white text-gray-600 hover:bg-gray-100 shadow"
-                }
-              `}
-            >
-              {skill}
-            </motion.button>
-          ))}
+        <div className="mb-8 sm:mb-10">
+          <div className="flex flex-wrap justify-center gap-2">
+            {TEAM_FILTERS.map((chip, index) => (
+              <motion.button
+                key={chip.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.05 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleFilterChange(chip.id)}
+                className={`
+                  w-[calc(50%-0.25rem)] sm:w-auto px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap
+                  ${
+                    filter === chip.id
+                      ? "bg-[#11285A] text-white shadow-lg"
+                      : "bg-white text-gray-600 hover:bg-gray-100 shadow"
+                  }
+                `}
+              >
+                {chip.label}
+              </motion.button>
+            ))}
+          </div>
         </div>
 
         {/* Team Grid */}
         <motion.div
+          ref={teamGridRef}
           layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-stretch"
         >
           <AnimatePresence>
             {filteredMembers.map((member, index) => (
               <motion.div
                 key={member.id}
-                layout
-                initial={{ opacity: 0, scale: 0.8 }}
+                layout="position"
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.25 }}
               >
                 <TeamMemberCard member={member} index={index} />
               </motion.div>
@@ -569,13 +656,13 @@ const TeamSection = () => {
               className="w-16 h-16 text-gray-300 mx-auto mb-4"
             />
             <p className="text-gray-500">
-              No team members found with this expertise.
+              No team members found in this category.
             </p>
             <button
               onClick={() => setFilter("all")}
               className="mt-4 px-6 py-2 bg-[#11285A] text-white rounded-lg hover:bg-[#0a1a38] transition-colors"
             >
-              View All Members
+              Show All
             </button>
           </motion.div>
         )}
