@@ -1,15 +1,13 @@
 // src/api/WeatherService.js
 
-// 📍 DEFAULT COORDINATES (Assisi St, Novaliches)
 export const DEFAULT_LOCATION = {
   lat: 14.7218,
   lon: 121.0512,
-  name: "Assisi St., Novaliches"
+  name: "Novaliches"
 };
 
 const BASE_URL = "https://api.open-meteo.com/v1/forecast";
 const GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
-
 
 // Helper for determining if a weather code indicates rain (for alerts and recommendations)
 const RAIN_CODES = [
@@ -21,17 +19,20 @@ export const searchLocations = async (query) => {
   if (!query || query.trim().length < 2) return [];
   try {
     const res = await fetch(
-      `${GEO_URL}?name=${encodeURIComponent(query.trim())}&count=6&language=en&format=json`
+      `${GEO_URL}?name=${encodeURIComponent(query.trim())}&count=12&language=en&format=json&countryCode=PH`
     );
     if (!res.ok) throw new Error("Geocoding failed");
     const data = await res.json();
-    return (data.results || []).map((r) => ({
-      id: r.id,
-      name: r.name,
-      display: [r.name, r.admin1, r.country].filter(Boolean).join(", "),
-      lat: r.latitude,
-      lon: r.longitude
-    }));
+    return (data.results || [])
+      .filter((r) => r.country_code === "PH" || r.country === "Philippines")
+      .slice(0, 6)
+      .map((r) => ({
+        id: r.id,
+        name: r.name,
+        display: [r.name, r.admin1, r.country].filter(Boolean).join(", "),
+        lat: r.latitude,
+        lon: r.longitude
+      }));
   } catch (err) {
     console.error("Geocoding error:", err);
     return [];
@@ -56,8 +57,8 @@ export const fetchWeatherAlert = async () => {
       temp,
       title: isRaining ? "Weather alert" : "Weather update",
       message: isRaining
-        ? "Rain expected / Raining in Assisi St."
-        : `Clear skies in Assisi St. (${temp}°C)`
+        ? "Rain expected / Raining in Novaliches."
+        : `Clear skies in Novaliches (${temp}°C)`
     };
   } catch (error) {
     console.error(error);
@@ -140,13 +141,15 @@ export const fetchWeatherForDate = async (
   }
 };
 
-
-export const fetchFullWeatherForecast = async (lat = DEFAULT_LOCATION.lat, lon = DEFAULT_LOCATION.lon) => {
+export const fetchFullWeatherForecast = async (
+  lat = DEFAULT_LOCATION.lat,
+  lon = DEFAULT_LOCATION.lon
+) => {
   try {
     // Request daily forecast: code, max temp, min temp, rain chance, sunrise, sunset, uv_index
     // Request current weather: temp, humidity, apparent_temp, pressure, wind_speed, visibility
     const response = await fetch(
-      `${BASE_URL}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,visibility,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto&forecast_days=7`
+      `${BASE_URL}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,visibility,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto&forecast_days=14`
     );
 
     if (!response.ok) throw new Error("Failed to fetch forecast");
@@ -232,20 +235,24 @@ export const fetchFullWeatherForecast = async (lat = DEFAULT_LOCATION.lat, lon =
       uvIndex: todayDaily.uvIndex
     };
 
-    // --- 3. Weekly Forecast (7 Days) ---
+    // --- 3. Two-Week Forecast (14 Days) ---
     const weekly = data.daily.time.map((time, index) => {
       const code = data.daily.weathercode[index];
       const max = Math.round(data.daily.temperature_2m_max[index]);
       const min = Math.round(data.daily.temperature_2m_min[index]);
       const date = new Date(time);
       const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+      const dateLabel = date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric"
+      });
 
       // Determine icon based on weather code
       let icon = "solar:sun-fog-bold-duotone"; // Default
       let color = "text-yellow-500";
 
       if (RAIN_CODES.includes(code)) {
-        icon = "tonesolar:cloud-rain-bold-duo";
+        icon = "solar:cloud-rain-bold-duotone";
         color = "text-blue-500";
       } else if (code > 3) {
         icon = "solar:cloud-bold-duotone";
@@ -254,7 +261,13 @@ export const fetchFullWeatherForecast = async (lat = DEFAULT_LOCATION.lat, lon =
 
       return {
         day: dayName,
+        dateLabel,
         temp: `${Math.round((max + min) / 2)}°C`,
+        tempMax: `${max}°C`,
+        tempMin: `${min}°C`,
+        weatherCode: code,
+        label: getWeatherLabel(code),
+        precipProbability: `${data.daily.precipitation_probability_max[index] ?? 0}%`,
         icon,
         color
       };

@@ -84,7 +84,7 @@ const RecentAlerts = () => {
           // LOADING STATE (Habang kinukuha pa ang weather)
           <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-center justify-center gap-2 text-gray-400 text-xs">
             <Icon icon="eos-icons:loading" className="animate-spin" />
-            <span>Checking Assisi St. weather...</span>
+            <span>Checking Novaliches weather...</span>
           </div>
         )}
       </div>

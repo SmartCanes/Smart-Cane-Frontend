@@ -4,15 +4,13 @@ import { Icon } from "@iconify/react";
 import {
   DEFAULT_LOCATION,
   fetchFullWeatherForecast,
-  fetchWeatherForDate,
-  getWeatherIcon,
   searchLocations
 } from "@/api/weatherService";
 
 const WeatherBoard = () => {
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [selectedForecastDay, setSelectedForecastDay] = useState(null);
 
   // Location search state
   const [location, setLocation] = useState(DEFAULT_LOCATION);
@@ -59,6 +57,15 @@ const WeatherBoard = () => {
     setIsDropdownOpen(false);
   };
 
+  const handleUseDefaultLocation = () => {
+    setLocation(DEFAULT_LOCATION);
+    setSearchQuery("");
+    setSearchResults([]);
+    setIsDropdownOpen(false);
+  };
+
+  const closeForecastModal = () => setSelectedForecastDay(null);
+
   useEffect(() => {
     let isMounted = true;
     const loadForecast = async () => {
@@ -101,18 +108,9 @@ const WeatherBoard = () => {
 
     let mainIcon = "solar:sun-fog-bold-duotone";
     let buttonLabel = "Safe to Walk";
-    let iconColor = "text-emerald-500";
-    let bgColor = "bg-emerald-50";
-    let borderColor = "border-emerald-100";
-    let titleColor = "text-emerald-700";
-
     if (!forecast.tomorrow.canGoOutside) {
       mainIcon = "solar:cloud-rain-bold-duotone";
       buttonLabel = "Stay Indoors";
-      iconColor = "text-orange-500";
-      bgColor = "bg-orange-50";
-      borderColor = "border-orange-100";
-      titleColor = "text-orange-700";
     } else {
       // 0, 1: Sunny
       if (
@@ -132,19 +130,9 @@ const WeatherBoard = () => {
 
     return {
       mainIcon,
-      buttonLabel,
-      iconColor,
-      bgColor,
-      borderColor,
-      titleColor
+      buttonLabel
     };
   }, [forecast]);
-
-  const todayDate = new Date().toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric"
-  });
 
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
@@ -160,15 +148,20 @@ const WeatherBoard = () => {
         </div>
 
         {/* LOCATION SEARCH BAR */}
-        <div ref={searchRef} className="relative">
+        <div ref={searchRef} className="relative space-y-2 md:max-w-xl">
           <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 transition-all">
-            <Icon icon="carbon:search" className="text-gray-400 text-lg shrink-0" />
+            <Icon
+              icon="carbon:search"
+              className="text-gray-400 text-lg shrink-0"
+            />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
-              placeholder="Search a city or place..."
+              onFocus={() =>
+                searchResults.length > 0 && setIsDropdownOpen(true)
+              }
+              placeholder="Search a city or place in the Philippines..."
               className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
             />
             {isSearching && (
@@ -188,6 +181,19 @@ const WeatherBoard = () => {
                 <Icon icon="ph:x-bold" className="text-sm" />
               </button>
             )}
+          </div>
+
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-500">
+              Default location: {DEFAULT_LOCATION.name}
+            </p>
+            <button
+              type="button"
+              onClick={handleUseDefaultLocation}
+              className="text-xs font-semibold text-[#11285A] hover:text-[#0b1c3f] hover:underline cursor-pointer transition-colors"
+            >
+              Use Novaliches, Quezon City
+            </button>
           </div>
 
           {/* AUTOCOMPLETE DROPDOWN */}
@@ -211,17 +217,46 @@ const WeatherBoard = () => {
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-[300px] gap-3">
-            <Icon
-              icon="eos-icons:loading"
-              className="text-4xl text-primary-100 animate-spin"
-            />
-            <p className="text-gray-400 text-sm">Checking forecast...</p>
+          <div className="animate-pulse space-y-6">
+            <div className="bg-gray-200 rounded-[2rem] h-36" />
+            <div className="space-y-2">
+              <div className="h-6 w-44 bg-gray-200 rounded-lg" />
+              <div className="h-4 w-72 bg-gray-200 rounded-lg" />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div
+                  key={`today-skeleton-${index}`}
+                  className="bg-gray-100 rounded-2xl border border-gray-200 p-5 space-y-3"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gray-200" />
+                  <div className="h-3 w-20 bg-gray-200 rounded" />
+                  <div className="h-4 w-16 bg-gray-200 rounded" />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <div className="h-6 w-44 bg-gray-200 rounded-lg" />
+              <div className="h-4 w-80 bg-gray-200 rounded-lg" />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+              {Array.from({ length: 14 }).map((_, index) => (
+                <div
+                  key={`forecast-skeleton-${index}`}
+                  className="bg-gray-100 rounded-2xl border border-gray-200 p-4 space-y-2"
+                >
+                  <div className="h-3 w-12 bg-gray-200 rounded mx-auto" />
+                  <div className="h-3 w-14 bg-gray-200 rounded mx-auto" />
+                  <div className="h-7 w-7 rounded-full bg-gray-200 mx-auto" />
+                  <div className="h-3 w-10 bg-gray-200 rounded mx-auto" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : forecast ? (
           <div className="flex flex-col gap-6">
-            {/* MOBILE RECOMMENDATION CARD */}
-            <div className="md:hidden bg-[#11285A] rounded-[2rem] p-5 flex flex-row items-center gap-4 shadow-lg relative overflow-hidden">
+            {/* RECOMMENDATION CARD */}
+            <div className="bg-[#11285A] rounded-[2rem] p-5 md:p-6 flex flex-row items-center gap-4 shadow-lg relative overflow-hidden">
               <div className="w-20 h-20 min-w-[5rem] rounded-full bg-white flex items-center justify-center shadow-md z-10">
                 <Icon
                   icon={visuals.mainIcon}
@@ -236,54 +271,13 @@ const WeatherBoard = () => {
                     {formattedDate ? `• ${formattedDate.toUpperCase()}` : ""}
                   </span>
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-1 truncate">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-1 truncate">
                   {visuals.buttonLabel}
                 </h2>
-                <p className="text-white/80 text-xs leading-relaxed line-clamp-2">
+                <p className="text-white/80 text-xs md:text-sm leading-relaxed line-clamp-2">
                   {forecast.tomorrow.recommendation}
                 </p>
               </div>
-            </div>
-
-            {/* DESKTOP RECOMMENDATION CARD */}
-            <div
-              className={`hidden md:flex rounded-3xl border-2 p-8 flex-col md:flex-row items-center gap-6 transition-all ${visuals.bgColor} ${visuals.borderColor}`}
-            >
-              <div
-                className={`w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-sm ${visuals.iconColor}`}
-              >
-                <Icon icon={visuals.mainIcon} className="text-6xl" />
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                  <span
-                    className={`px-3 py-1 rounded-full bg-white text-xs font-bold uppercase tracking-wider shadow-sm ${visuals.titleColor}`}
-                  >
-                    TOMORROW{" "}
-                    {formattedDate ? `- ${formattedDate.toUpperCase()}` : ""}
-                  </span>
-                </div>
-                <h2 className={`text-3xl font-bold mb-2 ${visuals.titleColor}`}>
-                  {visuals.buttonLabel}
-                </h2>
-                <p className="text-gray-600 text-sm md:text-base">
-                  {forecast.tomorrow.recommendation}
-                </p>
-              </div>
-            </div>
-
-            {/* DATE SELECTOR */}
-            <div
-              onClick={() => setIsCalendarOpen(true)}
-              className="cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm max-w-fit"
-            >
-              <Icon
-                icon="solar:calendar-linear"
-                className="text-gray-500 text-xl"
-              />
-              <span className="text-sm font-medium text-gray-600">
-                Today - {todayDate}
-              </span>
             </div>
 
             {/* TODAY'S WEATHER HEADER */}
@@ -297,8 +291,14 @@ const WeatherBoard = () => {
             </div>
 
             {/* DETAILS GRID */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                  <Icon
+                    icon="mdi:weather-sunset-up"
+                    className="text-orange-600 text-2xl"
+                  />
+                </div>
                 <span className="text-gray-800 text-xs font-bold">
                   Sunrise:
                 </span>
@@ -307,12 +307,24 @@ const WeatherBoard = () => {
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                  <Icon
+                    icon="mdi:weather-sunset-down"
+                    className="text-indigo-600 text-2xl"
+                  />
+                </div>
                 <span className="text-gray-800 text-xs font-bold">Sunset:</span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.sunset}
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                  <Icon
+                    icon="mdi:water-percent"
+                    className="text-cyan-600 text-2xl"
+                  />
+                </div>
                 <span className="text-gray-800 text-xs font-bold">
                   Humidity:
                 </span>
@@ -321,12 +333,24 @@ const WeatherBoard = () => {
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
+                  <Icon
+                    icon="mdi:weather-windy"
+                    className="text-teal-600 text-2xl"
+                  />
+                </div>
                 <span className="text-gray-800 text-xs font-bold">Wind:</span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.wind}
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+                  <Icon
+                    icon="mdi:thermometer-lines"
+                    className="text-rose-600 text-2xl"
+                  />
+                </div>
                 <span className="text-gray-800 text-xs font-bold">
                   Feels Like:
                 </span>
@@ -335,6 +359,9 @@ const WeatherBoard = () => {
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                  <Icon icon="mdi:gauge" className="text-violet-600 text-2xl" />
+                </div>
                 <span className="text-gray-800 text-xs font-bold">
                   Pressure:
                 </span>
@@ -343,6 +370,12 @@ const WeatherBoard = () => {
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
+                  <Icon
+                    icon="mdi:eye-outline"
+                    className="text-sky-600 text-2xl"
+                  />
+                </div>
                 <span className="text-gray-800 text-xs font-bold">
                   Visibility:
                 </span>
@@ -351,6 +384,12 @@ const WeatherBoard = () => {
                 </span>
               </div>
               <div className="bg-gray-50 rounded-2xl p-5 flex flex-col items-start justify-center gap-2 border border-gray-100">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                  <Icon
+                    icon="mdi:weather-sunny-alert"
+                    className="text-amber-600 text-2xl"
+                  />
+                </div>
                 <span className="text-gray-800 text-xs font-bold">
                   UV Index:
                 </span>
@@ -360,25 +399,37 @@ const WeatherBoard = () => {
               </div>
             </div>
 
-            {/* WEEKLY FORECAST HEADER */}
+            {/* 2-WEEK FORECAST HEADER */}
             <div>
               <h3 className="text-lg font-bold text-[#11285A]">
-                Weekly Forecast
+                2-Week Forecast
               </h3>
               <p className="text-xs text-gray-500">
-                Here are the summary of the whole weather this week
+                Here is the weather outlook for the next 14 days
               </p>
             </div>
 
-            {/* WEEKLY FORECAST GRID */}
-            <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
+            {/* 2-WEEK FORECAST GRID */}
+            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
               {forecast.weekly.map((day, index) => (
                 <div
                   key={index}
-                  className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 border border-gray-100"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedForecastDay(day)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedForecastDay(day);
+                    }
+                  }}
+                  className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 border border-gray-100 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
                 >
                   <span className="text-xs font-bold text-[#11285A]">
                     {day.day}
+                  </span>
+                  <span className="text-[11px] text-gray-500">
+                    {day.dateLabel}
                   </span>
                   <Icon icon={day.icon} className={`text-2xl ${day.color}`} />
                   <span className="text-xs text-gray-500">{day.temp}</span>
@@ -395,309 +446,80 @@ const WeatherBoard = () => {
         {/* <SimulationPanel /> */}
       </div>
 
-      <CalendarOverlay
-        isOpen={isCalendarOpen}
-        onClose={() => setIsCalendarOpen(false)}
-        forecast={forecast}
-        location={location}
-      />
-    </main>
-  );
-};
-
-const CalendarOverlay = ({ isOpen, onClose, forecast, location }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
-  const [dateWeather, setDateWeather] = useState(null);
-  const [isLoadingDate, setIsLoadingDate] = useState(false);
-
-  // Reset selection when closed
-  useEffect(() => {
-    if (!isOpen) {
-      setSelectedDate(null);
-      setDateWeather(null);
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-  const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-  const handlePrev = () => {
-    setSelectedDate(null);
-    setDateWeather(null);
-    setCurrentMonth(new Date(year, month - 1, 1));
-  };
-  const handleNext = () => {
-    setSelectedDate(null);
-    setDateWeather(null);
-    setCurrentMonth(new Date(year, month + 1, 1));
-  };
-
-  const toDateStr = (y, m, d) =>
-    `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-
-  const handleDayClick = async (day) => {
-    const dateStr = toDateStr(year, month, day);
-    setSelectedDate(dateStr);
-    setDateWeather(null);
-    setIsLoadingDate(true);
-    const data = await fetchWeatherForDate(location?.lat, location?.lon, dateStr);
-    setDateWeather(data);
-    setIsLoadingDate(false);
-  };
-
-  const renderCells = () => {
-    const cells = [];
-    const today = new Date();
-    const todayStr = toDateStr(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-
-    for (let i = 0; i < startDay; i++) {
-      const d = daysInPrevMonth - startDay + i + 1;
-      cells.push(
+      {selectedForecastDay && (
         <div
-          key={`prev-${d}`}
-          className="h-12 flex items-center justify-center text-gray-300 bg-white text-sm"
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 p-4"
+          onClick={closeForecastModal}
         >
-          {d}
-        </div>
-      );
-    }
-
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dateStr = toDateStr(year, month, i);
-      const isToday = dateStr === todayStr;
-      const isSelected = dateStr === selectedDate;
-
-      cells.push(
-        <div
-          key={`curr-${i}`}
-          onClick={() => handleDayClick(i)}
-          className={`h-12 flex items-center justify-center text-sm font-medium transition-all cursor-pointer select-none
-            ${
-              isSelected
-                ? "bg-[#11285A] text-white"
-                : isToday
-                  ? "bg-[#4B5EAA] text-white"
-                  : "bg-white text-gray-700 hover:bg-blue-50"
-            }`}
-        >
-          {i}
-        </div>
-      );
-    }
-
-    const totalSlots = 42;
-    const remaining = totalSlots - startDay - daysInMonth;
-    for (let i = 1; i <= remaining; i++) {
-      cells.push(
-        <div
-          key={`next-${i}`}
-          className="h-12 flex items-center justify-center text-gray-300 bg-gray-50/50 text-sm"
-        >
-          {i}
-        </div>
-      );
-    }
-    return cells;
-  };
-
-  const selectedLabel = selectedDate
-    ? new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric"
-      })
-    : null;
-
-  const { icon: dIcon, color: dColor } = selectedDate && dateWeather
-    ? getWeatherIcon(dateWeather.weatherCode)
-    : { icon: "solar:sun-fog-bold-duotone", color: "text-gray-300" };
-
-  return (
-    <div
-      className="fixed inset-0 z-[999] flex items-start md:items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
-      onClick={onClose}
-    >
-      <div
-        className={`bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-300 w-full my-auto ${
-          selectedDate ? "max-w-[780px]" : "max-w-[420px]"
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* ── LEFT: Calendar ── */}
-        <div className="p-6 flex-shrink-0 w-full md:w-[420px]">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6 px-1">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {currentMonth.toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric"
-              })}
-            </h2>
-            <div className="flex items-center gap-1">
+          <div
+            className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-gray-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                  <Icon
+                    icon={selectedForecastDay.icon}
+                    className={`text-3xl ${selectedForecastDay.color}`}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">
+                    {selectedForecastDay.day}, {selectedForecastDay.dateLabel}
+                  </p>
+                  <h4 className="text-lg font-bold text-[#11285A]">
+                    {selectedForecastDay.label}
+                  </h4>
+                </div>
+              </div>
               <button
-                onClick={handlePrev}
-                className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
+                type="button"
+                onClick={closeForecastModal}
+                className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                aria-label="Close forecast details"
               >
-                <Icon icon="solar:alt-arrow-left-linear" className="text-xl" />
-              </button>
-              <button
-                onClick={handleNext}
-                className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
-              >
-                <Icon icon="solar:alt-arrow-right-linear" className="text-xl" />
-              </button>
-              <button
-                onClick={onClose}
-                className="ml-1 p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-500 transition-colors"
-                aria-label="Close"
-              >
-                <Icon icon="ph:x-bold" className="text-xl" />
+                <Icon icon="ph:x-bold" className="text-lg" />
               </button>
             </div>
-          </div>
 
-          {/* Day labels */}
-          <div className="grid grid-cols-7 mb-2">
-            {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
-              <div
-                key={d}
-                className="text-center font-bold text-gray-900 text-sm py-2"
-              >
-                {d}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                <p className="text-[11px] text-gray-500 uppercase font-semibold">
+                  High
+                </p>
+                <p className="text-base font-bold text-[#11285A]">
+                  {selectedForecastDay.tempMax}
+                </p>
               </div>
-            ))}
+              <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                <p className="text-[11px] text-gray-500 uppercase font-semibold">
+                  Low
+                </p>
+                <p className="text-base font-bold text-[#11285A]">
+                  {selectedForecastDay.tempMin}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                <p className="text-[11px] text-gray-500 uppercase font-semibold">
+                  Average
+                </p>
+                <p className="text-base font-bold text-[#11285A]">
+                  {selectedForecastDay.temp}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                <p className="text-[11px] text-gray-500 uppercase font-semibold">
+                  Rain Chance
+                </p>
+                <p className="text-base font-bold text-[#11285A]">
+                  {selectedForecastDay.precipProbability}
+                </p>
+              </div>
+            </div>
           </div>
-
-          {/* Grid */}
-          <div className="grid grid-cols-7 border border-gray-200 rounded-xl overflow-hidden bg-gray-200 gap-[1px]">
-            {renderCells()}
-          </div>
-
-          {!selectedDate && (
-            <p className="text-center text-xs text-gray-400 mt-4">
-              Tap any date to see its weather
-            </p>
-          )}
         </div>
-
-        {/* ── RIGHT: Date Detail Panel ── */}
-        {selectedDate && (
-          <div className="flex-1 bg-[#f9fafb] border-t md:border-t-0 md:border-l border-gray-100 p-6 flex flex-col gap-4 min-w-0">
-            {isLoadingDate ? (
-              <div className="flex flex-col items-center justify-center h-full gap-3 py-10">
-                <Icon
-                  icon="eos-icons:loading"
-                  className="text-4xl text-[#4B5EAA] animate-spin"
-                />
-                <p className="text-sm text-gray-400">Loading weather...</p>
-              </div>
-            ) : dateWeather ? (
-              <>
-                {/* Date label + icon */}
-                <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0">
-                    <Icon icon={dIcon} className={`text-4xl ${dColor}`} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                      {selectedLabel}
-                    </p>
-                    <p className="text-xl font-bold text-[#11285A]">
-                      {dateWeather.label}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {dateWeather.tempMax}°C ↑ &nbsp; {dateWeather.tempMin}°C ↓
-                    </p>
-                  </div>
-                </div>
-
-                {/* Detail grid */}
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  {[
-                    {
-                      label: "Sunrise",
-                      value: dateWeather.sunrise,
-                      icon: "solar:sunrise-bold-duotone",
-                      color: "text-orange-400"
-                    },
-                    {
-                      label: "Sunset",
-                      value: dateWeather.sunset,
-                      icon: "solar:sunset-bold-duotone",
-                      color: "text-orange-500"
-                    },
-                    {
-                      label: "Feels Like",
-                      value: dateWeather.feelsLike,
-                      icon: "solar:temperature-bold-duotone",
-                      color: "text-red-400"
-                    },
-                    {
-                      label: "Wind Max",
-                      value: dateWeather.windMax,
-                      icon: "solar:wind-bold-duotone",
-                      color: "text-blue-400"
-                    },
-                    {
-                      label: "Rain Chance",
-                      value: dateWeather.precipProbability,
-                      icon: "solar:cloud-rain-bold-duotone",
-                      color: "text-blue-500"
-                    },
-                    {
-                      label: "Precipitation",
-                      value: dateWeather.precipSum,
-                      icon: "solar:drop-bold-duotone",
-                      color: "text-cyan-500"
-                    },
-                    {
-                      label: "UV Index",
-                      value: dateWeather.uvIndex,
-                      icon: "solar:sun-bold-duotone",
-                      color: "text-yellow-500"
-                    }
-                  ].map(({ label, value, icon, color }) => (
-                    <div
-                      key={label}
-                      className="bg-white rounded-xl p-3 flex items-center gap-2.5 border border-gray-100"
-                    >
-                      <Icon icon={icon} className={`text-2xl shrink-0 ${color}`} />
-                      <div>
-                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
-                          {label}
-                        </p>
-                        <p className="text-sm font-bold text-gray-700">{value}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full gap-2 py-10">
-                <Icon
-                  icon="solar:cloud-cross-bold-duotone"
-                  className="text-5xl text-gray-300"
-                />
-                <p className="text-sm text-gray-400">No data available</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+      )}
+    </main>
   );
 };
 
