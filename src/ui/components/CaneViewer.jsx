@@ -9,13 +9,13 @@ const AD_TEXTS = [
     label: "Voice-Guided Navigation",
     headline: "Navigate with Confidence",
     sub: "Real-time obstacle detection keeps every step safe.",
-    position: { bottom: "10%", left: "5%", right: "auto", top: "auto" }
+    position: { bottom: "10%", left: "auto", right: "5%", top: "auto" }
   },
   {
     label: "Always Connected",
     headline: "Peace of Mind, Everywhere",
     sub: "Live GPS tracking so guardians are never out of the loop.",
-    position: { top: "10%", right: "5%", bottom: "auto", left: "auto" }
+    position: { top: "10%", right: "auto", bottom: "auto", left: "5%" }
   },
   {
     label: "Emergency Ready",
@@ -349,7 +349,7 @@ const CaneViewer = () => {
           </button>
         </div>
       ) : (
-        <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
+        <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
           <button
             type="button"
             onClick={handleResetView}
