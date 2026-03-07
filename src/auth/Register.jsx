@@ -395,7 +395,7 @@ const Register = () => {
             street_address: formData.streetAddress
           };
 
-          const { data } = await registerApi(accountPayload);
+          await registerApi(accountPayload);
 
           if (deviceValidated.status === "ok" && deviceValidated.serial) {
             try {
@@ -588,6 +588,45 @@ const Register = () => {
     await sendOtp();
   };
 
+  const buildEmergencyState = (payload, fallbackSerial) => {
+    const data = payload?.data || payload || {};
+    const selectedDevice =
+      data.selectedDevice || data.device || data.deviceData || null;
+    const vip =
+      selectedDevice?.vip ||
+      data.vip ||
+      data.vips?.[0] ||
+      data.emergencyInfo?.vip ||
+      null;
+    const guardians =
+      data.guardians ||
+      (data.guardian ? [data.guardian] : null) ||
+      data.emergencyContacts ||
+      data.deviceGuardians ||
+      data.emergencyInfo?.guardians ||
+      [];
+
+    return {
+      vip: {
+        firstName: vip?.firstName || vip?.first_name || "",
+        lastName: vip?.lastName || vip?.last_name || "",
+        bloodType: vip?.bloodType || vip?.blood_type || null,
+        medicalNotes: vip?.medicalNotes || vip?.medical_notes || null,
+        contactNumber: vip?.contactNumber || vip?.contact_number || null,
+        email: vip?.email || null
+      },
+      device: {
+        deviceId: selectedDevice?.deviceId || selectedDevice?.device_id || null,
+        deviceSerialNumber:
+          selectedDevice?.deviceSerialNumber ||
+          selectedDevice?.device_serial_number ||
+          fallbackSerial
+      },
+      guardians,
+      source: "register_qr"
+    };
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const deviceSerial = params.get("device_serial");
@@ -597,6 +636,17 @@ const Register = () => {
     const validate = async () => {
       try {
         const { data } = await validateDeviceSerial(deviceSerial);
+        if (data.reason === "already_paired_with_vip") {
+          window.history.replaceState({}, "", window.location.pathname);
+          navigate("/emergency", {
+            replace: true,
+            state: {
+              emergencyData: buildEmergencyState(data, deviceSerial)
+            }
+          });
+          return;
+        }
+
         setDeviceValidated({
           validated: data.reason === "ok",
           serial: deviceSerial,

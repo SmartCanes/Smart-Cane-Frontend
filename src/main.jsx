@@ -34,6 +34,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/" element={<GuestPage />} />
         <Route path="/get-started" element={<GetStarted />} />
         <Route path="/guardian-invite/:token" element={<GuardianInvite />} />
+        <Route path="/emergency" element={<EmergencyDetails />} />
 
         <Route element={<PublicLayout />}>
           <Route path="/login" element={<Login />} />
@@ -42,7 +43,6 @@ createRoot(document.getElementById("root")).render(
         </Route>
 
         <Route element={<ProtectedLayout />}>
-          <Route path="/emergency" element={<EmergencyDetails />} />
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/activity-report" element={<ActivityReport />} />
