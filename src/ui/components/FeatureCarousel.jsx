@@ -37,8 +37,23 @@ export default function FeatureCarousel({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [canNavigate, setCanNavigate] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isInViewport, setIsInViewport] = useState(false);
+  const sectionRef = useRef(null);
   const autoTimerRef = useRef(null);
   const resumeTimerRef = useRef(null);
+
+  useEffect(() => {
+    const target = sectionRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInViewport(entry.isIntersecting),
+      { threshold: 0.25 }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   const updateSelectedIndex = useCallback(() => {
     if (!emblaApi) return;
@@ -53,14 +68,22 @@ export default function FeatureCarousel({
   }, []);
 
   const startAutoTimer = useCallback(() => {
-    if (!emblaApi || !autoScroll || isHovering || n <= 1) return;
+    if (!emblaApi || !autoScroll || isHovering || !isInViewport || n <= 1) return;
     stopAutoTimer();
     autoTimerRef.current = window.setInterval(() => {
-      if (!isHovering) {
+      if (!isHovering && isInViewport) {
         emblaApi.scrollNext();
       }
     }, autoScrollMs);
-  }, [autoScroll, autoScrollMs, emblaApi, isHovering, n, stopAutoTimer]);
+  }, [
+    autoScroll,
+    autoScrollMs,
+    emblaApi,
+    isHovering,
+    isInViewport,
+    n,
+    stopAutoTimer
+  ]);
 
   const pauseAutoplay = useCallback(() => {
     stopAutoTimer();
@@ -71,7 +94,7 @@ export default function FeatureCarousel({
   }, [startAutoTimer]);
 
   const pauseThenResumeAutoplay = useCallback(() => {
-    if (!emblaApi || n <= 1) return;
+    if (!emblaApi || !isInViewport || n <= 1) return;
     stopAutoTimer();
 
     if (resumeTimerRef.current) {
@@ -79,12 +102,20 @@ export default function FeatureCarousel({
     }
 
     resumeTimerRef.current = window.setTimeout(() => {
-      if (autoScroll && !isHovering && emblaApi) {
+      if (autoScroll && !isHovering && isInViewport && emblaApi) {
         emblaApi.scrollNext();
         startAutoTimer();
       }
     }, AUTO_PAUSE_MS);
-  }, [autoScroll, emblaApi, isHovering, n, startAutoTimer, stopAutoTimer]);
+  }, [
+    autoScroll,
+    emblaApi,
+    isHovering,
+    isInViewport,
+    n,
+    startAutoTimer,
+    stopAutoTimer
+  ]);
 
   useEffect(() => {
     return () => {
@@ -112,7 +143,7 @@ export default function FeatureCarousel({
 
   useEffect(() => {
     if (!emblaApi) return;
-    if (isHovering) {
+    if (isHovering || !isInViewport) {
       stopAutoTimer();
     } else {
       startAutoTimer();
@@ -121,7 +152,7 @@ export default function FeatureCarousel({
     return () => {
       stopAutoTimer();
     };
-  }, [emblaApi, isHovering, startAutoTimer, stopAutoTimer]);
+  }, [emblaApi, isHovering, isInViewport, startAutoTimer, stopAutoTimer]);
 
   const next = useCallback(() => {
     if (!emblaApi) return;
@@ -147,7 +178,11 @@ export default function FeatureCarousel({
   if (!n) return null;
 
   return (
-    <section className={`w-full ${className}`} aria-label="Feature carousel">
+    <section
+      ref={sectionRef}
+      className={`w-full ${className}`}
+      aria-label="Feature carousel"
+    >
       <div className="relative mt-12 w-full">
         <button
           type="button"
@@ -196,7 +231,7 @@ export default function FeatureCarousel({
             setIsHovering(false);
             resumeAutoplay();
           }}
-          className="overflow-hidden"
+          className="overflow-hidden touch-pan-y"
           style={{
             userSelect: "none",
             WebkitUserSelect: "none",
@@ -208,7 +243,7 @@ export default function FeatureCarousel({
               "flex gap-4 sm:gap-3 lg:gap-6",
               "px-4 sm:px-3 lg:px-8",
               "py-3 pb-6 sm:pb-7",
-              "touch-pan-x cursor-grab active:cursor-grabbing"
+              "cursor-grab active:cursor-grabbing"
             ].join(" ")}
           >
             {baseCards.map((card, idx) => {

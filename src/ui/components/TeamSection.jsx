@@ -2,20 +2,20 @@ import { useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlideUp } from "@/wrapper/MotionWrapper";
-import africaImg from "@/assets/images/team/africa.jpg";
-import arrojoImg from "@/assets/images/team/arrojo.jpg";
-import barbaImg from "@/assets/images/team/barba.jpg";
-import belasImg from "@/assets/images/team/belas.jpg";
-import casipeImg from "@/assets/images/team/casipe.jpg";
-import delacruzImg from "@/assets/images/team/delacruz.jpg";
-import diolaImg from "@/assets/images/team/diola.jpg";
-import ibanezImg from "@/assets/images/team/ibañez.jpg";
-import mabatoImg from "@/assets/images/team/mabato.jpg";
-import madriagaImg from "@/assets/images/team/madriaga.jpg";
-import morreImg from "@/assets/images/team/morre.jpg";
-import patacsilImg from "@/assets/images/team/patacsil.jpg";
-import perezImg from "@/assets/images/team/perez.jpg";
-import villamoraImg from "@/assets/images/team/villamora.jpg";
+import africaImg from "@/assets/images/team/africa.webp";
+import arrojoImg from "@/assets/images/team/arrojo.webp";
+import barbaImg from "@/assets/images/team/barba.webp";
+import belasImg from "@/assets/images/team/belas.webp";
+import casipeImg from "@/assets/images/team/casipe.webp";
+import delacruzImg from "@/assets/images/team/delacruz.webp";
+import diolaImg from "@/assets/images/team/diola.webp";
+import ibanezImg from "@/assets/images/team/ibañez.webp";
+import mabatoImg from "@/assets/images/team/mabato.webp";
+import madriagaImg from "@/assets/images/team/madriaga.webp";
+import morreImg from "@/assets/images/team/morre.webp";
+import patacsilImg from "@/assets/images/team/patacsil.webp";
+import perezImg from "@/assets/images/team/perez.webp";
+import villamoraImg from "@/assets/images/team/villamora.webp";
 
 const teamMembers = [
   {
@@ -372,6 +372,8 @@ const TeamMemberCard = ({ member, index }) => {
               >
                 {member.image ? (
                   <img
+                    loading="lazy"
+                    decoding="async"
                     src={member.image}
                     alt={member.name}
                     className="w-full h-full object-cover object-center"

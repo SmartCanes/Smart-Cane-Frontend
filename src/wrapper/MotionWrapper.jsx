@@ -1,45 +1,65 @@
 import { motion, useInView } from "framer-motion";
 import React from "react";
 
-export const FadeIn = ({ children, delay = 0, duration = 0.6 }) => (
+export const FadeIn = ({
+  children,
+  delay = 0,
+  duration = 0.6,
+  once = true
+}) => (
   <motion.div
     initial={{ opacity: 0 }}
     whileInView={{ opacity: 1 }}
     transition={{ duration, delay }}
-    viewport={{ amount: 0.2 }}
+    viewport={{ amount: 0.2, once }}
   >
     {children}
   </motion.div>
 );
 
-export const SlideUp = ({ children, delay = 0, duration = 0.6 }) => (
+export const SlideUp = ({
+  children,
+  delay = 0,
+  duration = 0.6,
+  once = true
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 40 }}
     whileInView={{ opacity: 1, y: 0 }}
     transition={{ duration, delay }}
-    viewport={{ amount: 0.2 }}
+    viewport={{ amount: 0.2, once }}
   >
     {children}
   </motion.div>
 );
 
-export const ScaleIn = ({ children, delay = 0, duration = 0.6 }) => (
+export const ScaleIn = ({
+  children,
+  delay = 0,
+  duration = 0.6,
+  once = true
+}) => (
   <motion.div
     initial={{ opacity: 0.0, scale: 0.9 }}
     whileInView={{ opacity: 1, scale: 1 }}
     transition={{ duration, delay }}
-    viewport={{ amount: 0.2 }}
+    viewport={{ amount: 0.2, once }}
   >
     {children}
   </motion.div>
 );
 
-export const SlideInFromLeft = ({ children, delay = 0, duration = 0.6 }) => (
+export const SlideInFromLeft = ({
+  children,
+  delay = 0,
+  duration = 0.6,
+  once = true
+}) => (
   <motion.div
     initial={{ opacity: 0, x: -40 }}
     whileInView={{ opacity: 1, x: 0 }}
     transition={{ duration, delay }}
-    viewport={{ amount: 0.2 }}
+    viewport={{ amount: 0.2, once }}
   >
     {children}
   </motion.div>
@@ -49,25 +69,31 @@ export const SlideInFromRight = ({
   children,
   delay = 0,
   duration = 0.6,
+  once = true,
   className
 }) => (
   <motion.div
     initial={{ opacity: 0, x: 40 }}
     whileInView={{ opacity: 1, x: 0 }}
     transition={{ duration, delay }}
-    viewport={{ amount: 0.2 }}
+    viewport={{ amount: 0.2, once }}
     className={className}
   >
     {children}
   </motion.div>
 );
 
-export const TextReveal = ({ children, delay = 0, duration = 0.6 }) => (
+export const TextReveal = ({
+  children,
+  delay = 0,
+  duration = 0.6,
+  once = true
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     transition={{ duration, delay }}
-    viewport={{ amount: 0.2 }}
+    viewport={{ amount: 0.2, once }}
     style={{ overflow: "hidden", display: "inline-block" }}
   >
     {children}
@@ -78,6 +104,7 @@ export function TextFade({
   direction,
   children,
   className = "",
+  once = true,
   staggerChildren = 0.1
 }) {
   const FADE_DOWN = {
@@ -85,13 +112,12 @@ export function TextFade({
     hidden: { opacity: 0, y: direction === "down" ? -18 : 18 }
   };
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { amount: 0.2 });
+  const isInView = useInView(ref, { amount: 0.2, once });
   return (
     <motion.div
       ref={ref}
       initial="hidden"
-      animate={isInView ? "show" : ""}
-      viewport={{ amount: 0.2 }}
+      animate={isInView ? "show" : "hidden"}
       variants={{
         hidden: {},
         show: {
@@ -129,7 +155,7 @@ export function WordsPullUp({ text, delay, className }) {
   };
 
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { amount: 0.2 });
+  const isInView = useInView(ref, { amount: 0.2, once: true });
   return (
     <div className="flex justify-center">
       {splittedText.map((current, i) => (
@@ -138,7 +164,7 @@ export function WordsPullUp({ text, delay, className }) {
           ref={ref}
           variants={pullupVariant}
           initial="initial"
-          animate={isInView ? "animate" : ""}
+          animate={isInView ? "animate" : "initial"}
           custom={i}
           className={"tracking-tighter pr-2" + className}
         >

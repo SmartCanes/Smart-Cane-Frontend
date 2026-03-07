@@ -54,6 +54,7 @@ const useMediaQuery = (query) => {
 };
 
 const CaneViewer = () => {
+  const containerRef = useRef(null);
   const mountRef = useRef(null);
 
   const sceneRef = useRef(null);
@@ -64,13 +65,41 @@ const CaneViewer = () => {
   const tiltGroupRef = useRef(null);
   const animFrameRef = useRef(null);
   const fitModelToViewRef = useRef(() => {});
+  const isInViewportRef = useRef(false);
 
   const [adIndex, setAdIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const [isInteractMode, setIsInteractMode] = useState(false);
+  const [isInViewport, setIsInViewport] = useState(false);
   const isMobile = useMediaQuery("(max-width: 767px)");
 
   useEffect(() => {
+    const target = containerRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInViewport(entry.isIntersecting);
+      },
+      {
+        threshold: 0.35
+      }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    isInViewportRef.current = isInViewport;
+  }, [isInViewport]);
+
+  useEffect(() => {
+    if (!isInViewport) {
+      setVisible(true);
+      return;
+    }
+
     let timeoutId;
 
     const interval = setInterval(() => {
@@ -86,7 +115,7 @@ const CaneViewer = () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, []);
+  }, [isInViewport]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -229,6 +258,8 @@ const CaneViewer = () => {
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);
 
+      if (!isInViewportRef.current) return;
+
       if (!controlsRef.current?.enabled && modelRef.current) {
         modelRef.current.rotation.y += window.innerWidth <= 767 ? 0.004 : 0.006;
       }
@@ -281,6 +312,7 @@ const CaneViewer = () => {
 
   return (
     <div
+      ref={containerRef}
       className="relative w-full h-full overflow-hidden"
       style={{
         background:

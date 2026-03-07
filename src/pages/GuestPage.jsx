@@ -1,8 +1,8 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { memo, useRef, useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import icaneLogo from "@/assets/images/smartcane-logo-blue.png";
-import heroBackground from "@/assets/images/background.png";
+import heroBackground from "@/assets/images/background.webp";
 import gpsCardArrow from "@/assets/images/gps-card-arrow.png";
 import SwitchFilled from "@/assets/images/SwitchFilled.png";
 import Document from "@/assets/images/document.png";
@@ -13,7 +13,7 @@ import twitterIcon from "@/assets/images/twitter-icon.png";
 import instagramIcon from "@/assets/images/instagram-icon.png";
 import callIcon from "@/assets/images/call-icon.png";
 import emailIcon from "@/assets/images/email-icon.png";
-import teamPhoto from "@/assets/images/team-photo.jpg";
+import teamPhoto from "@/assets/images/team-photo.webp";
 import FAQItem from "@/ui/components/FAQItem";
 import CaneViewer from "@/ui/components/CaneViewer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -223,6 +223,10 @@ const featureCards = rawFeatureCards.filter((card, index, arr) => {
   return arr.findIndex((item) => item.id === card.id) === index;
 });
 
+const MemoFeatureCarousel = memo(FeatureCarousel);
+const MemoCaneViewer = memo(CaneViewer);
+const MemoTeamSection = memo(TeamSection);
+
 const faqs = [
   {
     question: "What is SmartCane?",
@@ -335,9 +339,9 @@ const GuestPage = () => {
       {/* Navigation */}
       <header
         id="header"
-        className="w-full bg-white/95 backdrop-blur shadow-sm fixed top-0 z-20"
+        className="w-full bg-white/95 md:backdrop-blur shadow-sm fixed top-0 z-20"
       >
-        <div className="max-w-6xl mx-auto px-4 py-3 sm:px-6 sm:py-4">
+        <div className="max-w-6xl mx-auto px-4 py-3 sm:px-6 sm:py-4 relative">
           <div className="flex items-center">
             {/* LEFT: Logo (fixed width) */}
             <div className="flex items-center gap-3 w-[220px]">
@@ -447,73 +451,65 @@ const GuestPage = () => {
               <motion.div
                 id="mobile-menu"
                 key="mobile-menu"
-                initial={{ height: 0, opacity: 0, y: -6 }}
-                animate={{ height: "auto", opacity: 1, y: 0 }}
-                exit={{ height: 0, opacity: 0, y: -6 }}
-                transition={{ duration: 0.28, ease: "easeOut" }}
-                className="md:hidden overflow-hidden border-t border-black/10 bg-white mt-2"
+                initial={{ opacity: 0, y: -8, scaleY: 0.98 }}
+                animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                exit={{ opacity: 0, y: -8, scaleY: 0.98 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="md:hidden absolute left-0 right-0 top-full border-t border-black/10 bg-white px-4 sm:px-6 py-3 shadow-lg origin-top"
               >
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18, ease: "easeOut", delay: 0.05 }}
-                  className="max-w-6xl mx-auto px-4 sm:px-6 py-3"
-                >
-                  <div className="flex flex-col gap-2 font-montserrat text-sm">
-                    <ScrollLink
-                      targetId="home"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
-                    >
-                      Home
-                    </ScrollLink>
+                <div className="flex flex-col gap-2 font-montserrat text-sm">
+                  <ScrollLink
+                    targetId="home"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                  >
+                    Home
+                  </ScrollLink>
 
-                    <ScrollLink
-                      targetId="iCane"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
-                    >
-                      iCane
-                    </ScrollLink>
+                  <ScrollLink
+                    targetId="iCane"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                  >
+                    iCane
+                  </ScrollLink>
 
-                    <ScrollLink
-                      targetId="about"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
-                    >
-                      About Us
-                    </ScrollLink>
+                  <ScrollLink
+                    targetId="about"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                  >
+                    About Us
+                  </ScrollLink>
 
-                    <ScrollLink
-                      targetId="faq"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
-                    >
-                      FAQs
-                    </ScrollLink>
+                  <ScrollLink
+                    targetId="faq"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                  >
+                    FAQs
+                  </ScrollLink>
 
-                    <ScrollLink
-                      targetId="contact"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
-                    >
-                      Contact Us
-                    </ScrollLink>
+                  <ScrollLink
+                    targetId="contact"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
+                  >
+                    Contact Us
+                  </ScrollLink>
 
-                    <div className="pt-2">
-                      <button
-                        onClick={() => {
-                          setIsMobileMenuOpen(false);
-                          navigate("/get-started");
-                        }}
-                        className="w-full rounded-xl bg-[#1C253C] px-4 py-3 text-white font-medium hover:bg-[#0d1c3f] transition cursor-pointer"
-                      >
-                        Log In
-                      </button>
-                    </div>
+                  <div className="pt-2">
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        navigate("/get-started");
+                      }}
+                      className="w-full rounded-xl bg-[#1C253C] px-4 py-3 text-white font-medium hover:bg-[#0d1c3f] transition cursor-pointer"
+                    >
+                      Log In
+                    </button>
                   </div>
-                </motion.div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -527,20 +523,22 @@ const GuestPage = () => {
         {" "}
         {/* Hero section //Background Image */}
         <img
-          loading="lazy"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
           src={heroBackground}
           alt="Group of people walking with canes"
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
         <div className="relative mx-auto max-w-5xl px-4 text-center text-white space-y-6 sm:px-6 z-10">
-          <TextFade delay={0.3}>
+          <TextFade delay={0.3} once={false}>
             <h1 className="font-poppins text-3xl md:text-5xl lg:text-6xl font-semibold leading-tight">
               The iCane That Sees Ahead.
             </h1>
           </TextFade>
 
-          <TextReveal delay={0.6}>
+          <TextReveal delay={0.6} once={false}>
             <h2 className="font-poppins text-xl font-medium md:text-2xl lg:text-3xl text-white/90">
               SmartCane: Redefining Mobility with AI-Powered Safety.
             </h2>
@@ -548,6 +546,7 @@ const GuestPage = () => {
 
           <TextFade
             delay={1}
+            once={false}
             className="font-poppins text-[16px] md:text-lg lg:text-xl
             text-white/90 pr-2"
           >
@@ -558,7 +557,7 @@ const GuestPage = () => {
             </p>
           </TextFade>
 
-          <ScaleIn delay={1.3}>
+          <ScaleIn delay={1.3} once={false}>
             <div className="mx-auto max-w-xs pt-4 sm:max-w-none">
               <Link
                 to="/get-started"
@@ -571,7 +570,7 @@ const GuestPage = () => {
         </div>
       </section>
       {/* Feature carousel */}
-      <FeatureCarousel cards={featureCards} autoScroll autoScrollMs={5000} />
+      <MemoFeatureCarousel cards={featureCards} autoScroll autoScrollMs={5000} />
       {/* Section divider for iCane */}
       <div className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16">
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
@@ -582,7 +581,7 @@ const GuestPage = () => {
 
       {/* iCane 3d placeholder */}
       <div id="iCane" className="mx-auto w-full h-[85vh] bg-[#dfdfdf]">
-        <CaneViewer />
+        <MemoCaneViewer />
       </div>
 
       {/* Section divider for About */}
@@ -604,6 +603,7 @@ const GuestPage = () => {
           <div className="flex justify-center rounded-2xl bg-[#dfdfdf] overflow-hidden">
             <img
               loading="lazy"
+              decoding="async"
               src={teamPhoto}
               alt="Team Photo"
               className="w-full h-full object-contain object-center rounded-2xl"
@@ -631,7 +631,7 @@ const GuestPage = () => {
         </p>
       </SlideUp>
 
-      <TeamSection />
+      <MemoTeamSection />
 
       <div
         id="faq"
