@@ -2,33 +2,50 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import FeatureCard from "@/ui/components/FeatureCard";
 
+const AUTO_SCROLL_MS_DEFAULT = 2500;
+const AUTO_PAUSE_MS = 3200;
+const SNAP_IDLE_MS = 140;
+const ANIMATION_MS = 420;
+const NAV_LOCK_MS = 380;
+const DRAG_THRESHOLD_PX = 3;
+
 export default function FeatureCarousel({
   cards = [],
   autoScroll = true,
-  autoScrollMs = 5000,
+  autoScrollMs = AUTO_SCROLL_MS_DEFAULT,
   className = "",
-  cloneCount = 2,
   activeClassName = "opacity-100 scale-100 sm:scale-[1.02]",
   inactiveClassName = "opacity-40 sm:opacity-60 scale-[0.94]"
 }) {
   const trackRef = useRef(null);
-  const itemRefs = useRef([]); // refs for ALL rendered items (including clones)
+  const itemRefs = useRef([]);
 
-  const isProgrammaticRef = useRef(false);
-  const snapTimerRef = useRef(null);
   const autoTimerRef = useRef(null);
+  const idleTimerRef = useRef(null);
+  const navUnlockTimerRef = useRef(null);
+  const animationDoneTimerRef = useRef(null);
+
   const pauseUntilRef = useRef(0);
+  const isHoveringRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const isProgrammaticRef = useRef(false);
+  const canNavigateRef = useRef(true);
+
+  const dragPointerIdRef = useRef(null);
+  const dragStartXRef = useRef(0);
+  const dragStartScrollLeftRef = useRef(0);
 
   const [isHovering, setIsHovering] = useState(false);
-
-  // activeLoopedIndex = index in loopedCards (includes clones)
+  const [isDragging, setIsDragging] = useState(false);
   const [activeLoopedIndex, setActiveLoopedIndex] = useState(0);
+  const [canNavigate, setCanNavigate] = useState(true);
 
-  // Dedupe base by id (prevents weird looping bugs)
   const baseCards = useMemo(() => {
     const seen = new Set();
-    return (cards || []).filter((c) => {
-      const id = c?.id ?? JSON.stringify(c);
+
+    return (cards || []).filter((card) => {
+      const id = card?.id ?? JSON.stringify(card);
       if (seen.has(id)) return false;
       seen.add(id);
       return true;
@@ -37,263 +54,437 @@ export default function FeatureCarousel({
 
   const n = baseCards.length;
 
-  const k = useMemo(() => {
-    if (!n) return 0;
-    return Math.max(1, Math.min(cloneCount, n));
-  }, [cloneCount, n]);
-
   const loopedCards = useMemo(() => {
     if (!n) return [];
-    const head = baseCards.slice(0, k);
-    const tail = baseCards.slice(n - k);
-    return [...tail, ...baseCards, ...head];
-  }, [baseCards, k, n]);
+    return [...baseCards, ...baseCards, ...baseCards];
+  }, [baseCards, n]);
 
-  // Keep refs array aligned
+  const middleStart = n;
+  const middleEnd = 2 * n - 1;
+
   useEffect(() => {
     itemRefs.current = itemRefs.current.slice(0, loopedCards.length);
   }, [loopedCards.length]);
 
-  const pauseAuto = useCallback((ms = 2500) => {
+  useEffect(() => {
+    isHoveringRef.current = isHovering;
+  }, [isHovering]);
+
+  const pauseAuto = useCallback((ms = AUTO_PAUSE_MS) => {
     pauseUntilRef.current = Date.now() + ms;
   }, []);
 
-  // Convert looped index to base index (0..n-1)
-  const loopedToBaseIndex = useCallback(
-    (loopedIndex) => {
-      if (!n) return 0;
-      const baseIndex = loopedIndex - k; // base region starts at k
-      return ((baseIndex % n) + n) % n;
-    },
-    [k, n]
-  );
+  const setNavigationEnabled = useCallback((enabled) => {
+    canNavigateRef.current = enabled;
+    setCanNavigate(enabled);
+  }, []);
 
-  // Center a specific looped item
-  const centerToLoopedIndex = useCallback(
-    (loopedIndex, behavior = "smooth") => {
-      const track = trackRef.current;
-      const el = itemRefs.current[loopedIndex];
-      if (!track || !el) return;
+  const lockNavigation = useCallback(
+    (ms = NAV_LOCK_MS) => {
+      setNavigationEnabled(false);
 
-      // Stable math (no layout jitter during momentum)
-      const targetLeft =
-        el.offsetLeft - (track.clientWidth - el.clientWidth) / 2;
-
-      const clamped = Math.max(
-        0,
-        Math.min(targetLeft, track.scrollWidth - track.clientWidth)
-      );
-
-      isProgrammaticRef.current = true;
-
-      track.scrollTo({ left: clamped, behavior });
-
-      // Prefer scrollend when available; fallback to a timer
-      const done = () => {
-        isProgrammaticRef.current = false;
-        track.removeEventListener("scrollend", done);
-      };
-
-      if (behavior === "auto") {
-        isProgrammaticRef.current = false;
-        return;
+      if (navUnlockTimerRef.current) {
+        window.clearTimeout(navUnlockTimerRef.current);
       }
 
-      // @ts-ignore (scrollend not typed everywhere)
-      track.addEventListener?.("scrollend", done, { once: true });
-      window.setTimeout(() => {
-        isProgrammaticRef.current = false;
-      }, 450);
+      navUnlockTimerRef.current = window.setTimeout(() => {
+        setNavigationEnabled(true);
+      }, ms);
     },
-    []
+    [setNavigationEnabled]
   );
 
-  // Find which looped card is closest to the track center
+  const toBaseIndex = useCallback(
+    (loopedIndex) => {
+      if (!n) return 0;
+      return ((loopedIndex % n) + n) % n;
+    },
+    [n]
+  );
+
+  const getEquivalentMiddleIndex = useCallback(
+    (loopedIndex) => {
+      if (!n) return 0;
+      return middleStart + toBaseIndex(loopedIndex);
+    },
+    [middleStart, n, toBaseIndex]
+  );
+
+  const getTrackLeftForIndex = useCallback((loopedIndex) => {
+    const track = trackRef.current;
+    const el = itemRefs.current[loopedIndex];
+
+    if (!track || !el) return null;
+
+    const targetLeft = el.offsetLeft - (track.clientWidth - el.clientWidth) / 2;
+
+    const maxLeft = track.scrollWidth - track.clientWidth;
+    return Math.max(0, Math.min(targetLeft, maxLeft));
+  }, []);
+
+  const scrollToLoopedIndex = useCallback(
+    (loopedIndex, behavior = "smooth") => {
+      const track = trackRef.current;
+      const left = getTrackLeftForIndex(loopedIndex);
+
+      if (!track || left == null) return;
+
+      track.scrollTo({ left, behavior });
+    },
+    [getTrackLeftForIndex]
+  );
+
   const getNearestLoopedIndex = useCallback(() => {
     const track = trackRef.current;
-    if (!track) return 0;
+    if (!track) return middleStart;
 
-    const { left, width } = track.getBoundingClientRect();
-    const center = left + width / 2;
+    const trackRect = track.getBoundingClientRect();
+    const trackCenter = trackRect.left + trackRect.width / 2;
 
-    let bestIdx = 0;
-    let bestDist = Number.POSITIVE_INFINITY;
+    let nearestIndex = middleStart;
+    let nearestDistance = Number.POSITIVE_INFINITY;
 
     itemRefs.current.forEach((el, idx) => {
       if (!el) return;
-      const r = el.getBoundingClientRect();
-      const c = r.left + r.width / 2;
-      const d = Math.abs(center - c);
-      if (d < bestDist) {
-        bestDist = d;
-        bestIdx = idx;
+
+      const rect = el.getBoundingClientRect();
+      const cardCenter = rect.left + rect.width / 2;
+      const distance = Math.abs(cardCenter - trackCenter);
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = idx;
       }
     });
 
-    return bestIdx;
-  }, []);
+    return nearestIndex;
+  }, [middleStart]);
 
-  /**
-   * Normalize index if we're on clones:
-   * - left clones: 0..k-1
-   * - real region: k..k+n-1
-   * - right clones: k+n..k+n+k-1
-   *
-   * For continuous RIGHT motion, we mainly normalize when we are in RIGHT clones.
-   * The jump is instantaneous and keeps the same card centered.
-   */
-  const normalizeIfOnClone = useCallback(
+  const normalizeInstantlyIfNeeded = useCallback(
     (loopedIndex) => {
       if (!n) return loopedIndex;
 
-      const realStart = k;
-      const realEnd = k + n - 1;
+      if (loopedIndex < middleStart || loopedIndex > middleEnd) {
+        const normalized = getEquivalentMiddleIndex(loopedIndex);
+        isProgrammaticRef.current = true;
+        scrollToLoopedIndex(normalized, "auto");
+        setActiveLoopedIndex(normalized);
 
-      // If in right clones, jump back by n to the matching real item
-      if (loopedIndex > realEnd) {
-        const normalized = loopedIndex - n;
-        centerToLoopedIndex(normalized, "auto");
-        return normalized;
-      }
+        requestAnimationFrame(() => {
+          isProgrammaticRef.current = false;
+        });
 
-      // If in left clones (rare unless user scrolls left hard), jump forward by n
-      if (loopedIndex < realStart) {
-        const normalized = loopedIndex + n;
-        centerToLoopedIndex(normalized, "auto");
         return normalized;
       }
 
       return loopedIndex;
     },
-    [centerToLoopedIndex, k, n]
+    [getEquivalentMiddleIndex, middleEnd, middleStart, n, scrollToLoopedIndex]
   );
 
-  // Snap to nearest after user scroll momentum ends
+  const finishProgrammaticScroll = useCallback(
+    (targetIndex) => {
+      const normalized = normalizeInstantlyIfNeeded(targetIndex);
+      setActiveLoopedIndex(normalized);
+      isProgrammaticRef.current = false;
+    },
+    [normalizeInstantlyIfNeeded]
+  );
+
+  const animateToLoopedIndex = useCallback(
+    (targetIndex) => {
+      if (!n) return;
+
+      const track = trackRef.current;
+      if (!track) return;
+
+      if (!canNavigateRef.current) return;
+      if (isDraggingRef.current) return;
+
+      pauseAuto(3500);
+      lockNavigation();
+
+      isProgrammaticRef.current = true;
+      setActiveLoopedIndex(targetIndex);
+      scrollToLoopedIndex(targetIndex, "smooth");
+
+      if (animationDoneTimerRef.current) {
+        window.clearTimeout(animationDoneTimerRef.current);
+      }
+
+      animationDoneTimerRef.current = window.setTimeout(() => {
+        finishProgrammaticScroll(targetIndex);
+      }, ANIMATION_MS);
+    },
+    [
+      finishProgrammaticScroll,
+      lockNavigation,
+      n,
+      pauseAuto,
+      scrollToLoopedIndex
+    ]
+  );
+
   const snapToNearest = useCallback(() => {
     if (!n) return;
+    if (isDraggingRef.current) return;
 
-    if (snapTimerRef.current) window.clearTimeout(snapTimerRef.current);
+    const nearest = getNearestLoopedIndex();
+    const currentLeft = trackRef.current?.scrollLeft ?? 0;
+    const targetLeft = getTrackLeftForIndex(nearest);
 
-    snapTimerRef.current = window.setTimeout(() => {
-      const nearest = getNearestLoopedIndex();
-      centerToLoopedIndex(nearest, "smooth");
+    setActiveLoopedIndex(nearest);
 
-      // after smooth ends, normalize if it landed on clones
-      window.setTimeout(() => {
-        const normalized = normalizeIfOnClone(nearest);
-        setActiveLoopedIndex(normalized);
-      }, 380);
-    }, 140);
-  }, [centerToLoopedIndex, getNearestLoopedIndex, normalizeIfOnClone, n]);
+    if (targetLeft == null) return;
 
-  // Manual scroll handler (update active indicator but do NOT fight user)
+    const almostCentered = Math.abs(currentLeft - targetLeft) < 1.5;
+
+    if (nearest < middleStart || nearest > middleEnd) {
+      if (almostCentered) {
+        normalizeInstantlyIfNeeded(nearest);
+        return;
+      }
+
+      isProgrammaticRef.current = true;
+      lockNavigation();
+      scrollToLoopedIndex(nearest, "smooth");
+
+      if (animationDoneTimerRef.current) {
+        window.clearTimeout(animationDoneTimerRef.current);
+      }
+
+      animationDoneTimerRef.current = window.setTimeout(() => {
+        finishProgrammaticScroll(nearest);
+      }, ANIMATION_MS);
+
+      return;
+    }
+
+    if (!almostCentered) {
+      isProgrammaticRef.current = true;
+      lockNavigation();
+      scrollToLoopedIndex(nearest, "smooth");
+
+      if (animationDoneTimerRef.current) {
+        window.clearTimeout(animationDoneTimerRef.current);
+      }
+
+      animationDoneTimerRef.current = window.setTimeout(() => {
+        finishProgrammaticScroll(nearest);
+      }, ANIMATION_MS);
+
+      return;
+    }
+
+    setActiveLoopedIndex(nearest);
+  }, [
+    finishProgrammaticScroll,
+    getNearestLoopedIndex,
+    getTrackLeftForIndex,
+    lockNavigation,
+    middleEnd,
+    middleStart,
+    n,
+    normalizeInstantlyIfNeeded,
+    scrollToLoopedIndex
+  ]);
+
+  const scheduleSnap = useCallback(
+    (delay = SNAP_IDLE_MS) => {
+      if (idleTimerRef.current) {
+        window.clearTimeout(idleTimerRef.current);
+      }
+
+      idleTimerRef.current = window.setTimeout(() => {
+        if (!isDraggingRef.current && !isProgrammaticRef.current) {
+          snapToNearest();
+        }
+      }, delay);
+    },
+    [snapToNearest]
+  );
+
+  const next = useCallback(() => {
+    animateToLoopedIndex(activeLoopedIndex + 1);
+  }, [activeLoopedIndex, animateToLoopedIndex]);
+
+  const prev = useCallback(() => {
+    animateToLoopedIndex(activeLoopedIndex - 1);
+  }, [activeLoopedIndex, animateToLoopedIndex]);
+
+  const goToBaseIndex = useCallback(
+    (baseIndex) => {
+      if (!n) return;
+      if (!canNavigateRef.current) return;
+
+      const safeBaseIndex = ((baseIndex % n) + n) % n;
+      const target = middleStart + safeBaseIndex;
+      animateToLoopedIndex(target);
+    },
+    [animateToLoopedIndex, middleStart, n]
+  );
+
   const onScroll = useCallback(() => {
-    if (isProgrammaticRef.current) return;
-
-    pauseAuto(2500);
+    if (!n) return;
 
     const nearest = getNearestLoopedIndex();
     setActiveLoopedIndex(nearest);
+    pauseAuto(2500);
 
-    // Debounced snap for *any* scroll input (wheel, touchpad, drag, fling)
-    snapToNearest();
-  }, [getNearestLoopedIndex, pauseAuto, snapToNearest]);
+    if (isProgrammaticRef.current) return;
+    scheduleSnap();
+  }, [getNearestLoopedIndex, n, pauseAuto, scheduleSnap]);
 
-  const next = useCallback(() => {
-    pauseAuto(3000);
-    const target = activeLoopedIndex + 1;
-    centerToLoopedIndex(target, "smooth");
+  const endMouseDrag = useCallback(
+    (pointerId) => {
+      const track = trackRef.current;
 
-    // normalize after animation finishes
-    window.setTimeout(() => {
-      const normalized = normalizeIfOnClone(target);
-      setActiveLoopedIndex(normalized);
-    }, 380);
-  }, [activeLoopedIndex, centerToLoopedIndex, normalizeIfOnClone, pauseAuto]);
+      if (track && pointerId != null) {
+        track.releasePointerCapture?.(pointerId);
+      }
 
-  const prev = useCallback(() => {
-    pauseAuto(3000);
-    const target = activeLoopedIndex - 1;
-    centerToLoopedIndex(target, "smooth");
+      if (!isDraggingRef.current) return;
 
-    window.setTimeout(() => {
-      const normalized = normalizeIfOnClone(target);
-      setActiveLoopedIndex(normalized);
-    }, 380);
-  }, [activeLoopedIndex, centerToLoopedIndex, normalizeIfOnClone, pauseAuto]);
+      isDraggingRef.current = false;
+      setIsDragging(false);
+      dragPointerIdRef.current = null;
 
-  // Initial position: first REAL card centered (k)
+      pauseAuto(2500);
+      scheduleSnap(40);
+      lockNavigation();
+    },
+    [lockNavigation, pauseAuto, scheduleSnap]
+  );
+
+  const onPointerDown = useCallback(
+    (e) => {
+      pauseAuto(3500);
+
+      if (e.pointerType !== "mouse") return;
+
+      const track = trackRef.current;
+      if (!track) return;
+
+      isDraggingRef.current = true;
+      hasDraggedRef.current = false;
+      setIsDragging(true);
+
+      dragPointerIdRef.current = e.pointerId;
+      dragStartXRef.current = e.clientX;
+      dragStartScrollLeftRef.current = track.scrollLeft;
+
+      track.setPointerCapture?.(e.pointerId);
+    },
+    [pauseAuto]
+  );
+
+  const onPointerMove = useCallback((e) => {
+    if (!isDraggingRef.current) return;
+    if (e.pointerType !== "mouse") return;
+
+    const track = trackRef.current;
+    if (!track) return;
+
+    const dx = e.clientX - dragStartXRef.current;
+
+    if (Math.abs(dx) > DRAG_THRESHOLD_PX) {
+      hasDraggedRef.current = true;
+    }
+
+    track.scrollLeft = dragStartScrollLeftRef.current - dx;
+  }, []);
+
+  const onPointerUp = useCallback(
+    (e) => {
+      if (e.pointerType !== "mouse") return;
+      endMouseDrag(e.pointerId);
+    },
+    [endMouseDrag]
+  );
+
+  const onPointerCancel = useCallback(
+    (e) => {
+      if (e.pointerType !== "mouse") return;
+      endMouseDrag(e.pointerId);
+    },
+    [endMouseDrag]
+  );
+
   useEffect(() => {
     if (!n) return;
 
-    const t = window.setTimeout(() => {
-      setActiveLoopedIndex(k);
-      centerToLoopedIndex(k, "auto");
-    }, 0);
+    const startIndex = middleStart;
 
-    return () => window.clearTimeout(t);
-  }, [centerToLoopedIndex, k, n]);
+    requestAnimationFrame(() => {
+      scrollToLoopedIndex(startIndex, "auto");
+      setActiveLoopedIndex(startIndex);
+    });
+  }, [middleStart, n, scrollToLoopedIndex]);
 
-  // Auto-scroll continuously to the RIGHT forever (no visible reset)
   useEffect(() => {
-    if (!autoScroll) return;
-    if (!n) return;
+    if (!autoScroll || !n) return;
 
-    const tick = () => {
-      const now = Date.now();
-      if (isHovering) return; // remove this line if you want auto-scroll even on hover
-      if (now < pauseUntilRef.current) return;
+    autoTimerRef.current = window.setInterval(() => {
+      if (Date.now() < pauseUntilRef.current) return;
+      if (isHoveringRef.current) return;
+      if (isDraggingRef.current) return;
       if (isProgrammaticRef.current) return;
+      if (!canNavigateRef.current) return;
 
-      const target = activeLoopedIndex + 1;
-      centerToLoopedIndex(target, "smooth");
-
-      window.setTimeout(() => {
-        const normalized = normalizeIfOnClone(target);
-        setActiveLoopedIndex(normalized);
-      }, 380);
-    };
-
-    autoTimerRef.current = window.setInterval(tick, autoScrollMs);
+      const nearest = getEquivalentMiddleIndex(getNearestLoopedIndex());
+      animateToLoopedIndex(nearest + 1);
+    }, autoScrollMs);
 
     return () => {
-      if (autoTimerRef.current) window.clearInterval(autoTimerRef.current);
+      if (autoTimerRef.current) {
+        window.clearInterval(autoTimerRef.current);
+      }
     };
   }, [
-    activeLoopedIndex,
+    animateToLoopedIndex,
     autoScroll,
     autoScrollMs,
-    centerToLoopedIndex,
-    isHovering,
-    n,
-    normalizeIfOnClone
+    getEquivalentMiddleIndex,
+    getNearestLoopedIndex,
+    n
   ]);
 
-  // Cleanup timers
   useEffect(() => {
     return () => {
-      if (snapTimerRef.current) window.clearTimeout(snapTimerRef.current);
       if (autoTimerRef.current) window.clearInterval(autoTimerRef.current);
+      if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
+      if (navUnlockTimerRef.current) {
+        window.clearTimeout(navUnlockTimerRef.current);
+      }
+      if (animationDoneTimerRef.current) {
+        window.clearTimeout(animationDoneTimerRef.current);
+      }
     };
   }, []);
 
   if (!n) return null;
 
-  const activeBaseIndex = loopedToBaseIndex(activeLoopedIndex);
+  const activeBaseIndex = toBaseIndex(activeLoopedIndex);
 
   return (
     <section className={`w-full ${className}`} aria-label="Feature carousel">
       <div className="relative mt-12 w-full">
-        {/* Edge fades (modern full-bleed) */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-16 bg-gradient-to-r from-[#FDFCF9] to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-16 bg-gradient-to-l from-[#FDFCF9] to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[#FDFCF9] to-transparent sm:w-16" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[#FDFCF9] to-transparent sm:w-16" />
 
-        {/* Arrows */}
         <button
           type="button"
           onClick={prev}
-          className="hidden md:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md ring-1 ring-black/5 backdrop-blur transition hover:scale-[1.03] active:scale-[0.98]"
           aria-label="Previous feature"
+          aria-disabled={!canNavigate}
+          className={[
+            "absolute left-3 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full",
+            "bg-white/90 shadow-md ring-1 ring-black/5 backdrop-blur transition",
+            "md:flex sm:left-6",
+            canNavigate
+              ? "hover:scale-[1.03] active:scale-[0.98]"
+              : "opacity-70"
+          ].join(" ")}
         >
           <Icon icon="mingcute:left-line" className="text-2xl" />
         </button>
@@ -301,19 +492,27 @@ export default function FeatureCarousel({
         <button
           type="button"
           onClick={next}
-          className="hidden md:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md ring-1 ring-black/5 backdrop-blur transition hover:scale-[1.03] active:scale-[0.98]"
           aria-label="Next feature"
+          aria-disabled={!canNavigate}
+          className={[
+            "absolute right-3 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full",
+            "bg-white/90 shadow-md ring-1 ring-black/5 backdrop-blur transition",
+            "md:flex sm:right-6",
+            canNavigate
+              ? "hover:scale-[1.03] active:scale-[0.98]"
+              : "opacity-70"
+          ].join(" ")}
         >
           <Icon icon="mingcute:right-line" className="text-2xl" />
         </button>
 
-        {/* Track */}
         <div
           ref={trackRef}
           onScroll={onScroll}
-          onPointerDown={() => pauseAuto(3500)}
-          onPointerUp={snapToNearest}
-          onTouchEnd={snapToNearest}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
           className={[
@@ -323,27 +522,35 @@ export default function FeatureCarousel({
             "px-4 sm:px-6 lg:px-10",
             "scroll-px-4 sm:scroll-px-6 lg:scroll-px-10",
             "py-4 pb-8",
-            "snap-x snap-mandatory",
-            "scroll-smooth",
             "overscroll-x-contain",
-            "md:cursor-grab active:md:cursor-grabbing",
-            "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            "touch-pan-x select-none",
+            "cursor-default md:cursor-grab",
+            isDragging ? "md:cursor-grabbing" : "",
+            "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+            "scrollbar-hide"
           ].join(" ")}
+          style={{
+            userSelect: "none",
+            WebkitUserSelect: "none",
+            scrollBehavior: "auto"
+          }}
         >
           {loopedCards.map((card, loopedIdx) => {
-            const baseIdx = loopedToBaseIndex(loopedIdx);
+            const baseIdx = toBaseIndex(loopedIdx);
             const isActive = baseIdx === activeBaseIndex;
 
             return (
               <FeatureCard
                 key={`${card.id ?? baseIdx}-loop-${loopedIdx}`}
-                ref={(el) => (itemRefs.current[loopedIdx] = el)}
+                ref={(el) => {
+                  itemRefs.current[loopedIdx] = el;
+                }}
                 {...card}
                 isActive={isActive}
                 className={[
-                  "snap-center shrink-0",
+                  "shrink-0",
                   "w-[88vw] sm:w-[420px] lg:w-[520px]",
-                  "transition-all duration-300 ease-out",
+                  "transition-[transform,opacity] duration-300 ease-out",
                   card.className ?? ""
                 ].join(" ")}
                 activeClassName={card.activeClassName ?? activeClassName}
@@ -353,16 +560,14 @@ export default function FeatureCarousel({
           })}
         </div>
 
-        {/* Dots (base only) */}
         <div className="mt-2 flex justify-center gap-2 sm:gap-3">
           {baseCards.map((card, idx) => (
             <button
               key={`${card.id ?? idx}-dot`}
               type="button"
-              onClick={() => {
-                pauseAuto(3500);
-                goToBaseIndex(idx, "smooth");
-              }}
+              onClick={() => goToBaseIndex(idx)}
+              aria-label={`Show ${card.title ?? "feature"} card`}
+              aria-pressed={activeBaseIndex === idx}
               className={[
                 "h-2.5 rounded-full transition-all duration-200",
                 "focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2",
@@ -370,8 +575,6 @@ export default function FeatureCarousel({
                   ? "w-8 bg-[#11285A]"
                   : "w-2.5 bg-[#d7dde9]"
               ].join(" ")}
-              aria-label={`Show ${card.title ?? "feature"} card`}
-              aria-pressed={activeBaseIndex === idx}
             />
           ))}
         </div>
