@@ -147,6 +147,7 @@ function LiveMap() {
     clearRoute
   } = useRouteStore();
 
+  const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
@@ -157,6 +158,8 @@ function LiveMap() {
   const [previewPos, setPreviewPos] = useState(null);
   const [isUserFollowingCane, setIsUserFollowingCane] = useState(false);
   const [isFreeMode, setIsFreeMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
   const routeRequestedRef = useRef(false);
   const routeCoordsRef = useRef([]);
   const activeIndexRef = useRef(0);
@@ -474,8 +477,79 @@ function LiveMap() {
     setIsFreeMode(true);
   };
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const active = document.fullscreenElement === mapContainerRef.current;
+      setIsFullscreen(active);
+
+      if (mapRef.current) {
+        setTimeout(() => mapRef.current.invalidateSize(), 150);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isPseudoFullscreen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        setIsPseudoFullscreen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    if (mapRef.current) {
+      setTimeout(() => mapRef.current.invalidateSize(), 150);
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isPseudoFullscreen]);
+
+  const handleToggleFullscreen = async () => {
+    const container = mapContainerRef.current;
+    if (!container) return;
+
+    const activeNativeFullscreen = document.fullscreenElement === container;
+
+    if (activeNativeFullscreen) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    if (container.requestFullscreen) {
+      try {
+        await container.requestFullscreen();
+        return;
+      } catch (err) {
+        console.error("Failed to enter fullscreen:", err);
+      }
+    }
+
+    setIsPseudoFullscreen((prev) => !prev);
+  };
+
   return (
-    <div className="relative w-full h-full z-0">
+    <div
+      ref={mapContainerRef}
+      className={
+        isPseudoFullscreen
+          ? "fixed inset-0 z-[1000] bg-white"
+          : "relative w-full h-full z-0"
+      }
+    >
       <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between gap-2 ">
         {/* Search container */}
         <div className="flex-1 sm:max-w-sm relative">
@@ -574,6 +648,29 @@ function LiveMap() {
             <span className="hidden sm:inline ml-2">Clear Destination</span>
           </button>
         )}
+        <button
+          onClick={handleToggleFullscreen}
+          className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
+          aria-label={
+            isFullscreen || isPseudoFullscreen
+              ? "Exit fullscreen map"
+              : "Open fullscreen map"
+          }
+        >
+          <Icon
+            icon={
+              isFullscreen || isPseudoFullscreen
+                ? "mdi:fullscreen-exit"
+                : "mdi:fullscreen"
+            }
+            className="w-5 h-5 group-hover:scale-110 transition-transform"
+          />
+          <span className="hidden sm:inline ml-2">
+            {isFullscreen || isPseudoFullscreen
+              ? "Exit Fullscreen"
+              : "Fullscreen"}
+          </span>
+        </button>
       </div>
       <MapContainer
         center={guardianPosition}
