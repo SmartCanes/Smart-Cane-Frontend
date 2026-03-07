@@ -413,7 +413,10 @@ const GuestPage = () => {
           <div className="flex items-center">
             {/* LEFT: Logo (fixed width) */}
             <div className="flex items-center gap-3 w-[220px]">
-              <ScrollLink targetId="home" className="inline-flex items-center">
+              <ScrollLink
+                targetId="home"
+                className="inline-flex items-center  cursor-pointer"
+              >
                 {/* <BlinkingIcon
                   src={icaneLogo}
                   alt="iCane logo"

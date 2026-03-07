@@ -283,7 +283,7 @@ const CaneViewer = () => {
           <button
             type="button"
             onClick={() => setIsInteractMode((prev) => !prev)}
-            className="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-[11px] tracking-[0.14em] font-semibold uppercase transition-all duration-300"
+            className="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-[11px] tracking-[0.14em] font-semibold uppercase transition-all duration-300 cursor-pointer"
             style={{
               borderColor: isInteractMode
                 ? "rgba(255,255,255,0.2)"
