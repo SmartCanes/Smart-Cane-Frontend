@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import icaneData from "../../assets/project.json";
@@ -54,24 +55,37 @@ const useMediaQuery = (query) => {
 
 const CaneViewer = () => {
   const mountRef = useRef(null);
+
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
+  const rendererRef = useRef(null);
+  const controlsRef = useRef(null);
+  const modelRef = useRef(null);
+  const tiltGroupRef = useRef(null);
+  const animFrameRef = useRef(null);
+  const fitModelToViewRef = useRef(() => {});
+
   const [adIndex, setAdIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const [isInteractMode, setIsInteractMode] = useState(false);
   const isMobile = useMediaQuery("(max-width: 767px)");
 
   useEffect(() => {
+    let timeoutId;
+
     const interval = setInterval(() => {
       setVisible(false);
 
-      const timeoutId = setTimeout(() => {
+      timeoutId = setTimeout(() => {
         setAdIndex((i) => (i + 1) % AD_TEXTS.length);
         setVisible(true);
       }, 700);
-
-      return () => clearTimeout(timeoutId);
     }, 4000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -79,6 +93,7 @@ const CaneViewer = () => {
     if (!mount) return;
 
     const scene = new THREE.Scene();
+    sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(
       50,
@@ -86,21 +101,20 @@ const CaneViewer = () => {
       0.1,
       1000
     );
+    cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true
     });
+    rendererRef.current = renderer;
 
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    mount.appendChild(renderer.domElement);
-
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.display = "block";
-    renderer.domElement.style.touchAction = isInteractMode ? "none" : "pan-y";
-    renderer.domElement.style.pointerEvents = isInteractMode ? "auto" : "none";
+    mount.appendChild(renderer.domElement);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
@@ -111,14 +125,16 @@ const CaneViewer = () => {
 
     const loader = new THREE.ObjectLoader();
     const model = loader.parse(icaneData.scene);
+    modelRef.current = model;
 
     const floor = model.getObjectByName("Box");
     if (floor) floor.removeFromParent();
 
     const tiltGroup = new THREE.Group();
     tiltGroup.rotation.z = -Math.PI / 5;
-    scene.add(tiltGroup);
     tiltGroup.add(model);
+    scene.add(tiltGroup);
+    tiltGroupRef.current = tiltGroup;
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = true;
@@ -130,12 +146,27 @@ const CaneViewer = () => {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.screenSpacePanning = true;
-    controls.enabled = isInteractMode;
-    controls.update();
+    controlsRef.current = controls;
 
     const fitModelToView = () => {
+      if (
+        !mount ||
+        !cameraRef.current ||
+        !rendererRef.current ||
+        !modelRef.current ||
+        !tiltGroupRef.current ||
+        !controlsRef.current
+      ) {
+        return;
+      }
+
       const width = mount.clientWidth;
       const height = mount.clientHeight;
+      const camera = cameraRef.current;
+      const renderer = rendererRef.current;
+      const model = modelRef.current;
+      const tiltGroup = tiltGroupRef.current;
+      const controls = controlsRef.current;
 
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
@@ -145,6 +176,7 @@ const CaneViewer = () => {
       model.position.set(0, 0, 0);
       model.rotation.set(0, 0, 0);
       tiltGroup.position.set(0, 0, 0);
+      tiltGroup.rotation.z = -Math.PI / 5;
 
       const rawBox = new THREE.Box3().setFromObject(model);
       const rawCenter = rawBox.getCenter(new THREE.Vector3());
@@ -152,13 +184,12 @@ const CaneViewer = () => {
 
       model.position.set(-rawCenter.x, -rawCenter.y, -rawCenter.z);
 
-      const targetHeight = isMobile ? 4.8 : 5.8;
+      const targetHeight = window.innerWidth <= 767 ? 4.8 : 5.8;
       const scale = targetHeight / Math.max(rawSize.y, 0.0001);
       model.scale.setScalar(scale);
 
       const box = new THREE.Box3().setFromObject(tiltGroup);
       const center = box.getCenter(new THREE.Vector3());
-
       tiltGroup.position.set(-center.x, -center.y, -center.z);
 
       const fittedBox = new THREE.Box3().setFromObject(tiltGroup);
@@ -173,7 +204,7 @@ const CaneViewer = () => {
         maxSizeX / 2 / (Math.tan(fov / 2) * camera.aspect);
 
       const fitDistance = Math.max(distanceForHeight, distanceForWidth);
-      const offset = isMobile ? 1.18 : 1.15;
+      const offset = window.innerWidth <= 767 ? 1.18 : 1.15;
       const initialDistance = fitDistance * offset;
 
       camera.position.set(0, 0, initialDistance);
@@ -182,33 +213,26 @@ const CaneViewer = () => {
 
       controls.minDistance = initialDistance * 0.65;
       controls.maxDistance = initialDistance * 1.8;
-
       controls.update();
     };
 
-    fitModelToView();
+    fitModelToViewRef.current = fitModelToView;
 
     const handleResize = () => {
-      renderer.domElement.style.touchAction = isInteractMode ? "none" : "pan-y";
-      renderer.domElement.style.pointerEvents = isInteractMode
-        ? "auto"
-        : "none";
-      controls.enabled = isInteractMode;
       fitModelToView();
     };
 
     window.addEventListener("resize", handleResize);
 
-    let animFrameId;
+    fitModelToView();
 
     const animate = () => {
-      animFrameId = requestAnimationFrame(animate);
+      animFrameRef.current = requestAnimationFrame(animate);
 
-      if (!isInteractMode) {
-        model.rotation.y += isMobile ? 0.004 : 0.006;
+      if (!controlsRef.current?.enabled && modelRef.current) {
+        modelRef.current.rotation.y += window.innerWidth <= 767 ? 0.004 : 0.006;
       }
 
-      controls.enabled = isInteractMode;
       controls.update();
       renderer.render(scene, camera);
     };
@@ -216,17 +240,42 @@ const CaneViewer = () => {
     animate();
 
     return () => {
-      cancelAnimationFrame(animFrameId);
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+
       window.removeEventListener("resize", handleResize);
+
+      controls.dispose();
 
       if (mount && renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);
       }
 
-      controls.dispose();
       renderer.dispose();
+      renderer.getContext().getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [isMobile, isInteractMode]);
+  }, []);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    const controls = controlsRef.current;
+
+    if (!renderer || !controls) return;
+
+    renderer.domElement.style.touchAction = isInteractMode ? "none" : "pan-y";
+    renderer.domElement.style.pointerEvents = isInteractMode ? "auto" : "none";
+    controls.enabled = isInteractMode;
+    controls.update();
+  }, [isInteractMode]);
+
+  useEffect(() => {
+    fitModelToViewRef.current?.();
+  }, [isMobile]);
+
+  const handleResetView = () => {
+    fitModelToViewRef.current?.();
+  };
 
   const ad = AD_TEXTS[adIndex];
 
@@ -259,7 +308,21 @@ const CaneViewer = () => {
       </div>
 
       {isMobile ? (
-        <div className="absolute top-14 left-4 z-10">
+        <div className="absolute top-14 left-4 z-10 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleResetView}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border bg-white/90 text-[#111111] transition-all duration-300"
+            style={{
+              borderColor: "rgba(255,255,255,0.4)",
+              boxShadow: "0 10px 24px rgba(91,141,239,0.16)"
+            }}
+            aria-label="Reset 3D view"
+            title="Reset view"
+          >
+            <Icon icon="mdi:restore" className="text-[18px]" />
+          </button>
+
           <button
             type="button"
             onClick={() => setIsInteractMode((prev) => !prev)}
@@ -286,11 +349,25 @@ const CaneViewer = () => {
           </button>
         </div>
       ) : (
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
+          <button
+            type="button"
+            onClick={handleResetView}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border bg-white/90 text-[#111111] transition-all duration-300 cursor-pointer hover:bg-white"
+            style={{
+              borderColor: "rgba(255,255,255,0.4)",
+              boxShadow: "0 10px 24px rgba(91,141,239,0.16)"
+            }}
+            aria-label="Reset 3D view"
+            title="Reset view"
+          >
+            <Icon icon="mdi:restore" className="text-[20px]" />
+          </button>
+
           <button
             type="button"
             onClick={() => setIsInteractMode((prev) => !prev)}
-            className="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-[11px] tracking-[0.14em] font-semibold uppercase transition-all duration-300 cursor-pointer z-20"
+            className="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-[11px] tracking-[0.14em] font-semibold uppercase transition-all duration-300 cursor-pointer"
             style={{
               borderColor: isInteractMode
                 ? "rgba(255,255,255,0.2)"
