@@ -23,7 +23,6 @@ import {
 } from "@/api/backendService";
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
-import ReCAPTCHA from "react-google-recaptcha";
 
 const Register = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
@@ -58,8 +57,6 @@ const Register = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [scrollTarget, setScrollTarget] = useState("terms");
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null);
-  const [captchaLoading, setCaptchaLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -73,6 +70,10 @@ const Register = () => {
   const firstNameRef = useRef(null);
   const streetAddressRef = useRef(null);
   const inviteMode = invite.valid;
+  const registerSelectLabelClassName =
+    "text-[15px] sm:text-[17px] mb-1.5 sm:mb-2";
+  const registerSelectInputClassName =
+    "px-4 sm:px-5 py-3 sm:py-3.5 text-sm sm:text-base rounded-customradius";
 
   const validateField = (name, value) => {
     switch (name) {
@@ -206,6 +207,10 @@ const Register = () => {
     }
   };
 
+  const preventClipboardAction = (event) => {
+    event.preventDefault();
+  };
+
   const handleSelectChange = (name, value) => handleChange(name, value);
 
   const validateStep = (stepNumber) => {
@@ -264,18 +269,6 @@ const Register = () => {
 
   const handleNext = async (e) => {
     e.preventDefault();
-
-    if (step === 2 && isBackendEnabled) {
-      if (!captchaValue) {
-        setErrors((prev) => ({
-          ...prev,
-          captcha: "Please complete the CAPTCHA to continue"
-        }));
-        return;
-      }
-    }
-
-    setErrors((prev) => ({ ...prev, captcha: "" }));
 
     setOtp(["", "", "", "", "", ""]);
 
@@ -674,6 +667,10 @@ const Register = () => {
 
   useEffect(() => {
     if (showScanner) return;
+    const isDesktop = window.matchMedia
+      ? window.matchMedia("(min-width: 640px)").matches
+      : window.innerWidth >= 640;
+    if (!isDesktop) return;
     const focusMap = {
       1: firstNameRef,
       2: streetAddressRef,
@@ -689,15 +686,15 @@ const Register = () => {
         <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
           {!showScanner && (
             <motion.div
-              initial={{ opacity: 0, x: 100 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={
-                isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
+                isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }
               }
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-8 pb-8 px-6"
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="flex-1 flex flex-col gap-6 sm:gap-7 justify-start sm:justify-center items-center pt-4 sm:pt-8 pb-6 sm:pb-8 px-4 sm:px-6 transform-gpu will-change-transform"
             >
               <div className="text-center space-y-2 ">
-                <h1 className="hidden sm:block  text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
+                <h1 className="hidden sm:block text-3xl md:text-4xl lg:text-5xl font-bold text-[#1C253C]">
                   {step === 3 ? "Email Verification" : "Welcome"}
                 </h1>
                 <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
@@ -719,7 +716,7 @@ const Register = () => {
                     </>
                   )}
                 </p>
-                <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
+                <p className="sm:hidden text-[#1C253C] text-base">
                   Create your account
                 </p>
                 {step === 3 && (
@@ -731,19 +728,23 @@ const Register = () => {
                 )}
               </div>
               <motion.form
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={
-                  isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                  isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }
                 }
-                transition={{ duration: 0.6 }}
-                className="w-full max-w-md sm:max-w-none lg:max-w-lg"
+                transition={{
+                  duration: 0.4,
+                  ease: [0.22, 1, 0.36, 1],
+                  delay: 0.05
+                }}
+                className="w-full max-w-md sm:max-w-none lg:max-w-lg transform-gpu will-change-transform"
                 onSubmit={handleNext}
                 noValidate
               >
                 {/* Step 1: Basic Information */}
                 {step === 1 && !showScanner && (
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-5 sm:gap-3.5">
                       <TextField
                         ref={firstNameRef}
                         className="font-poppins"
@@ -755,8 +756,9 @@ const Register = () => {
                           handleChange("firstName", e.target.value)
                         }
                         onBlur={() => handleBlur("firstName")}
-                        inputClassName="py-3"
+                        inputClassName="py-3 sm:py-3.5"
                         error={errors.firstName}
+                        reserveErrorSpace={false}
                         maxLength={50}
                         required
                       />
@@ -772,8 +774,9 @@ const Register = () => {
                           handleChange("middleName", e.target.value)
                         }
                         onBlur={() => handleBlur("middleName")}
-                        inputClassName="py-3"
+                        inputClassName="py-3 sm:py-3.5"
                         error={errors.middleName}
+                        reserveErrorSpace={false}
                         maxLength={50}
                       />
                     </div>
@@ -786,8 +789,9 @@ const Register = () => {
                       value={formData.lastName}
                       onChange={(e) => handleChange("lastName", e.target.value)}
                       onBlur={() => handleBlur("lastName")}
-                      inputClassName="py-3"
+                      inputClassName="py-3 sm:py-3.5"
                       error={errors.lastName}
+                      reserveErrorSpace={false}
                       maxLength={50}
                       required
                     />
@@ -800,8 +804,9 @@ const Register = () => {
                       value={formData.username}
                       onChange={(e) => handleChange("username", e.target.value)}
                       onBlur={() => handleBlur("username")}
-                      inputClassName="py-3"
+                      inputClassName="py-3 sm:py-3.5"
                       error={errors.username}
+                      reserveErrorSpace={false}
                       maxLength={20}
                       required
                     />
@@ -816,8 +821,13 @@ const Register = () => {
                       onBlur={() => handleBlur("password")}
                       error={errors.password}
                       showValidationRules
-                      inputClassName="py-3"
+                      inputClassName="py-3 sm:py-3.5"
+                      onPaste={preventClipboardAction}
+                      onCopy={preventClipboardAction}
+                      onCut={preventClipboardAction}
+                      onDrop={preventClipboardAction}
                       maxLength={20}
+                      reserveErrorSpace={false}
                       required
                     />
 
@@ -832,8 +842,13 @@ const Register = () => {
                       }
                       onBlur={() => handleBlur("confirmPassword")}
                       error={errors.confirmPassword}
-                      inputClassName="py-3"
+                      inputClassName="py-3 sm:py-3.5"
+                      onPaste={preventClipboardAction}
+                      onCopy={preventClipboardAction}
+                      onCut={preventClipboardAction}
+                      onDrop={preventClipboardAction}
                       maxLength={20}
+                      reserveErrorSpace={false}
                       required
                     />
                   </div>
@@ -841,9 +856,9 @@ const Register = () => {
 
                 {/* Step 2: Address Information */}
                 {step === 2 && !showScanner && (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {/* Lot No./Bldg./Street and Province - Side by side */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       <TextField
                         ref={streetAddressRef}
                         className="whitespace-nowrap "
@@ -855,15 +870,17 @@ const Register = () => {
                           handleChange("streetAddress", e.target.value)
                         }
                         onBlur={() => handleBlur("streetAddress")}
+                        inputClassName="py-3 sm:py-3.5"
                         error={errors.streetAddress}
+                        reserveErrorSpace={false}
                         maxLength={50}
-                        required
                       />
 
                       <SelectField
                         label={"Province"}
+                        labelClassName={registerSelectLabelClassName}
+                        inputClassName={registerSelectInputClassName}
                         placeholder="Province..."
-                        required
                         onChange={(e) => {
                           handleSelectChange("province", e.target.value);
                         }}
@@ -877,12 +894,13 @@ const Register = () => {
                     </div>
 
                     {/* Barangay and City - Side by side */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <SelectField
                         className="font-poppins "
                         label={"City"}
+                        labelClassName={registerSelectLabelClassName}
+                        inputClassName={registerSelectInputClassName}
                         placeholder="City..."
-                        required
                         onChange={(e) => {
                           handleSelectChange("barangay", e.target.value);
                         }}
@@ -896,8 +914,9 @@ const Register = () => {
                       <SelectField
                         className="font-poppins"
                         label={"Barangay"}
+                        labelClassName={registerSelectLabelClassName}
+                        inputClassName={registerSelectInputClassName}
                         placeholder="Barangay..."
-                        required
                         disabled
                         onChange={(e) => {
                           handleSelectChange("barangay", e.target.value);
@@ -912,8 +931,9 @@ const Register = () => {
 
                     <SelectField
                       label={"Village"}
+                      labelClassName={registerSelectLabelClassName}
+                      inputClassName={registerSelectInputClassName}
                       placeholder="Village..."
-                      required
                       onChange={(e) => {
                         handleSelectChange("barangay", e.target.value);
                       }}
@@ -940,9 +960,11 @@ const Register = () => {
                         handleChange("contactNumber", e.target.value)
                       }
                       onBlur={() => handleBlur("contactNumber")}
+                      inputClassName="py-3 sm:py-3.5"
                       inputMode="numeric"
                       maxLength={11}
                       error={errors.contactNumber}
+                      reserveErrorSpace={false}
                       required
                     />
 
@@ -956,7 +978,9 @@ const Register = () => {
                       value={formData.email}
                       onChange={(e) => handleChange("email", e.target.value)}
                       onBlur={() => handleBlur("email")}
+                      inputClassName="py-3 sm:py-3.5"
                       error={errors.email}
+                      reserveErrorSpace={false}
                       maxLength={50}
                       disabled={inviteMode}
                       required
@@ -1018,31 +1042,6 @@ const Register = () => {
                   </div>
                 )}
 
-                {step === 2 && !showScanner && (
-                  <div className="captcha-container">
-                    {captchaLoading && (
-                      <p className="text-center text-gray-500 mb-2">
-                        Loading CAPTCHA...
-                      </p>
-                    )}
-
-                    <ReCAPTCHA
-                      sitekey={import.meta.env.VITE_CAPTCHA_KEY}
-                      onChange={(value) => {
-                        setCaptchaValue(value);
-                        if (errors.captcha)
-                          setErrors((prev) => ({ ...prev, captcha: "" }));
-                      }}
-                      asyncScriptOnLoad={() => setCaptchaLoading(false)}
-                    />
-                    {errors.captcha && (
-                      <p className="font-poppins text-[#CE4B34] text-sm mt-2">
-                        {errors.captcha}
-                      </p>
-                    )}
-                  </div>
-                )}
-
                 {step <= 3 && (
                   <div className="mt-6 flex flex-col sm:flex-row-reverse gap-3">
                     <PrimaryButton
@@ -1074,11 +1073,11 @@ const Register = () => {
                 )}
               </motion.form>
 
-              <p className="text-center text-[18px]">
+              <p className="text-center text-base sm:text-[18px]">
                 Already have an Account?{" "}
                 <Link
                   to="/login"
-                  className="font-poppins text-blue-500 hover:underline text-[18px]"
+                  className="font-poppins text-blue-500 hover:underline text-base sm:text-[18px]"
                 >
                   Sign In
                 </Link>
@@ -1112,12 +1111,12 @@ const Register = () => {
           )}
 
           {showScanner && (
-            <div className="flex flex-col gap-7 sm:justify-center items-center pt-[30px] sm:pt-5 pb-8 sm:pb-5 px-6">
+            <div className="flex flex-col gap-6 sm:gap-7 sm:justify-center items-center pt-4 sm:pt-5 pb-6 sm:pb-5 px-4 sm:px-6">
               <div className="space-y-2">
-                <h1 className="text-4xl sm:text-3xl lg:text-4xl font-bold text-[#1C253C] text-center">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1C253C] text-center">
                   Scan your iCane Device
                 </h1>
-                <p className="text-[#1C253C] text-paragraph text-1xl text-center">
+                <p className="text-[#1C253C] text-sm sm:text-base text-center">
                   Point your camera at the QR code on your iCane device to pair
                   it automatically.
                 </p>

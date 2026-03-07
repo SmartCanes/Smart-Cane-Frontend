@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import icaneLogo from "@/assets/images/smartcane-logo-blue.png";
@@ -9,7 +9,6 @@ import Document from "@/assets/images/document.png";
 import icaneLogoWhite from "@/assets/images/icane-logo-white.png";
 import icaneLabel from "@/assets/images/icane-label.png";
 import facebookIcon from "@/assets/images/facebook-icon.png";
-import twitterIcon from "@/assets/images/twitter-icon.png";
 import instagramIcon from "@/assets/images/instagram-icon.png";
 import callIcon from "@/assets/images/call-icon.png";
 import emailIcon from "@/assets/images/email-icon.png";
@@ -500,7 +499,7 @@ const GuestPage = () => {
                     <button
                       onClick={() => {
                         setIsMobileMenuOpen(false);
-                        navigate("/get-started");
+                        navigate("/login");
                       }}
                       className="w-full rounded-xl bg-[#1C253C] px-4 py-3 text-white font-medium hover:bg-[#0d1c3f] transition cursor-pointer"
                     >
@@ -716,11 +715,14 @@ const GuestPage = () => {
             </div>
 
             {/* bottom row (aligned) */}
-            <div className="mt-4 flex items-center justify-center gap-3 sm:justify-start">
-              <span className="flex h-10 w-10 items-center justify-center">
-                <HoverIcon src={callIcon} alt="Call" size={10} />
-              </span>
-              <p className="leading-none text-sm">09696273011</p>
+            <div className="mx-auto mt-4 flex w-[230px] items-center justify-start gap-3 sm:mx-0 sm:w-auto">
+              <a
+                href="tel:09696273011"
+                className="flex h-10 w-10 items-center justify-center"
+              >
+                <HoverIcon src={callIcon} alt="Call" size={40} />
+              </a>
+              <p className="leading-none text-sm">+63-969-627-3011</p>
             </div>
           </SlideInFromLeft>
         </div>
@@ -741,14 +743,14 @@ const GuestPage = () => {
             </div>
 
             {/* bottom row (aligned) */}
-            <div className="mt-4 flex items-center justify-center gap-3 sm:justify-start">
+            <div className="mx-auto mt-4 flex w-[230px] items-center justify-start gap-3 sm:mx-0 sm:w-auto">
               <a
                 href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center"
               >
-                <HoverIcon src={emailIcon} alt="Email" size={10} />
+                <HoverIcon src={emailIcon} alt="Email" size={40} />
               </a>
               <p className="leading-none text-sm">iCane@gmail.com</p>
             </div>
@@ -847,7 +849,7 @@ const GuestPage = () => {
                     hoverRotate={-10}
                   />
                 </a>
-                <a
+                {/* <a
                   href="!"
                   aria-label="Visit the iCane Twitter page"
                   className="inline-flex h-10 w-10 items-center justify-center"
@@ -857,7 +859,7 @@ const GuestPage = () => {
                     alt="Twitter icon"
                     hoverRotate={0}
                   />
-                </a>
+                </a> */}
                 <a
                   href="#!"
                   aria-label="Visit the iCane Instagram page"

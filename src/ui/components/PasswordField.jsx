@@ -15,7 +15,9 @@ const PasswordField = ({
   helperText = "",
   showValidationRules = false,
   inputClassName = "",
+  labelClassName = "",
   showErrorIcon = false,
+  reserveErrorSpace = false,
   ...rest
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -104,7 +106,7 @@ const PasswordField = ({
       {label && (
         <label
           htmlFor={name}
-          className="font-poppins font-medium mt-2 mb-2 text-[16px] align-center"
+          className={`font-poppins font-medium mt-0 mb-1.5 sm:mb-2 text-[15px] sm:text-[17px] align-center ${labelClassName}`}
           style={{ color: labelColor }}
         >
           {label}
@@ -124,7 +126,7 @@ const PasswordField = ({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className={`w-full px-4 py-4 border rounded-customradius focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent item-center ${
+          className={`w-full px-4 py-2.5 sm:py-3.5 text-sm sm:text-base border rounded-customradius focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent item-center ${
             hasError ? "" : "border-gray-300"
           } ${inputClassName}`}
           style={
@@ -148,20 +150,41 @@ const PasswordField = ({
             loading="lazy"
             src={showPassword ? EyeOn : EyeOff}
             alt={showPassword ? "Hide password" : "Show password"}
-            className="item-center py-2 h-10 w-10"
+            className="item-center h-5 w-5"
           />
         </button>
       </div>
-      {hasError && errorHasContent && (
+      {reserveErrorSpace ? (
         <p
-          className="flex items-center gap-2 text-sm mt-1 ml-2"
+          className={`flex items-center gap-2 text-sm mt-1 ml-2 min-h-[1.25rem] ${
+            hasError && errorHasContent ? "visible" : "invisible"
+          }`}
           style={{ color: validationColor }}
         >
-          {showErrorIcon && (
+          {showErrorIcon && hasError && errorHasContent && (
             <span className="material-symbols-outlined text-base">error</span>
           )}
-          <span>{typeof error === "string" ? error.trim() : error}</span>
+          <span>
+            {hasError && errorHasContent
+              ? typeof error === "string"
+                ? error.trim()
+                : error
+              : " "}
+          </span>
         </p>
+      ) : (
+        hasError &&
+        errorHasContent && (
+          <p
+            className="flex items-center gap-2 text-sm mt-1 ml-2"
+            style={{ color: validationColor }}
+          >
+            {showErrorIcon && (
+              <span className="material-symbols-outlined text-base">error</span>
+            )}
+            <span>{typeof error === "string" ? error.trim() : error}</span>
+          </p>
+        )
       )}
       {shouldShowRules && (
         <ul className="mt-3 space-y-2 text-sm font-poppins">

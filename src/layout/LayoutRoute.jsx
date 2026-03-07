@@ -1,4 +1,4 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import SidebarContent from "@/ui/components/SidebarContent";
 import {
   useDevicesStore,
@@ -96,6 +96,8 @@ const PublicLayout = () => {
   // const [isAuthenticated, setIsAuthenticated] = useState(null);
   const { setIsAnimationDone } = useUIStore();
   const { user } = useUserStore();
+  const { pathname } = useLocation();
+  const isLoginRoute = pathname === "/login";
 
   // useEffect(() => {
   //   const checkAuth = async () => {
@@ -130,9 +132,23 @@ const PublicLayout = () => {
   if (user) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="min-h-screen w-full flex flex-col sm:flex-row relative">
+    <div
+      className={
+        isLoginRoute
+          ? "h-[100dvh] w-full flex flex-col sm:flex-row relative overflow-hidden bg-[#FDFCFA]"
+          : "min-h-screen w-full flex flex-col sm:flex-row relative"
+      }
+    >
       <SidebarContent onAnimationComplete={() => setIsAnimationDone(true)} />
-      <Outlet />
+      <div
+        className={
+          isLoginRoute
+            ? "w-full sm:ml-[50%] sm:w-1/2 h-full sm:flex sm:items-center sm:justify-center bg-[#FDFCFA]"
+            : "w-full sm:ml-[50%] sm:w-1/2"
+        }
+      >
+        <Outlet />
+      </div>
     </div>
   );
 };

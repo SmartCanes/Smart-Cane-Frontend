@@ -173,7 +173,7 @@ const SelectField = ({
       {label && (
         <label
           htmlFor={id || name}
-          className={`block text-[18px] font-medium mb-2 ${labelClassName}`}
+          className={`block text-[15px] sm:text-[17px] font-medium mb-1.5 sm:mb-2 ${labelClassName}`}
           style={{ color: labelColor }}
         >
           {label}
@@ -199,8 +199,8 @@ const SelectField = ({
               onBlur={handleCustomInputBlur}
               onKeyDown={handleCustomInputKeyDown}
               className={`
-                w-full px-5 py-4 
-                border rounded-[15px]
+                w-full px-4 sm:px-5 py-2.5 sm:py-3.5 text-sm sm:text-base
+                border rounded-customradius
                 focus:outline-none focus:ring-2
                 transition-all duration-200
                 bg-white
@@ -258,8 +258,8 @@ const SelectField = ({
             disabled={disabled}
             onClick={handleToggle}
             className={`
-              w-full text-left px-5 py-4 
-              border rounded-[15px]
+              w-full text-left px-4 sm:px-5 py-2.5 sm:py-3.5 text-sm sm:text-base
+              border rounded-customradius
               flex items-center justify-between
               focus:outline-none focus:ring-2
               transition-all duration-200 whitespace-nowrap overflow-hidden
@@ -315,7 +315,7 @@ const SelectField = ({
               {options.map((option) => (
                 <li
                   key={option.value}
-                  className="px-5 py-3 cursor-pointer hover:bg-primary-100 hover:text-white text-secondary-100 
+                  className="px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base cursor-pointer hover:bg-primary-100 hover:text-white text-secondary-100 
                              border-b border-gray-200 last:border-b-0 transition-colors duration-200"
                   onClick={() => handleSelectOption(option)}
                 >

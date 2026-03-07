@@ -17,6 +17,7 @@ const TextField = forwardRef(
       className = "",
       inputClassName = "",
       labelClassName = "",
+      reserveErrorSpace = true,
       ...props
     },
     ref
@@ -34,7 +35,7 @@ const TextField = forwardRef(
         {label && (
           <label
             htmlFor={id || name}
-            className={`block text-[18px] font-medium mb-2 ${labelClassName}`}
+            className={`block text-[15px] sm:text-[17px] font-medium mb-1.5 sm:mb-2 ${labelClassName}`}
             style={{ color: labelColor }}
           >
             {label}
@@ -57,7 +58,7 @@ const TextField = forwardRef(
           required={required}
           disabled={disabled}
           className={`
-          w-full px-5 py-4 
+          w-full px-4 sm:px-5 py-2.5 sm:py-3.5 text-sm sm:text-base
           border rounded-customradius
           focus:outline-none focus:ring-2 focus:border-transparent
           disabled:bg-gray-100 disabled:cursor-not-allowed
@@ -79,14 +80,26 @@ const TextField = forwardRef(
           {...props}
         />
 
-        <p
-          className={`text-[13px] mt-[4px] ml-2 min-h-[1.22rem] ${
-            hasError && errorHasContent ? "visible" : "invisible"
-          }`}
-          style={{ color: validationColor }}
-        >
-          {typeof error === "string" ? error.trim() : error || " "}
-        </p>
+        {reserveErrorSpace ? (
+          <p
+            className={`text-[13px] mt-[4px] ml-2 min-h-[1.22rem] ${
+              hasError && errorHasContent ? "visible" : "invisible"
+            }`}
+            style={{ color: validationColor }}
+          >
+            {typeof error === "string" ? error.trim() : error || " "}
+          </p>
+        ) : (
+          hasError &&
+          errorHasContent && (
+            <p
+              className="text-[13px] mt-[4px] ml-2"
+              style={{ color: validationColor }}
+            >
+              {typeof error === "string" ? error.trim() : error}
+            </p>
+          )
+        )}
 
         {helperText && !error && (
           <p className="text-gray-500 text-sm mt-1">{helperText}</p>

@@ -54,6 +54,10 @@ const Login = () => {
     }
   };
 
+  const preventClipboardAction = (event) => {
+    event.preventDefault();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -188,8 +192,13 @@ const Login = () => {
     script.defer = true;
     document.head.appendChild(script);
 
-    const firstInput = document.querySelector("input:not([disabled])");
-    firstInput?.focus();
+    const isDesktop = window.matchMedia
+      ? window.matchMedia("(min-width: 640px)").matches
+      : window.innerWidth >= 640;
+    if (isDesktop) {
+      const firstInput = document.querySelector("input:not([disabled])");
+      firstInput?.focus();
+    }
 
     return () => {
       document.head.removeChild(script);
@@ -199,19 +208,19 @@ const Login = () => {
 
   return (
     <>
-      <div className="relative flex flex-col min-h-[calc(100vh-140px)] w-full bg-[#FDFCFA] overflow-hidden">
+      <div className="relative flex flex-col flex-1 min-h-0 w-full bg-[#FDFCFA] overflow-y-auto md:overflow-hidden scrollbar-hide">
         {!showScanner && (
           <motion.div
-            initial={{ opacity: 0, x: 100 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={
-              isAnimationDone ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }
+              isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }
             }
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="flex-1 flex flex-col gap-7 justify-start sm:justify-center items-center pt-[30px] sm:pt-8 pb-8 px-6"
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="flex-1 flex flex-col gap-6 sm:gap-7 justify-start sm:justify-center items-center pt-4 sm:pt-8 pb-6 sm:pb-8 px-4 sm:px-6 transform-gpu will-change-transform"
           >
             {/* Header (match Register style) */}
             <div className="text-center space-y-2">
-              <h1 className="hidden sm:block text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
+              <h1 className="hidden sm:block text-3xl md:text-4xl lg:text-5xl font-bold text-[#1C253C]">
                 Welcome
               </h1>
 
@@ -219,18 +228,22 @@ const Login = () => {
                 Ready to go? Log in and jump straight into your dashboard.
               </p>
 
-              <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
+              <p className="sm:hidden text-[#1C253C] text-base">
                 Login to your account
               </p>
             </div>
 
             <motion.form
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={
-                isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }
               }
-              transition={{ duration: 0.6 }}
-              className="w-full max-w-md sm:max-w-none lg:max-w-lg"
+              transition={{
+                duration: 0.4,
+                ease: [0.22, 1, 0.36, 1],
+                delay: 0.05
+              }}
+              className="w-full max-w-md sm:max-w-none lg:max-w-lg transform-gpu will-change-transform"
               onSubmit={handleSubmit}
               noValidate
             >
@@ -251,6 +264,7 @@ const Login = () => {
                   value={credentials.identifier}
                   onChange={handleChange}
                   error={errors.identifier}
+                  inputClassName="py-3 sm:py-4"
                   maxLength={50}
                   disabled={retryAfter > 0}
                 />
@@ -265,6 +279,11 @@ const Login = () => {
                   onChange={handleChange}
                   error={errors.password}
                   showErrorIcon={false}
+                  inputClassName="py-3 sm:py-4"
+                  onPaste={preventClipboardAction}
+                  onCopy={preventClipboardAction}
+                  onCut={preventClipboardAction}
+                  onDrop={preventClipboardAction}
                   maxLength={20}
                   disabled={retryAfter > 0}
                 />
@@ -302,7 +321,7 @@ const Login = () => {
                 )}
 
                 <PrimaryButton
-                  className="font-poppins w-full py-4 text-[18px] font-medium mt-6"
+                  className="font-poppins w-full py-3 sm:py-4 text-base sm:text-[18px] font-medium mt-5 sm:mt-6"
                   bgColor="bg-primary-100"
                   text={loading ? "Signing in..." : "Sign In"}
                   type="submit"
@@ -312,11 +331,11 @@ const Login = () => {
             </motion.form>
 
             {/* Footer (match Register placement) */}
-            <p className="text-center text-[18px]">
+            <p className="text-center text-base sm:text-[18px]">
               Didn't have an account?{" "}
               <Link
                 to="/register"
-                className="font-poppins text-blue-500 hover:underline text-[18px]"
+                className="font-poppins text-blue-500 hover:underline text-base sm:text-[18px]"
               >
                 Sign Up
               </Link>
@@ -325,12 +344,12 @@ const Login = () => {
         )}
 
         {showScanner && (
-          <div className="flex flex-col gap-7 sm:justify-center items-center pt-[30px] sm:pt-5 pb-8 sm:pb-5 px-6">
+          <div className="flex flex-col gap-6 sm:gap-7 sm:justify-center items-center pt-4 sm:pt-5 pb-6 sm:pb-5 px-4 sm:px-6">
             <div className="space-y-2">
-              <h1 className="text-4xl sm:text-3xl lg:text-4xl font-bold text-[#1C253C] text-center">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1C253C] text-center">
                 Scan your iCane Device
               </h1>
-              <p className="text-[#1C253C] text-paragraph text-1xl text-center">
+              <p className="text-[#1C253C] text-sm sm:text-base text-center">
                 Point your camera at the QR code on your iCane device to pair it
                 automatically.
               </p>

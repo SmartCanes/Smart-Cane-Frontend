@@ -107,31 +107,34 @@ const SidebarContent = ({ onAnimationComplete, className = "" }) => {
       )}
 
       {/* Mobile Header */}
-      <motion.div
-        animate={animationPhase === "final" ? "mobileFinal" : "mobileStart"}
-        variants={containerVariants}
-        className="bg-primary-100 flex flex-col items-center justify-center relative overflow-hidden"
-      >
-        <motion.h1
-          initial={{ fontSize: "2.5rem" }}
-          animate={
-            isMobile && animationPhase === "final"
-              ? { fontSize: "3.5rem" }
-              : { fontSize: "2.5rem" }
-          }
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          style={{
-            lineHeight: isMobile && animationPhase === "final" ? "1" : "inherit"
-          }}
-          className="font-gabriela text-6xl sm:text-h1 text-[#FDFCFA]"
-          onClick={() => {
-            clearRegisterStore();
-            navigate("/", { replace: true });
-          }}
+      {isMobile && (
+        <motion.div
+          animate={animationPhase === "final" ? "mobileFinal" : "mobileStart"}
+          variants={containerVariants}
+          className="bg-primary-100 flex flex-col items-center justify-center relative overflow-hidden"
         >
-          iCane
-        </motion.h1>
-      </motion.div>
+          <motion.h1
+            initial={{ fontSize: "2.5rem" }}
+            animate={
+              isMobile && animationPhase === "final"
+                ? { fontSize: "3.5rem" }
+                : { fontSize: "2.5rem" }
+            }
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            style={{
+              lineHeight:
+                isMobile && animationPhase === "final" ? "1" : "inherit"
+            }}
+            className="font-gabriela text-6xl sm:text-h1 text-[#FDFCFA]"
+            onClick={() => {
+              clearRegisterStore();
+              navigate("/", { replace: true });
+            }}
+          >
+            iCane
+          </motion.h1>
+        </motion.div>
+      )}
 
       {(!isMobile || animationPhase !== "final") && (
         <motion.div

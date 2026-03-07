@@ -184,12 +184,15 @@ export const HoverIcon = ({
   className = "",
   transition = { type: "spring", stiffness: 300 }
 }) => {
+  const iconSize = typeof size === "number" ? `${size}px` : size;
+
   return (
     <motion.img
       loading="lazy"
       src={src}
       alt={alt}
-      className={`${className} w-[${size}px] h-[${size}px]`}
+      className={`${className} object-contain`}
+      style={{ width: iconSize, height: iconSize }}
       initial={{
         scale: 1,
         rotate: 0
