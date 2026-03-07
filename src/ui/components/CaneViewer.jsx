@@ -100,6 +100,7 @@ const CaneViewer = () => {
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.display = "block";
     renderer.domElement.style.touchAction = isInteractMode ? "none" : "pan-y";
+    renderer.domElement.style.pointerEvents = isInteractMode ? "auto" : "none";
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
@@ -189,6 +190,9 @@ const CaneViewer = () => {
 
     const handleResize = () => {
       renderer.domElement.style.touchAction = isInteractMode ? "none" : "pan-y";
+      renderer.domElement.style.pointerEvents = isInteractMode
+        ? "auto"
+        : "none";
       controls.enabled = isInteractMode;
       fitModelToView();
     };
@@ -237,7 +241,10 @@ const CaneViewer = () => {
       <div
         ref={mountRef}
         className="w-full h-full"
-        style={{ touchAction: isInteractMode ? "none" : "pan-y" }}
+        style={{
+          touchAction: isInteractMode ? "none" : "pan-y",
+          pointerEvents: isInteractMode ? "auto" : "none"
+        }}
       />
 
       <div className="absolute top-4 left-4 pointer-events-none flex items-center gap-2 z-10 max-w-[calc(100%-2rem)] sm:max-w-none">
