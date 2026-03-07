@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import PrimaryButton from "../ui/components/PrimaryButton.jsx";
 import smartcaneLogo from "../assets/images/smartcane-logo.png";
-import { BlinkingIcon } from "@/wrapper/MotionWrapper.jsx";
 
 const GetStarted = () => {
   const navigate = useNavigate();
@@ -16,7 +15,7 @@ const GetStarted = () => {
       />
 
       <Link to="/" className="z-10">
-        <BlinkingIcon
+        <img
           src={smartcaneLogo}
           alt="Smart Cane Logo"
           className="w-[180px] sm:w-[220px] md:w-[260px] lg:w-[290px]"
