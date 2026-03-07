@@ -9,9 +9,10 @@ const SERIAL_LENGTH = 6;
 
 const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
   const [paused, setPaused] = useState(false);
-  const [hasCamera, setHasCamera] = useState(false);
+  const [hasCamera, setHasCamera] = useState(true);
   const [serial, setSerial] = useState(Array(SERIAL_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
+  const [scannerError, setScannerError] = useState(null);
   const [toast, setToast] = useState({
     showToast: false,
     message: "",
@@ -20,14 +21,47 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
 
   const inputRefs = useRef([...Array(SERIAL_LENGTH)].map(() => createRef()));
   const [lastError, setLastError] = useState(null);
-  const lastScannedCodeRef = useRef(null);
   const scanCooldownRef = useRef(false);
 
   useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then(() => setHasCamera(true))
-      .catch(() => setHasCamera(false));
+    if (!window.isSecureContext) {
+      setScannerError(
+        "Camera requires HTTPS (or localhost). If you opened this from a phone over local IP, use HTTPS."
+      );
+    }
+
+    let isMounted = true;
+
+    const checkCameraAvailability = async () => {
+      if (!navigator?.mediaDevices?.enumerateDevices) {
+        if (isMounted) {
+          setHasCamera(false);
+        }
+        return;
+      }
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputExists = devices.some(
+          (device) => device.kind === "videoinput"
+        );
+
+        if (isMounted) {
+          setHasCamera(videoInputExists);
+        }
+      } catch {
+        // Fall back to rendering scanner; scanner callback will report detailed errors.
+        if (isMounted) {
+          setHasCamera(true);
+        }
+      }
+    };
+
+    checkCameraAvailability();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleScan = (detectedCodes) => {
@@ -46,8 +80,6 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
       }
 
       scanCooldownRef.current = true;
-      lastScannedCodeRef.current = code;
-
       setPaused(true);
 
       let device_serial = null;
@@ -96,7 +128,10 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
   };
 
   const handleError = (error) => {
-    console.error("QR Scanner Error:", error?.message);
+    const message = error?.message || "Unable to access camera.";
+
+    setScannerError(message);
+    console.error("QR Scanner Error:", message);
   };
 
   const highlightCodeOnCanvas = (detectedCodes, ctx) => {
@@ -193,20 +228,35 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
     <>
       <div className="w-full max-w-xl h-full gap-5 flex flex-col">
         {hasCamera ? (
-          <Scanner
-            paused={paused}
-            onScan={handleScan}
-            onError={handleError}
-            scanDelay={200}
-            components={{
-              tracker: highlightCodeOnCanvas,
-              audio: true,
-              torch: true,
-              zoom: true,
-              finder: true
-            }}
-            videoConstraints={{ facingMode: "environment" }}
-          />
+          <div className="w-full min-h-[260px] sm:min-h-[320px] overflow-hidden rounded-xl bg-black/5 relative">
+            <Scanner
+              paused={paused}
+              onScan={handleScan}
+              onError={handleError}
+              scanDelay={200}
+              components={{
+                tracker: highlightCodeOnCanvas,
+                audio: true,
+                torch: false,
+                zoom: false,
+                finder: true
+              }}
+              constraints={{ facingMode: { ideal: "environment" } }}
+              styles={{
+                container: {
+                  width: "100%",
+                  height: "100%",
+                  minHeight: "260px"
+                }
+              }}
+            />
+
+            {/* {scannerError && (
+              <div className="absolute inset-0 bg-white/90 flex items-center justify-center px-4 text-center">
+                <p className="text-sm text-red-600">{scannerError}</p>
+              </div>
+            )} */}
+          </div>
         ) : (
           <div className="text-gray-500 text-center h-full flex items-center justify-center">
             No camera detected. Please use a device with a camera.
@@ -260,19 +310,6 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
           onClose={() => setToast((prev) => ({ ...prev, showToast: false }))}
         />
       )}
-
-      <style>
-        {`
-          @keyframes scan {
-            0% { top: 0%; }
-            50% { top: 100%; }
-            100% { top: 0%; }
-          }
-          .animate-scan {
-            animation: scan 2s linear infinite;
-          }
-        `}
-      </style>
     </>
   );
 };
