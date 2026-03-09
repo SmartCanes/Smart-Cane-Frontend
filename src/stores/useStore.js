@@ -53,6 +53,15 @@ export const useRealtimeStore = create(
       canePosition: null,
       guardianPosition: null,
       deviceConfig: {},
+      gpsDebug: {
+        status: 0,
+        sats: 0,
+        fix: false,
+        hdop: null,
+        ready: false,
+        lat: null,
+        lng: null
+      },
       componentHealth: {
         gpsStatus: false,
         ultrasonicStatus: false,
@@ -63,7 +72,7 @@ export const useRealtimeStore = create(
       },
       connectWs: () => {
         wsApi.off("status");
-        wsApi.off("location");
+        wsApi.off("gps");
         wsApi.off("connect");
         wsApi.off("disconnect");
         wsApi.off("guardianPresence");
@@ -147,10 +156,29 @@ export const useRealtimeStore = create(
           resetHeartbeat();
         });
 
-        wsApi.on("location", (data) => {
-          if (data?.lat != null && data?.lng != null) {
-            set({ canePosition: [data.lat, data.lng] });
-          }
+        wsApi.on("gps", (data) => {
+          const payload = data?.payload || data;
+
+          console.log("Received GPS update:", payload);
+
+          const lat = payload?.lat;
+          const lng = payload?.lng;
+
+          set((state) => ({
+            canePosition:
+              lat != null && lng != null ? [lat, lng] : state.canePosition,
+            gps: {
+              status: Number(payload?.status || 0),
+              sats: Number(payload?.sats || 0),
+              fix: Boolean(payload?.fix),
+              hdop:
+                payload?.hdop != null ? Number(payload.hdop).toFixed(2) : null,
+              ready: Boolean(payload?.ready),
+              lat: lat ?? null,
+              lng: lng ?? null
+            }
+          }));
+
           resetHeartbeat();
         });
 
@@ -281,10 +309,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -377,10 +405,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                  g.guardianId === guardian.guardianId
-                    ? { ...g, ...guardian }
-                    : g
-                )
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
                 : [...d.guardians, guardian]
             };
           })
@@ -399,11 +427,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                ...d,
-                guardians: d.guardians.filter(
-                  (g) => g.guardianId !== guardianId
-                )
-              }
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
               : d
           )
         })),

@@ -4,66 +4,40 @@ import LiveMap from "@/ui/components/LiveMap";
 import RecentAlerts from "@/ui/components/RecentAlert";
 import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import SendNote from "@/ui/components/SendNote";
-import { motion } from "framer-motion";
-import QuickActions from "@/ui/components/QuickActions";
-import { useAnimation } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
+import { useRealtimeStore } from "@/stores/useStore";
+
+const formatCoordinate = (value) => {
+  if (value == null || Number.isNaN(Number(value))) return "--";
+  return Number(value).toFixed(6);
+};
+
+const getGpsBadge = (gps) => {
+  if (!gps || Number(gps.status) === 0) {
+    return {
+      label: "Off",
+      className: "bg-gray-100 text-gray-700 border-gray-200"
+    };
+  }
+
+  if (gps.ready) {
+    return {
+      label: "Ready",
+      className: "bg-green-100 text-green-700 border-green-200"
+    };
+  }
+
+  return {
+    label: "Starting",
+    className: "bg-yellow-100 text-yellow-700 border-yellow-200"
+  };
+};
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("track");
-  // const [route, setRoute] = useState(null);
   const controls = useAnimation();
-
-  // const handleSwapLocations = () => {
-  //   setStartPoint(destinationPoint);
-  //   setDestinationPoint(startPoint);
-  // };
-
-  // const historyButtonStyle =
-  //   activeTab === "history"
-  //     ? {
-  //         backgroundColor: "var(--color-primary-100)",
-  //         color: "#FFFFFF",
-  //         borderColor: "#E5E7EB",
-  //         fill: "#F3F4F6"
-  //       }
-  //     : {};
-
-  // const handleRequestDirections = () => {
-  //   if (!startPoint || !destinationPoint) {
-  //     alert("Please specify both starting point and destination.");
-  //     return;
-  //   }
-
-  //   console.log("Requesting directions", { startPoint, destinationPoint });
-  // };
-
-  // useEffect(() => {
-  //   const watchId = navigator.geolocation.watchPosition(
-  //     (position) => {
-  //       const { latitude, longitude } = position.coords;
-  //       setGuardianLocation([latitude, longitude]);
-
-  //       // if (isMapLoading) {
-  //       //   setIsMapLoading(false);
-  //       // }
-  //     },
-  //     (error) => {
-  //       console.error("Failed to get location:", error.message);
-  //       // setIsMapLoading(false);
-  //     },
-  //     {
-  //       enableHighAccuracy: true,
-  //       maximumAge: 0,
-  //       timeout: 5000
-  //     }
-  //   );
-
-  //   return () => {
-  //     navigator.geolocation.clearWatch(watchId);
-  //   };
-
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  const { gps } = useRealtimeStore();
+  const badge = getGpsBadge(gps);
 
   return (
     <>
@@ -73,7 +47,6 @@ const Dashboard = () => {
         animate={controls}
       >
         <div className="w-full space-y-6 sm:space-y-8 max-w-5xl mx-auto md:max-w-none md:mx-0 md:pr-6">
-          {/* Title Section */}
           <div className="mb-4 sm:mb-6">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
               Live Location
@@ -85,29 +58,21 @@ const Dashboard = () => {
 
           <div className="grid xl:grid-cols-[minmax(0,2fr)_300px] gap-4 sm:gap-8 items-start">
             <div className="flex flex-col gap-4 sm:gap-8">
-              {/* Mobile Only: Walking Directions */}
-              {/* <div className="lg:hidden">
-                <WalkingDirections
-                  startValue={startPoint}
-                  destinationValue={destinationPoint}
-                  onStartChange={setStartPoint}
-                  onDestinationChange={setDestinationPoint}
-                  onSwapLocations={handleSwapLocations}
-                  helperText="Preview walking routes customized for your cane"
-                />
-              </div> */}
-
-              {/* Map Container */}
-              <div className="bg-white rounded-2xl shadow-sm overflow-hidden w-full border border-[#F3F4F6]">
-                {/* Map Header */}
-                <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 hidden sm:block">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 font-poppins">
+              <div className="bg-white rounded-2xl shadow-sm overflow-hidden w-full border border-[#F3F4F6] relative">
+                <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 className="text-base sm:text-xl font-semibold text-gray-800 font-poppins">
                       Live Location Tracking
                     </h3>
 
-                    {/* Track Live / History Buttons */}
-                    <div className="flex gap-2 items-center">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <span
+                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border ${badge.className}`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-current opacity-75" />
+                        {badge.label}
+                      </span>
+
                       <button
                         onClick={() => setActiveTab("track")}
                         className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-poppins font-medium text-xs sm:text-sm flex items-center gap-2 transition-all ${
@@ -119,71 +84,54 @@ const Dashboard = () => {
                         <Icon icon="ph:map-pin-fill" className="text-lg" />
                         Track Live
                       </button>
-                      {/* <div className="relative">
-                        <div className="flex  items-center bg-gray-50 rounded-full pr-5 shadow-sm border border-gray-200">
-                          <div className="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-lg font-medium h-fit">
-                              {"J"}
-                            </span>
-                          </div>
-                          <span className="ml-3 font-semibold text-gray-800 text-sm tracking-tight">
-                            {"Jay"}
-                          </span>
-                        </div>
-                        {online && (
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 ">
-                            <div className="bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border-2 border-white animate-pulse">
-                              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                              Online
-                            </div>
-                          </div>
-                        )}
-                      </div> */}
-
-                      {/* <button
-                        onClick={() => setActiveTab("history")}
-                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-poppins font-medium text-xs sm:text-sm flex items-center gap-2 transition-all ${
-                          activeTab === "history"
-                            ? "shadow-md"
-                            : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
-                        }`}
-                        style={historyButtonStyle}
-                      >
-                        History
-                      </button> */}
                     </div>
                   </div>
                 </div>
 
-                {/* Map Area */}
                 <div className="w-full h-[70vh] sm:h-[60vh] relative rounded-2xl overflow-hidden">
                   <LiveMap />
-                  {/* 
-                  {isMapLoading && (
-                    <div className="absolute inset-0 z-[50] flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
-                      <Loader />
-                    </div>
-                  )} */}
                 </div>
 
-                {/* Map footer info */}
-                {/* <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-t border-gray-100">
-                  <div className="flex items-center gap-2 text-gray-600 font-poppins text-xs">
-                    <Icon icon="tabler:clock-filled" />
-                    <span>Last updated: 2 minutes ago</span>
-                  </div>
+                <div className="w-full border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                        <Icon
+                          icon="mdi:satellite-variant"
+                          className="text-blue-600 text-xl"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 font-medium">
+                          Satellites
+                        </p>
+                        <p className="text-base sm:text-lg font-semibold text-gray-800">
+                          {gps?.sats ?? 0}
+                        </p>
+                      </div>
+                    </div>
 
-                  <div className="flex items-center gap-2 text-gray-800 font-poppins text-xs font-medium">
-                    <Icon icon="flowbite:map-pin-solid" />
-                    <span>SM City Novaliches</span>
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                        <Icon
+                          icon="mdi:map-marker-radius"
+                          className="text-green-600 text-xl"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 font-medium">
+                          Last Location
+                        </p>
+                        <p className="text-sm sm:text-base font-medium text-gray-800 break-all">
+                          {gps?.lat != null && gps?.lng != null
+                            ? `${formatCoordinate(gps.lat)}, ${formatCoordinate(gps.lng)}`
+                            : "No location available"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div> */}
+                </div>
               </div>
-
-              {/* Mobile Only: Quick Actions */}
-              {/* <div className="lg:hidden">
-                <QuickActions />
-              </div> */}
 
               <div className="grid gap-8 lg:grid-cols-2">
                 <GuardianNetwork />
@@ -191,18 +139,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-8 w-full ">
-              {/* <div className="hidden lg:block">
-                <WalkingDirections
-                  startValue={startPoint}
-                  destinationValue={destinationPoint}
-                  onStartChange={setStartPoint}
-                  onDestinationChange={setDestinationPoint}
-                  onSwapLocations={handleSwapLocations}
-                  // onRequestDirections={handleRequestDirections}
-                  helperText="Preview walking routes customized for your cane"
-                />
-              </div> */}
+            <div className="flex flex-col gap-8 w-full">
               <SendNote />
             </div>
           </div>
