@@ -6,6 +6,8 @@ import {
   useUserStore
 } from "@/stores/useStore";
 import { Icon } from "@iconify/react";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import { useState } from "react";
 
 const EmergencyDetails = () => {
   const location = useLocation();
@@ -13,361 +15,557 @@ const EmergencyDetails = () => {
   const { selectedDevice } = useDevicesStore();
   const { guardians } = useGuardiansStore();
   const emergencyData = location.state?.emergencyData || null;
+  const [activeTab, setActiveTab] = useState("vip");
+
   const pick = (...values) => values.find((value) => value != null);
+  const capitalize = (value) =>
+    value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
+
+  const formatDateTime = (value) => {
+    if (!value) return "Not set";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
 
   const deviceId = selectedDevice?.deviceId;
   const storeGuardians = (guardians(deviceId) ?? []).filter(
     (g) => g.guardianId !== user?.guardianId
   );
-  const allGuardians =
+  const rawGuardians =
     emergencyData?.guardians?.length > 0
       ? emergencyData.guardians
       : storeGuardians;
 
   const vipFromState = emergencyData?.vip || null;
   const vipFromDevice = selectedDevice?.vip || null;
+  const deviceFromState = emergencyData?.device || null;
 
   const vipFirstName =
     pick(
       vipFromState?.firstName,
       vipFromState?.first_name,
       vipFromDevice?.firstName,
-      vipFromDevice?.first_name,
-      user?.firstName
+      vipFromDevice?.first_name
     ) || "";
+
+  const vipMiddleName =
+    pick(
+      vipFromState?.middleName,
+      vipFromState?.middle_name,
+      vipFromDevice?.middleName,
+      vipFromDevice?.middle_name
+    ) || "";
+
   const vipLastName =
     pick(
       vipFromState?.lastName,
       vipFromState?.last_name,
       vipFromDevice?.lastName,
-      vipFromDevice?.last_name,
-      user?.lastName
+      vipFromDevice?.last_name
     ) || "";
 
-  const fullName = `${vipFirstName} ${vipLastName}`.trim() || "—";
+  const vipFullName =
+    [vipFirstName, vipMiddleName, vipLastName].filter(Boolean).join(" ") ||
+    "Unnamed VIP";
 
-  const bloodType =
-    pick(
-      vipFromState?.bloodType,
-      vipFromState?.blood_type,
-      vipFromDevice?.bloodType,
-      vipFromDevice?.blood_type,
-      user?.bloodType
-    ) || null;
-  const medicalNotes =
-    pick(
-      vipFromState?.medicalNotes,
-      vipFromState?.medical_notes,
-      vipFromDevice?.medicalNotes,
-      vipFromDevice?.medical_notes,
-      user?.medicalNotes
-    ) || "No known allergies. Uses an assistive smart cane.";
-  const deviceSerial =
-    pick(
-      emergencyData?.device?.deviceSerialNumber,
-      emergencyData?.device?.device_serial_number,
-      selectedDevice?.deviceSerialNumber,
-      selectedDevice?.device_serial_number
-    ) || "—";
-  const userPhone =
-    pick(
-      vipFromState?.contactNumber,
-      vipFromState?.contact_number,
-      vipFromDevice?.contactNumber,
-      vipFromDevice?.contact_number
-    ) || null;
-  const userEmail = pick(vipFromState?.email, vipFromDevice?.email) || null;
-
-  const capitalize = (str) =>
-    str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
-
-  const roleLabel = (role) => capitalize(role) || "Guardian";
-
-  const statusColor = (status) => {
-    if (status === "active") return "bg-green-50 text-green-700";
-    if (status === "pending") return "bg-yellow-50 text-yellow-700";
-    return "bg-gray-100 text-gray-500";
-  };
-
-  const DetailRow = ({ icon, children, className = "" }) => (
-    <div className={`flex items-start gap-3 ${className}`}>
-      <Icon
-        icon={icon}
-        className="text-lg text-primary-100/60 flex-shrink-0 mt-0.5"
-      />
-      <div className="flex-1 min-w-0">{children}</div>
-    </div>
+  const vipImage = pick(
+    vipFromState?.vipImageUrl,
+    vipFromState?.vip_image_url,
+    vipFromDevice?.vipImageUrl,
+    vipFromDevice?.vip_image_url
   );
 
-  return (
-    <main className="font-poppins bg-[#f0f2f7] rounded-t-[32px] md:rounded-none h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:h-[calc(100vh-var(--header-height))] overflow-hidden flex flex-col pb-[calc(var(--mobile-nav-height)+0.5rem)] md:pb-0">
-      {/* Header Banner */}
-      <header className="flex-shrink-0 relative overflow-hidden bg-primary-100 shadow-md">
-        {/* Emergency red top strip */}
+  const vipAddress = [
+    pick(
+      vipFromState?.streetAddress,
+      vipFromState?.street_address,
+      vipFromDevice?.streetAddress,
+      vipFromDevice?.street_address
+    ),
+    pick(vipFromState?.village, vipFromState?.village, vipFromDevice?.village),
+    pick(vipFromState?.barangay, vipFromDevice?.barangay),
+    pick(vipFromState?.city, vipFromDevice?.city),
+    pick(vipFromState?.province, vipFromDevice?.province)
+  ]
+    .filter(Boolean)
+    .join(", ");
 
-        <div className="px-5 py-4 flex items-center gap-4">
-          <img
-            src={logo}
-            alt="SmartCane Logo"
-            className="h-8 w-auto object-contain drop-shadow-sm flex-shrink-0"
-          />
-          <div className="flex-1 min-w-0">
-            <h1 className="font-poppins text-xl md:text-2xl font-bold tracking-wide text-white leading-tight">
-              EMERGENCY INFO
-            </h1>
-            <p className="font-poppins text-sm md:text-sm text-white/70 mt-0.5 hidden sm:block">
-              In case of emergency, please contact the guardians below.
+  const vipFields = [
+    {
+      label: "First Name",
+      value: pick(
+        vipFromState?.first_name,
+        vipFromState?.firstName,
+        vipFromDevice?.firstName
+      ),
+      icon: "ph:user"
+    },
+    {
+      label: "Middle Name",
+      value: pick(
+        vipFromState?.middle_name,
+        vipFromState?.middleName,
+        vipFromDevice?.middleName
+      ),
+      icon: "ph:user"
+    },
+    {
+      label: "Last Name",
+      value: pick(
+        vipFromState?.last_name,
+        vipFromState?.lastName,
+        vipFromDevice?.lastName
+      ),
+      icon: "ph:user"
+    },
+    {
+      label: "Device Serial",
+      value: pick(
+        deviceFromState?.deviceSerialNumber,
+        deviceFromState?.device_serial_number,
+        selectedDevice?.deviceSerialNumber,
+        selectedDevice?.device_serial_number
+      ),
+      icon: "ph:hash"
+    }
+  ];
+
+  const normalizedGuardians = rawGuardians.map((guardian) => {
+    const firstName = pick(guardian.firstName, guardian.first_name) || "";
+    const middleName = pick(guardian.middleName, guardian.middle_name) || "";
+    const lastName = pick(guardian.lastName, guardian.last_name) || "";
+    const name =
+      [firstName, middleName, lastName].filter(Boolean).join(" ") || "Unknown";
+
+    const address = [
+      pick(guardian.streetAddress, guardian.street_address),
+      pick(guardian.village),
+      pick(guardian.barangay),
+      pick(guardian.city),
+      pick(guardian.province)
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    return {
+      id: pick(guardian.guardianId, guardian.guardian_id, name),
+      name,
+      initials: (firstName?.[0] || name?.[0] || "?").toUpperCase(),
+      username: guardian.username,
+      email: guardian.email || null,
+      phone: pick(
+        guardian.contactNumber,
+        guardian.contact_number,
+        guardian.guardianPhone
+      ),
+      role: pick(guardian.role, "guardian"),
+      relationship: pick(guardian.relationship),
+      status: pick(guardian.status, "active"),
+      image: pick(guardian.guardianImageUrl, guardian.guardian_image_url),
+      assignedAt: pick(guardian.assignedAt, guardian.assigned_at),
+      createdAt: pick(guardian.createdAt, guardian.created_at),
+      updatedAt: pick(guardian.updatedAt, guardian.updated_at),
+      address
+    };
+  });
+
+  const emergencyGuardian = normalizedGuardians[0] || null;
+
+  const statusColor = (status) => {
+    switch (status) {
+      case "active":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "pending":
+        return "bg-amber-50 text-amber-700 border-amber-200";
+      case "inactive":
+        return "bg-slate-50 text-slate-700 border-slate-200";
+      default:
+        return "bg-slate-50 text-slate-700 border-slate-200";
+    }
+  };
+
+  return (
+    <main className="font-poppins bg-gradient-to-br rounded-t-[32px] md:rounded-none h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:h-[calc(100vh-var(--header-height))] overflow-hidden flex flex-col pb-[calc(var(--mobile-nav-height)+0.5rem)] md:pb-0">
+      {/* Header with glass morphism effect */}
+      <header className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 xl:px-15 relative z-20 shadow-lg">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
+          <div className="bg-white/15 p-2 rounded-xl backdrop-blur-sm">
+            <img
+              src={logo}
+              alt="SmartCane Logo"
+              className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 object-contain"
+            />
+          </div>
+          <div className="min-w-0">
+            <p className="text-white text-base sm:text-lg md:text-xl font-bold leading-tight truncate flex items-center gap-2">
+              Emergency Details
+            </p>
+            <p className="text-white/70 text-[11px] sm:text-xs truncate">
+              VIP identity and emergency guardian information
             </p>
           </div>
         </div>
-      </header>
 
-      {/* Body — two-column on desktop */}
-      <div className="flex-1 min-h-0 overflow-y-auto md:overflow-hidden p-4 md:p-5 flex flex-col md:flex-row gap-4">
-        {/* Personal Details Card */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm flex flex-col md:w-[42%] flex-shrink-0 overflow-hidden">
-          <div className="px-5 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <Icon
-                icon="ph:user-circle-fill"
-                className="text-lg text-primary-100"
-              />
-              <h2 className="font-poppins text-lg font-bold uppercase tracking-[0.1em] text-primary-100/70">
-                Personal Details
-              </h2>
-            </div>
-          </div>
-
-          <div className="px-5 py-3 flex flex-col gap-3 overflow-y-auto flex-1 min-h-0">
-            {/* Name + badges */}
-            <div>
-              <h3 className="font-poppins text-xl md:text-2xl font-bold text-primary-100 leading-tight mb-2">
-                {fullName}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                <span
-                  className={`font-poppins inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ${bloodType ? "bg-red-50 text-red-700 border border-red-200" : "bg-gray-100 text-gray-500"}`}
-                >
-                  <Icon icon="ph:drop-fill" className="text-sm" />
-                  {bloodType ?? "Blood Type Unknown"}
-                </span>
-                <span className="font-poppins inline-flex items-center gap-1.5 rounded-full bg-primary-100/10 px-3 py-1 text-sm font-semibold text-primary-100">
-                  <Icon icon="ph:eye-slash-fill" className="text-sm" />
-                  Visually Impaired
-                </span>
-              </div>
-            </div>
-
-            <div className="h-px bg-gray-100" />
-
-            {/* Detail rows */}
-            <div className="space-y-2.5">
-              <DetailRow icon="ph:note-pencil">
-                <p className="font-poppins text-lg font-semibold text-primary-100/60 uppercase tracking-wide mb-0.5">
-                  Medical Notes
-                </p>
-                <p className="font-poppins text-md text-gray-700 leading-snug">
-                  {medicalNotes}
-                </p>
-              </DetailRow>
-
-              <DetailRow icon="ph:cpu">
-                <p className="font-poppins text-lg font-semibold text-primary-100/60 uppercase tracking-wide mb-0.5">
-                  Device ID
-                </p>
-                <p className="font-poppins text-md text-gray-800 font-medium">
-                  {deviceSerial}
-                </p>
-              </DetailRow>
-
-              <DetailRow icon="ph:phone-fill">
-                <p className="font-poppins text-lg font-semibold text-primary-100/60 uppercase tracking-wide mb-0.5">
-                  Phone
-                </p>
-                {userPhone ? (
-                  <a
-                    href={`tel:${userPhone}`}
-                    className="font-poppins text-md font-semibold text-primary-100 hover:underline"
-                  >
-                    {userPhone}
-                  </a>
-                ) : (
-                  <p className="font-poppins text-md text-gray-400 italic">
-                    Not on file
-                  </p>
-                )}
-              </DetailRow>
-
-              <DetailRow icon="ph:envelope-simple-fill">
-                <p className="font-poppins text-lg font-semibold text-primary-100/60 uppercase tracking-wide mb-0.5">
-                  Email
-                </p>
-                {userEmail ? (
-                  <a
-                    href={`mailto:${userEmail}`}
-                    className="font-poppins text-md text-gray-700 hover:underline truncate block"
-                  >
-                    {userEmail}
-                  </a>
-                ) : (
-                  <p className="font-poppins text-md text-gray-400 italic">
-                    Not on file
-                  </p>
-                )}
-              </DetailRow>
-            </div>
-          </div>
+        {/* Mobile tabs */}
+        <div className="flex sm:hidden items-center gap-1 bg-white/10 rounded-xl p-1">
+          <button
+            onClick={() => setActiveTab("vip")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              activeTab === "vip"
+                ? "bg-white text-[#1a4a9f] shadow-sm"
+                : "text-white/80 hover:text-white"
+            }`}
+          >
+            VIP
+          </button>
+          <button
+            onClick={() => setActiveTab("guardian")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              activeTab === "guardian"
+                ? "bg-white text-[#1a4a9f] shadow-sm"
+                : "text-white/80 hover:text-white"
+            }`}
+          >
+            Guardian
+          </button>
         </div>
 
-        {/* Emergency Contacts Card */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
-          <div className="px-5 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="ph:warning-circle-fill"
-                  className="text-lg text-red-500"
-                />
-                <h2 className="font-poppins text-md font-bold uppercase tracking-[0.1em] text-primary-100/70">
-                  Emergency Contacts
-                </h2>
-              </div>
-              {allGuardians.length > 0 && (
-                <span className="font-poppins text-md font-semibold text-primary-100/50">
-                  {allGuardians.length}{" "}
-                  {allGuardians.length === 1 ? "contact" : "contacts"}
-                </span>
-              )}
-            </div>
-          </div>
+        {/* Desktop badge */}
+        <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-white/10 backdrop-blur-sm px-4 py-2 text-white text-xs font-semibold border border-white/20">
+          <Icon
+            icon="ph:warning-diamond-fill"
+            className="text-sm text-amber-300"
+          />
+          Emergency Mode • Active
+        </div>
+      </header>
 
-          <div className="px-5 py-4 flex-1 min-h-0 overflow-y-auto">
-            {allGuardians.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center gap-2 py-8">
-                <Icon
-                  icon="ph:users-three"
-                  className="text-4xl text-gray-300"
-                />
-                <p className="font-poppins text-md font-semibold text-gray-400">
-                  No emergency contacts found
-                </p>
-                <p className="font-poppins text-md text-gray-300">
-                  Guardians will appear here once added.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {allGuardians.map((guardian) => {
-                  const firstName = pick(
-                    guardian.firstName,
-                    guardian.first_name
-                  );
-                  const lastName = pick(guardian.lastName, guardian.last_name);
-                  const name =
-                    [firstName, lastName].filter(Boolean).join(" ") ||
-                    "Unknown";
-                  const initials = (firstName?.[0] ?? "?").toUpperCase();
-                  const phone =
-                    pick(
-                      guardian.contactNumber,
-                      guardian.contact_number,
-                      guardian.guardianPhone
-                    ) || null;
-                  const relationship = pick(
-                    guardian.relationship,
-                    guardian.deviceRelationship
-                  );
-                  const status = pick(guardian.status, "active");
-                  const role = pick(guardian.role, "guardian");
-                  const guardianId =
-                    pick(guardian.guardianId, guardian.guardian_id, name) ||
-                    name;
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6">
+        {/* Mobile view - tabbed content */}
+        <div className="block xl:hidden">
+          {activeTab === "vip" ? (
+            <VIPSection
+              vipFullName={vipFullName}
+              vipImage={vipImage}
+              vipAddress={vipAddress}
+              vipFields={vipFields}
+            />
+          ) : (
+            <GuardianSection
+              emergencyGuardian={emergencyGuardian}
+              formatDateTime={formatDateTime}
+              statusColor={statusColor}
+              capitalize={capitalize}
+            />
+          )}
+        </div>
 
-                  return (
-                    <article
-                      key={guardianId}
-                      className="rounded-xl border border-gray-200 bg-gray-50 p-4 hover:border-primary-100/30 hover:bg-primary-100/[0.02] transition-all"
-                    >
-                      <div className="flex items-start gap-3">
-                        {/* Avatar */}
-                        <div className="w-11 h-11 rounded-full bg-primary-100 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
-                          {initials}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                            <p className="font-poppins text-lg font-bold text-primary-100 leading-tight">
-                              {name}
-                            </p>
-                            {status && (
-                              <span
-                                className={`font-poppins text-lg font-semibold px-2 py-0.5 rounded-full ${statusColor(status)}`}
-                              >
-                                {capitalize(status)}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                            <span className="font-poppins text-lg font-semibold text-primary-100/60 capitalize">
-                              {roleLabel(role)}
-                            </span>
-                            {relationship && (
-                              <>
-                                <span className="text-gray-300 text-md">·</span>
-                                <span className="font-poppins text-md text-gray-500 capitalize">
-                                  {capitalize(relationship)}
-                                </span>
-                              </>
-                            )}
-                          </div>
-
-                          {guardian.email && (
-                            <div className="flex items-center gap-1.5 text-gray-500 mb-1.5">
-                              <Icon
-                                icon="ph:envelope-simple"
-                                className="text-md flex-shrink-0"
-                              />
-                              <a
-                                href={`mailto:${guardian.email}`}
-                                className="font-poppins text-md hover:underline truncate"
-                              >
-                                {guardian.email}
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Call button / no phone */}
-                      {phone ? (
-                        <a
-                          href={`tel:${phone}`}
-                          className="mt-2.5 flex items-center justify-center gap-2 w-full py-2 rounded-xl bg-primary-100 text-white font-poppins font-bold text-base hover:bg-primary-100/90 active:scale-[0.98] transition-all"
-                        >
-                          <Icon
-                            icon="ph:phone-call-fill"
-                            className="text-base"
-                          />
-                          {phone}
-                        </a>
-                      ) : (
-                        <div className="mt-2.5 flex items-center justify-center gap-2 w-full py-2 rounded-xl bg-gray-100 text-gray-400 font-poppins text-md italic">
-                          <Icon icon="ph:phone-slash" className="text-md" />
-                          No phone number on file
-                        </div>
-                      )}
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+        {/* Desktop view - side by side */}
+        <div className="hidden xl:grid xl:grid-cols-2 gap-6 h-full">
+          <VIPSection
+            vipFullName={vipFullName}
+            vipImage={vipImage}
+            vipAddress={vipAddress}
+            vipFields={vipFields}
+          />
+          <GuardianSection
+            emergencyGuardian={emergencyGuardian}
+            formatDateTime={formatDateTime}
+            statusColor={statusColor}
+            capitalize={capitalize}
+          />
         </div>
       </div>
     </main>
   );
 };
+
+// Extracted VIP Section component
+const VIPSection = ({ vipFullName, vipImage, vipAddress, vipFields }) => (
+  <section className="bg-white/90 backdrop-blur-sm border border-white/50 rounded-3xl shadow-xl overflow-hidden h-full flex flex-col">
+    <div className="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+      <div className="flex items-center gap-3">
+        <div className="bg-[#1a4a9f]/10 p-2.5 rounded-xl">
+          <Icon icon="ph:user-focus-fill" className="text-2xl text-[#1a4a9f]" />
+        </div>
+        <div>
+          <h2 className="text-lg md:text-xl font-bold tracking-wide text-slate-800">
+            VIP Profile
+          </h2>
+          <p className="text-xs text-slate-500">
+            Personal information and device details
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div className="p-6 md:p-7 space-y-6 flex-1 overflow-y-auto">
+      {/* VIP Header Card */}
+      <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <div className="flex items-center gap-5">
+          <div className="relative">
+            <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-[#1a4a9f] to-[#0a1e3f]">
+              {vipImage ? (
+                <img
+                  src={resolveProfileImageSrc(vipImage)}
+                  alt={vipFullName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white text-4xl font-bold">
+                  {vipFullName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className="absolute -bottom-1 -right-1 bg-emerald-500 w-6 h-6 rounded-full border-4 border-white"></div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h3 className="text-2xl md:text-3xl font-bold text-[#0a1e3f] leading-tight mb-1">
+              {vipFullName}
+            </h3>
+            {/* <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
+              <Icon icon="ph:map-pin-fill" className="text-[#1a4a9f]" />
+              <span className="truncate">
+                {vipAddress || "Address not available"}
+              </span>
+            </div> */}
+            <div className="flex items-center gap-2 text-xs">
+              <span className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200">
+                Active
+              </span>
+              <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
+                VIP
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {vipFields.map((item) => (
+          <InfoTile
+            key={item.label}
+            icon={item.icon}
+            label={item.label}
+            value={item.value || "Not set"}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// Extracted Guardian Section component
+const GuardianSection = ({
+  emergencyGuardian,
+  formatDateTime,
+  statusColor,
+  capitalize
+}) => (
+  <section className="bg-white/90 backdrop-blur-sm border border-white/50 rounded-3xl shadow-xl overflow-hidden h-full flex flex-col">
+    <div className="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-[#1a4a9f]/10 p-2.5 rounded-xl">
+            <Icon
+              icon="ph:users-three-fill"
+              className="text-2xl text-[#1a4a9f]"
+            />
+          </div>
+          <div>
+            <h2 className="text-lg md:text-xl font-bold tracking-wide text-slate-800">
+              Emergency Guardian
+            </h2>
+            <p className="text-xs text-slate-500">Primary contact person</p>
+          </div>
+        </div>
+        <span className="text-xs font-semibold rounded-full bg-blue-50 text-blue-700 px-3 py-1.5 border border-blue-200">
+          1 contact
+        </span>
+      </div>
+    </div>
+
+    <div className="p-6 md:p-7 flex-1 overflow-y-auto">
+      {!emergencyGuardian ? (
+        <EmptyGuardianState />
+      ) : (
+        <div className="space-y-5">
+          {/* Guardian Profile Card */}
+          <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="relative">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-[#1a4a9f] to-[#0a1e3f]">
+                  {emergencyGuardian.image ? (
+                    <img
+                      src={resolveProfileImageSrc(emergencyGuardian.image)}
+                      alt={emergencyGuardian.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-3xl">
+                      {emergencyGuardian.initials}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h3 className="font-bold text-[#0a1e3f] text-2xl md:text-3xl leading-tight">
+                    {emergencyGuardian.name}
+                  </h3>
+                  <span
+                    className={`text-xs font-semibold rounded-full px-3 py-1 border ${statusColor(emergencyGuardian.status)}`}
+                  >
+                    {capitalize(emergencyGuardian.status)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-slate-600 mb-3">
+                  <Icon icon="ph:briefcase" className="text-[#1a4a9f]" />
+                  <span>{capitalize(emergencyGuardian.role)}</span>
+                  {emergencyGuardian.relationship && (
+                    <>
+                      <span className="text-slate-300">•</span>
+                      <span>{capitalize(emergencyGuardian.relationship)}</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  {emergencyGuardian.phone && (
+                    <div className="bg-slate-100 rounded-xl p-2 text-center">
+                      <p className="text-xs text-slate-500">Phone</p>
+                      <p className="text-sm font-semibold text-slate-700 truncate">
+                        {emergencyGuardian.phone}
+                      </p>
+                    </div>
+                  )}
+                  {emergencyGuardian.email && (
+                    <div className="bg-slate-100 rounded-xl p-2 text-center">
+                      <p className="text-xs text-slate-500">Email</p>
+                      <p className="text-sm font-semibold text-slate-700 truncate">
+                        {emergencyGuardian.email}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Details Grid */}
+          <div className="grid grid-cols-1 gap-3">
+            <DetailCard
+              icon="ph:envelope-simple"
+              label="Email"
+              value={emergencyGuardian.email || "Not on file"}
+              href={
+                emergencyGuardian.email
+                  ? `mailto:${emergencyGuardian.email}`
+                  : null
+              }
+            />
+            <DetailCard
+              icon="ph:phone"
+              label="Contact"
+              value={emergencyGuardian.phone || "Not on file"}
+              href={
+                emergencyGuardian.phone
+                  ? `tel:${emergencyGuardian.phone}`
+                  : null
+              }
+            />
+            <DetailCard
+              icon="ph:map-pin"
+              label="Address"
+              value={emergencyGuardian.address || "Not set"}
+            />
+            <DetailCard
+              icon="ph:clock-counter-clockwise"
+              label="Updated At"
+              value={formatDateTime(emergencyGuardian.updatedAt)}
+            />
+          </div>
+
+          {/* Call Button */}
+          {emergencyGuardian.phone && (
+            <div className="group mt-5 inline-flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-gradient-to-r from-[#1a4a9f] to-[#0a1e3f] text-white text-base md:text-lg font-semibold hover:shadow-lg hover:shadow-[#1a4a9f]/25 transition-all duration-300 transform hover:scale-[1.02]">
+              <Icon
+                icon="ph:phone-call-fill"
+                className="text-xl group-hover:animate-pulse"
+              />
+              Call Emergency Guardian
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </section>
+);
+
+// Empty state component
+const EmptyGuardianState = () => (
+  <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center rounded-2xl border-2 border-dashed border-slate-200 bg-gradient-to-br from-slate-50 to-white px-6">
+    <div className="bg-slate-100 p-4 rounded-2xl mb-4">
+      <Icon icon="ph:user-circle-dashed" className="text-6xl text-slate-400" />
+    </div>
+    <p className="text-lg font-semibold text-slate-700 mb-2">
+      No emergency guardian found
+    </p>
+    <p className="text-sm text-slate-500 max-w-[200px]">
+      Assign an emergency contact to show details here
+    </p>
+  </div>
+);
+
+// Enhanced InfoTile component
+const InfoTile = ({ icon, label, value }) => (
+  <div className="group rounded-xl border border-slate-200 bg-white hover:border-[#1a4a9f]/30 hover:shadow-md transition-all duration-300 p-3 md:p-3.5">
+    <div className="flex items-center gap-2 text-slate-400 group-hover:text-[#1a4a9f] mb-1 transition-colors">
+      <Icon icon={icon} className="text-base" />
+      <p className="text-xs font-semibold uppercase tracking-wide">{label}</p>
+    </div>
+    <p className="text-sm md:text-base text-slate-700 break-words leading-relaxed font-medium pl-6">
+      {value}
+    </p>
+  </div>
+);
+
+// Enhanced DetailCard component
+const DetailCard = ({ icon, label, value, href = null }) => (
+  <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-all">
+    <div className="bg-white p-2 rounded-lg shadow-sm">
+      <Icon icon={icon} className="text-[#1a4a9f] text-lg" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-xs uppercase tracking-wide text-slate-500 font-semibold mb-0.5">
+        {label}
+      </p>
+      {href ? (
+        <a
+          href={href}
+          className="text-sm md:text-base text-[#1a4a9f] hover:text-[#0a1e3f] hover:underline font-medium break-words transition-colors"
+        >
+          {value}
+        </a>
+      ) : (
+        <p className="text-sm md:text-base text-slate-700 break-words font-medium">
+          {value}
+        </p>
+      )}
+    </div>
+  </div>
+);
 
 export default EmergencyDetails;
