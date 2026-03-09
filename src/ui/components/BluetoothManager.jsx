@@ -5,7 +5,8 @@ import Button from "@/ui/components/Button";
 import {
   useUserStore,
   useGuardiansStore,
-  useBluetoothStore
+  useBluetoothStore,
+  useRealtimeStore
 } from "@/stores/useStore";
 import Modal from "./Modal";
 import { wsApi } from "@/api/ws-api";
@@ -13,6 +14,7 @@ import { useToast } from "@/context/ToastContext";
 
 const BluetoothManager = () => {
   const { user } = useUserStore();
+  const { _wsConnected, connectionStatus } = useRealtimeStore();
   const { currentGuardianRole } = useGuardiansStore();
   const {
     requestScan,
@@ -293,7 +295,7 @@ const BluetoothManager = () => {
           <div className="flex flex-col gap-3 w-full sm:w-auto">
             <Button
               onClick={scanForDevices}
-              disabled={isScanning}
+              disabled={isScanning || !_wsConnected || !connectionStatus}
               className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center gap-2 justify-center"
             >
               <Icon
