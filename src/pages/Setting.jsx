@@ -629,18 +629,49 @@ const Setting = () => {
   });
 
   const [privacy, setPrivacy] = useState({
-    location: true,
+    location: false,
     twoFactor: true,
     analytics: false
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const {
+    _guardianWatchId,
+    isGuardianTracking,
+    startGuardianTracking,
+    stopGuardianTracking
+  } = useRealtimeStore();
+
+  const isLocationTrackingEnabled = _guardianWatchId !== null;
+
+  useEffect(() => {
+    setPrivacy((prev) => ({
+      ...prev,
+      location: isLocationTrackingEnabled
+    }));
+  }, [isLocationTrackingEnabled]);
+
   const toggleNotification = (key) => {
     setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const togglePrivacy = (key) => {
+  const togglePrivacy = async (key) => {
+    if (key === "location") {
+      if (!("geolocation" in navigator)) {
+        alert("Geolocation is not supported by this browser.");
+        return;
+      }
+
+      if (isLocationTrackingEnabled) {
+        stopGuardianTracking();
+      } else {
+        startGuardianTracking();
+      }
+
+      return;
+    }
+
     setPrivacy((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -719,7 +750,7 @@ const Setting = () => {
                   icon="solar:map-point-bold"
                   title="Location Tracking"
                   description="Allow guardians to view your location"
-                  checked={privacy.location}
+                  checked={isLocationTrackingEnabled}
                   onChange={() => togglePrivacy("location")}
                 />
                 <ToggleItem
