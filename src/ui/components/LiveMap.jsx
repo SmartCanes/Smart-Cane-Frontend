@@ -25,6 +25,7 @@ import {
   useDevicesStore,
   useRealtimeStore,
   useRouteStore,
+  useSettingsStore,
   useUserStore
 } from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";

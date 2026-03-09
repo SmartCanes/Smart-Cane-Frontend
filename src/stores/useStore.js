@@ -49,7 +49,6 @@ export const useRealtimeStore = create(
       _wsConnected: false,
       connectionStatus: false,
       _guardianWatchId: null,
-      isGuardianTracking: false,
       emergency: false,
       canePosition: null,
       guardianPosition: null,
@@ -162,6 +161,7 @@ export const useRealtimeStore = create(
 
           const lat = payload?.lat;
           const lng = payload?.lng;
+          console.log("Received GPS update:", { lat, lng, payload });
 
           set((state) => ({
             canePosition:
@@ -207,7 +207,7 @@ export const useRealtimeStore = create(
               console.error("Failed to track guardian:", error.message),
             { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
           );
-          set({ _guardianWatchId: watchId, isGuardianTracking: true });
+          set({ _guardianWatchId: watchId });
         } else if (!("geolocation" in navigator)) {
           console.error("Geolocation is not supported by this browser.");
         }
@@ -219,8 +219,7 @@ export const useRealtimeStore = create(
           navigator.geolocation.clearWatch(watchId);
           set({
             _guardianWatchId: null,
-            guardianPosition: null,
-            isGuardianTracking: false
+            guardianPosition: null
           });
         }
       },
@@ -866,6 +865,135 @@ export const useActivityReportsStore = create(
       onRehydrateStorage: () => (state) => {
         state?.setState?.({ hasHydrated: true });
       }
+    }
+  )
+);
+
+export const useSettingsStore = create(
+  persist(
+    (set, get) => ({
+      settings: {
+        notifications: {
+          push: true,
+          email: true,
+          sms: false,
+          emergency: true
+        },
+        privacy: {
+          location: true,
+          twoFactor: true,
+          analytics: false
+        },
+        demoMode: false
+      },
+
+      setSettings: (updater) =>
+        set((state) => ({
+          settings:
+            typeof updater === "function"
+              ? updater(state.settings)
+              : { ...state.settings, ...updater }
+        })),
+
+      updateNotifications: (updates) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            notifications: {
+              ...state.settings.notifications,
+              ...updates
+            }
+          }
+        })),
+
+      updatePrivacy: (updates) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            privacy: {
+              ...state.settings.privacy,
+              ...updates
+            }
+          }
+        })),
+
+      toggleNotification: (key) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            notifications: {
+              ...state.settings.notifications,
+              [key]: !state.settings.notifications[key]
+            }
+          }
+        })),
+
+      togglePrivacy: (key) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            privacy: {
+              ...state.settings.privacy,
+              [key]: !state.settings.privacy[key]
+            }
+          }
+        })),
+
+      setDemoMode: (value) => {
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            demoMode: value
+          }
+        }));
+
+        wsApi.emit("updateDemoMode", {
+          enabled: value
+        });
+      },
+
+      toggleDemoMode: () => {
+        const nextValue = !get().settings.demoMode;
+
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            demoMode: nextValue
+          }
+        }));
+
+        wsApi.emit("updateDemoMode", {
+          enabled: nextValue
+        });
+      },
+
+      clearSettings: () =>
+        set({
+          settings: {
+            notifications: {
+              push: true,
+              email: true,
+              sms: false,
+              emergency: true
+            },
+            privacy: {
+              location: true,
+              twoFactor: true,
+              analytics: false
+            },
+            demoMode: false
+          }
+        }),
+
+      getSettings: () => get().settings,
+      getNotifications: () => get().settings.notifications,
+      getPrivacy: () => get().settings.privacy,
+      isDemoMode: () => get().settings.demoMode
+    }),
+    {
+      name: "settings-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ settings: state.settings })
     }
   )
 );

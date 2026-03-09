@@ -10,7 +10,7 @@ import {
   useGuardiansStore,
   useRealtimeStore,
   useRouteStore,
-  useUIStore,
+  useSettingsStore,
   useUserStore
 } from "@/stores/useStore";
 
@@ -621,39 +621,28 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 };
 
 const Setting = () => {
-  const [notifications, setNotifications] = useState({
-    push: true,
-    email: true,
-    sms: false,
-    emergency: true
-  });
-
-  const [privacy, setPrivacy] = useState({
-    location: false,
-    twoFactor: true,
-    analytics: false
-  });
+  const { settings, setSettings, toggleNotification, toggleDemoMode } =
+    useSettingsStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const {
-    _guardianWatchId,
-    isGuardianTracking,
-    startGuardianTracking,
-    stopGuardianTracking
-  } = useRealtimeStore();
+  const { _guardianWatchId, startGuardianTracking, stopGuardianTracking } =
+    useRealtimeStore();
 
   const isLocationTrackingEnabled = _guardianWatchId !== null;
 
   useEffect(() => {
-    setPrivacy((prev) => ({
+    setSettings((prev) => ({
       ...prev,
-      location: isLocationTrackingEnabled
+      privacy: {
+        ...prev.privacy,
+        location: isLocationTrackingEnabled
+      }
     }));
-  }, [isLocationTrackingEnabled]);
+  }, [isLocationTrackingEnabled, setSettings]);
 
-  const toggleNotification = (key) => {
-    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
+  const handleNotificationToggle = (key) => {
+    toggleNotification(key);
   };
 
   const togglePrivacy = async (key) => {
@@ -672,7 +661,13 @@ const Setting = () => {
       return;
     }
 
-    setPrivacy((prev) => ({ ...prev, [key]: !prev[key] }));
+    setSettings((prev) => ({
+      ...prev,
+      privacy: {
+        ...prev.privacy,
+        [key]: !prev.privacy[key]
+      }
+    }));
   };
 
   const openModal = () => {
@@ -708,28 +703,28 @@ const Setting = () => {
                   icon="solar:bell-bold"
                   title="Push Notifications"
                   description="Receive alerts on your device"
-                  checked={notifications.push}
+                  checked={settings.notifications.push}
                   onChange={() => toggleNotification("push")}
                 />
                 <ToggleItem
                   icon="solar:letter-bold"
                   title="Email Notifications"
                   description="Get updates via email"
-                  checked={notifications.email}
+                  checked={settings.notifications.email}
                   onChange={() => toggleNotification("email")}
                 />
                 <ToggleItem
                   icon="solar:chat-round-dots-bold"
                   title="SMS Alerts"
                   description="Receive text messages for urgent alerts"
-                  checked={notifications.sms}
+                  checked={settings.notifications.sms}
                   onChange={() => toggleNotification("sms")}
                 />
                 <ToggleItem
                   icon="solar:danger-triangle-bold"
                   title="Emergency Alerts"
                   description="Critical notifications for safety events"
-                  checked={notifications.emergency}
+                  checked={settings.notifications.emergency}
                   onChange={() => toggleNotification("emergency")}
                 />
               </div>
@@ -750,23 +745,43 @@ const Setting = () => {
                   icon="solar:map-point-bold"
                   title="Location Tracking"
                   description="Allow guardians to view your location"
-                  checked={isLocationTrackingEnabled}
+                  checked={settings.privacy.location}
                   onChange={() => togglePrivacy("location")}
                 />
                 <ToggleItem
                   icon="solar:shield-check-bold"
                   title="Two-Factor Authentication"
                   description="Extra security for your account"
-                  checked={privacy.twoFactor}
+                  checked={settings.privacy.twoFactor}
                   onChange={() => togglePrivacy("twoFactor")}
                 />
                 <ToggleItem
                   icon="carbon:analytics"
                   title="Usage Analytics"
                   description="Help improve iCane with usage data"
-                  checked={privacy.analytics}
+                  checked={settings.privacy.analytics}
                   onChange={() => togglePrivacy("analytics")}
                 />
+              </div>
+              <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
+                <button
+                  onClick={() => toggleDemoMode()}
+                  className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                    settings.demoMode
+                      ? "bg-green-600 text-white hover:bg-green-700"
+                      : "border border-[#11285A] text-[#11285A] hover:bg-blue-50 hover:border-[#0d1f4a]"
+                  }`}
+                >
+                  <Icon
+                    icon={
+                      settings.demoMode
+                        ? "mdi:play-circle"
+                        : "mdi:play-circle-outline"
+                    }
+                    className="text-lg"
+                  />
+                  {settings.demoMode ? "Disable Demo Mode" : "Enable Demo Mode"}
+                </button>
               </div>
 
               <div className="mt-8 pt-6 border-t border-gray-100">
