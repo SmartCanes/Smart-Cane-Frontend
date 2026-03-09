@@ -32,7 +32,7 @@ const BluetoothManager = () => {
 
   const [isScanning, setIsScanning] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
-  const [viewMode, setViewMode] = useState("all"); // 'all', 'paired', 'available'
+  const [viewMode, setViewMode] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const [pairModal, setPairModal] = useState({
@@ -56,7 +56,12 @@ const BluetoothManager = () => {
     action: "connect"
   });
 
+  const [pendingAction, setPendingAction] = useState(null);
+  const [hasTriggeredAction, setHasTriggeredAction] = useState(false);
+
   const timeoutRef = useRef(null);
+  const prevProcessingRef = useRef(false);
+
   const currentRole = currentGuardianRole(user?.guardianId);
   const canManageBluetooth =
     currentRole === "primary" || currentRole === "secondary";
@@ -120,16 +125,20 @@ const BluetoothManager = () => {
   ]);
 
   useEffect(() => {
-    if (!isBluetoothProcessing) {
+    const wasProcessing = prevProcessingRef.current;
+
+    if (hasTriggeredAction && wasProcessing && !isBluetoothProcessing) {
+      setPendingAction(null);
+      setHasTriggeredAction(false);
+
       setPairModal({ show: false, device: null });
       setUnpairModal({ show: false, device: null });
-      setConnectionModal({ show: false, device: null });
+      setForgetModal({ show: false, device: null });
+      setConnectionModal({ show: false, device: null, action: "connect" });
     }
-  }, [isBluetoothProcessing]);
 
-  // useEffect(() => {
-  //   scanForDevices();
-  // }, []);
+    prevProcessingRef.current = isBluetoothProcessing;
+  }, [isBluetoothProcessing, hasTriggeredAction]);
 
   const scanForDevices = async () => {
     setIsScanning(true);
@@ -144,22 +153,35 @@ const BluetoothManager = () => {
     }, 12000);
   };
 
-  // Handle device pairing
+  const startAction = (action) => {
+    setPendingAction(action);
+    setHasTriggeredAction(true);
+  };
+
   const handlePairDevice = async (device) => {
+    if (!device) return;
+    startAction("pair");
     pairDevice(device.mac);
   };
 
-  // Handle device unpairing
   const handleUnpairDevice = async (device) => {
+    if (!device) return;
+    startAction("unpair");
     unpairDevice(device.mac);
   };
 
-  // Handle forgetting a device
-  const handleForgetDevice = async (device) => {};
+  const handleForgetDevice = async (device) => {
+    if (!device) return;
+    startAction("forget");
 
-  // Handle connection/disconnection
+    // Replace with your actual store action
+    // forgetDevice(device.mac);
+  };
+
   const handleConnectionToggle = async (device, action) => {
     if (!device) return;
+
+    startAction(action);
 
     if (action === "connect") {
       connectDevice(device.mac);
@@ -167,6 +189,7 @@ const BluetoothManager = () => {
       disconnectDevice(device.mac);
     }
   };
+
   const filteredDevices = devices.filter((device) => {
     const matchesSearch =
       device.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -183,16 +206,11 @@ const BluetoothManager = () => {
       className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6"
     >
       <div className="mx-auto w-full space-y-4 sm:space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
               Bluetooth Management
             </h2>
-            {/* <p className="text-sm sm:text-base text-gray-600">
-              Manage and monitor Bluetooth devices connected to your iCane
-              system
-            </p> */}
             <p className="text-gray-500 text-sm mt-1">
               {devices.filter((d) => d.paired).length} paired •{" "}
               {devices.filter((d) => d.connected).length} connected
@@ -216,7 +234,6 @@ const BluetoothManager = () => {
               {isScanning ? "Scanning..." : "Scan for Devices"}
             </Button>
 
-            {/* Filter Tabs */}
             <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
               {["all", "paired", "available"].map((mode) => (
                 <button
@@ -235,7 +252,6 @@ const BluetoothManager = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
         <div className="relative">
           <Icon
             icon="ph:magnifying-glass-bold"
@@ -250,7 +266,6 @@ const BluetoothManager = () => {
           />
         </div>
 
-        {/* Devices Grid */}
         {filteredDevices.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             {filteredDevices.map((device) => (
@@ -279,13 +294,12 @@ const BluetoothManager = () => {
           />
         )}
 
-        {/* Modals */}
         <PairDeviceModal
           isOpen={pairModal.show}
           device={pairModal.device}
           onClose={() => setPairModal({ show: false, device: null })}
           onConfirm={() => handlePairDevice(pairModal.device)}
-          isSubmitting={isBluetoothProcessing}
+          isSubmitting={pendingAction === "pair" || isBluetoothProcessing}
         />
 
         <UnpairDeviceModal
@@ -293,7 +307,7 @@ const BluetoothManager = () => {
           device={unpairModal.device}
           onClose={() => setUnpairModal({ show: false, device: null })}
           onConfirm={() => handleUnpairDevice(unpairModal.device)}
-          isSubmitting={isBluetoothProcessing}
+          isSubmitting={pendingAction === "unpair" || isBluetoothProcessing}
         />
 
         <ForgetDeviceModal
@@ -301,7 +315,7 @@ const BluetoothManager = () => {
           device={forgetModal.device}
           onClose={() => setForgetModal({ show: false, device: null })}
           onConfirm={() => handleForgetDevice(forgetModal.device)}
-          isSubmitting={isBluetoothProcessing}
+          isSubmitting={pendingAction === "forget" || isBluetoothProcessing}
         />
 
         <ConnectionModal
@@ -317,10 +331,11 @@ const BluetoothManager = () => {
               connectionModal.action
             )
           }
-          isSubmitting={isBluetoothProcessing}
+          isSubmitting={
+            pendingAction === connectionModal.action || isBluetoothProcessing
+          }
         />
 
-        {/* Toast Notification */}
         {toast.show && (
           <Toast
             type={toast.type}
@@ -343,7 +358,6 @@ const BluetoothDeviceCard = ({
   canManage
 }) => {
   const [showActions, setShowActions] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
@@ -442,12 +456,9 @@ const BluetoothDeviceCard = ({
         }`}
       />
 
-      {/* Card Header */}
       <div className="p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-          {/* Device Info */}
           <div className="flex items-start gap-3 min-w-0 flex-1">
-            {/* Icon with Connection Indicator */}
             <div className="relative flex-shrink-0">
               <div
                 className={`p-3 rounded-xl transition-all duration-300 ${
@@ -469,7 +480,7 @@ const BluetoothDeviceCard = ({
                   }`}
                 />
               </div>
-              {/* Animated Pulse for Connected Devices */}
+
               {device.connected && (
                 <span className="absolute -top-1 -right-1 flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -483,7 +494,6 @@ const BluetoothDeviceCard = ({
                 <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate max-w-[150px] sm:max-w-[200px]">
                   {device.name !== "Unknown" ? device.name : "---"}
                 </h3>
-                {/* Device Type Badge - Mobile */}
                 {device.type && (
                   <span className="sm:hidden px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
                     {device.type}
@@ -496,7 +506,6 @@ const BluetoothDeviceCard = ({
             </div>
           </div>
 
-          {/* Status Badges - Desktop */}
           <div className="hidden sm:flex items-center gap-2">
             <span
               className={`px-3 py-1 text-xs font-medium rounded-full ${status.color}`}
@@ -510,7 +519,6 @@ const BluetoothDeviceCard = ({
             )}
           </div>
 
-          {/* Mobile Status Badge - Single Line */}
           <div className="sm:hidden flex items-center justify-between w-full">
             <span
               className={`px-2 py-0.5 text-xs font-medium rounded-full ${status.color}`}
@@ -521,10 +529,8 @@ const BluetoothDeviceCard = ({
         </div>
       </div>
 
-      {/* Device Details Grid */}
       <div className="px-4 sm:px-5 pb-4">
         <div className="grid grid-cols-2 gap-3 mb-4">
-          {/* Signal Strength Card */}
           <div className="bg-gray-50 rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1">
               <Icon
@@ -538,7 +544,6 @@ const BluetoothDeviceCard = ({
             </p>
           </div>
 
-          {/* Battery Level Card */}
           {device.paired &&
           device.batteryLevel !== null &&
           device.batteryLevel !== undefined ? (
@@ -582,7 +587,6 @@ const BluetoothDeviceCard = ({
           )}
         </div>
 
-        {/* Paired Cane Info */}
         {device.pairedCane && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -613,7 +617,6 @@ const BluetoothDeviceCard = ({
           </motion.div>
         )}
 
-        {/* Last Seen */}
         {device.lastSeen && (
           <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg p-2">
             <Icon icon="ph:clock-bold" className="w-3.5 h-3.5" />
@@ -630,10 +633,8 @@ const BluetoothDeviceCard = ({
         )}
       </div>
 
-      {/* Actions Footer */}
       <div className="relative px-4 sm:px-5 py-3 bg-gray-50 border-t border-gray-100">
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
-          {/* Connection/Pair Button */}
           {device.paired ? (
             <motion.button
               whileTap={{ scale: 0.98 }}
@@ -669,14 +670,12 @@ const BluetoothDeviceCard = ({
             </motion.button>
           )}
 
-          {/* Manage Dropdown */}
           <div className="relative flex-1 sm:flex-none" ref={menuRef}>
             <button
               ref={buttonRef}
               onClick={handleManageClick}
               className="w-full sm:w-auto px-4 py-2.5 sm:py-1.5 text-sm text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-xl sm:rounded-lg transition-all flex items-center justify-center gap-2 border border-gray-200 cursor-pointer"
             >
-              {/* <Icon icon="ph:dots-three-bold" className="w-4 h-4" /> */}
               <span className="sm:hidden">Options</span>
               <span className="hidden sm:inline">Manage</span>
               <Icon
@@ -736,19 +735,6 @@ const BluetoothDeviceCard = ({
                         <span>Pair Device</span>
                       </button>
                     )}
-                    {/* <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleActionClick(() => {
-                          // View details action
-                          console.log("View details:", device);
-                        });
-                      }}
-                      className="w-full px-4 py-3 sm:py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 border-t border-gray-100 cursor-pointer transition-colors"
-                    >
-                      <Icon icon="ph:info-bold" className="w-4 h-4" />
-                      <span>Device Details</span>
-                    </button> */}
                   </div>
                 </motion.div>
               )}
@@ -757,7 +743,6 @@ const BluetoothDeviceCard = ({
         </div>
       </div>
 
-      {/* Hover Effect Gradient Overlay */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: isHovered ? 0.03 : 0 }}
@@ -767,7 +752,6 @@ const BluetoothDeviceCard = ({
   );
 };
 
-// Modal Components
 const PairDeviceModal = ({
   isOpen,
   device,
@@ -853,7 +837,6 @@ const ConnectionModal = ({
   />
 );
 
-// Empty State Component
 const EmptyState = ({ isScanning, onScan, viewMode }) => (
   <div className="text-center py-12">
     <Icon
