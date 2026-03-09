@@ -7,10 +7,9 @@ import {
   useGuardiansStore,
   useBluetoothStore
 } from "@/stores/useStore";
-
-import Toast from "./Toast";
 import Modal from "./Modal";
 import { wsApi } from "@/api/ws-api";
+import { useToast } from "@/context/ToastContext";
 
 const BluetoothManager = () => {
   const { user } = useUserStore();
@@ -29,9 +28,9 @@ const BluetoothManager = () => {
     handleConnectStatus,
     isBluetoothProcessing
   } = useBluetoothStore();
+  const { showToast } = useToast();
 
   const [isScanning, setIsScanning] = useState(false);
-  const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [viewMode, setViewMode] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -68,7 +67,17 @@ const BluetoothManager = () => {
 
   useEffect(() => {
     const deviceListener = (data) => {
-      const devices = data?.payload?.devices || data?.devices;
+      const devices = data?.devices || data?.devices;
+      const error = data?.error;
+
+      if (error) {
+        showToast({
+          show: true,
+          type: "error",
+          message: error
+        });
+      }
+
       if (!devices) return;
 
       handleBluetoothPayload({
@@ -85,18 +94,82 @@ const BluetoothManager = () => {
 
     const pairListener = (data) => {
       handlePairStatus(data);
+
+      if (data?.status === "failed") {
+        showToast({
+          show: true,
+          type: "error",
+          message: data?.error || "Pairing failed"
+        });
+      }
+
+      if (data?.status === "success") {
+        showToast({
+          show: true,
+          type: "success",
+          message: "Device paired successfully"
+        });
+      }
     };
 
     const unpairListener = (data) => {
       handleUnpairStatus(data);
+
+      if (data?.status === "failed") {
+        showToast({
+          show: true,
+          type: "error",
+          message: data?.error || "Unpairing failed"
+        });
+      }
+
+      if (data?.status === "success") {
+        showToast({
+          show: true,
+          type: "success",
+          message: "Device unpaired successfully"
+        });
+      }
     };
 
     const connectListener = (data) => {
       handleConnectStatus(data);
+
+      if (data?.status === "failed") {
+        showToast({
+          show: true,
+          type: "error",
+          message: data?.error || "Connection failed"
+        });
+      }
+
+      if (data?.status === "success") {
+        showToast({
+          show: true,
+          type: "success",
+          message: "Device connected successfully"
+        });
+      }
     };
 
     const disconnectListener = (data) => {
       handleDisconnectStatus(data);
+
+      if (data?.status === "failed") {
+        showToast({
+          show: true,
+          type: "error",
+          message: data?.error || "Disconnection failed"
+        });
+      }
+
+      if (data?.status === "success") {
+        showToast({
+          show: true,
+          type: "success",
+          message: "Device disconnected successfully"
+        });
+      }
     };
 
     wsApi.on("bluetoothDevices", deviceListener);
@@ -335,15 +408,6 @@ const BluetoothManager = () => {
             pendingAction === connectionModal.action || isBluetoothProcessing
           }
         />
-
-        {toast.show && (
-          <Toast
-            type={toast.type}
-            message={toast.message}
-            position="bottom-right"
-            onClose={() => setToast({ show: false, type: "", message: "" })}
-          />
-        )}
       </div>
     </main>
   );
