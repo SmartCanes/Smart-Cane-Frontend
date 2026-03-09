@@ -3,10 +3,12 @@ import { Icon } from "@iconify/react";
 import Toast from "./Toast";
 import { validateField } from "@/utils/ValidationHelper";
 import { wsApi } from "@/api/ws-api";
+import { useDevicesStore } from "@/stores/useStore";
 
 const SendNote = () => {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { selectedDevice } = useDevicesStore();
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     title: "",
@@ -74,7 +76,8 @@ const SendNote = () => {
       <div className="bg-white rounded-2xl shadow-sm p-6 w-full font-poppins">
         <h3 className="text-xl font-semibold text-gray-900 mb-1">Send Note</h3>
         <p className="text-sm text-gray-500 mb-6">
-          Compose and send a message to your contacts
+          Compose and send a message to{" "}
+          {selectedDevice?.vip?.firstName ? selectedDevice?.vip?.firstName : "your device"}
         </p>
 
         <div className="mb-4">
