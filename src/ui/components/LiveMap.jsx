@@ -10,6 +10,7 @@ import {
   Polyline
 } from "react-leaflet";
 import { Icon } from "@iconify/react";
+import "leaflet/dist/leaflet.css";
 import { AnimatePresence, motion } from "framer-motion";
 import L from "leaflet";
 import CustomZoomControl from "./CustomZoomControl";
@@ -17,6 +18,9 @@ import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
 import { wsApi } from "@/api/ws-api";
 import "leaflet-polylinedecorator";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import {
   useDevicesStore,
   useRealtimeStore,
@@ -24,6 +28,8 @@ import {
   useUserStore
 } from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+
+delete L.Icon.Default.prototype._getIconUrl;
 
 const circleAvatarIcon = (imgUrl, size = 40) => {
   return L.divIcon({
@@ -42,6 +48,12 @@ const circleAvatarIcon = (imgUrl, size = 40) => {
     iconAnchor: [size / 2, size / 2]
   });
 };
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow
+});
 
 const SmoothMarker = ({ position, icon, duration = 400 }) => {
   const markerRef = useRef(null);
