@@ -15,8 +15,8 @@ const formatCoordinate = (value) => {
 const getGpsBadge = (gps) => {
   if (!gps || Number(gps.status) === 0) {
     return {
-      label: "Off",
-      className: "bg-gray-100 text-gray-700 border-gray-200"
+      label: "No Signal",
+      className: "bg-red-100 text-red-700 border-red-200"
     };
   }
 
@@ -28,7 +28,7 @@ const getGpsBadge = (gps) => {
   }
 
   return {
-    label: "Starting",
+    label: "Low Signal",
     className: "bg-yellow-100 text-yellow-700 border-yellow-200"
   };
 };
