@@ -1042,7 +1042,7 @@ const Register = () => {
                 {step === 3 && !showScanner && (
                   <div className="space-y-6">
                     {/* OTP Input Boxes */}
-                    <div className="flex justify-center gap-3">
+                    <div className="flex justify-center gap-2 lg:gap-3">
                       {otp.map((digit, index) => (
                         <input
                           key={index}
@@ -1055,7 +1055,7 @@ const Register = () => {
                             handleOtpChange(index, e.target.value)
                           }
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                          className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
+                          className="w-10 h-10 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-center text-xl lg:text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none"
                         />
                       ))}
                     </div>
