@@ -18,6 +18,7 @@ const BluetoothManager = () => {
   const { currentGuardianRole } = useGuardiansStore();
   const {
     requestScan,
+    isScanning,
     devices,
     handleBluetoothPayload,
     pairDevice,
@@ -29,11 +30,11 @@ const BluetoothManager = () => {
     handleDisconnectStatus,
     handleConnectStatus,
     isBluetoothProcessing,
-    refreshBluetoothDevices
+    refreshBluetoothDevices,
+    handleScanStatus
   } = useBluetoothStore();
   const { showToast } = useToast();
 
-  const [isScanning, setIsScanning] = useState(false);
   const [viewMode, setViewMode] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -87,8 +88,6 @@ const BluetoothManager = () => {
       handleBluetoothPayload({
         payload: { devices }
       });
-
-      setIsScanning(false);
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -181,6 +180,7 @@ const BluetoothManager = () => {
     wsApi.on("unpairStatus", unpairListener);
     wsApi.on("connectStatus", connectListener);
     wsApi.on("disconnectStatus", disconnectListener);
+    wsApi.on("scanStatus", handleScanStatus);
 
     return () => {
       wsApi.off("bluetoothDevices", deviceListener);
@@ -188,6 +188,7 @@ const BluetoothManager = () => {
       wsApi.off("unpairStatus", unpairListener);
       wsApi.off("connectStatus", connectListener);
       wsApi.off("disconnectStatus", disconnectListener);
+      wsApi.off("scanStatus", handleScanStatus);
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -218,16 +219,13 @@ const BluetoothManager = () => {
   }, [isBluetoothProcessing, hasTriggeredAction]);
 
   const scanForDevices = async () => {
-    setIsScanning(true);
     requestScan();
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
-    timeoutRef.current = setTimeout(() => {
-      setIsScanning(false);
-    }, 12000);
+    timeoutRef.current = setTimeout(() => {}, 12000);
   };
 
   useEffect(() => {
@@ -255,9 +253,7 @@ const BluetoothManager = () => {
   const handleForgetDevice = async (device) => {
     if (!device) return;
     startAction("forget");
-
-    // Replace with your actual store action
-    // forgetDevice(device.mac);
+    unpairDevice(device.mac);
   };
 
   const handleConnectionToggle = async (device, action) => {
@@ -282,7 +278,7 @@ const BluetoothManager = () => {
       device.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       device.deviceId?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    if (viewMode === "paired") return isKnownDevice(device) && matchesSearch;
+    if (viewMode === "known") return isKnownDevice(device) && matchesSearch;
     if (viewMode === "available")
       return isAvailableDevice(device) && matchesSearch;
 
@@ -324,7 +320,7 @@ const BluetoothManager = () => {
             </Button>
 
             <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
-              {["all", "paired", "available"].map((mode) => (
+              {["all", "known", "available"].map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
@@ -520,7 +516,7 @@ const BluetoothDeviceCard = ({
   const canConnect = (device) => device.paired && !device.connected;
   const canDisconnect = (device) => device.paired && device.connected;
   const canUnpair = (device) => device.paired;
-  const canForget = (device) => !device.connected;
+  const canForget = (device) => !device.connected && !device.paired;
 
   return (
     <motion.div

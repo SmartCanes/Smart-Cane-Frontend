@@ -310,10 +310,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                  d.deviceId === updatedDevice.deviceId
-                    ? { ...d, ...updatedDevice }
-                    : d
-                )
+                d.deviceId === updatedDevice.deviceId
+                  ? { ...d, ...updatedDevice }
+                  : d
+              )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -406,10 +406,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                    g.guardianId === guardian.guardianId
-                      ? { ...g, ...guardian }
-                      : g
-                  )
+                  g.guardianId === guardian.guardianId
+                    ? { ...g, ...guardian }
+                    : g
+                )
                 : [...d.guardians, guardian]
             };
           })
@@ -428,11 +428,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                  ...d,
-                  guardians: d.guardians.filter(
-                    (g) => g.guardianId !== guardianId
-                  )
-                }
+                ...d,
+                guardians: d.guardians.filter(
+                  (g) => g.guardianId !== guardianId
+                )
+              }
               : d
           )
         })),
@@ -612,61 +612,79 @@ export const useBluetoothStore = create(
       _wsListenerAttached: false,
 
       handleBluetoothPayload: (data) => {
-        if (!data?.payload?.devices) return;
+        if (!data?.payload?.devices) {
+          set({
+            devices: [],
+            lastUpdatedAt: Date.now()
+          });
+          return;
+        }
 
         const incomingDevices = data.payload.devices;
 
-        set((state) => {
-          const map = new Map();
+        const normalizedDevices = incomingDevices
+          .filter((device) => device?.mac)
+          .map((device) => ({
+            mac: device.mac,
+            deviceId: device.deviceId ?? device.mac,
+            name: device.name ?? "Unknown",
+            paired: device.paired ?? false,
+            connected: device.connected ?? false,
+            trusted: device.trusted ?? false,
+            type: device.type ?? "Unknown",
+            icon: device.icon ?? "",
+            rssi: device.rssi != null ? device.rssi : null,
+            batteryLevel:
+              device.batteryLevel != null ? device.batteryLevel : null,
+            lastSeen: device.lastSeen ?? null
+          }));
 
-          for (const device of state.devices) {
-            map.set(device.mac, device);
-          }
+        const uniqueMap = new Map();
 
-          for (const incoming of incomingDevices) {
-            const existing = map.get(incoming.mac);
+        for (const device of normalizedDevices) {
+          uniqueMap.set(device.mac, device);
+        }
 
-            map.set(incoming.mac, {
-              ...existing,
-              ...incoming,
-              mac: incoming.mac,
-              name: incoming.name ?? existing?.name ?? "Unknown",
-              deviceId: incoming.deviceId ?? existing?.deviceId ?? incoming.mac,
-              paired: incoming.paired ?? existing?.paired ?? false,
-              connected: incoming.connected ?? existing?.connected ?? false,
-              trusted: incoming.trusted ?? existing?.trusted ?? false,
-              type: incoming.type ?? existing?.type,
-              icon: incoming.icon ?? existing?.icon,
-              rssi:
-                incoming.rssi != null
-                  ? incoming.rssi
-                  : (existing?.rssi ?? null),
-              batteryLevel:
-                incoming.batteryLevel != null
-                  ? incoming.batteryLevel
-                  : (existing?.batteryLevel ?? null),
-              lastSeen: incoming.lastSeen ?? existing?.lastSeen ?? null
-            });
-          }
+        const devices = Array.from(uniqueMap.values()).sort((a, b) => {
+          const aPriority = a.paired || a.connected ? 0 : 1;
+          const bPriority = b.paired || b.connected ? 0 : 1;
 
-          const devices = Array.from(map.values()).sort((a, b) => {
-            const aPriority = a.paired || a.connected ? 0 : 1;
-            const bPriority = b.paired || b.connected ? 0 : 1;
+          if (aPriority !== bPriority) return aPriority - bPriority;
 
-            if (aPriority !== bPriority) return aPriority - bPriority;
+          const aRssi = a.rssi ?? -1000;
+          const bRssi = b.rssi ?? -1000;
 
-            const aRssi = a.rssi ?? -1000;
-            const bRssi = b.rssi ?? -1000;
-
-            return bRssi - aRssi;
-          });
-
-          return {
-            devices,
-            lastUpdatedAt: Date.now(),
-            isScanning: false
-          };
+          return bRssi - aRssi;
         });
+
+        set({
+          devices,
+          lastUpdatedAt: Date.now()
+        });
+      },
+
+      handleScanStatus: (data) => {
+        const payload = data?.payload ?? data;
+        const status = payload?.status;
+
+        if (status === "started") {
+          set({ isScanning: true });
+          return;
+        }
+
+        if (status === "completed") {
+          set({ isScanning: false });
+          return;
+        }
+
+        if (status === "error") {
+          set({ isScanning: false });
+          return;
+        }
+
+        if (status === "scanning_in_progress") {
+          set({ isScanning: true });
+        }
       },
 
       handlePairStatus: (data) => {
@@ -684,11 +702,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: true,
-                    trusted: true
-                  }
+                  ...d,
+                  paired: true,
+                  connected: true,
+                  trusted: true
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -717,11 +735,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: true,
-                    trusted: true
-                  }
+                  ...d,
+                  paired: true,
+                  connected: true,
+                  trusted: true
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -750,10 +768,10 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: false
-                  }
+                  ...d,
+                  paired: true,
+                  connected: false
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -779,16 +797,7 @@ export const useBluetoothStore = create(
 
         if (status === "success") {
           set((state) => ({
-            devices: state.devices.map((d) =>
-              d.mac === mac
-                ? {
-                    ...d,
-                    paired: false,
-                    connected: false,
-                    trusted: false
-                  }
-                : d
-            ),
+            devices: state.devices.filter((d) => d.mac !== mac),
             isBluetoothProcessing: false,
             processingMac: null
           }));
