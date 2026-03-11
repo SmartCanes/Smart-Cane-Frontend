@@ -161,7 +161,6 @@ export const useRealtimeStore = create(
 
           const lat = payload?.lat;
           const lng = payload?.lng;
-          console.log("Received GPS update:", { lat, lng, payload });
 
           set((state) => ({
             canePosition:
@@ -311,10 +310,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -407,10 +406,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                  g.guardianId === guardian.guardianId
-                    ? { ...g, ...guardian }
-                    : g
-                )
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
                 : [...d.guardians, guardian]
             };
           })
@@ -429,11 +428,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                ...d,
-                guardians: d.guardians.filter(
-                  (g) => g.guardianId !== guardianId
-                )
-              }
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
               : d
           )
         })),
@@ -612,30 +611,67 @@ export const useBluetoothStore = create(
       lastUpdatedAt: null,
       _wsListenerAttached: false,
 
-      // -----------------------------
-      // Payload Sync
-      // -----------------------------
-
       handleBluetoothPayload: (data) => {
         if (!data?.payload?.devices) return;
 
-        const devices = data.payload.devices;
+        const incomingDevices = data.payload.devices;
 
-        set(() => ({
-          devices,
-          lastUpdatedAt: Date.now(),
-          isScanning: false
-        }));
+        set((state) => {
+          const map = new Map();
+
+          for (const device of state.devices) {
+            map.set(device.mac, device);
+          }
+
+          for (const incoming of incomingDevices) {
+            const existing = map.get(incoming.mac);
+
+            map.set(incoming.mac, {
+              ...existing,
+              ...incoming,
+              mac: incoming.mac,
+              name: incoming.name ?? existing?.name ?? "Unknown",
+              deviceId: incoming.deviceId ?? existing?.deviceId ?? incoming.mac,
+              paired: incoming.paired ?? existing?.paired ?? false,
+              connected: incoming.connected ?? existing?.connected ?? false,
+              trusted: incoming.trusted ?? existing?.trusted ?? false,
+              type: incoming.type ?? existing?.type,
+              icon: incoming.icon ?? existing?.icon,
+              rssi:
+                incoming.rssi != null
+                  ? incoming.rssi
+                  : (existing?.rssi ?? null),
+              batteryLevel:
+                incoming.batteryLevel != null
+                  ? incoming.batteryLevel
+                  : (existing?.batteryLevel ?? null),
+              lastSeen: incoming.lastSeen ?? existing?.lastSeen ?? null
+            });
+          }
+
+          const devices = Array.from(map.values()).sort((a, b) => {
+            const aPriority = a.paired || a.connected ? 0 : 1;
+            const bPriority = b.paired || b.connected ? 0 : 1;
+
+            if (aPriority !== bPriority) return aPriority - bPriority;
+
+            const aRssi = a.rssi ?? -1000;
+            const bRssi = b.rssi ?? -1000;
+
+            return bRssi - aRssi;
+          });
+
+          return {
+            devices,
+            lastUpdatedAt: Date.now(),
+            isScanning: false
+          };
+        });
       },
 
-      // -----------------------------
-      // Pair Status
-      // -----------------------------
-
       handlePairStatus: (data) => {
-        const { status, mac } = data || {};
-        console.log("Pair status update:", data);
-
+        const payload = data?.payload ?? data;
+        const { status, mac } = payload || {};
         if (!mac) return;
 
         if (status === "starting") {
@@ -647,40 +683,17 @@ export const useBluetoothStore = create(
           set((state) => ({
             devices: state.devices.map((d) =>
               d.mac === mac
-                ? { ...d, trusted: true, connected: true, paired: true }
+                ? {
+                    ...d,
+                    paired: true,
+                    connected: true,
+                    trusted: true
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
             processingMac: null
           }));
-        }
-
-        if (status === "failed") {
-          set({ isBluetoothProcessing: false, processingMac: null });
-        }
-      },
-
-      // -----------------------------
-      // Unpair Status
-      // -----------------------------
-
-      handleUnpairStatus: (data) => {
-        const { status, mac } = data || {};
-        console.log("Unpair status update:", data);
-        if (!mac) return;
-
-        if (status === "starting") {
-          set({ isBluetoothProcessing: true, processingMac: mac });
-          return;
-        }
-
-        if (status === "success") {
-          set((state) => ({
-            devices: state.devices.filter((d) => d.mac !== mac),
-            isBluetoothProcessing: false,
-            processingMac: null
-          }));
-
           return;
         }
 
@@ -688,13 +701,10 @@ export const useBluetoothStore = create(
           set({ isBluetoothProcessing: false, processingMac: null });
         }
       },
-
-      // -----------------------------
-      // Connect Status
-      // -----------------------------
 
       handleConnectStatus: (data) => {
-        const { status, mac } = data || {};
+        const payload = data?.payload ?? data;
+        const { status, mac } = payload || {};
         if (!mac) return;
 
         if (status === "starting") {
@@ -705,11 +715,19 @@ export const useBluetoothStore = create(
         if (status === "success") {
           set((state) => ({
             devices: state.devices.map((d) =>
-              d.mac === mac ? { ...d, connected: true, trusted: true } : d
+              d.mac === mac
+                ? {
+                    ...d,
+                    paired: true,
+                    connected: true,
+                    trusted: true
+                  }
+                : d
             ),
             isBluetoothProcessing: false,
             processingMac: null
           }));
+          return;
         }
 
         if (status === "failed") {
@@ -717,12 +735,9 @@ export const useBluetoothStore = create(
         }
       },
 
-      // -----------------------------
-      // Disconnect Status
-      // -----------------------------
-
       handleDisconnectStatus: (data) => {
-        const { status, mac } = data || {};
+        const payload = data?.payload ?? data;
+        const { status, mac } = payload || {};
         if (!mac) return;
 
         if (status === "starting") {
@@ -733,16 +748,64 @@ export const useBluetoothStore = create(
         if (status === "success") {
           set((state) => ({
             devices: state.devices.map((d) =>
-              d.mac === mac ? { ...d, connected: false } : d
+              d.mac === mac
+                ? {
+                    ...d,
+                    paired: true,
+                    connected: false
+                  }
+                : d
             ),
             isBluetoothProcessing: false,
             processingMac: null
           }));
+          return;
         }
 
         if (status === "failed") {
           set({ isBluetoothProcessing: false, processingMac: null });
         }
+      },
+
+      handleUnpairStatus: (data) => {
+        const payload = data?.payload ?? data;
+        const { status, mac } = payload || {};
+        if (!mac) return;
+
+        if (status === "starting") {
+          set({ isBluetoothProcessing: true, processingMac: mac });
+          return;
+        }
+
+        if (status === "success") {
+          set((state) => ({
+            devices: state.devices.map((d) =>
+              d.mac === mac
+                ? {
+                    ...d,
+                    paired: false,
+                    connected: false,
+                    trusted: false
+                  }
+                : d
+            ),
+            isBluetoothProcessing: false,
+            processingMac: null
+          }));
+          return;
+        }
+
+        if (status === "failed") {
+          set({ isBluetoothProcessing: false, processingMac: null });
+        }
+      },
+
+      forgetDevice: (mac) => {
+        if (!mac) return;
+
+        set((state) => ({
+          devices: state.devices.filter((d) => d.mac !== mac)
+        }));
       },
 
       requestScan: () => {
@@ -750,31 +813,33 @@ export const useBluetoothStore = create(
         wsApi.emit("scanBluetooth");
       },
 
-      pairDevice: (mac) => {
-        if (!mac) return;
-        if (get().isBluetoothProcessing) return;
+      requestBluetoothState: () => {
+        wsApi.emit("getBluetoothState");
+      },
 
+      refreshBluetoothDevices: () => {
+        const { requestBluetoothState, requestScan } = get();
+        requestBluetoothState();
+        requestScan();
+      },
+
+      pairDevice: (mac) => {
+        if (!mac || get().isBluetoothProcessing) return;
         wsApi.emit("pairBluetooth", { mac });
       },
 
       unpairDevice: (mac) => {
-        if (!mac) return;
-        if (get().isBluetoothProcessing) return;
-
+        if (!mac || get().isBluetoothProcessing) return;
         wsApi.emit("unpairBluetooth", { mac });
       },
 
       connectDevice: (mac) => {
-        if (!mac) return;
-        if (get().isBluetoothProcessing) return;
-
+        if (!mac || get().isBluetoothProcessing) return;
         wsApi.emit("connectBluetooth", { mac });
       },
 
       disconnectDevice: (mac) => {
-        if (!mac) return;
-        if (get().isBluetoothProcessing) return;
-
+        if (!mac || get().isBluetoothProcessing) return;
         wsApi.emit("disconnectBluetooth", { mac });
       },
 
@@ -785,7 +850,6 @@ export const useBluetoothStore = create(
         }),
 
       getDeviceByMac: (mac) => get().devices.find((d) => d.mac === mac),
-
       getTrustedDevices: () => get().devices.filter((d) => d.trusted)
     }),
     {

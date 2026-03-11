@@ -28,7 +28,8 @@ const BluetoothManager = () => {
     handleUnpairStatus,
     handleDisconnectStatus,
     handleConnectStatus,
-    isBluetoothProcessing
+    isBluetoothProcessing,
+    refreshBluetoothDevices
   } = useBluetoothStore();
   const { showToast } = useToast();
 
@@ -69,6 +70,7 @@ const BluetoothManager = () => {
 
   useEffect(() => {
     const deviceListener = (data) => {
+      console.log(data);
       const devices = data?.devices || data?.devices;
       const error = data?.error;
 
@@ -228,6 +230,11 @@ const BluetoothManager = () => {
     }, 12000);
   };
 
+  useEffect(() => {
+    if (!_wsConnected || !connectionStatus) return;
+    refreshBluetoothDevices();
+  }, [_wsConnected, connectionStatus]);
+
   const startAction = (action) => {
     setPendingAction(action);
     setHasTriggeredAction(true);
@@ -265,13 +272,20 @@ const BluetoothManager = () => {
     }
   };
 
+  const isKnownDevice = (device) =>
+    Boolean(device.paired || device.connected || device.trusted);
+
+  const isAvailableDevice = (device) => !isKnownDevice(device);
+
   const filteredDevices = devices.filter((device) => {
     const matchesSearch =
       device.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       device.deviceId?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    if (viewMode === "paired") return device.paired && matchesSearch;
-    if (viewMode === "available") return !device.paired && matchesSearch;
+    if (viewMode === "paired") return isKnownDevice(device) && matchesSearch;
+    if (viewMode === "available")
+      return isAvailableDevice(device) && matchesSearch;
+
     return matchesSearch;
   });
 
@@ -501,6 +515,12 @@ const BluetoothDeviceCard = ({
     setShowActions(false);
     action();
   };
+
+  const canPair = (device) => !device.paired;
+  const canConnect = (device) => device.paired && !device.connected;
+  const canDisconnect = (device) => device.paired && device.connected;
+  const canUnpair = (device) => device.paired;
+  const canForget = (device) => !device.connected;
 
   return (
     <motion.div
@@ -766,30 +786,7 @@ const BluetoothDeviceCard = ({
                   }}
                 >
                   <div className="py-1">
-                    {device.paired ? (
-                      <>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleActionClick(onUnpair);
-                          }}
-                          className="w-full px-4 py-3 sm:py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-3 cursor-pointer transition-colors"
-                        >
-                          <Icon icon="ph:link-break-bold" className="w-4 h-4" />
-                          <span>Unpair Device</span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleActionClick(onForget);
-                          }}
-                          className="w-full px-4 py-3 sm:py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 border-t border-gray-100 cursor-pointer transition-colors"
-                        >
-                          <Icon icon="ph:trash-bold" className="w-4 h-4" />
-                          <span>Forget Device</span>
-                        </button>
-                      </>
-                    ) : (
+                    {canPair(device) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -799,6 +796,61 @@ const BluetoothDeviceCard = ({
                       >
                         <Icon icon="ph:link-bold" className="w-4 h-4" />
                         <span>Pair Device</span>
+                      </button>
+                    )}
+
+                    {canConnect(device) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleActionClick(onConnect);
+                        }}
+                        className="w-full px-4 py-3 sm:py-2.5 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-3 cursor-pointer transition-colors"
+                      >
+                        <Icon icon="ph:plugs-bold" className="w-4 h-4" />
+                        <span>Connect</span>
+                      </button>
+                    )}
+
+                    {canDisconnect(device) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleActionClick(onConnect);
+                        }}
+                        className="w-full px-4 py-3 sm:py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-3 cursor-pointer transition-colors"
+                      >
+                        <Icon
+                          icon="ph:plugs-connected-bold"
+                          className="w-4 h-4"
+                        />
+                        <span>Disconnect</span>
+                      </button>
+                    )}
+
+                    {canUnpair(device) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleActionClick(onUnpair);
+                        }}
+                        className="w-full px-4 py-3 sm:py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-3 border-t border-gray-100 cursor-pointer transition-colors"
+                      >
+                        <Icon icon="ph:link-break-bold" className="w-4 h-4" />
+                        <span>Unpair Device</span>
+                      </button>
+                    )}
+
+                    {canForget(device) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleActionClick(onForget);
+                        }}
+                        className="w-full px-4 py-3 sm:py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 border-t border-gray-100 cursor-pointer transition-colors"
+                      >
+                        <Icon icon="ph:trash-bold" className="w-4 h-4" />
+                        <span>Forget Device</span>
                       </button>
                     )}
                   </div>
