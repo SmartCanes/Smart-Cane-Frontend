@@ -278,7 +278,7 @@ const BluetoothManager = () => {
       device.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       device.deviceId?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    if (viewMode === "known") return isKnownDevice(device) && matchesSearch;
+    if (viewMode === "paired") return isKnownDevice(device) && matchesSearch;
     if (viewMode === "available")
       return isAvailableDevice(device) && matchesSearch;
 
@@ -320,7 +320,7 @@ const BluetoothManager = () => {
             </Button>
 
             <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
-              {["all", "known", "available"].map((mode) => (
+              {["all", "paired", "available"].map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
@@ -516,7 +516,7 @@ const BluetoothDeviceCard = ({
   const canConnect = (device) => device.paired && !device.connected;
   const canDisconnect = (device) => device.paired && device.connected;
   const canUnpair = (device) => device.paired;
-  const canForget = (device) => !device.connected && !device.paired;
+  const canForget = (device) => !device.connected && !device.paired && device.trusted;
 
   return (
     <motion.div
