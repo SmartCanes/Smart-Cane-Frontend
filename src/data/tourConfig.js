@@ -169,3 +169,19 @@ export const TOUR_STEPS = {
     }
   ]
 };
+
+/**
+ * Mobile-only tour behavior overrides.
+ * TourGuide uses this when it rewrites desktop header steps into a
+ * hamburger-first sequence for small screens.
+ */
+export const MOBILE_TOUR_FLOW = {
+  "/dashboard": {
+    headerMenuIntro: {
+      title: "Open the Header Menu",
+      description:
+        "Open the Header Menu to access your connection status, VIP dropdown, and other settings.",
+      icon: "ph:list-bold"
+    }
+  }
+};
