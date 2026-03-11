@@ -1127,7 +1127,7 @@ function Advanced() {
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6 overflow-x-hidden">
       <div className="mx-auto w-full space-y-4 sm:space-y-6 ">
-        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
+        <div data-tour="tour-advanced-header" className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
               Component Management
@@ -1164,7 +1164,7 @@ function Advanced() {
         </div>
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div data-tour="tour-device-status" className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-lg">

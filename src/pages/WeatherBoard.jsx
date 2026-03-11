@@ -137,7 +137,7 @@ const WeatherBoard = () => {
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
       <div className="mx-auto space-y-6 min-h-full">
-        <div>
+        <div data-tour="tour-weather-main">
           <h1 className="text-2xl font-bold text-[#11285A] mb-1">
             Weather Forecast
           </h1>
@@ -148,7 +148,7 @@ const WeatherBoard = () => {
         </div>
 
         {/* LOCATION SEARCH BAR */}
-        <div ref={searchRef} className="relative space-y-2 md:max-w-xl">
+        <div data-tour="tour-weather-search" ref={searchRef} className="relative space-y-2 md:max-w-xl">
           <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 transition-all">
             <Icon
               icon="carbon:search"
