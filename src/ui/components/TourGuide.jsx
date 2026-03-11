@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useTourStore } from "@/stores/useTourStore";
 import { useUserStore, useUIStore } from "@/stores/useStore";
-import { TOUR_STEPS } from "@/data/tourConfig";
+import { MOBILE_TOUR_FLOW, TOUR_STEPS } from "@/data/tourConfig";
 import { markTourComplete } from "@/api/backendService";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -16,6 +16,18 @@ const TOOLTIP_SIDE_PADDING = 16; // minimum gap from viewport edge
 // Responsive tooltip width: shrink on narrow screens so it never clips
 const getTooltipWidth = () =>
   Math.min(320, window.innerWidth - TOOLTIP_SIDE_PADDING * 2);
+
+function normalizeTourFlag(value) {
+  if (typeof value === "boolean") return value;
+  if (value === 1 || value === "1") return true;
+  if (value === 0 || value === "0") return false;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+  }
+  return null;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -152,18 +164,26 @@ const TourGuide = () => {
   const hasEvaluatedAutoStartRef = useRef(false);
   const evaluatedForPathRef = useRef(null);
 
-  const { user } = useUserStore();
+  const { user, updateUser } = useUserStore();
   const { hydrate } = useTourStore();
   const { setMobileMenuOpen } = useUIStore();
+
+  // Normalize keys because auth/login payloads may use camelCase while
+  // hydrated profile data from backend uses snake_case.
+  const guardianId = user?.guardianId ?? user?.guardian_id ?? null;
+  const hasSeenTourBackend =
+    normalizeTourFlag(user?.has_seen_tour) ??
+    normalizeTourFlag(user?.hasSeenTour) ??
+    null;
 
   // ── Hydrate per-user localStorage data whenever the logged-in user changes ─
   // This is the key fix: each guardian ID gets its own localStorage key, so
   // a new account on the same browser never inherits another user's tour history.
   useEffect(() => {
-    if (user?.guardianId) {
-      hydrate(user.guardianId);
+    if (guardianId) {
+      hydrate(guardianId);
     }
-  }, [user?.guardianId, hydrate]);
+  }, [guardianId, hydrate]);
 
   // ── Track mobile breakpoint as React state so steps recompute on resize ─
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
@@ -173,65 +193,66 @@ const TourGuide = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const rawSteps = TOUR_STEPS[location.pathname] ?? [];
+  const rawSteps = useMemo(
+    () => TOUR_STEPS[location.pathname] ?? [],
+    [location.pathname]
+  );
+  const mobileFlow = MOBILE_TOUR_FLOW[location.pathname];
 
-  const steps = isMobileView
-    ? (() => {
-        const out = [];
-        let headerInserted = false;
+  const steps = useMemo(() => {
+    if (!isMobileView) return rawSteps;
 
-        for (const s of rawSteps) {
-          if (MOBILE_HEADER_TARGETS.has(s.target)) {
-            if (!headerInserted) {
-              // STEP 1 of header section: the hamburger gateway
+    const out = [];
+    let headerInserted = false;
+
+    for (const s of rawSteps) {
+      if (MOBILE_HEADER_TARGETS.has(s.target)) {
+        if (!headerInserted) {
+          // STEP 1 of header section: the hamburger gateway.
+          out.push({
+            target: "tour-mobile-menu",
+            title: mobileFlow?.headerMenuIntro?.title ?? "Open the Header Menu",
+            description:
+              mobileFlow?.headerMenuIntro?.description ??
+              "Open the Header Menu to access your connection status, VIP dropdown, and other settings.",
+            position: "bottom",
+            icon: mobileFlow?.headerMenuIntro?.icon ?? "ph:list-bold",
+            isMobileMenuTrigger: true
+          });
+
+          // STEPS 2-N: individual items inside the menu, in original order.
+          for (const hs of rawSteps) {
+            if (MOBILE_HEADER_TARGETS.has(hs.target)) {
               out.push({
-                target: "tour-mobile-menu",
-                title: "Open the Header Menu",
-                description:
-                  "Tap the three-line icon to open the app menu. It contains your VIP device switcher, connection status, notifications, and account settings.",
-                position: "bottom",
-                icon: "ph:list-bold",
-                isMobileMenuTrigger: true
+                ...hs,
+                target: MOBILE_HEADER_STEP_MAP[hs.target],
+                requiresMobileMenu: true
               });
-
-              // STEPS 2-N: individual items inside the menu, in original order
-              for (const hs of rawSteps) {
-                if (MOBILE_HEADER_TARGETS.has(hs.target)) {
-                  out.push({
-                    ...hs,
-                    target: MOBILE_HEADER_STEP_MAP[hs.target],
-                    requiresMobileMenu: true
-                  });
-                }
-              }
-
-              headerInserted = true;
             }
-            // Skip — already emitted above in a single pass
-          } else {
-            out.push(s);
           }
+
+          headerInserted = true;
         }
-        return out;
-      })()
-    : rawSteps;
+        // Skip - already emitted above in a single pass.
+      } else {
+        out.push(s);
+      }
+    }
+
+    return out;
+  }, [isMobileView, rawSteps, mobileFlow]);
 
   const isActive = activeTourPage === location.pathname;
   const step = isActive && steps[currentStep] ? steps[currentStep] : null;
+  const firstStepTarget = steps[0]?.target ?? null;
+  const allTourPaths = useMemo(
+    () => Object.keys(TOUR_STEPS).filter((path) => (TOUR_STEPS[path] ?? []).length > 0),
+    []
+  );
 
   // ── Auto-start for first-time page visits ─────────────────────────────────
-  // Guards:
-  //   1. backend `isNewUser` (based on created_at) — no schema changes needed
-  //   2. per-user per-page localStorage flag — each page tracked independently
-  //
-  // hasSeenTour is intentionally NOT used here because it is set globally
-  // after the *first* page's tour completes, which would suppress every other
-  // page's tour. Per-page `hasVisited` tracking is the correct mechanism.
-  //
-  // The evaluatedForPath/hasEvaluated refs ensure the decision is made ONCE
-  // after the user object loads, and is NOT re-evaluated on every parent
-  // re-render (e.g. WebSocket reconnect, location-polling), which would
-  // repeatedly cancel the startup timer and prevent the tour from showing.
+  // Backend `has_seen_tour` is the source of truth so the tour never replays
+  // across browsers/devices after completion.
   useEffect(() => {
     // Reset evaluation gate when navigating to a different page
     if (evaluatedForPathRef.current !== location.pathname) {
@@ -239,23 +260,69 @@ const TourGuide = () => {
       evaluatedForPathRef.current = location.pathname;
     }
 
+    // Global guard: backend completion is absolute source of truth.
+    // If backend says completed, tour must never auto-start on any page.
+    if (hasSeenTourBackend === true) {
+      hasEvaluatedAutoStartRef.current = true;
+      return;
+    }
+
     // Already decided for this page — don't re-evaluate on re-renders
     if (hasEvaluatedAutoStartRef.current) return;
 
     if (steps.length === 0) return;
-    if (!user?.guardianId) return;   // wait for user to finish loading
-    if (!user?.isNewUser) return;    // account older than 7 days
-    if (hasVisited(location.pathname)) return; // page already toured
+    if (!guardianId) return; // wait for user to finish loading
 
-    // Commit: mark as evaluated so concurrent re-renders don't schedule a
-    // second timer while this one is still counting down.
-    hasEvaluatedAutoStartRef.current = true;
+    // Wait until backend completion status is known and explicitly false.
+    // Multi-page onboarding only runs while backend still says "not completed".
+    if (hasSeenTourBackend !== false) return;
 
-    // Small delay so the page content can render before we start
-    const t = setTimeout(() => startTour(location.pathname), 500);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, user?.guardianId, user?.isNewUser]);
+    // During onboarding phase, localStorage tracks per-page progression.
+    if (hasVisited(location.pathname)) {
+      hasEvaluatedAutoStartRef.current = true;
+      return;
+    }
+
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    const tryStart = () => {
+      if (cancelled || hasEvaluatedAutoStartRef.current) return;
+      if (!firstStepTarget) return;
+
+      const targetEl = document.querySelector(
+        `[data-tour="${firstStepTarget}"]`
+      );
+
+      // Wait until dashboard/header elements are mounted and measurable.
+      if (!targetEl || (targetEl.offsetWidth === 0 && targetEl.offsetHeight === 0)) {
+        if (attempts < maxAttempts) {
+          attempts += 1;
+          setTimeout(tryStart, 120);
+        }
+        return;
+      }
+
+      hasEvaluatedAutoStartRef.current = true;
+      startTour(location.pathname);
+    };
+
+    // Slight delay lets route transition and header layout settle.
+    const t = setTimeout(tryStart, 180);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [
+    location.pathname,
+    steps,
+    firstStepTarget,
+    guardianId,
+    hasSeenTourBackend,
+    hasVisited,
+    startTour
+  ]);
 
   // ── End any active tour when navigating to a different page ───────────────
   useEffect(() => {
@@ -348,16 +415,24 @@ const TourGuide = () => {
     };
   }, [step, updatePosition]);
 
-  // Lock body scroll while the tour overlay is shown — prevents the background
-  // page from scrolling/shifting under the dark backdrop on mobile.
+  // Lock body scroll only on desktop while the tour overlay is shown.
+  // Mobile must remain scrollable so scrollIntoView can move to lower targets.
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || isMobileView) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [isActive]);
+  }, [isActive, isMobileView]);
+
+  // Hard-close drawer whenever the tour is not actively controlling mobile
+  // header steps. This prevents stale open state for returning users.
+  useEffect(() => {
+    if (!isActive || !isMobileView) {
+      setMobileMenuOpen(false);
+    }
+  }, [isActive, isMobileView, setMobileMenuOpen]);
 
   // ── Mobile menu gate: automatically open/close the drawer as the tour
   //    moves between the hamburger step and its inner sub-steps. ─────────────
@@ -376,26 +451,47 @@ const TourGuide = () => {
     setMobileMenuOpen(false);
   }, [step, isActive, isMobileView, setMobileMenuOpen]);
 
-  // ── Persist tour completion to backend (fire-and-forget analytics) ─────────
-  // NOTE: We intentionally do NOT set hasSeenTour=true here. That flag was
-  // previously set after the very first page tour, which silently blocked every
-  // subsequent page from ever starting its own tour. Per-page tracking via
-  // hasVisited (set inside startTour) is the correct mechanism.
-  const completeTour = useCallback(async () => {
+  // ── Persist onboarding completion to backend ───────────────────────────────
+  // Completion is delayed until either:
+  // 1) user skips onboarding, or
+  // 2) user completes the last page in the configured tour sequence.
+  const completeTour = useCallback(async (mode = "page-complete") => {
     setMobileMenuOpen(false); // close drawer if it was opened by the tour
     endTour();
+
+    const lastTourPath = allTourPaths[allTourPaths.length - 1];
+    const isLastPageInSequence = location.pathname === lastTourPath;
+    const shouldMarkComplete =
+      mode === "skip" || (mode === "page-complete" && isLastPageInSequence);
+
+    // Delayed backend completion: only on Skip or final page completion.
+    if (!shouldMarkComplete || hasSeenTourBackend === true) return;
+
     try {
       await markTourComplete();
+      updateUser({ has_seen_tour: true, hasSeenTour: true });
     } catch {
       // Non-critical — per-page localStorage guard still prevents re-show
     }
-  }, [endTour, setMobileMenuOpen]);
+  }, [
+    allTourPaths,
+    location.pathname,
+    hasSeenTourBackend,
+    endTour,
+    setMobileMenuOpen,
+    updateUser
+  ]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleNext = () => {
     if (currentStep >= steps.length - 1) {
       completeTour();
     } else {
+      // Open drawer right after the hamburger step so the next step can
+      // spotlight inner menu items after the menu animation settles.
+      if (isMobileView && step?.isMobileMenuTrigger) {
+        setMobileMenuOpen(true);
+      }
       setStepReady(false);
       nextStep();
     }
@@ -406,7 +502,7 @@ const TourGuide = () => {
     prevStep();
   };
 
-  const handleSkip = () => completeTour();
+  const handleSkip = () => completeTour("skip");
 
   // ── Nothing to render ────────────────────────────────────────────────────
   if (!isActive || !step || !stepReady || !spotlightRect) return null;
