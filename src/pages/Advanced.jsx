@@ -1125,20 +1125,41 @@ function Advanced() {
 
   const onlineCount = components.filter((c) => c.isOnline).length;
   const sensorComponents = components.filter((c) => c.type === "sensor");
-  const controllerComponents = components.filter((c) => c.type === "controller");
+  const controllerComponents = components.filter(
+    (c) => c.type === "controller"
+  );
 
   const tabs = [
-    { id: "sensors", label: "Sensors & Safety", shortLabel: "Sensors", icon: "mdi:radar", count: sensorComponents.length },
-    { id: "hardware", label: "Hardware", shortLabel: "Hardware", icon: "mdi:chip", count: controllerComponents.length },
-    { id: "voice", label: "Voice & Audio", shortLabel: "Voice", icon: "mdi:voice", count: null }
+    {
+      id: "sensors",
+      label: "Sensors & Safety",
+      shortLabel: "Sensors",
+      icon: "mdi:radar",
+      count: sensorComponents.length
+    },
+    {
+      id: "hardware",
+      label: "Hardware",
+      shortLabel: "Hardware",
+      icon: "mdi:chip",
+      count: controllerComponents.length
+    },
+    {
+      id: "voice",
+      label: "Voice & Audio",
+      shortLabel: "Voice",
+      icon: "mdi:voice",
+      count: null
+    }
   ];
 
   return (
-    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-4 sm:p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6 overflow-x-hidden">
-      <div className="mx-auto w-full max-w-5xl">
-
-        {/* ── Page Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6 overflow-x-hidden">
+      <div className="mx-auto w-full space-y-4 sm:space-y-6 ">
+        <div
+          data-tour="tour-advanced-header"
+          className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8"
+        >
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
               Component Management
@@ -1151,12 +1172,16 @@ function Advanced() {
           {/* Compact stats */}
           <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-3 shadow-sm border w-full sm:w-auto">
             <div className="flex-1 text-center px-2">
-              <div className="text-lg font-bold text-primary-600">{onlineCount}</div>
+              <div className="text-lg font-bold text-primary-600">
+                {onlineCount}
+              </div>
               <div className="text-xs text-gray-500">Online</div>
             </div>
             <div className="h-8 w-px bg-gray-200" />
             <div className="flex-1 text-center px-2">
-              <div className="text-lg font-bold text-gray-800">{components.length}</div>
+              <div className="text-lg font-bold text-gray-800">
+                {components.length}
+              </div>
               <div className="text-xs text-gray-500">Total</div>
             </div>
             <div className="h-8 w-px bg-gray-200" />
@@ -1169,23 +1194,38 @@ function Advanced() {
           </div>
         </div>
 
-        {/* ── Status Badges ── */}
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 mb-5">
-          <div className="flex items-center gap-2.5 bg-green-50 border border-green-100 rounded-xl px-3 py-2.5">
-            <div className="p-1.5 bg-green-100 rounded-lg flex-shrink-0">
-              <Icon icon="mdi:check-circle" className="w-4 h-4 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 leading-none mb-0.5">System Health</p>
-              <p className="text-sm font-semibold text-gray-800">Excellent</p>
+        {/* Stats Bar */}
+        <div
+          data-tour="tour-device-status"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
+        >
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Icon
+                  icon="mdi:check-circle"
+                  className="w-5 h-5 text-green-600"
+                />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  System Health
+                </p>
+                <p className="text-base sm:text-lg font-semibold">Excellent</p>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2.5 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5">
             <div className="p-1.5 bg-orange-100 rounded-lg flex-shrink-0">
-              <Icon icon="mdi:alert-circle" className="w-4 h-4 text-orange-600" />
+              <Icon
+                icon="mdi:alert-circle"
+                className="w-4 h-4 text-orange-600"
+              />
             </div>
             <div>
-              <p className="text-xs text-gray-500 leading-none mb-0.5">Active Alerts</p>
+              <p className="text-xs text-gray-500 leading-none mb-0.5">
+                Active Alerts
+              </p>
               <p className="text-sm font-semibold text-gray-800">0</p>
             </div>
           </div>
@@ -1236,7 +1276,9 @@ function Advanced() {
                 <ComponentCard
                   key={component.id}
                   component={component}
-                  deviceConfig={deviceConfig?.[component.codeName]?.config || {}}
+                  deviceConfig={
+                    deviceConfig?.[component.codeName]?.config || {}
+                  }
                   onTogglePower={handleToggle}
                   onConfigure={handleConfigure}
                 />
@@ -1257,7 +1299,9 @@ function Advanced() {
                 <ComponentCard
                   key={component.id}
                   component={component}
-                  deviceConfig={deviceConfig?.[component.codeName]?.config || {}}
+                  deviceConfig={
+                    deviceConfig?.[component.codeName]?.config || {}
+                  }
                   onTogglePower={handleToggle}
                   onConfigure={handleConfigure}
                 />

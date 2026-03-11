@@ -26,6 +26,7 @@ function CustomZoomControl({
   return (
     <div
       ref={controlRef}
+      data-tour="tour-map-controls"
       className="absolute bottom-5 right-5 z-[1000] flex flex-col space-y-2"
     >
       <button

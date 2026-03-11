@@ -620,6 +620,7 @@ const Header = () => {
 
         {/* Mobile Menu Button */}
         <button
+          data-tour="tour-mobile-menu"
           onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
           className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
           aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
@@ -650,6 +651,7 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-3 lg:gap-4">
           <div ref={vipRef} className="relative">
             <button
+              data-tour="tour-vip-dropdown"
               onClick={() => setVipOpen(!vipOpen)}
               className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition px-3 py-1.5 rounded-full min-w-[140px] lg:min-w-[160px] max-w-[180px]"
             >
@@ -731,6 +733,7 @@ const Header = () => {
             )}
           </div>
           <div
+            data-tour="tour-connection-status"
             className={`flex items-center gap-1.5 text-white px-3 py-1.5 rounded-full font-poppins text-xs font-medium whitespace-nowrap ${
               connectionStatus ? "bg-[#55B938]" : "bg-gray-500"
             }`}
@@ -746,6 +749,7 @@ const Header = () => {
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>
             <button
+              data-tour="tour-notifications"
               onClick={handleNotificationClick}
               className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors notification-button"
               aria-label="Notifications"
@@ -773,6 +777,7 @@ const Header = () => {
           {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
+              data-tour="tour-profile-menu"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-9 h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden flex items-center justify-center transition-colors hover:ring-2 hover:ring-white/30 cursor-pointer"
               aria-label="User menu"
@@ -868,7 +873,7 @@ const Header = () => {
                   }}
                   className="px-4 py-6 space-y-6 border-t border-white/10"
                 >
-                  <div className="mb-6">
+                  <div data-tour="tour-mobile-vip" className="mb-6">
                     <div className="text-white/80 text-sm font-medium mb-2 px-2">
                       Select Device
                     </div>
@@ -925,7 +930,7 @@ const Header = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                  <div data-tour="tour-mobile-connection" className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                     <span className="text-white font-medium">Connection</span>
                     <div className="flex items-center gap-2">
                       <div
@@ -939,6 +944,7 @@ const Header = () => {
 
                   <div className="space-y-1">
                     <button
+                      data-tour="tour-mobile-profile"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         navigate("/profile");
@@ -969,6 +975,7 @@ const Header = () => {
                       <span className="font-medium">Settings</span>
                     </button>
                     <button
+                      data-tour="tour-mobile-notifications"
                       onClick={() => {
                         handleNavigateToNotifications();
                         setMobileMenuOpen(false);
