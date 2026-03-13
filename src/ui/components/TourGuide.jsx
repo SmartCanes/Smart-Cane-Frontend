@@ -38,8 +38,14 @@ function clampToViewport(top, left, tooltipWidth, tooltipHeight) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   return {
-    top: Math.max(TOOLTIP_SIDE_PADDING, Math.min(top, vh - tooltipHeight - TOOLTIP_SIDE_PADDING)),
-    left: Math.max(TOOLTIP_SIDE_PADDING, Math.min(left, vw - tooltipWidth - TOOLTIP_SIDE_PADDING))
+    top: Math.max(
+      TOOLTIP_SIDE_PADDING,
+      Math.min(top, vh - tooltipHeight - TOOLTIP_SIDE_PADDING)
+    ),
+    left: Math.max(
+      TOOLTIP_SIDE_PADDING,
+      Math.min(left, vw - tooltipWidth - TOOLTIP_SIDE_PADDING)
+    )
   };
 }
 
@@ -49,7 +55,12 @@ function clampToViewport(top, left, tooltipWidth, tooltipHeight) {
  * On mobile (isMobile=true) always returns a bottom-center fixed modal position
  * so the tooltip never overflows or clips against the spotlight.
  */
-function computeTooltipPos(rect, preferred, tooltipHeight = 220, isMobile = false) {
+function computeTooltipPos(
+  rect,
+  preferred,
+  tooltipHeight = 220,
+  isMobile = false
+) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const tw = getTooltipWidth();
@@ -126,10 +137,10 @@ const MOBILE_HEADER_TARGETS = new Set([
 // Maps each desktop header data-tour key → its mobile-menu equivalent.
 // The mobile menu items carry these attributes so TourGuide can spotlight them.
 const MOBILE_HEADER_STEP_MAP = {
-  "tour-vip-dropdown":      "tour-mobile-vip",
+  "tour-vip-dropdown": "tour-mobile-vip",
   "tour-connection-status": "tour-mobile-connection",
-  "tour-notifications":     "tour-mobile-notifications",
-  "tour-profile-menu":      "tour-mobile-profile"
+  "tour-notifications": "tour-mobile-notifications",
+  "tour-profile-menu": "tour-mobile-profile"
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -186,7 +197,9 @@ const TourGuide = () => {
   }, [guardianId, hydrate]);
 
   // ── Track mobile breakpoint as React state so steps recompute on resize ─
-  const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
+  const [isMobileView, setIsMobileView] = useState(
+    () => window.innerWidth < 768
+  );
   useEffect(() => {
     const onResize = () => setIsMobileView(window.innerWidth < 768);
     window.addEventListener("resize", onResize);
@@ -246,7 +259,10 @@ const TourGuide = () => {
   const step = isActive && steps[currentStep] ? steps[currentStep] : null;
   const firstStepTarget = steps[0]?.target ?? null;
   const allTourPaths = useMemo(
-    () => Object.keys(TOUR_STEPS).filter((path) => (TOUR_STEPS[path] ?? []).length > 0),
+    () =>
+      Object.keys(TOUR_STEPS).filter(
+        (path) => (TOUR_STEPS[path] ?? []).length > 0
+      ),
     []
   );
 
@@ -296,7 +312,10 @@ const TourGuide = () => {
       );
 
       // Wait until dashboard/header elements are mounted and measurable.
-      if (!targetEl || (targetEl.offsetWidth === 0 && targetEl.offsetHeight === 0)) {
+      if (
+        !targetEl ||
+        (targetEl.offsetWidth === 0 && targetEl.offsetHeight === 0)
+      ) {
         if (attempts < maxAttempts) {
           attempts += 1;
           setTimeout(tryStart, 120);
@@ -352,7 +371,14 @@ const TourGuide = () => {
     setSpotlightRect({ ...rect.toJSON() });
 
     const tooltipHeight = tooltipRef.current?.offsetHeight ?? 220;
-    setTooltipPos(computeTooltipPos(rect, step.position ?? "auto", tooltipHeight, isMobileView));
+    setTooltipPos(
+      computeTooltipPos(
+        rect,
+        step.position ?? "auto",
+        tooltipHeight,
+        isMobileView
+      )
+    );
     setStepReady(true);
   }, [step, isMobileView]);
 
@@ -369,14 +395,20 @@ const TourGuide = () => {
       // mobile (e.g. accidentally toggling the hamburger menu).
       const r = el.getBoundingClientRect();
       const inViewport =
-        r.top >= 0 && r.bottom <= window.innerHeight &&
-        r.left >= 0 && r.right <= window.innerWidth;
+        r.top >= 0 &&
+        r.bottom <= window.innerHeight &&
+        r.left >= 0 &&
+        r.right <= window.innerWidth;
       if (!inViewport) {
         // ── Scroll lock: ignore scroll events while the animation is in
         //    flight so we don't trigger the scroll→recompute→scroll loop.
         isScrollingRef.current = true;
         clearTimeout(scrollLockTimerRef.current);
-        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+        el.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest"
+        });
         // Release the lock once the smooth scroll has had time to settle.
         // 700ms covers most devices; the 360ms measurement timer below fires
         // after the lock is released, so positions are always accurate.
@@ -455,32 +487,35 @@ const TourGuide = () => {
   // Completion is delayed until either:
   // 1) user skips onboarding, or
   // 2) user completes the last page in the configured tour sequence.
-  const completeTour = useCallback(async (mode = "page-complete") => {
-    setMobileMenuOpen(false); // close drawer if it was opened by the tour
-    endTour();
+  const completeTour = useCallback(
+    async (mode = "page-complete") => {
+      setMobileMenuOpen(false); // close drawer if it was opened by the tour
+      endTour();
 
-    const lastTourPath = allTourPaths[allTourPaths.length - 1];
-    const isLastPageInSequence = location.pathname === lastTourPath;
-    const shouldMarkComplete =
-      mode === "skip" || (mode === "page-complete" && isLastPageInSequence);
+      const lastTourPath = allTourPaths[allTourPaths.length - 1];
+      const isLastPageInSequence = location.pathname === lastTourPath;
+      const shouldMarkComplete =
+        mode === "skip" || (mode === "page-complete" && isLastPageInSequence);
 
-    // Delayed backend completion: only on Skip or final page completion.
-    if (!shouldMarkComplete || hasSeenTourBackend === true) return;
+      // Delayed backend completion: only on Skip or final page completion.
+      if (!shouldMarkComplete || hasSeenTourBackend === true) return;
 
-    try {
-      await markTourComplete();
-      updateUser({ has_seen_tour: true, hasSeenTour: true });
-    } catch {
-      // Non-critical — per-page localStorage guard still prevents re-show
-    }
-  }, [
-    allTourPaths,
-    location.pathname,
-    hasSeenTourBackend,
-    endTour,
-    setMobileMenuOpen,
-    updateUser
-  ]);
+      try {
+        await markTourComplete();
+        updateUser({ has_seen_tour: true, hasSeenTour: true });
+      } catch {
+        // Non-critical — per-page localStorage guard still prevents re-show
+      }
+    },
+    [
+      allTourPaths,
+      location.pathname,
+      hasSeenTourBackend,
+      endTour,
+      setMobileMenuOpen,
+      updateUser
+    ]
+  );
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleNext = () => {
@@ -521,12 +556,34 @@ const TourGuide = () => {
       {/* ── Backdrop: 4 fixed panels around the spotlight ─────────────────
            Using separate panels instead of a 9999px box-shadow avoids the
            body overflow / layout-glitch on mobile browsers.            ── */}
-      {([
-        { key: "bd-top",    style: { top: 0, left: 0, right: 0, height: Math.max(0, hl.top) } },
-        { key: "bd-bottom", style: { top: hl.top + hl.height, left: 0, right: 0, bottom: 0 } },
-        { key: "bd-left",   style: { top: hl.top, left: 0, width: Math.max(0, hl.left), height: hl.height } },
-        { key: "bd-right",  style: { top: hl.top, left: hl.left + hl.width, right: 0, height: hl.height } }
-      ]).map(({ key, style }) => (
+      {[
+        {
+          key: "bd-top",
+          style: { top: 0, left: 0, right: 0, height: Math.max(0, hl.top) }
+        },
+        {
+          key: "bd-bottom",
+          style: { top: hl.top + hl.height, left: 0, right: 0, bottom: 0 }
+        },
+        {
+          key: "bd-left",
+          style: {
+            top: hl.top,
+            left: 0,
+            width: Math.max(0, hl.left),
+            height: hl.height
+          }
+        },
+        {
+          key: "bd-right",
+          style: {
+            top: hl.top,
+            left: hl.left + hl.width,
+            right: 0,
+            height: hl.height
+          }
+        }
+      ].map(({ key, style }) => (
         <motion.div
           key={key}
           className="fixed z-[9999] bg-black/[.52]"
@@ -542,7 +599,12 @@ const TourGuide = () => {
       <motion.div
         key={`spotlight-${step.target}`}
         className="fixed z-[10000] rounded-xl pointer-events-none"
-        style={{ top: hl.top, left: hl.left, width: hl.width, height: hl.height }}
+        style={{
+          top: hl.top,
+          left: hl.left,
+          width: hl.width,
+          height: hl.height
+        }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
