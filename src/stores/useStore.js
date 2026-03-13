@@ -1,7 +1,8 @@
 import {
   getAllDeviceGuardians,
   getDevices,
-  getPendingInvites
+  getPendingInvites,
+  getAccountHistory
 } from "@/api/backendService";
 import { wsApi } from "@/api/ws-api";
 import { create } from "zustand";
@@ -76,7 +77,7 @@ export const useRealtimeStore = create((set, get) => ({
     wsApi.on("connect", () => {
       console.log("WebSocket connected:", wsApi.socket?.id);
       set({ _wsConnected: true });
-      useBluetoothStore.getState().connectBluetoothWs();
+      useBluetoothStore.getState().connectBluetoothWs?.();
       resetHeartbeat();
     });
 
@@ -123,21 +124,6 @@ export const useRealtimeStore = create((set, get) => ({
       }
       resetHeartbeat();
     });
-
-    // wsApi.on("bluetoothDevices", (data) => {
-    //   const devices = data?.payload?.devices || data?.devices;
-
-    //   if (!devices) return;
-
-    //   useBluetoothStore.getState().handleBluetoothPayload({
-    //     payload: { devices }
-    //   });
-    // });
-
-    // wsApi.on("destinationReached", () => {
-    //   const { clearRoute } = useRouteStore.getState();
-    //   clearRoute();
-    // });
   },
   setGuardianLocation: (loc) => set({ guardianLocation: loc }),
   startGuardianTracking: () => {
@@ -203,10 +189,6 @@ export const useDevicesStore = create(
         const { isLoading } = get();
         if (isLoading) return;
 
-        // if (!force && lastFetchedAt && Date.now() - lastFetchedAt < 30_000) {
-        //   return;
-        // }
-
         set({ isLoading: true });
 
         try {
@@ -235,10 +217,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -266,7 +248,6 @@ export const useDevicesStore = create(
         if (device?.deviceSerialNumber) {
           wsApi.emit("subscribe", { serial: device.deviceSerialNumber });
           console.log("Switching to serial:", device.deviceSerialNumber);
-
           wsApi.emit("requestStatus", { serial: device.deviceSerialNumber });
         }
       }
@@ -319,19 +300,17 @@ export const useGuardiansStore = create(
         set((state) => ({
           guardiansByDevice: state.guardiansByDevice.map((d) => {
             if (d.deviceId !== deviceId) return d;
-
             const exists = d.guardians.some(
               (g) => g.guardianId === guardian.guardianId
             );
-
             return {
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                  g.guardianId === guardian.guardianId
-                    ? { ...g, ...guardian }
-                    : g
-                )
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
                 : [...d.guardians, guardian]
             };
           })
@@ -341,7 +320,6 @@ export const useGuardiansStore = create(
         const guardian = get()
           .guardiansByDevice.flatMap((d) => d.guardians)
           .find((g) => g.guardianId === guardianId);
-
         return guardian ? guardian.role : "primary";
       },
 
@@ -350,11 +328,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                ...d,
-                guardians: d.guardians.filter(
-                  (g) => g.guardianId !== guardianId
-                )
-              }
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
               : d
           )
         })),
@@ -494,15 +472,9 @@ export const useBluetoothStore = create(
       lastUpdatedAt: null,
       _wsListenerAttached: false,
 
-      // -----------------------------
-      // Payload Sync
-      // -----------------------------
-
       handleBluetoothPayload: (data) => {
         if (!data?.payload?.devices) return;
-
         const devices = data.payload.devices;
-
         set(() => ({
           devices,
           lastUpdatedAt: Date.now(),
@@ -510,21 +482,13 @@ export const useBluetoothStore = create(
         }));
       },
 
-      // -----------------------------
-      // Pair Status
-      // -----------------------------
-
       handlePairStatus: (data) => {
         const { status, mac } = data || {};
-        console.log("Pair status update:", data);
-
         if (!mac) return;
-
         if (status === "starting") {
           set({ isBluetoothProcessing: true, processingMac: mac });
           return;
         }
-
         if (status === "success") {
           set((state) => ({
             devices: state.devices.map((d) =>
@@ -536,54 +500,38 @@ export const useBluetoothStore = create(
             processingMac: null
           }));
         }
-
         if (status === "failed") {
           set({ isBluetoothProcessing: false, processingMac: null });
         }
       },
 
-      // -----------------------------
-      // Unpair Status
-      // -----------------------------
-
       handleUnpairStatus: (data) => {
         const { status, mac } = data || {};
-        console.log("Unpair status update:", data);
         if (!mac) return;
-
         if (status === "starting") {
           set({ isBluetoothProcessing: true, processingMac: mac });
           return;
         }
-
         if (status === "success") {
           set((state) => ({
             devices: state.devices.filter((d) => d.mac !== mac),
             isBluetoothProcessing: false,
             processingMac: null
           }));
-
           return;
         }
-
         if (status === "failed") {
           set({ isBluetoothProcessing: false, processingMac: null });
         }
       },
 
-      // -----------------------------
-      // Connect Status
-      // -----------------------------
-
       handleConnectStatus: (data) => {
         const { status, mac } = data || {};
         if (!mac) return;
-
         if (status === "starting") {
           set({ isBluetoothProcessing: true, processingMac: mac });
           return;
         }
-
         if (status === "success") {
           set((state) => ({
             devices: state.devices.map((d) =>
@@ -593,25 +541,18 @@ export const useBluetoothStore = create(
             processingMac: null
           }));
         }
-
         if (status === "failed") {
           set({ isBluetoothProcessing: false, processingMac: null });
         }
       },
 
-      // -----------------------------
-      // Disconnect Status
-      // -----------------------------
-
       handleDisconnectStatus: (data) => {
         const { status, mac } = data || {};
         if (!mac) return;
-
         if (status === "starting") {
           set({ isBluetoothProcessing: true, processingMac: mac });
           return;
         }
-
         if (status === "success") {
           set((state) => ({
             devices: state.devices.map((d) =>
@@ -621,7 +562,6 @@ export const useBluetoothStore = create(
             processingMac: null
           }));
         }
-
         if (status === "failed") {
           set({ isBluetoothProcessing: false, processingMac: null });
         }
@@ -633,41 +573,28 @@ export const useBluetoothStore = create(
       },
 
       pairDevice: (mac) => {
-        if (!mac) return;
-        if (get().isBluetoothProcessing) return;
-
+        if (!mac || get().isBluetoothProcessing) return;
         wsApi.emit("pairBluetooth", { mac });
       },
 
       unpairDevice: (mac) => {
-        if (!mac) return;
-        if (get().isBluetoothProcessing) return;
-
+        if (!mac || get().isBluetoothProcessing) return;
         wsApi.emit("unpairBluetooth", { mac });
       },
 
       connectDevice: (mac) => {
-        if (!mac) return;
-        if (get().isBluetoothProcessing) return;
-
+        if (!mac || get().isBluetoothProcessing) return;
         wsApi.emit("connectBluetooth", { mac });
       },
 
       disconnectDevice: (mac) => {
-        if (!mac) return;
-        if (get().isBluetoothProcessing) return;
-
+        if (!mac || get().isBluetoothProcessing) return;
         wsApi.emit("disconnectBluetooth", { mac });
       },
 
-      clearDevices: () =>
-        set({
-          devices: [],
-          lastUpdatedAt: null
-        }),
+      clearDevices: () => set({ devices: [], lastUpdatedAt: null }),
 
       getDeviceByMac: (mac) => get().devices.find((d) => d.mac === mac),
-
       getTrustedDevices: () => get().devices.filter((d) => d.trusted)
     }),
     {
@@ -676,6 +603,131 @@ export const useBluetoothStore = create(
       partialize: (state) => ({
         lastUpdatedAt: state.lastUpdatedAt
       })
+    }
+  )
+);
+
+
+// Activity Reports Store
+export const useActivityReportsStore = create(
+  persist(
+    (set, get) => ({
+      history: [],
+      isLoading: false,
+      isRefreshing: false,
+      error: null,
+      lastFetchedAt: null,
+
+      fetchHistory: async () => {
+        const { history } = get();
+        const hasCache = Array.isArray(history) && history.length > 0;
+        await get()._fetch({ silent: hasCache });
+      },
+
+      _fetch: async ({ silent } = { silent: false }) => {
+        const { isLoading, isRefreshing } = get();
+        if (!silent && isLoading) return;
+        if (silent && isRefreshing) return;
+
+        if (silent) set({ isRefreshing: true, error: null });
+        else set({ isLoading: true, error: null });
+
+        try {
+          const response = await getAccountHistory();
+          if (!response?.success) throw new Error("Failed");
+
+          const history =
+            response.data?.history || response.data?.data?.history || [];
+
+          set({ history, lastFetchedAt: Date.now(), error: null });
+        } catch (e) {
+          set({ error: "Failed to load activity history" });
+        } finally {
+          if (silent) set({ isRefreshing: false });
+          else set({ isLoading: false });
+        }
+      },
+
+      clearHistory: () =>
+        set({
+          history: [],
+          isLoading: false,
+          isRefreshing: false,
+          error: null,
+          lastFetchedAt: null
+        })
+    }),
+    {
+      name: "activity-reports-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        history: state.history,
+        lastFetchedAt: state.lastFetchedAt
+      })
+    }
+  )
+);
+
+
+// Notif
+const EXCLUDED_ACTIONS = new Set(["LOGIN"]);
+
+export const NOTIFICATION_META = {
+  CREATE:              { label: "Device Created",        icon: "ph:device-mobile-plus", color: "blue"   },
+  UPDATE:              { label: "Device Updated",        icon: "ph:pencil-simple",      color: "indigo" },
+  DELETE:              { label: "Device Deleted",        icon: "ph:trash",              color: "red"    },
+  PAIR:                { label: "Device Paired",         icon: "ph:link",               color: "green"  },
+  UNPAIR:              { label: "Device Unpaired",       icon: "ph:link-break",         color: "orange" },
+  INVITE:              { label: "Guardian Invited",      icon: "ph:envelope-simple",    color: "purple" },
+  REMOVE_GUARDIAN:     { label: "Guardian Removed",      icon: "ph:user-minus",         color: "red"    },
+  UPDATE_ROLE:         { label: "Role Updated",          icon: "ph:shield",             color: "indigo" },
+  ACCEPT_INVITE:       { label: "Invite Accepted",       icon: "ph:check-circle",       color: "green"  },
+  SET_EMERGENCY:       { label: "Emergency Contact Set", icon: "ph:warning-circle",     color: "red"    },
+  UPDATE_RELATIONSHIP: { label: "Relationship Updated",  icon: "ph:users",              color: "blue"   },
+};
+
+export const useNotificationsStore = create(
+  persist(
+    (set, get) => ({
+      readIds: [],
+
+      markAsRead: (historyId) =>
+        set((state) => ({
+          readIds: state.readIds.includes(historyId)
+            ? state.readIds
+            : [...state.readIds, historyId]
+        })),
+
+      markAllRead: (historyIds) =>
+        set((state) => ({
+          readIds: [...new Set([...state.readIds, ...historyIds])]
+        })),
+
+      clearRead: () => set({ readIds: [] }),
+
+      getNotifications: (history, currentGuardianId) => {
+        const readIds = get().readIds;
+        return (history || [])
+          .filter((h) => !EXCLUDED_ACTIONS.has(h.action))
+          .filter((h) => Number(h.guardianId) !== Number(currentGuardianId))
+          .map((h) => ({
+            id:           h.historyId,
+            historyId:    h.historyId,
+            action:       h.action,
+            title:        NOTIFICATION_META[h.action]?.label || h.action,
+            message:      h.description || "—",
+            guardianName: h.guardianName || "Unknown",
+            color:        NOTIFICATION_META[h.action]?.color || "gray",
+            icon:         NOTIFICATION_META[h.action]?.icon  || "ph:bell",
+            timestamp:    h.createdAt,
+            read:         readIds.includes(h.historyId)
+          }));
+      }
+    }),
+    {
+      name: "notifications-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ readIds: state.readIds })
     }
   )
 );
