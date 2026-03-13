@@ -8,13 +8,13 @@ import { useUserStore, useUIStore } from "@/stores/useStore";
 import { MOBILE_TOUR_FLOW, TOUR_STEPS } from "@/data/tourConfig";
 import { markTourComplete, markTourProgress } from "@/api/backendService";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-const SPOTLIGHT_PADDING = 10; // extra space around the target element
-const TOOLTIP_MARGIN = 14; // gap between target edge and tooltip
-const TOOLTIP_SIDE_PADDING = 16; // minimum gap from viewport edge
-const MOBILE_TOOLTIP_BOTTOM_GAP = 24; // fixed gap below tooltip on mobile
 
-// Responsive tooltip width: shrink on narrow screens so it never clips
+const SPOTLIGHT_PADDING = 10; 
+const TOOLTIP_MARGIN = 14; 
+const TOOLTIP_SIDE_PADDING = 16; 
+const MOBILE_TOOLTIP_BOTTOM_GAP = 24;
+
+
 const getTooltipWidth = () =>
   Math.min(320, window.innerWidth - TOOLTIP_SIDE_PADDING * 2);
 
@@ -49,28 +49,19 @@ function clampToViewport(top, left, tooltipWidth, tooltipHeight) {
   };
 }
 
-/**
- * Calculate the best tooltip position relative to the target element rect.
- * Tries the preferred direction first, then falls back through the others.
- * On mobile (isMobile=true) always returns a bottom-center fixed modal position
- * so the tooltip never overflows or clips against the spotlight.
- */
+
 function computeTooltipPos(rect, preferred, tooltipHeight = 220, isMobile = false) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const tw = getTooltipWidth();
 
-  // ── Mobile: anchor tooltip to the bottom-centre of the viewport ──────────
-  // This avoids the tooltip being squeezed between the spotlight and screen
-  // edges, which is a common source of overflow/flicker on narrow screens.
+  
   if (isMobile) {
     const bottomTop = vh - tooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP;
     const overlapsBottomTooltipZone =
       rect.bottom + SPOTLIGHT_PADDING >= bottomTop - TOOLTIP_MARGIN;
 
-    // If the highlighted target lives in the bottom tooltip zone (e.g. map
-    // controls fixed near bottom-right), pin the tooltip near the top instead
-    // so the spotlight remains clear and fully visible.
+ 
     if (overlapsBottomTooltipZone) {
       return clampToViewport(
         TOOLTIP_SIDE_PADDING + 8,
@@ -136,7 +127,7 @@ function computeTooltipPos(rect, preferred, tooltipHeight = 220, isMobile = fals
   );
 }
 
-// Header targets that live in `hidden md:flex` — invisible on mobile.
+
 // Defined outside the component so no new Set is created on every render.
 const MOBILE_HEADER_TARGETS = new Set([
   "tour-vip-dropdown",
@@ -146,7 +137,6 @@ const MOBILE_HEADER_TARGETS = new Set([
 ]);
 
 // Maps each desktop header data-tour key → its mobile-menu equivalent.
-// The mobile menu items carry these attributes so TourGuide can spotlight them.
 const MOBILE_HEADER_STEP_MAP = {
   "tour-vip-dropdown":      "tour-mobile-vip",
   "tour-connection-status": "tour-mobile-connection",
@@ -174,15 +164,10 @@ const TourGuide = () => {
   const [stepReady, setStepReady] = useState(false);
   const tooltipRef = useRef(null);
 
-  // ── Scroll-lock: prevents the scroll→recompute→scroll infinite loop ───────
-  // Set to true while a programmatic scrollIntoView is in flight so that
-  // incoming scroll events are ignored until the scroll animation settles.
+
   const isScrollingRef = useRef(false);
   const scrollLockTimerRef = useRef(null);
 
-  // ── Auto-start stability: evaluated once per page per user load ───────────
-  // Using refs (instead of state) means the decision survives parent re-renders
-  // without triggering a new effect run, which would cancel the startup timer.
   const hasEvaluatedAutoStartRef = useRef(false);
   const evaluatedForPathRef = useRef(null);
 
@@ -190,8 +175,7 @@ const TourGuide = () => {
   const { hydrate } = useTourStore();
   const { setMobileMenuOpen } = useUIStore();
 
-  // Normalize keys because auth/login payloads may use camelCase while
-  // hydrated profile data from backend uses snake_case.
+ 
   const guardianId = user?.guardianId ?? user?.guardian_id ?? null;
   const hasSeenTourBackend =
     normalizeTourFlag(user?.has_seen_tour) ??
@@ -202,16 +186,13 @@ const TourGuide = () => {
     [user?.visited_tour_pages, user?.visitedTourPages]
   );
 
-  // ── Hydrate per-user localStorage data whenever the logged-in user changes ─
-  // This is the key fix: each guardian ID gets its own localStorage key, so
-  // a new account on the same browser never inherits another user's tour history.
+
   useEffect(() => {
     if (guardianId) {
       hydrate(guardianId, backendVisitedPages);
     }
   }, [guardianId, backendVisitedPages, hydrate]);
 
-  // ── Track mobile breakpoint as React state so steps recompute on resize ─
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
   useEffect(() => {
     const onResize = () => setIsMobileView(window.innerWidth < 768);
@@ -276,9 +257,7 @@ const TourGuide = () => {
     []
   );
 
-  // ── Auto-start for first-time page visits ─────────────────────────────────
-  // Backend `has_seen_tour` is the source of truth so the tour never replays
-  // across browsers/devices after completion.
+
   useEffect(() => {
     // Reset evaluation gate when navigating to a different page
     if (evaluatedForPathRef.current !== location.pathname) {
@@ -286,21 +265,16 @@ const TourGuide = () => {
       evaluatedForPathRef.current = location.pathname;
     }
 
-    // Global guard: backend completion is absolute source of truth.
-    // If backend says completed, tour must never auto-start on any page.
     if (hasSeenTourBackend === true) {
       hasEvaluatedAutoStartRef.current = true;
       return;
     }
 
-    // Already decided for this page — don't re-evaluate on re-renders
+    
     if (hasEvaluatedAutoStartRef.current) return;
 
     if (steps.length === 0) return;
-    if (!guardianId) return; // wait for user to finish loading
-
-    // Wait until backend completion status is known and explicitly false.
-    // Multi-page onboarding only runs while backend still says "not completed".
+    if (!guardianId) return;
     if (hasSeenTourBackend !== false) return;
 
     // During onboarding phase, localStorage tracks per-page progression.
@@ -321,7 +295,7 @@ const TourGuide = () => {
         `[data-tour="${firstStepTarget}"]`
       );
 
-      // Wait until dashboard/header elements are mounted and measurable.
+     
       if (!targetEl || (targetEl.offsetWidth === 0 && targetEl.offsetHeight === 0)) {
         if (attempts < maxAttempts) {
           attempts += 1;
@@ -334,7 +308,6 @@ const TourGuide = () => {
       startTour(location.pathname);
     };
 
-    // Slight delay lets route transition and header layout settle.
     const t = setTimeout(tryStart, 180);
     return () => {
       cancelled = true;
@@ -358,10 +331,7 @@ const TourGuide = () => {
     }
   }, [location.pathname, activeTourPage, endTour, setMobileMenuOpen]);
 
-  // ── Measure target element and compute positions ──────────────────────────
-  // On mobile, header step targets are inside `hidden md:flex` so they have
-  // no dimensions — they've already been remapped to "tour-mobile-menu" via
-  // the effectiveSteps logic above, so no further remapping is needed here.
+
   const updatePosition = useCallback(() => {
     if (!step) return;
 
@@ -382,8 +352,7 @@ const TourGuide = () => {
     setStepReady(true);
   }, [step, isMobileView]);
 
-  // When the active step changes: scroll to target, wait for scroll to settle,
-  // then measure
+  
   useEffect(() => {
     setStepReady(false);
     if (!step) return;
@@ -391,13 +360,10 @@ const TourGuide = () => {
     let didTriggerScroll = false;
     const el = document.querySelector(`[data-tour="${step.target}"]`);
     if (el) {
-      // Only scroll if the element isn't already fully visible — prevents
-      // programmatic scroll from firing accidental touch/click events on
-      // mobile (e.g. accidentally toggling the hamburger menu).
+     
       const r = el.getBoundingClientRect();
       const tooltipHeight = tooltipRef.current?.offsetHeight ?? 220;
-      // On mobile, the fixed tooltip occupies bottom screen space; treat that
-      // area as non-visible so lower targets still trigger scrollIntoView.
+   
       const mobileBottomSafeZone = isMobileView
         ? tooltipHeight + MOBILE_TOOLTIP_BOTTOM_GAP + TOOLTIP_MARGIN
         : 0;
@@ -407,26 +373,20 @@ const TourGuide = () => {
         r.left >= 0 && r.right <= window.innerWidth;
       if (!inViewport) {
         didTriggerScroll = true;
-        // ── Scroll lock: ignore scroll events while the animation is in
-        //    flight so we don't trigger the scroll→recompute→scroll loop.
+        
         isScrollingRef.current = true;
         clearTimeout(scrollLockTimerRef.current);
         el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-        // Release the lock once the smooth scroll has had time to settle.
-        // 700ms covers most devices; the 360ms measurement timer below fires
-        // after the lock is released, so positions are always accurate.
+        
         scrollLockTimerRef.current = setTimeout(() => {
           isScrollingRef.current = false;
         }, 700);
       }
     }
 
-    // Steps that need the mobile menu open require a longer settle time:
-    // the menu control effect opens it at t≈80ms, the spring animation
-    // finishes around t≈400ms, so we measure at t=620ms to be safe.
+    
     const baseDelay = step.requiresMobileMenu ? 620 : 360;
-    // If we initiated smooth scrolling, wait longer so we measure final
-    // post-scroll coordinates instead of a transient mid-scroll position.
+    
     const delay = didTriggerScroll ? Math.max(baseDelay, 750) : baseDelay;
     const t = setTimeout(updatePosition, delay);
     return () => {
@@ -436,9 +396,7 @@ const TourGuide = () => {
     };
   }, [step, updatePosition, isMobileView]);
 
-  // Recompute positions on scroll or resize.
-  // The scroll handler is guarded by isScrollingRef so that programmatic
-  // scrollIntoView calls don't trigger an infinite recompute→scroll loop.
+ 
   useEffect(() => {
     if (!step) return;
     const handleScroll = () => {
@@ -453,8 +411,6 @@ const TourGuide = () => {
     };
   }, [step, updatePosition]);
 
-  // Lock body scroll only on desktop while the tour overlay is shown.
-  // Mobile must remain scrollable so scrollIntoView can move to lower targets.
   useEffect(() => {
     if (!isActive || isMobileView) return;
     const prev = document.body.style.overflow;
@@ -464,35 +420,27 @@ const TourGuide = () => {
     };
   }, [isActive, isMobileView]);
 
-  // Hard-close drawer whenever the tour is not actively controlling mobile
-  // header steps. This prevents stale open state for returning users.
   useEffect(() => {
     if (!isActive || !isMobileView) {
       setMobileMenuOpen(false);
     }
   }, [isActive, isMobileView, setMobileMenuOpen]);
 
-  // ── Mobile menu gate: automatically open/close the drawer as the tour
-  //    moves between the hamburger step and its inner sub-steps. ─────────────
+
   useEffect(() => {
     if (!isActive || !isMobileView) return;
 
     if (step?.requiresMobileMenu) {
-      // Open the drawer slightly before we start measuring positions.
-      // The measurement timer (620ms) is longer than this delay, so the
-      // spring animation has time to settle before getBoundingClientRect runs.
+      
       const t = setTimeout(() => setMobileMenuOpen(true), 80);
       return () => clearTimeout(t);
     }
 
-    // Close the drawer when on the hamburger step or any non-menu step.
+    
     setMobileMenuOpen(false);
   }, [step, isActive, isMobileView, setMobileMenuOpen]);
 
-  // ── Persist onboarding completion to backend ───────────────────────────────
-  // Completion is delayed until either:
-  // 1) user skips onboarding, or
-  // 2) user completes a page and all configured tour pages are already visited.
+  
   const completeTour = useCallback(async (mode = "page-complete") => {
     setMobileMenuOpen(false); // close drawer if it was opened by the tour
     endTour();
@@ -547,8 +495,7 @@ const TourGuide = () => {
     if (currentStep >= steps.length - 1) {
       completeTour();
     } else {
-      // Open drawer right after the hamburger step so the next step can
-      // spotlight inner menu items after the menu animation settles.
+      
       if (isMobileView && step?.isMobileMenuTrigger) {
         setMobileMenuOpen(true);
       }
@@ -578,9 +525,7 @@ const TourGuide = () => {
 
   return createPortal(
     <AnimatePresence>
-      {/* ── Backdrop: 4 fixed panels around the spotlight ─────────────────
-           Using separate panels instead of a 9999px box-shadow avoids the
-           body overflow / layout-glitch on mobile browsers.            ── */}
+  
       {([
         { key: "bd-top",    style: { top: 0, left: 0, right: 0, height: Math.max(0, hl.top) } },
         { key: "bd-bottom", style: { top: hl.top + hl.height, left: 0, right: 0, bottom: 0 } },

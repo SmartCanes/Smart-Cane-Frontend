@@ -1,12 +1,5 @@
 /**
- * Per-page tour step definitions for the first-time user onboarding system.
- *
- * Each page path maps to an ordered array of steps.
- * Each step describes:
- *   - target     → value of the `data-tour` attribute on the target DOM element
- *   - title      → short heading shown in the tooltip
- *   - description→ explanatory text shown in the tooltip
- *   - position   → preferred tooltip placement: "top" | "bottom" | "left" | "right" | "auto"
+  
  */
 export const TOUR_STEPS = {
   "/dashboard": [
