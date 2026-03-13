@@ -403,7 +403,7 @@ const GuardianTile = ({
         bg-white/80 backdrop-blur
         shadow-sm hover:shadow-xl
         ring-1 ring-gray-200/70
-        p-5 md:p-6
+        p-5 sm:p-6
         transition-all
         ${guardian.isEmergencyContact ? "ring-2 ring-red-200" : ""}
       `}
@@ -632,7 +632,7 @@ const GuardianListItem = ({
       transition={{ duration: 0.15, ease: "easeOut" }}
       className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden ${guardian.isEmergencyContact ? "ring-2 ring-red-200" : "border border-gray-200 hover:border-blue-200 "}`}
     >
-      <div className="p-4">
+      <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0 flex-1">
             <div className="relative">
@@ -691,7 +691,7 @@ const GuardianListItem = ({
                 </span>
               </div>
 
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6 text-sm">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6 text-sm">
                 <div className="flex items-center gap-2 text-gray-600 min-w-0">
                   <Icon
                     icon="ph:envelope-bold"
@@ -714,7 +714,7 @@ const GuardianListItem = ({
               </div>
 
               {/* Relationship with Edit Button */}
-              <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+              <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
                 <Icon
                   icon="ph:users-three-bold"
                   className="w-4 h-4 text-gray-400 flex-shrink-0"
@@ -1159,7 +1159,7 @@ const ManageGuardiansModal = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="relative z-10 w-full max-w-6xl px-4 sm:px-6">
+          <div className="relative z-10 w-full max-w-6xl px-3 sm:px-6">
             <motion.div
               className="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] flex flex-col border border-gray-100 overflow-hidden"
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1169,7 +1169,7 @@ const ManageGuardiansModal = ({
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 rounded-t-2xl z-10">
+              <div className="sticky top-0 bg-white px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 rounded-t-2xl z-10">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg sm:text-xl font-bold text-gray-900">
@@ -1192,8 +1192,8 @@ const ManageGuardiansModal = ({
               </div>
 
               {/* Content */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-5 mb-6 sm:mb-7">
                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
                     {/* VIP Info */}
                     <div className="flex-1 w-full">
@@ -1223,11 +1223,11 @@ const ManageGuardiansModal = ({
                     <div className="w-full md:w-auto mt-3 md:mt-0">
                       <button
                         onClick={() => setInviteModalOpen(true)}
-                        className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto whitespace-nowrap text-sm sm:text-base"
+                        className="bg-[#2ECC71] text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto whitespace-nowrap text-sm sm:text-base"
                         disabled={isSubmitting}
                       >
                         <Icon icon="ph:user-plus-bold" className="w-5 h-5" />
-                        Invite Guardian
+                        Invite Family
                       </button>
                     </div>
                   </div>

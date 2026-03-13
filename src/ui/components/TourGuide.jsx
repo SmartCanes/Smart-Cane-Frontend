@@ -6,12 +6,13 @@ import { Icon } from "@iconify/react";
 import { useTourStore } from "@/stores/useTourStore";
 import { useUserStore, useUIStore } from "@/stores/useStore";
 import { MOBILE_TOUR_FLOW, TOUR_STEPS } from "@/data/tourConfig";
-import { markTourComplete } from "@/api/backendService";
+import { markTourComplete, markTourProgress } from "@/api/backendService";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const SPOTLIGHT_PADDING = 10; // extra space around the target element
 const TOOLTIP_MARGIN = 14; // gap between target edge and tooltip
 const TOOLTIP_SIDE_PADDING = 16; // minimum gap from viewport edge
+const MOBILE_TOOLTIP_BOTTOM_GAP = 24; // fixed gap below tooltip on mobile
 
 // Responsive tooltip width: shrink on narrow screens so it never clips
 const getTooltipWidth = () =>
@@ -27,6 +28,11 @@ function normalizeTourFlag(value) {
     if (normalized === "false") return false;
   }
   return null;
+}
+
+function normalizeVisitedPages(value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((path) => typeof path === "string" && path.startsWith("/"));
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -58,8 +64,24 @@ function computeTooltipPos(rect, preferred, tooltipHeight = 220, isMobile = fals
   // This avoids the tooltip being squeezed between the spotlight and screen
   // edges, which is a common source of overflow/flicker on narrow screens.
   if (isMobile) {
+    const bottomTop = vh - tooltipHeight - MOBILE_TOOLTIP_BOTTOM_GAP;
+    const overlapsBottomTooltipZone =
+      rect.bottom + SPOTLIGHT_PADDING >= bottomTop - TOOLTIP_MARGIN;
+
+    // If the highlighted target lives in the bottom tooltip zone (e.g. map
+    // controls fixed near bottom-right), pin the tooltip near the top instead
+    // so the spotlight remains clear and fully visible.
+    if (overlapsBottomTooltipZone) {
+      return clampToViewport(
+        TOOLTIP_SIDE_PADDING + 8,
+        (vw - tw) / 2,
+        tw,
+        tooltipHeight
+      );
+    }
+
     return clampToViewport(
-      vh - tooltipHeight - 24,
+      bottomTop,
       (vw - tw) / 2,
       tw,
       tooltipHeight
@@ -175,15 +197,19 @@ const TourGuide = () => {
     normalizeTourFlag(user?.has_seen_tour) ??
     normalizeTourFlag(user?.hasSeenTour) ??
     null;
+  const backendVisitedPages = useMemo(
+    () => normalizeVisitedPages(user?.visited_tour_pages ?? user?.visitedTourPages),
+    [user?.visited_tour_pages, user?.visitedTourPages]
+  );
 
   // ── Hydrate per-user localStorage data whenever the logged-in user changes ─
   // This is the key fix: each guardian ID gets its own localStorage key, so
   // a new account on the same browser never inherits another user's tour history.
   useEffect(() => {
     if (guardianId) {
-      hydrate(guardianId);
+      hydrate(guardianId, backendVisitedPages);
     }
-  }, [guardianId, hydrate]);
+  }, [guardianId, backendVisitedPages, hydrate]);
 
   // ── Track mobile breakpoint as React state so steps recompute on resize ─
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
@@ -362,16 +388,25 @@ const TourGuide = () => {
     setStepReady(false);
     if (!step) return;
 
+    let didTriggerScroll = false;
     const el = document.querySelector(`[data-tour="${step.target}"]`);
     if (el) {
       // Only scroll if the element isn't already fully visible — prevents
       // programmatic scroll from firing accidental touch/click events on
       // mobile (e.g. accidentally toggling the hamburger menu).
       const r = el.getBoundingClientRect();
+      const tooltipHeight = tooltipRef.current?.offsetHeight ?? 220;
+      // On mobile, the fixed tooltip occupies bottom screen space; treat that
+      // area as non-visible so lower targets still trigger scrollIntoView.
+      const mobileBottomSafeZone = isMobileView
+        ? tooltipHeight + MOBILE_TOOLTIP_BOTTOM_GAP + TOOLTIP_MARGIN
+        : 0;
+      const effectiveViewportBottom = window.innerHeight - mobileBottomSafeZone;
       const inViewport =
-        r.top >= 0 && r.bottom <= window.innerHeight &&
+        r.top >= 0 && r.bottom <= effectiveViewportBottom &&
         r.left >= 0 && r.right <= window.innerWidth;
       if (!inViewport) {
+        didTriggerScroll = true;
         // ── Scroll lock: ignore scroll events while the animation is in
         //    flight so we don't trigger the scroll→recompute→scroll loop.
         isScrollingRef.current = true;
@@ -389,14 +424,17 @@ const TourGuide = () => {
     // Steps that need the mobile menu open require a longer settle time:
     // the menu control effect opens it at t≈80ms, the spring animation
     // finishes around t≈400ms, so we measure at t=620ms to be safe.
-    const delay = step.requiresMobileMenu ? 620 : 360;
+    const baseDelay = step.requiresMobileMenu ? 620 : 360;
+    // If we initiated smooth scrolling, wait longer so we measure final
+    // post-scroll coordinates instead of a transient mid-scroll position.
+    const delay = didTriggerScroll ? Math.max(baseDelay, 750) : baseDelay;
     const t = setTimeout(updatePosition, delay);
     return () => {
       clearTimeout(t);
       clearTimeout(scrollLockTimerRef.current);
       isScrollingRef.current = false;
     };
-  }, [step, updatePosition]);
+  }, [step, updatePosition, isMobileView]);
 
   // Recompute positions on scroll or resize.
   // The scroll handler is guarded by isScrollingRef so that programmatic
@@ -454,15 +492,33 @@ const TourGuide = () => {
   // ── Persist onboarding completion to backend ───────────────────────────────
   // Completion is delayed until either:
   // 1) user skips onboarding, or
-  // 2) user completes the last page in the configured tour sequence.
+  // 2) user completes a page and all configured tour pages are already visited.
   const completeTour = useCallback(async (mode = "page-complete") => {
     setMobileMenuOpen(false); // close drawer if it was opened by the tour
     endTour();
 
-    const lastTourPath = allTourPaths[allTourPaths.length - 1];
-    const isLastPageInSequence = location.pathname === lastTourPath;
+    if (mode === "page-complete" && guardianId && location.pathname) {
+      try {
+        const progressRes = await markTourProgress(location.pathname);
+        const syncedVisitedPages = normalizeVisitedPages(
+          progressRes?.data?.visited_tour_pages ?? progressRes?.data?.visitedTourPages
+        );
+
+        if (syncedVisitedPages.length > 0) {
+          hydrate(guardianId, syncedVisitedPages);
+          updateUser({
+            visited_tour_pages: syncedVisitedPages,
+            visitedTourPages: syncedVisitedPages
+          });
+        }
+      } catch (error) {
+        console.error("Failed to sync tour page progress:", error);
+      }
+    }
+
+    const hasVisitedAllTourPaths = allTourPaths.every((path) => hasVisited(path));
     const shouldMarkComplete =
-      mode === "skip" || (mode === "page-complete" && isLastPageInSequence);
+      mode === "skip" || (mode === "page-complete" && hasVisitedAllTourPaths);
 
     // Delayed backend completion: only on Skip or final page completion.
     if (!shouldMarkComplete || hasSeenTourBackend === true) return;
@@ -470,14 +526,18 @@ const TourGuide = () => {
     try {
       await markTourComplete();
       updateUser({ has_seen_tour: true, hasSeenTour: true });
-    } catch {
+    } catch (error) {
+      console.error("Failed to mark tour complete:", error);
       // Non-critical — per-page localStorage guard still prevents re-show
     }
   }, [
     allTourPaths,
+    guardianId,
     location.pathname,
+    hasVisited,
     hasSeenTourBackend,
     endTour,
+    hydrate,
     setMobileMenuOpen,
     updateUser
   ]);
@@ -628,9 +688,9 @@ const TourGuide = () => {
           </p>
 
           {/* Footer: progress dots + navigation buttons */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Step progress dots */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
               {steps.map((_, i) => (
                 <div
                   key={i}
@@ -646,18 +706,18 @@ const TourGuide = () => {
             </div>
 
             {/* Navigation buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
               {currentStep > 0 && (
                 <button
                   onClick={handlePrev}
-                  className="px-3 py-1.5 text-xs font-medium text-gray-600 rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer"
+                  className="px-3.5 py-2 text-xs font-medium text-gray-600 rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer min-w-[72px]"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={handleNext}
-                className="px-4 py-1.5 text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer min-w-[88px]"
               >
                 {isLastStep ? (
                   <>

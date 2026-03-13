@@ -826,7 +826,7 @@ const DeviceCard = ({
       </div>
 
       {/* VIP Profile Section */}
-      <div className="p-4 sm:p-5">
+      <div data-tour="tour-device-vip" className="p-4 sm:p-5">
         <div className="mb-4">
           <div className="flex justify-between items-center mb-3">
             <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2 ">
@@ -933,7 +933,7 @@ const DeviceCard = ({
       <div className="relative px-4 sm:px-5 py-3 bg-gray-50 border-t border-gray-100">
         <div className="flex justify-between items-center">
           {/* Manage button with Dropdown */}
-          <div className="relative" ref={actionsMenuRef}>
+          <div data-tour="tour-device-manage" className="relative" ref={actionsMenuRef}>
             <button
               onClick={(e) => {
                 e.stopPropagation();

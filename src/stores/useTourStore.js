@@ -31,6 +31,18 @@ function writeVisited(guardianId, visitedPages) {
   }
 }
 
+function normalizeVisitedTourPages(value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((path) => typeof path === "string" && path.startsWith("/"));
+}
+
+function arrayToVisitedMap(paths) {
+  return normalizeVisitedTourPages(paths).reduce((acc, path) => {
+    acc[path] = true;
+    return acc;
+  }, {});
+}
+
 // ─── Store ────────────────────────────────────────────────────────────────────
 
 export const useTourStore = create((set, get) => ({
@@ -51,15 +63,20 @@ export const useTourStore = create((set, get) => ({
 
   /**
    * Must be called once the logged-in user is known (e.g. on mount in
-   * TourGuide or after login). Loads the per-user visited map from
-   * localStorage so the correct tour history is used.
+   * TourGuide or after login). Merges server-tracked page progress with
+   * localStorage so per-page completion survives device/incognito changes.
    */
-  hydrate: (guardianId) => {
+  hydrate: (guardianId, backendVisitedTourPages = []) => {
     if (!guardianId) return;
-    // Already loaded for this user — nothing to do.
-    if (get().currentGuardianId === guardianId) return;
+
+    const localVisited = readVisited(guardianId);
+    const backendVisited = arrayToVisitedMap(backendVisitedTourPages);
+    const mergedVisited = { ...localVisited, ...backendVisited };
+
+    writeVisited(guardianId, mergedVisited);
+
     set({
-      visitedPages: readVisited(guardianId),
+      visitedPages: mergedVisited,
       currentGuardianId: guardianId
     });
   },

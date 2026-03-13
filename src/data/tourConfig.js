@@ -7,7 +7,6 @@
  *   - title      → short heading shown in the tooltip
  *   - description→ explanatory text shown in the tooltip
  *   - position   → preferred tooltip placement: "top" | "bottom" | "left" | "right" | "auto"
- *   - icon       → Iconify icon name for visual flair in the tooltip header
  */
 export const TOUR_STEPS = {
   "/dashboard": [
@@ -109,6 +108,22 @@ export const TOUR_STEPS = {
         "Tap 'Add Cane' and scan the QR code on your iCane to pair it with your account. It only takes a few seconds.",
       position: "bottom",
       icon: "ph:plus-circle-fill"
+    },
+    {
+      target: "tour-device-vip",
+      title: "Assign & Manage VIP",
+      description:
+        "Here you can also view the VIP's name, photo, and basic info",
+      position: "bottom",
+      icon: "ph:user-circle-fill"
+    },
+    {
+      target: "tour-device-manage",
+      title: "Cane Settings & Guardians",
+      description:
+        "Click this to edit the cane's nickname, or open 'Manage Guardians' to invite co-guardians and transfer emergency alerts to them.",
+      position: "bottom",
+      icon: "ph:gear-six-fill"
     }
   ],
 
@@ -160,12 +175,28 @@ export const TOUR_STEPS = {
       icon: "fa6-brands:unity"
     },
     {
+      target: "tour-advanced-stats",
+      title: "Live Component Stats",
+      description:
+        "Quickly see how many components are currently online and functioning properly out of your total modules.",
+      position: "bottom",
+      icon: "mdi:chart-box"
+    },
+    {
       target: "tour-device-status",
       title: "Health at a Glance",
       description:
         "This panel summarizes how many components are online and gives an overall health percentage for your iCane.",
       position: "bottom",
       icon: "mdi:chip"
+    },
+    {
+      target: "tour-advanced-tabs",
+      title: "Component Categories",
+      description:
+        "Switch between Sensors, Hardware controllers, and Voice engine settings using these tabs.",
+      position: "bottom",
+      icon: "mdi:tab"
     }
   ]
 };

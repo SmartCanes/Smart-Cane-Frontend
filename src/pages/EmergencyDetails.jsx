@@ -7,7 +7,6 @@ import {
 } from "@/stores/useStore";
 import { Icon } from "@iconify/react";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
-import { useState } from "react";
 
 const EmergencyDetails = () => {
   const location = useLocation();
@@ -15,7 +14,6 @@ const EmergencyDetails = () => {
   const { selectedDevice } = useDevicesStore();
   const { guardians } = useGuardiansStore();
   const emergencyData = location.state?.emergencyData || null;
-  const [activeTab, setActiveTab] = useState("vip");
 
   const pick = (...values) => values.find((value) => value != null);
   const capitalize = (value) =>
@@ -213,62 +211,19 @@ const EmergencyDetails = () => {
           </div>
         </div>
 
-        {/* Mobile tabs */}
-        <div className="flex sm:hidden items-center gap-1 bg-white/10 rounded-xl p-1">
-          <button
-            onClick={() => setActiveTab("vip")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeTab === "vip"
-                ? "bg-white text-[#1a4a9f] shadow-sm"
-                : "text-white/80 hover:text-white"
-            }`}
-          >
-            VIP
-          </button>
-          <button
-            onClick={() => setActiveTab("guardian")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeTab === "guardian"
-                ? "bg-white text-[#1a4a9f] shadow-sm"
-                : "text-white/80 hover:text-white"
-            }`}
-          >
-            Guardian
-          </button>
-        </div>
-
-        {/* Desktop badge */}
-        <div className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-white/10 backdrop-blur-sm px-4 py-2 text-white text-xs font-semibold border border-white/20">
+        {/* Emergency Mode badge */}
+        <div className="inline-flex items-center gap-1 sm:gap-1.5 rounded-xl bg-white/10 backdrop-blur-sm px-2.5 py-1.5 sm:px-4 sm:py-2 text-white font-semibold border border-white/20 whitespace-nowrap">
           <Icon
             icon="ph:warning-diamond-fill"
-            className="text-sm text-amber-300"
+            className="text-xs sm:text-sm text-amber-300"
           />
-          Emergency Mode • Active
+          <span className="hidden sm:inline text-xs">Emergency Mode • Active</span>
+          <span className="sm:hidden text-[10px]">Active</span>
         </div>
       </header>
 
       <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6">
-        {/* Mobile view - tabbed content */}
-        <div className="block xl:hidden">
-          {activeTab === "vip" ? (
-            <VIPSection
-              vipFullName={vipFullName}
-              vipImage={vipImage}
-              vipAddress={vipAddress}
-              vipFields={vipFields}
-            />
-          ) : (
-            <GuardianSection
-              emergencyGuardian={emergencyGuardian}
-              formatDateTime={formatDateTime}
-              statusColor={statusColor}
-              capitalize={capitalize}
-            />
-          )}
-        </div>
-
-        {/* Desktop view - side by side */}
-        <div className="hidden xl:grid xl:grid-cols-2 gap-6 h-full">
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:h-full">
           <VIPSection
             vipFullName={vipFullName}
             vipImage={vipImage}
@@ -277,6 +232,7 @@ const EmergencyDetails = () => {
           />
           <GuardianSection
             emergencyGuardian={emergencyGuardian}
+            guardianCount={normalizedGuardians.length}
             formatDateTime={formatDateTime}
             statusColor={statusColor}
             capitalize={capitalize}
@@ -311,7 +267,7 @@ const VIPSection = ({ vipFullName, vipImage, vipAddress, vipFields }) => (
       <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
         <div className="flex items-center gap-5">
           <div className="relative">
-            <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-[#1a4a9f] to-[#0a1e3f]">
+            <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-[#1a4a9f] to-[#0a1e3f]">
               {vipImage ? (
                 <img
                   src={resolveProfileImageSrc(vipImage)}
@@ -319,7 +275,7 @@ const VIPSection = ({ vipFullName, vipImage, vipAddress, vipFields }) => (
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white text-4xl font-bold">
+                <div className="w-full h-full flex items-center justify-center text-white text-3xl sm:text-4xl font-bold">
                   {vipFullName.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -328,7 +284,7 @@ const VIPSection = ({ vipFullName, vipImage, vipAddress, vipFields }) => (
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-2xl md:text-3xl font-bold text-[#0a1e3f] leading-tight mb-1">
+            <h3 className="text-lg sm:text-2xl md:text-3xl font-bold text-[#0a1e3f] leading-tight mb-1">
               {vipFullName}
             </h3>
             {/* <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
@@ -367,6 +323,7 @@ const VIPSection = ({ vipFullName, vipImage, vipAddress, vipFields }) => (
 // Extracted Guardian Section component
 const GuardianSection = ({
   emergencyGuardian,
+  guardianCount,
   formatDateTime,
   statusColor,
   capitalize
@@ -388,8 +345,8 @@ const GuardianSection = ({
             <p className="text-xs text-slate-500">Primary contact person</p>
           </div>
         </div>
-        <span className="text-xs font-semibold rounded-full bg-blue-50 text-blue-700 px-3 py-1.5 border border-blue-200">
-          1 contact
+        <span className="text-xs font-semibold rounded-full bg-blue-50 text-blue-700 px-3 py-1.5 border border-blue-200 whitespace-nowrap">
+          {guardianCount} {guardianCount === 1 ? "contact" : "contacts"}
         </span>
       </div>
     </div>
@@ -403,7 +360,7 @@ const GuardianSection = ({
           <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
             <div className="flex items-start gap-4">
               <div className="relative">
-                <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-[#1a4a9f] to-[#0a1e3f]">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-[#1a4a9f] to-[#0a1e3f]">
                   {emergencyGuardian.image ? (
                     <img
                       src={resolveProfileImageSrc(emergencyGuardian.image)}
@@ -411,7 +368,7 @@ const GuardianSection = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-3xl">
+                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-2xl sm:text-3xl">
                       {emergencyGuardian.initials}
                     </div>
                   )}
@@ -420,7 +377,7 @@ const GuardianSection = ({
 
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <h3 className="font-bold text-[#0a1e3f] text-2xl md:text-3xl leading-tight">
+                  <h3 className="font-bold text-[#0a1e3f] text-lg sm:text-2xl md:text-3xl leading-tight">
                     {emergencyGuardian.name}
                   </h3>
                   <span
@@ -500,13 +457,16 @@ const GuardianSection = ({
 
           {/* Call Button */}
           {emergencyGuardian.phone && (
-            <div className="group mt-5 inline-flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-gradient-to-r from-[#1a4a9f] to-[#0a1e3f] text-white text-base md:text-lg font-semibold hover:shadow-lg hover:shadow-[#1a4a9f]/25 transition-all duration-300 transform hover:scale-[1.02]">
+            <a
+              href={`tel:${emergencyGuardian.phone}`}
+              className="group mt-5 inline-flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-gradient-to-r from-[#1a4a9f] to-[#0a1e3f] text-white text-base md:text-lg font-semibold hover:shadow-lg hover:shadow-[#1a4a9f]/25 transition-all duration-300 transform hover:scale-[1.02]"
+            >
               <Icon
                 icon="ph:phone-call-fill"
                 className="text-xl group-hover:animate-pulse"
               />
               Call Emergency Guardian
-            </div>
+            </a>
           )}
         </div>
       )}

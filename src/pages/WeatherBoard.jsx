@@ -137,7 +137,10 @@ const WeatherBoard = () => {
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
       <div className="mx-auto space-y-6 min-h-full">
-        <div data-tour="tour-weather-main">
+        <div
+          data-tour="tour-weather-main"
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3"
+        >
           <h1 className="text-2xl font-bold text-[#11285A] mb-1">
             Weather Forecast
           </h1>

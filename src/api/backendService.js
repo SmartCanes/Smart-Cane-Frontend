@@ -17,6 +17,9 @@ export const getMyProfile = () =>
 export const markTourComplete = () =>
   handleRequest(() => backendApi.patch("/guardian/tour-complete"));
 
+export const markTourProgress = (path) =>
+  handleRequest(() => backendApi.patch("/guardian/tour-progress", { path }));
+
 export const getVIPs = () => handleRequest(() => backendApi.get("/vip"));
 
 // VIP's
