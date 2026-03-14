@@ -283,7 +283,7 @@ const TourGuide = () => {
       return;
     }
 
-    // Already decided for this page — don't re-evaluate on re-renders
+    // // Already decided for this page — don't re-evaluate on re-renders
     if (hasEvaluatedAutoStartRef.current) return;
 
     if (steps.length === 0) return;
