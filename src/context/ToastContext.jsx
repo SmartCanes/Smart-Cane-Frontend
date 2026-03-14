@@ -8,7 +8,8 @@ import {
 import Toast from "@/ui/components/Toast";
 
 const ToastContext = createContext({
-  showToast: () => {}
+  showToast: () => {},
+  clearToast: () => {}
 });
 
 ToastContext.displayName = "ToastContext";
@@ -24,6 +25,7 @@ export const ToastProvider = ({ children }) => {
       duration = 3000
     }) => {
       if (!message) return;
+
       setToast({
         key: Date.now(),
         message,
@@ -35,9 +37,16 @@ export const ToastProvider = ({ children }) => {
     []
   );
 
+  const clearToast = useCallback(() => {
+    setToast(null);
+  }, []);
+
   const handleClose = useCallback(() => setToast(null), []);
 
-  const value = useMemo(() => ({ showToast }), [showToast]);
+  const value = useMemo(
+    () => ({ showToast, clearToast }),
+    [showToast, clearToast]
+  );
 
   return (
     <ToastContext.Provider value={value}>

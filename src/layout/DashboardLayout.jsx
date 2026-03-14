@@ -3,6 +3,7 @@ import { ToastProvider, useToast } from "@/context/ToastContext";
 import { useRealtimeStore, useUserStore } from "@/stores/useStore";
 import DashboardSide from "@/ui/components/DashboardSide";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
+import FallOverlay from "@/ui/components/FallOverlay";
 import Header from "@/ui/components/Header";
 import TourGuide from "@/ui/components/TourGuide";
 import { createContext, useEffect, useRef, useState } from "react";
@@ -12,9 +13,9 @@ const ScrollContext = createContext();
 
 const DashboardLayoutContent = () => {
   const { setUser } = useUserStore();
-  const { emergency, connectWs, disconnectWs } = useRealtimeStore();
+  const { emergency, fall, connectWs, disconnectWs } = useRealtimeStore();
   const location = useLocation();
-  const { showToast } = useToast();
+  const { showToast, clearToast } = useToast();
   const [showNav, setShowNav] = useState(true);
   const lastScrollY = useRef(0);
 
@@ -48,8 +49,21 @@ const DashboardLayoutContent = () => {
         position: "bottom-right",
         duration: 500000
       });
+      return;
     }
-  }, [emergency, showToast]);
+
+    if (fall) {
+      showToast({
+        message: "Fall detected! Please check the user's status immediately.",
+        type: "warning",
+        position: "bottom-right",
+        duration: 10000
+      });
+      return;
+    }
+
+    clearToast();
+  }, [emergency, fall, showToast, clearToast]);
 
   useEffect(() => {
     const showModal = location.state?.showModal;
@@ -82,10 +96,13 @@ const DashboardLayoutContent = () => {
     lastScrollY.current = currentScrollY;
   };
 
+  const activeAlert = emergency ? "emergency" : fall ? "fall" : null;
+
   return (
     <ScrollContext.Provider value={{ handleScroll }}>
       <div className="min-h-screen flex flex-col overflow-y-hidden bg-primary-100">
-        <EmergencyOverlay emergency={emergency} />
+        {activeAlert === "fall" && <FallOverlay fall={true} />}
+        {activeAlert === "emergency" && <EmergencyOverlay emergency={true} />}
         <TourGuide />
 
         <div

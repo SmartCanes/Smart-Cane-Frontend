@@ -50,6 +50,7 @@ export const useRealtimeStore = create(
       connectionStatus: false,
       _guardianWatchId: null,
       emergency: false,
+      fall: false,
       canePosition: null,
       guardianPosition: null,
       deviceConfig: {},
@@ -129,9 +130,11 @@ export const useRealtimeStore = create(
         });
 
         wsApi.on("status", (data) => {
+          console.log(data);
           set({
             connectionStatus: data.status === "online",
             emergency: data.emergency,
+            fall: data.fall === true || data.fall === "true",
             componentHealth: {
               gpsStatus: Number(data.gpsStatus) === 2,
               ultrasonicStatus:
