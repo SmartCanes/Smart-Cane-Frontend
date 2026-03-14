@@ -267,7 +267,7 @@ const faqs = [
   {
     question: "How do I charge and maintain the SmartCane?",
     answer:
-      "The SmartCane can be charged using a USB charging cable connected to the cane’s charging port. A full charge usually takes about 2–3 hours and can last around 3-4 hours depending on usage. The cane is also water-resistant, meaning it can handle light rain but should not be submerged in water."
+      "The SmartCane can be charged using a USB charging cable connected to the cane’s charging port. A full charge usually takes about 2–3 hours and can last around 1-2 hours depending on usage. The cane is also water-resistant, meaning it can handle light rain but should not be submerged in water."
   }
 ];
 
