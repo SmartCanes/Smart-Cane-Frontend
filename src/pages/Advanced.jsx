@@ -267,7 +267,6 @@ const componentsData = [
   }
 ];
 
-// Voice Control Panel Component
 const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
   const config = deviceConfig?.config ?? {};
 
@@ -283,82 +282,6 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
 
   const uiVolume = Math.round((volume || 0) * 100);
   const isMuted = uiVolume === 0;
-
-  const voiceTypes = [
-    {
-      id: "en+f1",
-      name: "Female Voice 1",
-      icon: "mdi:microphone",
-      gender: "female"
-    },
-    {
-      id: "en+f2",
-      name: "Female Voice 2",
-      icon: "mdi:microphone",
-      gender: "female"
-    },
-    {
-      id: "en+f3",
-      name: "Female Voice 3",
-      icon: "mdi:microphone",
-      gender: "female"
-    },
-    {
-      id: "en+f4",
-      name: "Female Voice 4",
-      icon: "mdi:microphone",
-      gender: "female"
-    },
-    {
-      id: "en+f5",
-      name: "Female Voice 5",
-      icon: "mdi:microphone",
-      gender: "female"
-    },
-
-    {
-      id: "en+m1",
-      name: "Male Voice 1",
-      icon: "mdi:microphone",
-      gender: "male"
-    },
-    {
-      id: "en+m2",
-      name: "Male Voice 2",
-      icon: "mdi:microphone",
-      gender: "male"
-    },
-    {
-      id: "en+m3",
-      name: "Male Voice 3",
-      icon: "mdi:microphone",
-      gender: "male"
-    },
-    {
-      id: "en+m4",
-      name: "Male Voice 4",
-      icon: "mdi:microphone",
-      gender: "male"
-    },
-    {
-      id: "en+m5",
-      name: "Male Voice 5",
-      icon: "mdi:microphone",
-      gender: "male"
-    },
-    {
-      id: "en+m6",
-      name: "Male Voice 6",
-      icon: "mdi:microphone",
-      gender: "male"
-    },
-    {
-      id: "en+m7",
-      name: "Male Voice 7",
-      icon: "mdi:microphone",
-      gender: "male"
-    }
-  ];
 
   // useEffect(() => {
   //   if (!isOnline) return;
@@ -564,84 +487,6 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
       </div>
 
       {/* Voice Type Selection */}
-      <div className="mb-5 sm:mb-6">
-        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-3">
-          <div className="flex items-center gap-2">
-            <Icon icon="mdi:account-voice" className="w-4 h-4 text-gray-500" />
-            Voice Type
-          </div>
-        </label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-          {voiceTypes.map((voice) => (
-            <button
-              key={voice.id}
-              onClick={() => handleVoiceChange(voice.id)}
-              disabled={!isOnline}
-              className={`p-2 sm:p-3 rounded-xl border-2 transition-all ${
-                voiceType === voice.id
-                  ? "border-primary-500 bg-primary-50 shadow-sm"
-                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-              } ${!isOnline && "opacity-50 cursor-not-allowed"}`}
-            >
-              <div className="flex items-center gap-2">
-                <Icon icon={voice.icon} />
-                <div className="text-left">
-                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
-                    {voice.name}
-                  </p>
-                  <p className="text-xs text-gray-500 capitalize">
-                    {voice.gender}
-                  </p>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Preview Section */}
-      <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
-        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-          Preview Text
-        </label>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            value={previewText}
-            onChange={(e) => setPreviewText(e.target.value)}
-            disabled={!isOnline}
-            placeholder="Enter text to preview..."
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
-          />
-          <button
-            onClick={playPreview}
-            disabled={!isOnline || isPlaying}
-            className={`px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all ${
-              isPlaying
-                ? "bg-green-500 text-white"
-                : "bg-primary-600 text-white hover:bg-primary-700"
-            } ${(!isOnline || isPlaying) && "opacity-50 cursor-not-allowed"}`}
-          >
-            <Icon
-              icon={isPlaying ? "mdi:loading" : "mdi:play"}
-              className={`w-4 h-4 ${isPlaying ? "animate-spin" : ""}`}
-            />
-            {isPlaying ? "Playing..." : "Preview"}
-          </button>
-        </div>
-      </div>
-
-      {/* Status Bar */}
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-        <div className="flex items-center gap-1">
-          <Icon icon="mdi:check-circle" className="w-4 h-4 text-green-500" />
-          <span>Connected to audio device</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Icon icon="mdi:microphone" className="w-4 h-4 text-gray-400" />
-          <span>Speech ready</span>
-        </div>
-      </div>
     </motion.div>
   );
 };
@@ -1328,8 +1173,7 @@ function Advanced() {
                         ...deviceConfig?.components?.VOICE_ENGINE,
                         config: {
                           volume: config.volume,
-                          speechSpeed: config.speechSpeed,
-                          voiceType: config.voiceType
+                          speechSpeed: config.speechSpeed
                         }
                       }
                     }
