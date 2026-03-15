@@ -21,10 +21,10 @@ import GetStarted from "./pages/GetStarted.jsx";
 import { GuardianProfile } from "./pages/GuardianProfile";
 import Devices from "./pages/Devices";
 import GuardianInvite from "./pages/GuardianInvite";
-import Advanced from "./pages/ActivityLogs.jsx";
 import Notifications from "./pages/Notifications";
 import EmergencyDetails from "./pages/EmergencyDetails.jsx";
 import DeviceLogs from "./pages/DeviceLogs";
+import Advanced from "./pages/Advanced";
 import ActivityLogs from "./pages/ActivityLogs";
 
 createRoot(document.getElementById("root")).render(
