@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import ActivityActions from "@/ui/components/ActivityActions";
+import DefaultProfile from "@/ui/components/DefaultProfile";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import { useActivityReportsStore } from "@/stores/useStore";
 
 // Map backend action strings to ActivityActions types
@@ -43,7 +45,7 @@ const ActivityReport = () => {
   );
 
   const totalItems = filteredActivities.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const paginatedActivities = filteredActivities.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -85,7 +87,37 @@ const ActivityReport = () => {
     return pages;
   };
 
-  // Error state
+  const renderGuardianAvatar = (activity, size = "w-10 h-10") => {
+    // Replace these keys with your actual backend field if different
+    const avatar =
+      activity.guardianProfileImage ||
+      activity.guardianAvatar ||
+      activity.profileImage ||
+      activity.avatar;
+
+    const guardianName = activity.guardianName || "Guardian";
+
+    return (
+      <div
+        className={`${size} rounded-full overflow-hidden shrink-0 bg-gray-100`}
+      >
+        {avatar ? (
+          <img
+            loading="lazy"
+            src={resolveProfileImageSrc(avatar)}
+            alt={guardianName}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <DefaultProfile
+            bgColor="bg-primary-100"
+            userInitial={guardianName.charAt(0)}
+          />
+        )}
+      </div>
+    );
+  };
+
   if (error) {
     return (
       <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
@@ -119,7 +151,6 @@ const ActivityReport = () => {
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
       <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
-        {/* Header */}
         <div data-tour="tour-activity-header" className="mb-4 md:mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
             Activity Reports
@@ -129,7 +160,6 @@ const ActivityReport = () => {
           </p>
         </div>
 
-        {/* Search Bar */}
         <div
           data-tour="tour-activity-search"
           className="bg-white rounded-t-2xl p-4 md:p-6 border-b border-gray-100"
@@ -201,7 +231,10 @@ const ActivityReport = () => {
                       ? Array.from({ length: itemsPerPage }).map((_, index) => (
                           <tr key={`sk-${index}`} className="animate-pulse">
                             <td className="py-4 px-6">
-                              <div className="h-4 w-40 bg-gray-200 rounded" />
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                                <div className="h-4 w-32 bg-gray-200 rounded" />
+                              </div>
                             </td>
 
                             <td className="py-4 px-6">
@@ -226,9 +259,12 @@ const ActivityReport = () => {
                             className="hover:bg-gray-50 transition-colors"
                           >
                             <td className="py-4 px-6">
-                              <p className="font-semibold text-sm text-gray-900">
-                                {activity.guardianName || "—"}
-                              </p>
+                              <div className="flex items-center gap-3">
+                                {renderGuardianAvatar(activity, "w-10 h-10")}
+                                <p className="font-semibold text-sm text-gray-900">
+                                  {activity.guardianName || "—"}
+                                </p>
+                              </div>
                             </td>
 
                             <td className="py-4 px-6">
@@ -263,7 +299,6 @@ const ActivityReport = () => {
                 </table>
               </div>
 
-              {/* Pagination Footer */}
               <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
                 <p className="text-sm text-gray-500">
                   Showing{" "}
@@ -313,27 +348,33 @@ const ActivityReport = () => {
                     key={activity.historyId ?? index}
                     className="p-4 hover:bg-gray-50 transition-colors"
                   >
-                    <p className="font-semibold text-sm text-gray-900 mb-2">
-                      {activity.guardianName || "—"}
-                    </p>
+                    <div className="flex items-start gap-3 mb-3">
+                      {renderGuardianAvatar(activity, "w-11 h-11")}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm text-gray-900 truncate">
+                          {activity.guardianName || "—"}
+                        </p>
+                        <p className="text-xs text-gray-400 font-medium mt-1">
+                          {activity.createdAt
+                            ? activity.createdAt.replace("T", " ").split(".")[0]
+                            : "—"}
+                        </p>
+                      </div>
+                    </div>
+
                     <div className="mb-2 inline-block">
                       <ActivityActions
                         type={ACTION_TYPE_MAP[activity.action] || "settings"}
                       />
                     </div>
+
                     <p className="text-sm text-gray-600 mb-2 leading-relaxed">
                       {activity.description || "—"}
-                    </p>
-                    <p className="text-xs text-gray-400 font-medium">
-                      {activity.createdAt
-                        ? activity.createdAt.replace("T", " ").split(".")[0]
-                        : "—"}
                     </p>
                   </div>
                 ))}
               </div>
 
-              {/* Mobile Pagination */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t border-gray-100 bg-gray-50">
                 <p className="text-xs text-gray-500">
                   Showing{" "}

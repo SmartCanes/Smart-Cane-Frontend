@@ -1,16 +1,12 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import DefaultProfile from "@/ui/components/DefaultProfile";
 
-// Dummy data for Activity Logs
 const activityLogs = [
   {
     id: 1,
-    guardian: {
-      name: "John Smith",
-      avatar: "https://i.pravatar.cc/150?u=john"
-    },
-    device: "SC-136901",
-    vipName: "Mary Smith",
+    vipName: "Althea De Vera",
     activity: "Walk to Park",
     location: "Home (123 Main St)",
     destination: "Central Park",
@@ -20,12 +16,7 @@ const activityLogs = [
   },
   {
     id: 2,
-    guardian: {
-      name: "Sarah Johnson",
-      avatar: "https://i.pravatar.cc/150?u=sarah"
-    },
-    device: "SC-136902",
-    vipName: "Robert Johnson",
+    vipName: "Sarah Chua",
     activity: "Grocery Shopping",
     location: "Home",
     destination: "Whole Foods",
@@ -35,12 +26,7 @@ const activityLogs = [
   },
   {
     id: 3,
-    guardian: {
-      name: "Emily Davis",
-      avatar: "https://i.pravatar.cc/150?u=emily"
-    },
-    device: "SC-136903",
-    vipName: "William Davis",
+    vipName: "Isabel Garcia",
     activity: "Daily Walk",
     location: "Home",
     destination: "Neighborhood Loop",
@@ -50,12 +36,7 @@ const activityLogs = [
   },
   {
     id: 4,
-    guardian: {
-      name: "Robert Wilson",
-      avatar: "https://i.pravatar.cc/150?u=robert"
-    },
-    device: "SC-136904",
-    vipName: "Patricia Wilson",
+    vipName: "Daniel Flores",
     activity: "Doctor Appointment",
     location: "Clinic",
     destination: "Home",
@@ -65,12 +46,7 @@ const activityLogs = [
   },
   {
     id: 5,
-    guardian: {
-      name: "John Smith",
-      avatar: "https://i.pravatar.cc/150?u=john"
-    },
-    device: "SC-136905",
-    vipName: "Mary Smith",
+    vipName: "Jose Reyes",
     activity: "Morning Walk",
     location: "Home",
     destination: "Local Cafe",
@@ -79,15 +55,9 @@ const activityLogs = [
     status: "Ongoing"
   },
 
-  // Emergency example
   {
     id: 6,
-    guardian: {
-      name: "Michael Reyes",
-      avatar: "https://i.pravatar.cc/150?u=michael"
-    },
-    device: "SC-136906",
-    vipName: "Ana Reyes",
+    vipName: "Rafael Mendoza",
     activity: "Emergency Assistance Request",
     location: "5th Avenue Crossing",
     destination: "Nearest Safe Point",
@@ -96,15 +66,9 @@ const activityLogs = [
     status: "Emergency"
   },
 
-  // Fall detection example
   {
     id: 7,
-    guardian: {
-      name: "Lisa Brown",
-      avatar: "https://i.pravatar.cc/150?u=lisa"
-    },
-    device: "SC-136907",
-    vipName: "George Brown",
+    vipName: "Gabriel Reyes",
     activity: "Fall Detected",
     location: "Near Pharmacy Entrance",
     destination: "Awaiting Assistance",
@@ -139,10 +103,12 @@ const ActivityLogs = () => {
 
   const filteredLogs = activityLogs.filter(
     (log) =>
-      log.guardian.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.vipName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.activity.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.device.toLowerCase().includes(searchTerm.toLowerCase())
+      (log.device || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (log.guardian?.name || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
 
   const totalItems = filteredLogs.length;
@@ -247,13 +213,10 @@ const ActivityLogs = () => {
                   <thead>
                     <tr className="border-b border-gray-100">
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Guardian
+                        VIP
                       </th>
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         VIP Name
-                      </th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Device
                       </th>
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         Activity
@@ -276,27 +239,26 @@ const ActivityLogs = () => {
                         className="hover:bg-gray-50 transition-colors"
                       >
                         <td className="py-4 px-6">
-                          <div className="flex items-center gap-3">
-                            <img
-                              loading="lazy"
-                              src={log.guardian.avatar}
-                              alt={log.guardian.name}
-                              className="w-8 h-8 rounded-full object-cover bg-gray-200"
-                            />
-                            <p className="font-semibold text-sm text-gray-900 whitespace-nowrap">
-                              {log.guardian.name}
-                            </p>
+                          <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
+                            {log.avatar ? (
+                              <img
+                                loading="lazy"
+                                src={resolveProfileImageSrc(log.avatar)}
+                                alt={log.vipName}
+                                className="w-full h-full object-cover bg-gray-200"
+                              />
+                            ) : (
+                              <DefaultProfile
+                                bgColor="bg-primary-100"
+                                userInitial={log.vipName?.charAt(0)}
+                              />
+                            )}
                           </div>
                         </td>
                         <td className="py-4 px-6">
                           <p className="text-sm font-medium text-gray-800 whitespace-nowrap">
                             {log.vipName}
                           </p>
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className="px-2.5 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-full">
-                            {log.device}
-                          </span>
                         </td>
                         <td className="py-4 px-6">
                           <p className="text-sm text-gray-700 font-medium">
@@ -364,14 +326,40 @@ const ActivityLogs = () => {
                   >
                     {/* Header: VIP, Device & Status */}
                     <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="font-bold text-gray-900">{log.vipName}</p>
-                        <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] font-medium text-purple-700 bg-purple-100 rounded-lg">
-                          {log.device}
-                        </span>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
+                          {log?.avatar || log?.avatar ? (
+                            <img
+                              loading="lazy"
+                              src={resolveProfileImageSrc(
+                                log?.avatar || log?.avatar
+                              )}
+                              alt={log?.name || log?.vipName || "Profile"}
+                              className="w-full h-full object-cover bg-gray-200"
+                            />
+                          ) : (
+                            <DefaultProfile
+                              bgColor="bg-primary-100"
+                              userInitial={
+                                log?.name?.charAt(0) || log?.vipName?.charAt(0)
+                              }
+                            />
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="font-bold text-gray-900 truncate">
+                            {log.vipName}
+                          </p>
+
+                          <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] font-medium text-purple-700 bg-purple-100 rounded-lg">
+                            {log.device || "No Device"}
+                          </span>
+                        </div>
                       </div>
+
                       <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${getStatusColor(
                           log.status
                         )}`}
                       >
@@ -422,25 +410,12 @@ const ActivityLogs = () => {
 
                     {/* Footer: Guardian & Time */}
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                      <div className="flex items-center gap-2">
-                        <img
-                          loading="lazy"
-                          src={log.guardian.avatar}
-                          alt={log.guardian.name}
-                          className="w-6 h-6 rounded-full object-cover bg-gray-200"
-                        />
-                        <span className="text-xs font-medium text-gray-600">
-                          {log.guardian.name}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-800 font-medium">
-                          {log.dateTime}
-                        </p>
-                        <p className="text-[10px] text-gray-500 inline-flex items-center gap-1">
-                          <Icon icon="ph:clock" /> {log.duration}
-                        </p>
-                      </div>
+                      <p className="text-xs text-gray-800 font-medium">
+                        {log.dateTime}
+                      </p>
+                      <p className="text-[10px] text-gray-500 inline-flex items-center gap-1">
+                        <Icon icon="ph:clock" /> {log.duration}
+                      </p>
                     </div>
                   </div>
                 ))}
