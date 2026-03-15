@@ -193,7 +193,7 @@ const ActivityLogs = () => {
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
       <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
         <div data-tour="tour-activity-header" className="mb-4 md:mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 break-words">
             Activity Logs
           </h2>
           <p className="text-gray-500 text-xs md:text-sm">

@@ -45,7 +45,7 @@ const ActivityActions = ({ type = "login", label, onClick }) => {
       } ${variant.style}`}
     >
       <Icon icon={variant.icon} className="text-2xl" />
-      <span>{displayLabel}</span>
+      <span className="text-sm sm:text-lg">{displayLabel}</span>
     </div>
   );
 };
