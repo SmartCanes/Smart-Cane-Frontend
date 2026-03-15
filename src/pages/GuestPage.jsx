@@ -140,7 +140,7 @@ const rawFeatureCards = [
     icon: "mdi:toggle-switch",
     title: "IOT Connectivity",
     description:
-      "iCane’s IoT integration links the device to a companion web application that provides live updates on battery level, connectivity, and user location for continuous monitoring.",
+      "iCane’s IoT integration links the device to a companion web application that provides connectivity, fall detection, emergency alerts, and user location for continuous monitoring.",
     backgroundImage: SwitchFilled,
     backgroundImageOpacity: 0.12,
     backgroundImagePosition: "center bottom",
