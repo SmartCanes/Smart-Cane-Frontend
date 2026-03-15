@@ -1073,3 +1073,66 @@ export const useSettingsStore = create(
     }
   )
 );
+
+// Notif van copy mo na lang hanggang dulo
+const EXCLUDED_ACTIONS = new Set(["LOGIN"]);
+
+export const NOTIFICATION_META = {
+  CREATE:              { label: "Device Created",        icon: "ph:device-mobile-plus", color: "blue"   },
+  UPDATE:              { label: "Device Updated",        icon: "ph:pencil-simple",      color: "indigo" },
+  DELETE:              { label: "Device Deleted",        icon: "ph:trash",              color: "red"    },
+  PAIR:                { label: "Device Paired",         icon: "ph:link",               color: "green"  },
+  UNPAIR:              { label: "Device Unpaired",       icon: "ph:link-break",         color: "orange" },
+  INVITE:              { label: "Guardian Invited",      icon: "ph:envelope-simple",    color: "purple" },
+  REMOVE_GUARDIAN:     { label: "Guardian Removed",      icon: "ph:user-minus",         color: "red"    },
+  UPDATE_ROLE:         { label: "Role Updated",          icon: "ph:shield",             color: "indigo" },
+  ACCEPT_INVITE:       { label: "Invite Accepted",       icon: "ph:check-circle",       color: "green"  },
+  SET_EMERGENCY:       { label: "Emergency Contact Set", icon: "ph:warning-circle",     color: "red"    },
+  UPDATE_RELATIONSHIP: { label: "Relationship Updated",  icon: "ph:users",              color: "blue"   },
+};
+
+export const useNotificationsStore = create(
+  persist(
+    (set, get) => ({
+      readIds: [],
+
+      markAsRead: (historyId) =>
+        set((state) => ({
+          readIds: state.readIds.includes(historyId)
+            ? state.readIds
+            : [...state.readIds, historyId]
+        })),
+
+      markAllRead: (historyIds) =>
+        set((state) => ({
+          readIds: [...new Set([...state.readIds, ...historyIds])]
+        })),
+
+      clearRead: () => set({ readIds: [] }),
+
+      getNotifications: (history, currentGuardianId) => {
+        const readIds = get().readIds;
+        return (history || [])
+          .filter((h) => !EXCLUDED_ACTIONS.has(h.action))
+          .filter((h) => Number(h.guardianId) !== Number(currentGuardianId))
+          .map((h) => ({
+            id:           h.historyId,
+            historyId:    h.historyId,
+            action:       h.action,
+            title:        NOTIFICATION_META[h.action]?.label || h.action,
+            message:      h.description || "—",
+            guardianName: h.guardianName || "Unknown",
+            color:        NOTIFICATION_META[h.action]?.color || "gray",
+            icon:         NOTIFICATION_META[h.action]?.icon  || "ph:bell",
+            timestamp:    h.createdAt,
+            read:         readIds.includes(h.historyId)
+          }));
+      }
+    }),
+    {
+      name: "notifications-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ readIds: state.readIds })
+    }
+  )
+);

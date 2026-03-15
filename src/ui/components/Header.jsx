@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react"; // added useMemo van
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import {
   useActivityReportsStore,
   useDevicesStore,
   useGuardiansStore,
+  useNotificationsStore, // added van
   useRealtimeStore,
   useRouteStore,
   useUIStore,
@@ -22,11 +23,9 @@ import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 function showLogoutModal(message = "Logging out...") {
   if (document.getElementById("logout-modal-overlay")) return;
 
-  // Create overlay container
   const overlay = document.createElement("div");
   overlay.id = "logout-modal-overlay";
 
-  // Create and append framer-motion-like styles
   const styleEl = document.createElement("style");
   styleEl.innerHTML = `
     #logout-modal-overlay {
@@ -38,7 +37,6 @@ function showLogoutModal(message = "Logging out...") {
       justify-content: center;
       pointer-events: all;
     }
-    
     #logout-modal-overlay .backdrop {
       position: fixed;
       inset: 0;
@@ -47,7 +45,6 @@ function showLogoutModal(message = "Logging out...") {
       opacity: 0;
       animation: fadeIn 0.3s ease-out forwards;
     }
-    
     #logout-modal-overlay .modal-content {
       position: relative;
       z-index: 10;
@@ -68,13 +65,11 @@ function showLogoutModal(message = "Logging out...") {
       transform: translateY(20px) scale(0.95);
       animation: slideUp 0.3s ease-out 0.1s forwards;
     }
-    
     #logout-modal-overlay .spinner-container {
       position: relative;
       width: 4rem;
       height: 4rem;
     }
-    
     #logout-modal-overlay .spinner {
       position: absolute;
       top: 0;
@@ -86,20 +81,17 @@ function showLogoutModal(message = "Logging out...") {
       border-top: 4px solid #11285A;
       animation: spin 1s linear infinite;
     }
-    
     #logout-modal-overlay .message {
       font-size: 1.25rem;
       font-weight: 600;
       color: #111827;
       margin: 0;
     }
-    
     #logout-modal-overlay .submessage {
       font-size: 0.875rem;
       color: #6b7280;
       margin: 0;
     }
-    
     #logout-modal-overlay .progress-bar {
       width: 100%;
       height: 4px;
@@ -108,7 +100,6 @@ function showLogoutModal(message = "Logging out...") {
       overflow: hidden;
       margin-top: 0.5rem;
     }
-    
     #logout-modal-overlay .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, #11285A, #3b82f6);
@@ -116,129 +107,63 @@ function showLogoutModal(message = "Logging out...") {
       width: 0%;
       animation: progress 2s ease-in-out infinite;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
-    
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
-    
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     @keyframes slideDown {
-      from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-      to {
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-      }
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(20px) scale(0.95); }
     }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    @keyframes progress {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(200%); }
-    }
-    
-    /* Disable body scroll and interaction */
-    body.logout-modal-open {
-      overflow: hidden;
-      pointer-events: none;
-      user-select: none;
-    }
-    
-    body.logout-modal-open * {
-      pointer-events: none;
-    }
-    
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes progress { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+    body.logout-modal-open { overflow: hidden; pointer-events: none; user-select: none; }
+    body.logout-modal-open * { pointer-events: none; }
     body.logout-modal-open #logout-modal-overlay,
-    body.logout-modal-open #logout-modal-overlay * {
-      pointer-events: all;
-    }
+    body.logout-modal-open #logout-modal-overlay * { pointer-events: all; }
   `;
   document.head.appendChild(styleEl);
 
-  // Create backdrop
   const backdrop = document.createElement("div");
   backdrop.className = "backdrop";
-
-  // Create modal content
   const modalContent = document.createElement("div");
   modalContent.className = "modal-content";
-
-  // Create spinner container
   const spinnerContainer = document.createElement("div");
   spinnerContainer.className = "spinner-container";
-
   const spinner = document.createElement("div");
   spinner.className = "spinner";
-
   spinnerContainer.appendChild(spinner);
 
-  // Create message container
   const messageContainer = document.createElement("div");
-
   const mainMessage = document.createElement("h3");
   mainMessage.className = "message";
   mainMessage.textContent = message;
-
   const subMessage = document.createElement("p");
   subMessage.className = "submessage";
   subMessage.textContent = "Please wait while we secure your session...";
-
   messageContainer.appendChild(mainMessage);
   messageContainer.appendChild(subMessage);
 
-  // Create progress bar
   const progressBar = document.createElement("div");
   progressBar.className = "progress-bar";
-
   const progressFill = document.createElement("div");
   progressFill.className = "progress-fill";
-
   progressBar.appendChild(progressFill);
 
-  // Assemble modal
   modalContent.appendChild(spinnerContainer);
   modalContent.appendChild(messageContainer);
   modalContent.appendChild(progressBar);
-
-  // Assemble overlay
   overlay.appendChild(backdrop);
   overlay.appendChild(modalContent);
-
-  // Add to document
   document.body.appendChild(overlay);
   document.body.classList.add("logout-modal-open");
 
-  // Return hide function with animations
   return function hideLogoutModal() {
     if (!overlay.parentNode) return;
-
-    // Add exit animations
     backdrop.style.animation = "fadeOut 0.2s ease-out forwards";
     modalContent.style.animation = "slideDown 0.2s ease-out forwards";
-
-    // Remove elements after animation
     setTimeout(() => {
       overlay.remove();
       styleEl.remove();
@@ -247,8 +172,54 @@ function showLogoutModal(message = "Logging out...") {
   };
 }
 
-const NotificationDropdown = ({ notifications, onClose, onNavigateToAll }) => {
+// color map for notification icon bubbles — added van
+const COLOR = {
+  blue:   { bg: "bg-blue-100",   icon: "text-blue-600"   },
+  indigo: { bg: "bg-indigo-100", icon: "text-indigo-600" },
+  green:  { bg: "bg-green-100",  icon: "text-green-600"  },
+  orange: { bg: "bg-orange-100", icon: "text-orange-600" },
+  purple: { bg: "bg-purple-100", icon: "text-purple-600" },
+  red:    { bg: "bg-red-100",    icon: "text-red-600"    },
+  gray:   { bg: "bg-gray-100",   icon: "text-gray-500"   },
+};
+
+// convert UTC timestamp to Manila time van
+const toManilaDate = (raw) => {
+  if (!raw) return null;
+  const str = typeof raw === "string" ? raw.replace(" ", "T") : String(raw);
+  const withZ = !str.endsWith("Z") && !str.includes("+") ? str + "Z" : str;
+  const date = new Date(withZ);
+  return isNaN(date.getTime()) ? null : date;
+};
+
+// format timestamp added van
+const formatTime = (raw) => {
+  const date = toManilaDate(raw);
+  if (!date) return "—";
+  const diff  = Date.now() - date.getTime();
+  const mins  = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days  = Math.floor(diff / 86_400_000);
+  if (mins  < 1)  return "Just now";
+  if (mins  < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days  < 7)  return `${days}d ago`;
+  return date.toLocaleDateString("en-PH", {
+    timeZone: "Asia/Manila",
+    month: "short", day: "numeric", year: "numeric",
+  });
+};
+
+const NotificationDropdown = ({
+  notifications,
+  unreadCount, // added van
+  onClose,
+  onNotifClick, // added van
+  onSeeAll,     // added van
+  onMarkAllRead // added van
+}) => {
   const dropdownRef = useRef(null);
+  const { markAsRead } = useNotificationsStore(); // added van
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -256,61 +227,26 @@ const NotificationDropdown = ({ notifications, onClose, onNavigateToAll }) => {
         onClose();
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case "alert":
-        return "ph:warning-circle";
-      case "warning":
-        return "ph:warning";
-      case "info":
-        return "ph:info";
-      default:
-        return "ph:bell";
-    }
-  };
-
-  const getTypeColor = (type) => {
-    switch (type) {
-      case "alert":
-        return "text-red-500";
-      case "warning":
-        return "text-yellow-500";
-      case "info":
-        return "text-blue-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
-  const formatTime = (date) => {
-    const now = new Date();
-    const diffMs = now - new Date(date);
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${Math.floor(diffMs / 86400000)}d ago`;
-  };
-
-  const handleNotificationClick = (notification) => {
-    onClose();
-  };
-
   return (
     <div
       ref={dropdownRef}
-      className="fixed right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 overflow-hidden animate-[slideDown_0.2s_ease-out]"
+      className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 overflow-hidden animate-[slideDown_0.2s_ease-out]"
     >
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 text-lg">Notifications</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-gray-900 text-lg">Notifications</h3>
+            {/* unread badge van */}
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                {unreadCount}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500">
               {notifications.length} total
@@ -328,54 +264,62 @@ const NotificationDropdown = ({ notifications, onClose, onNavigateToAll }) => {
       <div className="max-h-[400px] overflow-y-auto">
         {notifications.length === 0 ? (
           <div className="p-8 text-center">
-            <Icon
-              icon="ph:bell-slash"
-              className="w-12 h-12 mx-auto mb-3 text-gray-300"
-            />
+            <Icon icon="ph:bell-slash" className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="text-gray-500 text-sm">No notifications yet</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {notifications.slice(0, 5).map((notification) => (
-              <motion.button
-                key={notification.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                onClick={() => handleNotificationClick(notification)}
-                className={`w-full text-left p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-                  !notification.read ? "bg-blue-50/50" : ""
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`mt-1 ${getTypeColor(notification.type)}`}>
-                    <Icon
-                      icon={getTypeIcon(notification.type)}
-                      className="w-5 h-5"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-medium text-gray-900 text-sm">
-                          {notification.title}
-                        </h4>
-                        <p className="text-gray-600 text-xs mt-1 line-clamp-2">
-                          {notification.message}
-                        </p>
+            {notifications.slice(0, 5).map((notif) => {
+              const c = COLOR[notif.color] || COLOR.gray; // color map van
+              return (
+                <motion.button
+                  key={notif.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  onClick={() => {
+                    if (!notif.read) markAsRead(notif.historyId); // mark read on click van
+                    onClose();
+                    onNotifClick();
+                  }}
+                  className={`w-full text-left p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
+                    !notif.read ? "bg-blue-50/50" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    {/*  icon  van */}
+                    <div className={`shrink-0 w-8 h-8 rounded-lg ${c.bg} flex items-center justify-center mt-0.5`}>
+                      <Icon icon={notif.icon} className={`w-4 h-4 ${c.icon}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h4 className="font-medium text-gray-900 text-sm truncate">
+                            {notif.title}
+                          </h4>
+                          <p className="text-gray-600 text-xs mt-0.5 line-clamp-2">
+                            {notif.message}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {/* timestamp van*/}
+                          <span className="text-xs text-gray-400 whitespace-nowrap">
+                            {formatTime(notif.timestamp)}
+                          </span>
+                          {!notif.read && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0" />
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
-                          {formatTime(notification.timestamp)}
-                        </span>
-                        {!notification.read && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        )}
-                      </div>
+                      {/* guardian name van */}
+                      <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                        <Icon icon="ph:user-circle" className="w-3 h-3" />
+                        {notif.guardianName}
+                      </p>
                     </div>
                   </div>
-                </div>
-              </motion.button>
-            ))}
+                </motion.button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -385,21 +329,22 @@ const NotificationDropdown = ({ notifications, onClose, onNavigateToAll }) => {
           <button
             onClick={() => {
               onClose();
-              onNavigateToAll();
+              onSeeAll(); // added van
             }}
-            className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1 cursor-pointer"
+            className="text-[#11285A] hover:text-[#11285A]/80 font-medium text-sm flex items-center gap-1 cursor-pointer"
           >
             See all notifications
             <Icon icon="ph:arrow-right" className="w-4 h-4" />
           </button>
-          <button
-            onClick={() => {
-              console.log("Mark all as read");
-            }}
-            className="text-gray-600 hover:text-gray-700 text-sm font-medium cursor-pointer"
-          >
-            Mark all as read
-          </button>
+          {/* mark all read button van */}
+          {unreadCount > 0 && (
+            <button
+              onClick={onMarkAllRead}
+              className="text-gray-600 hover:text-gray-800 text-sm font-medium cursor-pointer transition-colors"
+            >
+              Mark all as read
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -410,40 +355,56 @@ const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
   const { setMobileMenuOpen, isMobileMenuOpen } = useUIStore();
-  const { devices, clearDevices, selectedDevice, setSelectedDevice } =
-    useDevicesStore();
+  const { devices, clearDevices, selectedDevice, setSelectedDevice } = useDevicesStore();
   const { clearAllGuardians } = useGuardiansStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const { clearRoute } = useRouteStore();
   const { clearHistory } = useActivityReportsStore();
-  const [notificationCount, setNotificationCount] = useState(0);
+
+  // real notifications van
+  const { history, fetchHistory } = useActivityReportsStore();
+  const { readIds, getNotifications, markAllRead } = useNotificationsStore(); // added van
+  const currentGuardianId = user?.guardian_id ?? user?.guardianId; // added van
+
+  // notifications from history van
+  const allNotifications = useMemo(
+    () => getNotifications(history, currentGuardianId),
+    [history, readIds, currentGuardianId]
+  );
+
+  // real unread count van
+  const unreadCount = allNotifications.filter((n) => !n.read).length;
+  const allIds = allNotifications.map((n) => n.historyId); // added van
+
+  // fetch history van
+  useEffect(() => { fetchHistory(); }, [fetchHistory]);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const navigate = useNavigate();
-  const dropdownRef = useRef(null);
-
+  const [showScanner, setShowScanner] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [imageError, setImageError] = useState(false);
-
   const [vipOpen, setVipOpen] = useState(false);
-  const vipRef = useRef(null);
-
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+
+  // removed mock notifications 
+  // removed notificationCount hardcoded
+  // removed setInterval polling mock data 
+
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+  const vipRef = useRef(null);
   const notificationRef = useRef(null);
 
   useEffect(() => {
     if (!devices.length) return;
-
     if (!selectedDevice) {
       setSelectedDevice(devices[0]);
       return;
     }
-
     const latestSelectedDevice = devices.find(
       (device) => device.deviceId === selectedDevice.deviceId
     );
-
     if (latestSelectedDevice) {
       setSelectedDevice(latestSelectedDevice);
     }
@@ -480,7 +441,6 @@ const Header = () => {
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -494,7 +454,6 @@ const Header = () => {
     const enablePage = showLogoutModal("Logging out...");
     try {
       setIsLoggingOut(true);
-
       const response = await logoutApi();
       if (response.success) {
         clearUser();
@@ -515,74 +474,6 @@ const Header = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchNotifications = () => {
-      setNotificationCount(3);
-    };
-
-    fetchNotifications();
-  }, []);
-
-  useEffect(() => {
-    const fetchNotifications = () => {
-      const mockNotifications = [
-        {
-          id: 1,
-          title: "Fall Detected",
-          message: "Sarah Chua iCane detected a possible fall on Main Street.",
-          timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-          type: "alert",
-          read: false,
-          deviceId: "ICN-001"
-        },
-        {
-          id: 2,
-          title: "Emergency Alert",
-          message:
-            "Isabel Garcia triggered an emergency alert and may need immediate assistance.",
-          timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-          type: "alert",
-          read: false,
-          deviceId: "ICN-001"
-        },
-        {
-          id: 3,
-          title: "Location Arrived",
-          message: "Daniel Flores has arrived at the destination successfully.",
-          timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-          type: "info",
-          read: true,
-          deviceId: "ICN-001"
-        }
-      ];
-      setNotifications(mockNotifications);
-      setNotificationCount(mockNotifications.filter((n) => !n.read).length);
-    };
-
-    fetchNotifications();
-
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target) &&
-        !event.target.closest(".notification-button")
-      ) {
-        setIsNotificationOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const handleNotificationClick = () => {
     setIsNotificationOpen(!isNotificationOpen);
   };
@@ -598,9 +489,9 @@ const Header = () => {
   return (
     <>
       <header
-        className={`w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 xl:px-15 relative z-50`}
+        className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 xl:px-15 relative z-50"
       >
-        {/* Logo Section - Left */}
+        {/* Logo */}
         <div className="flex items-center h-full">
           <Link to="/dashboard" className="flex items-center gap-2 md:gap-3">
             <BlinkingIcon
@@ -614,7 +505,7 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile hamburger */}
         <button
           data-tour="tour-mobile-menu"
           onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
@@ -627,11 +518,7 @@ const Header = () => {
               rotate: isMobileMenuOpen ? 90 : 0,
               scale: isMobileMenuOpen ? 1.1 : 1
             }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 20
-            }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
             <Icon
               icon={isMobileMenuOpen ? "ph:x" : "ph:list"}
@@ -640,11 +527,13 @@ const Header = () => {
           </motion.div>
         </button>
 
-        {/* Desktop Navigation Section - Center */}
-        <div className="hidden md:flex items-center flex-1 justify-center gap-4 lg:gap-6"></div>
+        {/* Desktop center placeholder */}
+        <div className="hidden md:flex items-center flex-1 justify-center gap-4 lg:gap-6" />
 
-        {/* Desktop Actions - Right */}
+        {/* Desktop right */}
         <div className="hidden md:flex items-center gap-3 lg:gap-4">
+
+          {/* VIP selector */}
           <div ref={vipRef} className="relative">
             <button
               data-tour="tour-vip-dropdown"
@@ -654,9 +543,7 @@ const Header = () => {
               <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-full overflow-hidden bg-gray-200 shrink-0">
                 {selectedDevice?.vip?.vipImageUrl ? (
                   <img
-                    src={resolveProfileImageSrc(
-                      selectedDevice?.vip?.vipImageUrl
-                    )}
+                    src={resolveProfileImageSrc(selectedDevice?.vip?.vipImageUrl)}
                     className="w-full h-full object-cover"
                     alt="VIP"
                   />
@@ -666,20 +553,14 @@ const Header = () => {
                   </div>
                 )}
               </div>
-
               <span className="text-sm font-medium text-white truncate flex-1 text-left">
                 {selectedDevice?.vip?.firstName
                   ? capitalizeWords(selectedDevice.vip.firstName)
                   : selectedDevice?.deviceSerialNumber || "No VIP"}
               </span>
-
-              <Icon
-                icon="ph:caret-down-bold"
-                className="w-4 h-4 text-white shrink-0"
-              />
+              <Icon icon="ph:caret-down-bold" className="w-4 h-4 text-white shrink-0" />
             </button>
 
-            {/* VIP Dropdown */}
             {vipOpen && (
               <div
                 className="absolute left-1/2 -translate-x-1/2 top-12 bg-white rounded-2xl shadow-xl ring-1 ring-black/5 z-50 overflow-hidden min-w-full max-h-[60vh] flex flex-col"
@@ -689,21 +570,12 @@ const Header = () => {
                   {devices.map((device) => (
                     <button
                       key={device.deviceId}
-                      onClick={() => {
-                        setSelectedDevice(device);
-                        setVipOpen(false);
-                      }}
+                      onClick={() => { setSelectedDevice(device); setVipOpen(false); }}
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition"
                     >
                       <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0">
                         {device?.vip?.vipImageUrl ? (
-                          <img
-                            src={resolveProfileImageSrc(
-                              device?.vip?.vipImageUrl
-                            )}
-                            className="w-full h-full object-cover"
-                            alt="VIP"
-                          />
+                          <img src={resolveProfileImageSrc(device?.vip?.vipImageUrl)} className="w-full h-full object-cover" alt="VIP" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
                             {device?.deviceSerialNumber?.slice(-2)}
@@ -712,22 +584,20 @@ const Header = () => {
                       </div>
                       <p className="text-sm font-medium text-gray-800 truncate">
                         {device.vip?.firstName && device.vip?.lastName
-                          ? capitalizeWords(
-                              device.vip.firstName + " " + device.vip.lastName
-                            )
+                          ? capitalizeWords(device.vip.firstName + " " + device.vip.lastName)
                           : device?.deviceSerialNumber}
                       </p>
                     </button>
                   ))}
                   {devices.length === 0 && (
-                    <div className="py-8 text-center text-sm text-gray-400">
-                      No VIP available
-                    </div>
+                    <div className="py-8 text-center text-sm text-gray-400">No VIP available</div>
                   )}
                 </div>
               </div>
             )}
           </div>
+
+          {/* Connection pill */}
           <div
             data-tour="tour-connection-status"
             className={`flex items-center gap-1.5 text-white px-3 py-1.5 rounded-full font-poppins text-xs font-medium whitespace-nowrap ${
@@ -742,7 +612,8 @@ const Header = () => {
               {connectionStatus ? "Connected" : "Disconnected"}
             </span>
           </div>
-          {/* Notifications */}
+
+          {/* Bell van */}
           <div className="relative" ref={notificationRef}>
             <button
               data-tour="tour-notifications"
@@ -751,26 +622,30 @@ const Header = () => {
               aria-label="Notifications"
             >
               <Icon icon="ph:bell" className="w-6 h-6" />
-              {notificationCount > 0 && (
+              {/* unread count van */}
+              {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100">
-                  {notificationCount > 9 ? "9+" : notificationCount}
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
 
-            {/* Notification Dropdown */}
             <AnimatePresence>
               {isNotificationOpen && (
+                //  added van
                 <NotificationDropdown
-                  notifications={notifications}
+                  notifications={allNotifications}
+                  unreadCount={unreadCount}
                   onClose={() => setIsNotificationOpen(false)}
-                  onNavigateToAll={handleNavigateToNotifications}
+                  onNotifClick={() => navigate("/activity-report")}
+                  onSeeAll={handleNavigateToNotifications}
+                  onMarkAllRead={() => markAllRead(allIds)}
                 />
               )}
             </AnimatePresence>
           </div>
 
-          {/* Profile Dropdown */}
+          {/* Profile dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               data-tour="tour-profile-menu"
@@ -794,40 +669,29 @@ const Header = () => {
             {isDropdownOpen && (
               <div className="absolute right-0 top-14 w-56 animate-[slideDown_0.2s_ease-out] z-20">
                 <div className="relative bg-white rounded-2xl shadow-lg">
-                  <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white"></div>
+                  <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
                   <div className="py-2 flex flex-col w-full">
                     <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        navigate("/profile");
-                      }}
+                      onClick={() => { setIsDropdownOpen(false); navigate("/profile"); }}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="ph:user" className="w-4 h-4" />
                       Profile
                     </button>
                     <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        navigate("/activity-logs");
-                      }}
+                      onClick={() => { setIsDropdownOpen(false); navigate("/activity-logs"); }}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="oui:nav-reports" className="w-4 h-4" />
                       History
                     </button>
-
                     <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        navigate("/settings");
-                      }}
+                      onClick={() => { setIsDropdownOpen(false); navigate("/settings"); }}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="ph:gear" className="w-4 h-4" />
                       Settings
                     </button>
-
                     <button
                       onClick={handleLogoutClick}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-3"
@@ -841,6 +705,8 @@ const Header = () => {
             )}
           </div>
         </div>
+
+        {/* Mobile slide-down menu */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <>
@@ -848,39 +714,23 @@ const Header = () => {
                 initial={{ y: -5, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -5, opacity: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 320,
-                  damping: 24
-                }}
+                transition={{ type: "spring", stiffness: 320, damping: 24 }}
                 className="absolute top-full left-0 right-0 bg-primary-100 z-40 md:hidden"
               >
                 <motion.div
                   initial="hidden"
                   animate="show"
                   exit="hidden"
-                  variants={{
-                    hidden: {},
-                    show: {
-                      transition: {
-                        staggerChildren: 0.04
-                      }
-                    }
-                  }}
+                  variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
                   className="px-4 py-6 space-y-6 border-t border-white/10"
                 >
                   <div data-tour="tour-mobile-vip" className="mb-6">
-                    <div className="text-white/80 text-sm font-medium mb-2 px-2">
-                      Select Device
-                    </div>
+                    <div className="text-white/80 text-sm font-medium mb-2 px-2">Select Device</div>
                     <div className="space-y-2 max-h-[20vh] overflow-y-auto pr-1">
                       {devices.map((device) => (
                         <button
                           key={device.deviceId}
-                          onClick={() => {
-                            setSelectedDevice(device);
-                            setMobileMenuOpen(false);
-                          }}
+                          onClick={() => { setSelectedDevice(device); setMobileMenuOpen(false); }}
                           className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
                             selectedDevice?.deviceId === device.deviceId
                               ? "bg-white/20"
@@ -889,13 +739,7 @@ const Header = () => {
                         >
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
                             {device?.vip?.vipImageUrl ? (
-                              <img
-                                src={resolveProfileImageSrc(
-                                  device?.vip?.vipImageUrl
-                                )}
-                                className="w-full h-full object-cover"
-                                alt="VIP"
-                              />
+                              <img src={resolveProfileImageSrc(device?.vip?.vipImageUrl)} className="w-full h-full object-cover" alt="VIP" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-500">
                                 {device?.deviceSerialNumber?.slice(-2)}
@@ -905,23 +749,15 @@ const Header = () => {
                           <div className="flex-1 text-left">
                             <p className="text-white font-medium">
                               {device.vip?.firstName && device.vip?.lastName
-                                ? capitalizeWords(
-                                    device.vip.firstName +
-                                      " " +
-                                      device.vip.lastName
-                                  )
+                                ? capitalizeWords(device.vip.firstName + " " + device.vip.lastName)
                                 : device?.deviceSerialNumber}
                             </p>
-                            <p className="text-white/60 text-xs">
-                              {device.deviceSerialNumber}
-                            </p>
+                            <p className="text-white/60 text-xs">{device.deviceSerialNumber}</p>
                           </div>
                         </button>
                       ))}
                       {devices.length === 0 && (
-                        <div className="text-center text-white/60 py-4">
-                          No VIP devices
-                        </div>
+                        <div className="text-center text-white/60 py-4">No VIP devices</div>
                       )}
                     </div>
                   </div>
@@ -932,9 +768,7 @@ const Header = () => {
                   >
                     <span className="text-white font-medium">Connection</span>
                     <div className="flex items-center gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${connectionStatus ? "bg-green-400" : "bg-red-400"}`}
-                      />
+                      <div className={`w-2 h-2 rounded-full ${connectionStatus ? "bg-green-400" : "bg-red-400"}`} />
                       <span className="text-white/80 text-sm">
                         {connectionStatus ? "Connected" : "Disconnected"}
                       </span>
@@ -944,35 +778,28 @@ const Header = () => {
                   <div className="space-y-1">
                     <button
                       data-tour="tour-mobile-profile"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        navigate("/profile");
-                      }}
+                      onClick={() => { setMobileMenuOpen(false); navigate("/profile"); }}
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="ph:user" className="w-5 h-5" />
                       <span className="font-medium">Profile</span>
                     </button>
                     <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        navigate("/activity-logs");
-                      }}
+                      onClick={() => { setMobileMenuOpen(false); navigate("/activity-logs"); }}
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="oui:nav-reports" className="w-5 h-5" />
                       <span className="font-medium">History</span>
                     </button>
                     <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        navigate("/settings");
-                      }}
+                      onClick={() => { setMobileMenuOpen(false); navigate("/settings"); }}
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="ph:gear" className="w-5 h-5" />
                       <span className="font-medium">Settings</span>
                     </button>
+
+                    {/* mobile bell van */}
                     <button
                       data-tour="tour-mobile-notifications"
                       onClick={() => {
@@ -983,12 +810,14 @@ const Header = () => {
                     >
                       <Icon icon="ph:bell" className="w-5 h-5" />
                       <span className="font-medium">Notifications</span>
-                      {notificationCount > 0 && (
+                      {/* unread count van */}
+                      {unreadCount > 0 && (
                         <span className="absolute right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                          {notificationCount > 9 ? "9+" : notificationCount}
+                          {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                       )}
                     </button>
+
                     <button
                       onClick={handleLogoutClick}
                       className="w-full flex items-center gap-3 p-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors"
