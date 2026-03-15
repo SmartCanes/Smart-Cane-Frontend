@@ -8,15 +8,50 @@ import {
   useUserStore
 } from "@/stores/useStore";
 
-// ── color ng notification types van 
+// ── color ng notification types van
 const COLOR = {
-  blue:   { bg: "bg-blue-100",   icon: "text-blue-600",   dot: "bg-blue-500",   badge: "bg-blue-50 text-blue-700 border-blue-200"     },
-  indigo: { bg: "bg-indigo-100", icon: "text-indigo-600", dot: "bg-indigo-500", badge: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  green:  { bg: "bg-green-100",  icon: "text-green-600",  dot: "bg-green-500",  badge: "bg-green-50 text-green-700 border-green-200"   },
-  orange: { bg: "bg-orange-100", icon: "text-orange-600", dot: "bg-orange-500", badge: "bg-orange-50 text-orange-700 border-orange-200" },
-  purple: { bg: "bg-purple-100", icon: "text-purple-600", dot: "bg-purple-500", badge: "bg-purple-50 text-purple-700 border-purple-200" },
-  red:    { bg: "bg-red-100",    icon: "text-red-600",    dot: "bg-red-500",    badge: "bg-red-50 text-red-700 border-red-200"         },
-  gray:   { bg: "bg-gray-100",   icon: "text-gray-500",   dot: "bg-gray-400",   badge: "bg-gray-50 text-gray-600 border-gray-200"      },
+  blue: {
+    bg: "bg-blue-100",
+    icon: "text-blue-600",
+    dot: "bg-blue-500",
+    badge: "bg-blue-50 text-blue-700 border-blue-200"
+  },
+  indigo: {
+    bg: "bg-indigo-100",
+    icon: "text-indigo-600",
+    dot: "bg-indigo-500",
+    badge: "bg-indigo-50 text-indigo-700 border-indigo-200"
+  },
+  green: {
+    bg: "bg-green-100",
+    icon: "text-green-600",
+    dot: "bg-green-500",
+    badge: "bg-green-50 text-green-700 border-green-200"
+  },
+  orange: {
+    bg: "bg-orange-100",
+    icon: "text-orange-600",
+    dot: "bg-orange-500",
+    badge: "bg-orange-50 text-orange-700 border-orange-200"
+  },
+  purple: {
+    bg: "bg-purple-100",
+    icon: "text-purple-600",
+    dot: "bg-purple-500",
+    badge: "bg-purple-50 text-purple-700 border-purple-200"
+  },
+  red: {
+    bg: "bg-red-100",
+    icon: "text-red-600",
+    dot: "bg-red-500",
+    badge: "bg-red-50 text-red-700 border-red-200"
+  },
+  gray: {
+    bg: "bg-gray-100",
+    icon: "text-gray-500",
+    dot: "bg-gray-400",
+    badge: "bg-gray-50 text-gray-600 border-gray-200"
+  }
 };
 
 // convertion ng time van
@@ -32,17 +67,19 @@ const toManilaDate = (raw) => {
 const formatTime = (raw) => {
   const date = toManilaDate(raw);
   if (!date) return "—";
-  const diff  = Date.now() - date.getTime();
-  const mins  = Math.floor(diff / 60_000);
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60_000);
   const hours = Math.floor(diff / 3_600_000);
-  const days  = Math.floor(diff / 86_400_000);
-  if (mins  < 1)  return "Just now";
-  if (mins  < 60) return `${mins}m ago`;
+  const days = Math.floor(diff / 86_400_000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
   if (hours < 24) return `${hours}h ago`;
-  if (days  < 7)  return `${days}d ago`;
+  if (days < 7) return `${days}d ago`;
   return date.toLocaleDateString("en-PH", {
     timeZone: "Asia/Manila",
-    month: "short", day: "numeric", year: "numeric",
+    month: "short",
+    day: "numeric",
+    year: "numeric"
   });
 };
 
@@ -60,15 +97,17 @@ const groupByDate = (notifs) => {
         d.toLocaleString("en-US", { timeZone: "Asia/Manila" })
       );
       const days = Math.floor((nowManila - dManila) / 86_400_000);
-      if (days === 0)      label = "Today";
+      if (days === 0) label = "Today";
       else if (days === 1) label = "Yesterday";
-      else if (days < 7)  label = "This Week";
+      else if (days < 7) label = "This Week";
     }
     if (!groups[label]) groups[label] = [];
     groups[label].push(n);
   });
   const order = ["Today", "Yesterday", "This Week", "Older"];
-  return order.filter((k) => groups[k]).map((k) => ({ label: k, items: groups[k] }));
+  return order
+    .filter((k) => groups[k])
+    .map((k) => ({ label: k, items: groups[k] }));
 };
 
 // date divider van
@@ -94,7 +133,11 @@ const NotifCard = ({ notif, onRead, onNavigate, index }) => {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20, transition: { duration: 0.18 } }}
-      transition={{ delay: index * 0.04, duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{
+        delay: index * 0.04,
+        duration: 0.25,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }}
       onClick={handleClick}
       className={`
         group relative flex gap-3 px-4 py-4 cursor-pointer
@@ -108,7 +151,9 @@ const NotifCard = ({ notif, onRead, onNavigate, index }) => {
       )}
 
       {/* icon  van */}
-      <div className={`shrink-0 w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center`}>
+      <div
+        className={`shrink-0 w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center`}
+      >
         <Icon icon={notif.icon} className={`w-5 h-5 ${c.icon}`} />
       </div>
 
@@ -116,7 +161,9 @@ const NotifCard = ({ notif, onRead, onNavigate, index }) => {
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${c.badge}`}>
+            <span
+              className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${c.badge}`}
+            >
               {notif.title}
             </span>
             {/* unread indicator van */}
@@ -143,7 +190,10 @@ const NotifCard = ({ notif, onRead, onNavigate, index }) => {
             {/* mark as read button van */}
             {!notif.read && (
               <button
-                onClick={(e) => { e.stopPropagation(); onRead(notif.historyId); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRead(notif.historyId);
+                }}
                 className="text-xs text-blue-500 font-medium hover:text-blue-700 transition-colors cursor-pointer"
               >
                 Mark as read
@@ -176,7 +226,7 @@ const Skeleton = () => (
   </div>
 );
 
-// Filter options van 
+// Filter options van
 const FILTERS = ["All", "Unread", "Read"];
 
 // Main Notifications van
@@ -186,7 +236,8 @@ const Notifications = () => {
 
   // real data van
   const { history, isLoading, fetchHistory } = useActivityReportsStore();
-  const { readIds, getNotifications, markAsRead, markAllRead } = useNotificationsStore();
+  const { readIds, getNotifications, markAsRead, markAllRead } =
+    useNotificationsStore();
   const { user } = useUserStore();
   const currentGuardianId = user?.guardian_id ?? user?.guardianId;
 
@@ -204,17 +255,17 @@ const Notifications = () => {
   //  read/unread filter van
   const filtered = useMemo(() => {
     if (filter === "Unread") return allNotifications.filter((n) => !n.read);
-    if (filter === "Read")   return allNotifications.filter((n) =>  n.read);
+    if (filter === "Read") return allNotifications.filter((n) => n.read);
     return allNotifications;
   }, [allNotifications, filter]);
 
-  const grouped     = useMemo(() => groupByDate(filtered), [filtered]);
+  const grouped = useMemo(() => groupByDate(filtered), [filtered]);
   const unreadCount = allNotifications.filter((n) => !n.read).length;
-  const allIds      = allNotifications.map((n) => n.historyId);
+  const allIds = allNotifications.map((n) => n.historyId);
 
   // navigate to activity reports van
   const handleNavigate = (historyId) => {
-    navigate("/activity-reports", { state: { highlightId: historyId } });
+    navigate("/activity-logs", { state: { highlightId: historyId } });
   };
 
   return (
@@ -223,7 +274,6 @@ const Notifications = () => {
       className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6"
     >
       <div className="mx-auto w-full space-y-4 sm:space-y-6">
-
         {/* Page header at mark all read van*/}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 sm:mb-8">
           <div>
@@ -260,15 +310,18 @@ const Notifications = () => {
               className={`
                 flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
                 transition-colors cursor-pointer
-                ${filter === f
-                  ? "bg-[#11285A] text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"}
+                ${
+                  filter === f
+                    ? "bg-[#11285A] text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }
               `}
             >
               {f}
               {/* badge count van */}
               {f === "Unread" && unreadCount > 0 && (
-                <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold
+                <span
+                  className={`text-xs px-1.5 py-0.5 rounded-full font-semibold
                   ${filter === "Unread" ? "bg-white/20 text-white" : "bg-red-500 text-white"}`}
                 >
                   {unreadCount}
@@ -286,7 +339,10 @@ const Notifications = () => {
           ) : filtered.length === 0 ? (
             // empty state van
             <div className="p-10 text-center text-gray-500">
-              <Icon icon="ph:bell-slash" className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <Icon
+                icon="ph:bell-slash"
+                className="w-16 h-16 mx-auto mb-4 text-gray-300"
+              />
               <h3 className="text-lg font-semibold mb-2">
                 {filter === "Unread" ? "All caught up!" : "No notifications"}
               </h3>
@@ -345,7 +401,6 @@ const Notifications = () => {
             </div>
           </div>
         )}
-
       </div>
     </main>
   );

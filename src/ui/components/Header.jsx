@@ -174,13 +174,13 @@ function showLogoutModal(message = "Logging out...") {
 
 // color map for notification icon bubbles — added van
 const COLOR = {
-  blue:   { bg: "bg-blue-100",   icon: "text-blue-600"   },
+  blue: { bg: "bg-blue-100", icon: "text-blue-600" },
   indigo: { bg: "bg-indigo-100", icon: "text-indigo-600" },
-  green:  { bg: "bg-green-100",  icon: "text-green-600"  },
+  green: { bg: "bg-green-100", icon: "text-green-600" },
   orange: { bg: "bg-orange-100", icon: "text-orange-600" },
   purple: { bg: "bg-purple-100", icon: "text-purple-600" },
-  red:    { bg: "bg-red-100",    icon: "text-red-600"    },
-  gray:   { bg: "bg-gray-100",   icon: "text-gray-500"   },
+  red: { bg: "bg-red-100", icon: "text-red-600" },
+  gray: { bg: "bg-gray-100", icon: "text-gray-500" }
 };
 
 // convert UTC timestamp to Manila time van
@@ -196,17 +196,19 @@ const toManilaDate = (raw) => {
 const formatTime = (raw) => {
   const date = toManilaDate(raw);
   if (!date) return "—";
-  const diff  = Date.now() - date.getTime();
-  const mins  = Math.floor(diff / 60_000);
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60_000);
   const hours = Math.floor(diff / 3_600_000);
-  const days  = Math.floor(diff / 86_400_000);
-  if (mins  < 1)  return "Just now";
-  if (mins  < 60) return `${mins}m ago`;
+  const days = Math.floor(diff / 86_400_000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
   if (hours < 24) return `${hours}h ago`;
-  if (days  < 7)  return `${days}d ago`;
+  if (days < 7) return `${days}d ago`;
   return date.toLocaleDateString("en-PH", {
     timeZone: "Asia/Manila",
-    month: "short", day: "numeric", year: "numeric",
+    month: "short",
+    day: "numeric",
+    year: "numeric"
   });
 };
 
@@ -215,7 +217,7 @@ const NotificationDropdown = ({
   unreadCount, // added van
   onClose,
   onNotifClick, // added van
-  onSeeAll,     // added van
+  onSeeAll, // added van
   onMarkAllRead // added van
 }) => {
   const dropdownRef = useRef(null);
@@ -239,7 +241,9 @@ const NotificationDropdown = ({
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-900 text-lg">Notifications</h3>
+            <h3 className="font-semibold text-gray-900 text-lg">
+              Notifications
+            </h3>
             {/* unread badge van */}
             {unreadCount > 0 && (
               <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
@@ -264,7 +268,10 @@ const NotificationDropdown = ({
       <div className="max-h-[400px] overflow-y-auto">
         {notifications.length === 0 ? (
           <div className="p-8 text-center">
-            <Icon icon="ph:bell-slash" className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <Icon
+              icon="ph:bell-slash"
+              className="w-12 h-12 mx-auto mb-3 text-gray-300"
+            />
             <p className="text-gray-500 text-sm">No notifications yet</p>
           </div>
         ) : (
@@ -287,7 +294,9 @@ const NotificationDropdown = ({
                 >
                   <div className="flex items-start gap-3">
                     {/*  icon  van */}
-                    <div className={`shrink-0 w-8 h-8 rounded-lg ${c.bg} flex items-center justify-center mt-0.5`}>
+                    <div
+                      className={`shrink-0 w-8 h-8 rounded-lg ${c.bg} flex items-center justify-center mt-0.5`}
+                    >
                       <Icon icon={notif.icon} className={`w-4 h-4 ${c.icon}`} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -355,7 +364,8 @@ const Header = () => {
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
   const { setMobileMenuOpen, isMobileMenuOpen } = useUIStore();
-  const { devices, clearDevices, selectedDevice, setSelectedDevice } = useDevicesStore();
+  const { devices, clearDevices, selectedDevice, setSelectedDevice } =
+    useDevicesStore();
   const { clearAllGuardians } = useGuardiansStore();
   const { connectionStatus, disconnectWs } = useRealtimeStore();
   const { clearRoute } = useRouteStore();
@@ -377,7 +387,9 @@ const Header = () => {
   const allIds = allNotifications.map((n) => n.historyId); // added van
 
   // fetch history van
-  useEffect(() => { fetchHistory(); }, [fetchHistory]);
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -387,9 +399,9 @@ const Header = () => {
   const [vipOpen, setVipOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
-  // removed mock notifications 
+  // removed mock notifications
   // removed notificationCount hardcoded
-  // removed setInterval polling mock data 
+  // removed setInterval polling mock data
 
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -488,9 +500,7 @@ const Header = () => {
 
   return (
     <>
-      <header
-        className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 xl:px-15 relative z-50"
-      >
+      <header className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 xl:px-15 relative z-50">
         {/* Logo */}
         <div className="flex items-center h-full">
           <Link to="/dashboard" className="flex items-center gap-2 md:gap-3">
@@ -532,7 +542,6 @@ const Header = () => {
 
         {/* Desktop right */}
         <div className="hidden md:flex items-center gap-3 lg:gap-4">
-
           {/* VIP selector */}
           <div ref={vipRef} className="relative">
             <button
@@ -543,7 +552,9 @@ const Header = () => {
               <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-full overflow-hidden bg-gray-200 shrink-0">
                 {selectedDevice?.vip?.vipImageUrl ? (
                   <img
-                    src={resolveProfileImageSrc(selectedDevice?.vip?.vipImageUrl)}
+                    src={resolveProfileImageSrc(
+                      selectedDevice?.vip?.vipImageUrl
+                    )}
                     className="w-full h-full object-cover"
                     alt="VIP"
                   />
@@ -558,7 +569,10 @@ const Header = () => {
                   ? capitalizeWords(selectedDevice.vip.firstName)
                   : selectedDevice?.deviceSerialNumber || "No VIP"}
               </span>
-              <Icon icon="ph:caret-down-bold" className="w-4 h-4 text-white shrink-0" />
+              <Icon
+                icon="ph:caret-down-bold"
+                className="w-4 h-4 text-white shrink-0"
+              />
             </button>
 
             {vipOpen && (
@@ -570,12 +584,21 @@ const Header = () => {
                   {devices.map((device) => (
                     <button
                       key={device.deviceId}
-                      onClick={() => { setSelectedDevice(device); setVipOpen(false); }}
+                      onClick={() => {
+                        setSelectedDevice(device);
+                        setVipOpen(false);
+                      }}
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition"
                     >
                       <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0">
                         {device?.vip?.vipImageUrl ? (
-                          <img src={resolveProfileImageSrc(device?.vip?.vipImageUrl)} className="w-full h-full object-cover" alt="VIP" />
+                          <img
+                            src={resolveProfileImageSrc(
+                              device?.vip?.vipImageUrl
+                            )}
+                            className="w-full h-full object-cover"
+                            alt="VIP"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
                             {device?.deviceSerialNumber?.slice(-2)}
@@ -584,13 +607,17 @@ const Header = () => {
                       </div>
                       <p className="text-sm font-medium text-gray-800 truncate">
                         {device.vip?.firstName && device.vip?.lastName
-                          ? capitalizeWords(device.vip.firstName + " " + device.vip.lastName)
+                          ? capitalizeWords(
+                              device.vip.firstName + " " + device.vip.lastName
+                            )
                           : device?.deviceSerialNumber}
                       </p>
                     </button>
                   ))}
                   {devices.length === 0 && (
-                    <div className="py-8 text-center text-sm text-gray-400">No VIP available</div>
+                    <div className="py-8 text-center text-sm text-gray-400">
+                      No VIP available
+                    </div>
                   )}
                 </div>
               </div>
@@ -637,7 +664,7 @@ const Header = () => {
                   notifications={allNotifications}
                   unreadCount={unreadCount}
                   onClose={() => setIsNotificationOpen(false)}
-                  onNotifClick={() => navigate("/activity-report")}
+                  onNotifClick={() => navigate("/activity-logs")}
                   onSeeAll={handleNavigateToNotifications}
                   onMarkAllRead={() => markAllRead(allIds)}
                 />
@@ -672,21 +699,30 @@ const Header = () => {
                   <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
                   <div className="py-2 flex flex-col w-full">
                     <button
-                      onClick={() => { setIsDropdownOpen(false); navigate("/profile"); }}
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate("/profile");
+                      }}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="ph:user" className="w-4 h-4" />
                       Profile
                     </button>
                     <button
-                      onClick={() => { setIsDropdownOpen(false); navigate("/activity-logs"); }}
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate("/activity-logs");
+                      }}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="oui:nav-reports" className="w-4 h-4" />
                       History
                     </button>
                     <button
-                      onClick={() => { setIsDropdownOpen(false); navigate("/settings"); }}
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate("/settings");
+                      }}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="ph:gear" className="w-4 h-4" />
@@ -721,16 +757,24 @@ const Header = () => {
                   initial="hidden"
                   animate="show"
                   exit="hidden"
-                  variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
+                  variants={{
+                    hidden: {},
+                    show: { transition: { staggerChildren: 0.04 } }
+                  }}
                   className="px-4 py-6 space-y-6 border-t border-white/10"
                 >
                   <div data-tour="tour-mobile-vip" className="mb-6">
-                    <div className="text-white/80 text-sm font-medium mb-2 px-2">Select Device</div>
+                    <div className="text-white/80 text-sm font-medium mb-2 px-2">
+                      Select Device
+                    </div>
                     <div className="space-y-2 max-h-[20vh] overflow-y-auto pr-1">
                       {devices.map((device) => (
                         <button
                           key={device.deviceId}
-                          onClick={() => { setSelectedDevice(device); setMobileMenuOpen(false); }}
+                          onClick={() => {
+                            setSelectedDevice(device);
+                            setMobileMenuOpen(false);
+                          }}
                           className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
                             selectedDevice?.deviceId === device.deviceId
                               ? "bg-white/20"
@@ -739,7 +783,13 @@ const Header = () => {
                         >
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
                             {device?.vip?.vipImageUrl ? (
-                              <img src={resolveProfileImageSrc(device?.vip?.vipImageUrl)} className="w-full h-full object-cover" alt="VIP" />
+                              <img
+                                src={resolveProfileImageSrc(
+                                  device?.vip?.vipImageUrl
+                                )}
+                                className="w-full h-full object-cover"
+                                alt="VIP"
+                              />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-500">
                                 {device?.deviceSerialNumber?.slice(-2)}
@@ -749,15 +799,23 @@ const Header = () => {
                           <div className="flex-1 text-left">
                             <p className="text-white font-medium">
                               {device.vip?.firstName && device.vip?.lastName
-                                ? capitalizeWords(device.vip.firstName + " " + device.vip.lastName)
+                                ? capitalizeWords(
+                                    device.vip.firstName +
+                                      " " +
+                                      device.vip.lastName
+                                  )
                                 : device?.deviceSerialNumber}
                             </p>
-                            <p className="text-white/60 text-xs">{device.deviceSerialNumber}</p>
+                            <p className="text-white/60 text-xs">
+                              {device.deviceSerialNumber}
+                            </p>
                           </div>
                         </button>
                       ))}
                       {devices.length === 0 && (
-                        <div className="text-center text-white/60 py-4">No VIP devices</div>
+                        <div className="text-center text-white/60 py-4">
+                          No VIP devices
+                        </div>
                       )}
                     </div>
                   </div>
@@ -768,7 +826,9 @@ const Header = () => {
                   >
                     <span className="text-white font-medium">Connection</span>
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${connectionStatus ? "bg-green-400" : "bg-red-400"}`} />
+                      <div
+                        className={`w-2 h-2 rounded-full ${connectionStatus ? "bg-green-400" : "bg-red-400"}`}
+                      />
                       <span className="text-white/80 text-sm">
                         {connectionStatus ? "Connected" : "Disconnected"}
                       </span>
@@ -778,21 +838,30 @@ const Header = () => {
                   <div className="space-y-1">
                     <button
                       data-tour="tour-mobile-profile"
-                      onClick={() => { setMobileMenuOpen(false); navigate("/profile"); }}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        navigate("/profile");
+                      }}
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="ph:user" className="w-5 h-5" />
                       <span className="font-medium">Profile</span>
                     </button>
                     <button
-                      onClick={() => { setMobileMenuOpen(false); navigate("/activity-logs"); }}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        navigate("/activity-logs");
+                      }}
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="oui:nav-reports" className="w-5 h-5" />
                       <span className="font-medium">History</span>
                     </button>
                     <button
-                      onClick={() => { setMobileMenuOpen(false); navigate("/settings"); }}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        navigate("/settings");
+                      }}
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="ph:gear" className="w-5 h-5" />
