@@ -809,7 +809,7 @@ const Header = () => {
                     <button
                       onClick={() => {
                         setIsDropdownOpen(false);
-                        navigate("/activity-report");
+                        navigate("/activity-logs");
                       }}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
@@ -956,7 +956,7 @@ const Header = () => {
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        navigate("/activity-report");
+                        navigate("/activity-logs");
                       }}
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >

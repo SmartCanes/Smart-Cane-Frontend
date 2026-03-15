@@ -64,10 +64,10 @@ const DashboardSide = ({ className = "" }) => {
       path: "/dashboard"
     },
     {
-      id: "activity-logs",
-      label: "Activity Logs",
+      id: "device-logs",
+      label: "Device Logs",
       icon: "solar:history-linear",
-      path: "/activity-logs"
+      path: "/device-logs"
     },
     {
       id: "weather-board",
@@ -104,10 +104,10 @@ const DashboardSide = ({ className = "" }) => {
       path: "/weather-board"
     },
     {
-      id: "activity-logs",
-      label: "Activity",
+      id: "device-logs",
+      label: "Logs",
       icon: "solar:history-linear",
-      path: "/activity-logs"
+      path: "/device-logs"
     },
     {
       id: "mobile-home",

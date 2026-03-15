@@ -21,7 +21,7 @@ const ACTION_TYPE_MAP = {
   UPDATE_RELATIONSHIP: "relationship"
 };
 
-const ActivityReport = () => {
+const ActivityLogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -124,10 +124,10 @@ const ActivityReport = () => {
         <div className="w-full font-poppins max-w-5xl mx-auto space-y-6">
           <div className="mb-4 md:mb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
-              Activity Reports
+              Activity Logs
             </h2>
             <p className="text-gray-500 text-xs md:text-sm">
-              Monitor and track all user activities in your system
+              Monitor and track all guardian activities in your system
             </p>
           </div>
           <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center justify-center gap-3">
@@ -153,10 +153,10 @@ const ActivityReport = () => {
       <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
         <div data-tour="tour-activity-header" className="mb-4 md:mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
-            Activity Reports
+            Activity Logs
           </h2>
           <p className="text-gray-500 text-xs md:text-sm">
-            Monitor and track all user activities in your system
+            Monitor and track all guardian activities in your system
           </p>
         </div>
 
@@ -425,4 +425,4 @@ const ActivityReport = () => {
   );
 };
 
-export default ActivityReport;
+export default ActivityLogs;

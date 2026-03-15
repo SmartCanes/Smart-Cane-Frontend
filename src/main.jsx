@@ -16,16 +16,16 @@ import { ProtectedLayout, PublicLayout } from "./layout/LayoutRoute.jsx";
 import Setting from "./pages/Setting";
 import DashboardLayout from "./layout/DashboardLayout";
 import WeatherBoard from "./pages/WeatherBoard";
-import ActivityReport from "./pages/ActivityReport";
-import ActivityLogs from "./pages/ActivityLogs";
 import Notes from "./pages/Notes.jsx";
 import GetStarted from "./pages/GetStarted.jsx";
 import { GuardianProfile } from "./pages/GuardianProfile";
 import Devices from "./pages/Devices";
 import GuardianInvite from "./pages/GuardianInvite";
-import Advanced from "./pages/Advanced.jsx";
+import Advanced from "./pages/ActivityLogs.jsx";
 import Notifications from "./pages/Notifications";
 import EmergencyDetails from "./pages/EmergencyDetails.jsx";
+import DeviceLogs from "./pages/DeviceLogs";
+import ActivityLogs from "./pages/ActivityReport";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -45,8 +45,8 @@ createRoot(document.getElementById("root")).render(
         <Route element={<ProtectedLayout />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/activity-report" element={<ActivityReport />} />
             <Route path="/activity-logs" element={<ActivityLogs />} />
+            <Route path="/device-logs" element={<DeviceLogs />} />
             <Route path="/devices" element={<Devices />} />
             <Route path="/weather-board" element={<WeatherBoard />} />
             <Route path="/settings" element={<Setting />} />
