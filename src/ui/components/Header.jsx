@@ -534,29 +534,31 @@ const Header = () => {
         {
           id: 1,
           title: "Fall Detected",
-          message: "John Smith's iCane detected a fall at Main Street",
-          timestamp: new Date(Date.now() - 5 * 60 * 1000),
+          message:
+            "John Smith's iCane detected a possible fall on Main Street.",
+          timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
           type: "alert",
           read: false,
           deviceId: "ICN-001"
         },
         {
           id: 2,
-          title: "Battery Low",
-          message: "iCane device battery is at 15%",
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          type: "warning",
-          read: true,
-          deviceId: "IC-12345"
+          title: "Emergency Alert",
+          message:
+            "John Smith triggered an emergency alert and may need immediate assistance.",
+          timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
+          type: "alert",
+          read: false,
+          deviceId: "ICN-001"
         },
         {
           id: 3,
-          title: "Device Connected",
-          message: "New iCane device paired successfully",
-          timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+          title: "Location Arrived",
+          message: "John Smith has arrived at the destination successfully.",
+          timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
           type: "info",
-          read: false,
-          deviceId: "IC-67890"
+          read: true,
+          deviceId: "ICN-001"
         }
       ];
       setNotifications(mockNotifications);

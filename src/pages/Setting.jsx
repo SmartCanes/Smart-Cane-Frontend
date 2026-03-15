@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
-import BluetoothManager from "@/ui/components/BluetoothManager";
 import { changePasswordApi, logoutApi } from "@/api/authService";
 import { useNavigate } from "react-router-dom";
 import Modal from "@/ui/components/Modal";
@@ -720,13 +719,6 @@ const Setting = () => {
                   checked={settings.notifications.sms}
                   onChange={() => toggleNotification("sms")}
                 />
-                <ToggleItem
-                  icon="solar:danger-triangle-bold"
-                  title="Emergency Alerts"
-                  description="Critical notifications for safety events"
-                  checked={settings.notifications.emergency}
-                  onChange={() => toggleNotification("emergency")}
-                />
               </div>
             </div>
 
@@ -754,13 +746,6 @@ const Setting = () => {
                   description="Extra security for your account"
                   checked={settings.privacy.twoFactor}
                   onChange={() => togglePrivacy("twoFactor")}
-                />
-                <ToggleItem
-                  icon="carbon:analytics"
-                  title="Usage Analytics"
-                  description="Help improve iCane with usage data"
-                  checked={settings.privacy.analytics}
-                  onChange={() => togglePrivacy("analytics")}
                 />
               </div>
               <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
@@ -797,7 +782,6 @@ const Setting = () => {
           </div>
         </div>
 
-        <BluetoothManager />
         <ChangePasswordModal isOpen={isModalOpen} onClose={closeModal} />
       </main>
     </>

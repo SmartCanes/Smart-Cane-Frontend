@@ -8,12 +8,11 @@ const Notifications = () => {
   const [filter, setFilter] = useState("all"); // all, unread, read
 
   useEffect(() => {
-    // Mock data - replace with actual API call
     const mockNotifications = [
       {
         id: 1,
         title: "Fall Detected",
-        message: "John Smith's iCane detected a fall at Main Street",
+        message: "John Smith's iCane detected a possible fall on Main Street.",
         timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
         type: "alert",
         read: false,
@@ -21,28 +20,20 @@ const Notifications = () => {
       },
       {
         id: 2,
-        title: "Battery Low",
-        message: "iCane device IC-12345 battery is at 15%",
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        type: "warning",
-        read: true,
-        deviceId: "IC-12345"
+        title: "Emergency Alert",
+        message:
+          "John Smith triggered an emergency alert and may need immediate assistance.",
+        timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
+        type: "alert",
+        read: false,
+        deviceId: "ICN-001"
       },
       {
         id: 3,
-        title: "Device Offline",
-        message: "iCane device IC-67890 has been offline for 30 minutes",
-        timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+        title: "Location Arrived",
+        message: "John Smith has arrived at the destination successfully.",
+        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
         type: "info",
-        read: false,
-        deviceId: "IC-67890"
-      },
-      {
-        id: 4,
-        title: "Safe Zone Alert",
-        message: "VIP has exited the designated safe zone",
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        type: "alert",
         read: true,
         deviceId: "ICN-001"
       }

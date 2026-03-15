@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useDevicesStore, useRealtimeStore } from "@/stores/useStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { wsApi } from "@/api/ws-api";
+import BluetoothManager from "@/ui/components/BluetoothManager";
 
 const fallbackConfig = {
   FALL_DETECTION: {
     config: {
       enabled: true,
-      fallAngleThreshold: 10.0,
       fallConfirmationDelay: 3000
     }
   },
@@ -24,10 +24,7 @@ const fallbackConfig = {
   EDGE_DETECTION: {
     config: {
       enabled: true,
-      edgeBeepMin: 400,
-      edgeBeepMax: 708,
-      edgeContinuous: 709,
-      pointDownAngle: 30.0
+      edgeBeepMin: 400
     }
   },
 
@@ -35,8 +32,7 @@ const fallbackConfig = {
     config: {
       enabled: true,
       volume: 0.3,
-      speechSpeed: 150,
-      voiceType: "en-f5"
+      speechSpeed: 150
     }
   },
 
@@ -58,7 +54,6 @@ const DEVICE_COMPONENT_SCHEMA = {
   FALL_DETECTION: {
     enabled: true,
     config: {
-      fallAngleThreshold: "fallAngleThreshold",
       fallConfirmationDelay: "fallConfirmationDelay"
     }
   },
@@ -73,10 +68,7 @@ const DEVICE_COMPONENT_SCHEMA = {
   EDGE_DETECTION: {
     enabled: true,
     config: {
-      edgeBeepMin: "edgeBeepMin",
-      edgeBeepMax: "edgeBeepMax",
-      edgeContinuous: "edgeContinuous",
-      pointDownAngle: "pointDownAngle"
+      edgeBeepMin: "edgeBeepMin"
     }
   },
 
@@ -84,8 +76,7 @@ const DEVICE_COMPONENT_SCHEMA = {
     enabled: true,
     config: {
       volume: "volume",
-      speechSpeed: "speechSpeed",
-      voiceType: "voiceType"
+      speechSpeed: "speechSpeed"
     }
   },
 
@@ -122,13 +113,6 @@ const componentsData = [
     icon: "mdi:human-cane",
     configurable: true,
     configOptions: {
-      fallAngleThreshold: [
-        { label: "8° (Very Sensitive)", value: 8 },
-        { label: "10° (Default)", value: 10 },
-        { label: "15° (Stable Safety)", value: 15 },
-        { label: "20° (Low Sensitivity)", value: 20 }
-      ],
-
       fallConfirmationDelay: [
         { label: "2000 ms (Fast Alert)", value: 2000 },
         { label: "3000 ms (Default)", value: 3000 },
@@ -221,11 +205,6 @@ const componentsData = [
     icon: "mdi:eye",
     configurable: true,
     configOptions: {
-      alertType: [
-        { label: "Vibration Alert", value: "vibration" },
-        { label: "Voice Guidance", value: "voice" },
-        { label: "Combined Alert (Default)", value: "combined" }
-      ],
       recognitionInterval: [
         { label: "3s (Fast)", value: 3000 },
         { label: "5s (Default)", value: 5000 },
@@ -271,15 +250,7 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
   const config = deviceConfig?.config ?? {};
 
   const speechSpeed = config.speechSpeed ?? 150;
-  const voiceType = config.voiceType ?? "en+f5";
   const volume = config.volume ?? 0.3;
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const debounceRef = useRef(null);
-  const [previewText, setPreviewText] = useState(
-    "Hello, this is a voice preview"
-  );
-
   const uiVolume = Math.round((volume || 0) * 100);
   const isMuted = uiVolume === 0;
 
@@ -329,14 +300,6 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
       }
     });
   };
-  const handleVoiceChange = (voiceId) => {
-    onVoiceConfigChange?.({
-      config: {
-        ...deviceConfig?.config,
-        voiceType: voiceId
-      }
-    });
-  };
 
   const toggleMute = () => {
     const uiVolume = Math.round((volume || 0) * 100);
@@ -353,12 +316,6 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
         muted: !isCurrentlyMuted
       }
     });
-  };
-
-  const playPreview = () => {
-    setIsPlaying(true);
-    console.log("Playing preview:", previewText);
-    setTimeout(() => setIsPlaying(false), 2000);
   };
 
   const getVolumeIcon = () => {
@@ -388,7 +345,7 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
             <Icon
               icon="mdi:voice"
               className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                isOnline ? "text-primary-600" : "text-gray-500"
+                isOnline ? "text-white" : "text-gray-500"
               }`}
             />
           </div>
@@ -690,7 +647,6 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
   );
 };
 
-// Component Card (keep existing code)
 const ComponentCard = ({
   component,
   deviceConfig,
@@ -702,15 +658,15 @@ const ComponentCard = ({
   return (
     <motion.div
       layout
-      className={`rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
+      className={`rounded-xl border-2 overflow-hidden transition-all duration-300 hover:shadow-lg ${
         component.isOnline
           ? "border-primary-200 bg-gradient-to-br from-primary-50 to-white"
           : "border-gray-200 bg-white"
       }`}
     >
       <div className="p-3 sm:p-4 w-full">
-        <div className="flex items-start justify-between mb-3 sm:mb-4">
-          <div className="flex items-center gap-3">
+        <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
             <div
               className={`p-2 rounded-lg flex-shrink-0 ${
                 component.isOnline
@@ -720,15 +676,18 @@ const ComponentCard = ({
             >
               <Icon icon={component.icon} className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
+
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+              <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-tight break-words">
                 {component.name}
               </h3>
-              <p className="text-xs text-gray-500 ">{component.description}</p>
+              <p className="text-xs text-gray-500 leading-relaxed break-words line-clamp-2">
+                {component.description}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0 self-start">
             {component.configurable && (
               <button
                 onClick={() => onConfigure(component)}
@@ -741,6 +700,7 @@ const ComponentCard = ({
                 />
               </button>
             )}
+
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -757,13 +717,13 @@ const ComponentCard = ({
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 sm:mb-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <div
               className={`w-2 h-2 rounded-full flex-shrink-0 ${
                 component.isOnline ? "bg-green-500 animate-pulse" : "bg-red-500"
               }`}
             />
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               <span
                 className={`text-xs sm:text-sm font-medium ${
                   component.isOnline ? "text-green-600" : "text-red-600"
@@ -772,33 +732,11 @@ const ComponentCard = ({
                 {component.isOnline ? "Online" : "Offline"}
               </span>
               <span className="hidden sm:inline text-gray-400">•</span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 break-words">
                 {component.isOnline ? "Connected" : "Disconnected"}
               </span>
             </div>
           </div>
-          {component.configurable && (
-            <button
-              onClick={() => onTogglePower(component.codeName)}
-              className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center justify-center gap-2 transition-all text-sm font-medium ${
-                deviceConfig.enabled
-                  ? "bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200"
-                  : "bg-green-50 text-green-600 hover:bg-green-100 active:bg-green-200"
-              }`}
-              aria-label={`${deviceConfig.enabled ? "Power off" : "Power on"} ${component.name}`}
-            >
-              <Icon
-                icon={deviceConfig.enabled ? "mdi:power" : "mdi:power-off"}
-                className="w-4 h-4"
-              />
-              <span className="hidden sm:inline">
-                {deviceConfig.enabled ? "Power Off" : "Power On"}
-              </span>
-              <span className="inline sm:hidden">
-                {deviceConfig.enabled ? "Off" : "On"}
-              </span>
-            </button>
-          )}
         </div>
 
         <AnimatePresence>
@@ -810,37 +748,39 @@ const ComponentCard = ({
               className="overflow-hidden"
             >
               <div className="pt-3 sm:pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gray-50 rounded-lg p-3">
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-3">
+                  <div className="bg-gray-50 rounded-lg p-3 min-w-0">
                     <p className="text-xs text-gray-500 mb-1">Component Type</p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Icon
                         icon={
                           component.type === "sensor"
                             ? "mdi:sensor"
                             : "mdi:chip"
                         }
-                        className="w-4 h-4 text-gray-600"
+                        className="w-4 h-4 text-gray-600 flex-shrink-0"
                       />
-                      <p className="text-sm font-medium capitalize">
+                      <p className="text-sm font-medium capitalize break-words">
                         {component.type}
                       </p>
                     </div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
+
+                  <div className="bg-gray-50 rounded-lg p-3 min-w-0">
                     <p className="text-xs text-gray-500 mb-1">Component ID</p>
-                    <p className="text-sm font-medium font-mono">
+                    <p className="text-sm font-medium font-mono break-all">
                       CMP-{component.id.toString().padStart(3, "0")}
                     </p>
                   </div>
                 </div>
-                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg min-w-0">
                   <div className="flex items-start gap-2">
                     <Icon
                       icon="mdi:information"
                       className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"
                     />
-                    <p className="text-xs text-blue-700">
+                    <p className="text-xs text-blue-700 break-words">
                       {component.configurable
                         ? "Click the gear icon to configure sensor parameters and performance settings."
                         : "This component is currently read-only."}
@@ -983,17 +923,17 @@ function Advanced() {
       count: sensorComponents.length
     },
     {
-      id: "hardware",
-      label: "Hardware",
-      shortLabel: "Hardware",
-      icon: "mdi:chip",
-      count: controllerComponents.length
-    },
-    {
       id: "voice",
       label: "Voice & Audio",
       shortLabel: "Voice",
       icon: "mdi:voice",
+      count: null
+    },
+    {
+      id: "bluetooth",
+      label: "Bluetooth",
+      shortLabel: "BT",
+      icon: "mdi:bluetooth",
       count: null
     }
   ];
@@ -1039,63 +979,33 @@ function Advanced() {
           </div>
         </div>
 
-        {/* Stats Bar */}
-        <div
-          data-tour="tour-device-status"
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
-        >
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="w-5 h-5 text-green-600"
-                />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  System Health
-                </p>
-                <p className="text-base sm:text-lg font-semibold">Excellent</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5">
-            <div className="p-1.5 bg-orange-100 rounded-lg flex-shrink-0">
-              <Icon
-                icon="mdi:alert-circle"
-                className="w-4 h-4 text-orange-600"
-              />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 leading-none mb-0.5">
-                Active Alerts
-              </p>
-              <p className="text-sm font-semibold text-gray-800">0</p>
-            </div>
-          </div>
-        </div>
-
         {/* ── Tab Navigation ── */}
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-5">
+        <div className="flex flex-nowrap gap-1 bg-gray-100 p-1 rounded-xl mb-5">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+              className={`min-w-0 flex-1 basis-[calc(50%-0.125rem)] sm:basis-0 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all cursor-pointer ${
                 activeTab === tab.id
                   ? "bg-white text-primary-600 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
               <Icon icon={tab.icon} className="w-4 h-4 flex-shrink-0" />
-              <span className="sm:hidden">{tab.shortLabel}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
+
+              <span className="sm:hidden text-center leading-tight">
+                {tab.shortLabel}
+              </span>
+
+              <span className="hidden sm:inline text-center leading-tight">
+                {tab.label}
+              </span>
+
               {tab.count !== null && (
                 <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full leading-none hidden sm:inline ${
+                  className={`text-xs px-1.5 py-0.5 rounded-full leading-none hidden sm:inline-flex items-center justify-center min-w-[20px] ${
                     activeTab === tab.id
-                      ? "bg-primary-100 text-primary-600"
+                      ? "bg-gray-200 text-gray-500"
                       : "bg-gray-200 text-gray-500"
                   }`}
                 >
@@ -1115,7 +1025,7 @@ function Advanced() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
             >
               {sensorComponents.map((component) => (
                 <ComponentCard
@@ -1180,6 +1090,18 @@ function Advanced() {
                   })
                 }
               />
+            </motion.div>
+          )}
+
+          {activeTab === "bluetooth" && (
+            <motion.div
+              key="bluetooth"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+            >
+              <BluetoothManager embedded />
             </motion.div>
           )}
         </AnimatePresence>

@@ -12,7 +12,7 @@ import Modal from "./Modal";
 import { wsApi } from "@/api/ws-api";
 import { useToast } from "@/context/ToastContext";
 
-const BluetoothManager = () => {
+const BluetoothManager = ({ embedded = false }) => {
   const { user } = useUserStore();
   const { _wsConnected, connectionStatus } = useRealtimeStore();
   const { currentGuardianRole } = useGuardiansStore();
@@ -71,8 +71,7 @@ const BluetoothManager = () => {
 
   useEffect(() => {
     const deviceListener = (data) => {
-      console.log(data);
-      const devices = data?.devices || data?.devices;
+      const devices = data?.devices;
       const error = data?.error;
 
       if (error) {
@@ -199,7 +198,9 @@ const BluetoothManager = () => {
     handlePairStatus,
     handleUnpairStatus,
     handleConnectStatus,
-    handleDisconnectStatus
+    handleDisconnectStatus,
+    handleScanStatus,
+    showToast
   ]);
 
   useEffect(() => {
@@ -231,7 +232,7 @@ const BluetoothManager = () => {
   useEffect(() => {
     if (!_wsConnected || !connectionStatus) return;
     refreshBluetoothDevices();
-  }, [_wsConnected, connectionStatus]);
+  }, [_wsConnected, connectionStatus, refreshBluetoothDevices]);
 
   const startAction = (action) => {
     setPendingAction(action);
@@ -285,142 +286,147 @@ const BluetoothManager = () => {
     return matchesSearch;
   });
 
+  const content = (
+    <div className="mx-auto w-full space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+            Bluetooth Management
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            {devices.filter((d) => d.paired).length} paired •{" "}
+            {devices.filter((d) => d.connected).length} connected
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3 w-full sm:w-auto">
+          <Button
+            onClick={scanForDevices}
+            disabled={isScanning || !_wsConnected || !connectionStatus}
+            className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center gap-2 justify-center"
+          >
+            <Icon
+              icon={
+                isScanning ? "ph:circle-notch-bold" : "ph:magnifying-glass-bold"
+              }
+              className={`w-5 h-5 ${isScanning ? "animate-spin" : ""}`}
+            />
+            {isScanning ? "Scanning..." : "Scan for Devices"}
+          </Button>
+
+          <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
+            {["all", "paired", "available"].map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium capitalize transition-all cursor-pointer ${
+                  viewMode === mode
+                    ? "bg-white shadow-sm text-blue-600"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="relative">
+        <Icon
+          icon="ph:magnifying-glass-bold"
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+        />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by device name or ID..."
+          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+        />
+      </div>
+
+      {filteredDevices.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+          {filteredDevices.map((device) => (
+            <BluetoothDeviceCard
+              key={device.mac}
+              device={device}
+              onPair={() => setPairModal({ show: true, device })}
+              onUnpair={() => setUnpairModal({ show: true, device })}
+              onForget={() => setForgetModal({ show: true, device })}
+              onConnect={() =>
+                setConnectionModal({
+                  show: true,
+                  device,
+                  action: device.connected ? "disconnect" : "connect"
+                })
+              }
+              canManage={canManageBluetooth}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          isScanning={isScanning}
+          onScan={scanForDevices}
+          viewMode={viewMode}
+        />
+      )}
+
+      <PairDeviceModal
+        isOpen={pairModal.show}
+        device={pairModal.device}
+        onClose={() => setPairModal({ show: false, device: null })}
+        onConfirm={() => handlePairDevice(pairModal.device)}
+        isSubmitting={pendingAction === "pair" || isBluetoothProcessing}
+      />
+
+      <UnpairDeviceModal
+        isOpen={unpairModal.show}
+        device={unpairModal.device}
+        onClose={() => setUnpairModal({ show: false, device: null })}
+        onConfirm={() => handleUnpairDevice(unpairModal.device)}
+        isSubmitting={pendingAction === "unpair" || isBluetoothProcessing}
+      />
+
+      <ForgetDeviceModal
+        isOpen={forgetModal.show}
+        device={forgetModal.device}
+        onClose={() => setForgetModal({ show: false, device: null })}
+        onConfirm={() => handleForgetDevice(forgetModal.device)}
+        isSubmitting={pendingAction === "forget" || isBluetoothProcessing}
+      />
+
+      <ConnectionModal
+        isOpen={connectionModal.show}
+        device={connectionModal.device}
+        action={connectionModal.action}
+        onClose={() =>
+          setConnectionModal({ show: false, device: null, action: "connect" })
+        }
+        onConfirm={() =>
+          handleConnectionToggle(connectionModal.device, connectionModal.action)
+        }
+        isSubmitting={
+          pendingAction === connectionModal.action || isBluetoothProcessing
+        }
+      />
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <section className="w-full border-2 p-5 rounded-2xl">{content}</section>
+    );
+  }
+
   return (
     <main
       id="app-main"
       className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6"
     >
-      <div className="mx-auto w-full space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
-              Bluetooth Management
-            </h2>
-            <p className="text-gray-500 text-sm mt-1">
-              {devices.filter((d) => d.paired).length} paired •{" "}
-              {devices.filter((d) => d.connected).length} connected
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 w-full sm:w-auto">
-            <Button
-              onClick={scanForDevices}
-              disabled={isScanning || !_wsConnected || !connectionStatus}
-              className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center gap-2 justify-center"
-            >
-              <Icon
-                icon={
-                  isScanning
-                    ? "ph:circle-notch-bold"
-                    : "ph:magnifying-glass-bold"
-                }
-                className={`w-5 h-5 ${isScanning ? "animate-spin" : ""}`}
-              />
-              {isScanning ? "Scanning..." : "Scan for Devices"}
-            </Button>
-
-            <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
-              {["all", "paired", "available"].map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium capitalize transition-all cursor-pointer ${
-                    viewMode === mode
-                      ? "bg-white shadow-sm text-blue-600"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="relative">
-          <Icon
-            icon="ph:magnifying-glass-bold"
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by device name or ID..."
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-          />
-        </div>
-
-        {filteredDevices.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-            {filteredDevices.map((device) => (
-              <BluetoothDeviceCard
-                key={device.mac}
-                device={device}
-                onPair={() => setPairModal({ show: true, device })}
-                onUnpair={() => setUnpairModal({ show: true, device })}
-                onForget={() => setForgetModal({ show: true, device })}
-                onConnect={() =>
-                  setConnectionModal({
-                    show: true,
-                    device,
-                    action: device.connected ? "disconnect" : "connect"
-                  })
-                }
-                canManage={canManageBluetooth}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            isScanning={isScanning}
-            onScan={scanForDevices}
-            viewMode={viewMode}
-          />
-        )}
-
-        <PairDeviceModal
-          isOpen={pairModal.show}
-          device={pairModal.device}
-          onClose={() => setPairModal({ show: false, device: null })}
-          onConfirm={() => handlePairDevice(pairModal.device)}
-          isSubmitting={pendingAction === "pair" || isBluetoothProcessing}
-        />
-
-        <UnpairDeviceModal
-          isOpen={unpairModal.show}
-          device={unpairModal.device}
-          onClose={() => setUnpairModal({ show: false, device: null })}
-          onConfirm={() => handleUnpairDevice(unpairModal.device)}
-          isSubmitting={pendingAction === "unpair" || isBluetoothProcessing}
-        />
-
-        <ForgetDeviceModal
-          isOpen={forgetModal.show}
-          device={forgetModal.device}
-          onClose={() => setForgetModal({ show: false, device: null })}
-          onConfirm={() => handleForgetDevice(forgetModal.device)}
-          isSubmitting={pendingAction === "forget" || isBluetoothProcessing}
-        />
-
-        <ConnectionModal
-          isOpen={connectionModal.show}
-          device={connectionModal.device}
-          action={connectionModal.action}
-          onClose={() =>
-            setConnectionModal({ show: false, device: null, action: "connect" })
-          }
-          onConfirm={() =>
-            handleConnectionToggle(
-              connectionModal.device,
-              connectionModal.action
-            )
-          }
-          isSubmitting={
-            pendingAction === connectionModal.action || isBluetoothProcessing
-          }
-        />
-      </div>
+      {content}
     </main>
   );
 };
