@@ -372,11 +372,6 @@ const NotificationDropdown = ({ notifications, onClose, onNavigateToAll }) => {
                         )}
                       </div>
                     </div>
-                    <div className="mt-2">
-                      <span className="text-xs text-gray-400">
-                        Device: {notification.deviceId}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </motion.button>
@@ -534,8 +529,7 @@ const Header = () => {
         {
           id: 1,
           title: "Fall Detected",
-          message:
-            "John Smith's iCane detected a possible fall on Main Street.",
+          message: "Sarah Chua iCane detected a possible fall on Main Street.",
           timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
           type: "alert",
           read: false,
@@ -545,7 +539,7 @@ const Header = () => {
           id: 2,
           title: "Emergency Alert",
           message:
-            "John Smith triggered an emergency alert and may need immediate assistance.",
+            "Isabel Garcia triggered an emergency alert and may need immediate assistance.",
           timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
           type: "alert",
           read: false,
@@ -554,7 +548,7 @@ const Header = () => {
         {
           id: 3,
           title: "Location Arrived",
-          message: "John Smith has arrived at the destination successfully.",
+          message: "Daniel Flores has arrived at the destination successfully.",
           timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
           type: "info",
           read: true,
