@@ -957,7 +957,7 @@ export const useSettingsStore = create(
         },
         privacy: {
           location: true,
-          twoFactor: true,
+          twoFactor: false, //default is fasle van
           analytics: false
         },
         demoMode: false
