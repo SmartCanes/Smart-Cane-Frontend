@@ -77,6 +77,40 @@ const activityLogs = [
     duration: "15 mins",
     dateTime: "Oct 24, 2023 at 8:00 AM",
     status: "Ongoing"
+  },
+
+  // Emergency example
+  {
+    id: 6,
+    guardian: {
+      name: "Michael Reyes",
+      avatar: "https://i.pravatar.cc/150?u=michael"
+    },
+    device: "SC-136906",
+    vipName: "Ana Reyes",
+    activity: "Emergency Assistance Request",
+    location: "5th Avenue Crossing",
+    destination: "Nearest Safe Point",
+    duration: "2 mins",
+    dateTime: "Today at 3:12 PM",
+    status: "Emergency"
+  },
+
+  // Fall detection example
+  {
+    id: 7,
+    guardian: {
+      name: "Lisa Brown",
+      avatar: "https://i.pravatar.cc/150?u=lisa"
+    },
+    device: "SC-136907",
+    vipName: "George Brown",
+    activity: "Fall Detected",
+    location: "Near Pharmacy Entrance",
+    destination: "Awaiting Assistance",
+    duration: "1 min",
+    dateTime: "Today at 11:08 AM",
+    status: "Fall Detected"
   }
 ];
 
@@ -88,6 +122,10 @@ const getStatusColor = (status) => {
       return "bg-blue-100 text-blue-700";
     case "cancelled":
       return "bg-red-100 text-red-700";
+    case "emergency":
+      return "bg-red-100 text-red-700";
+    case "fall detected":
+      return "bg-orange-100 text-orange-700";
     default:
       return "bg-gray-100 text-gray-700";
   }
