@@ -68,7 +68,8 @@ export default function FeatureCarousel({
   }, []);
 
   const startAutoTimer = useCallback(() => {
-    if (!emblaApi || !autoScroll || isHovering || !isInViewport || n <= 1) return;
+    if (!emblaApi || !autoScroll || isHovering || !isInViewport || n <= 1)
+      return;
     stopAutoTimer();
     autoTimerRef.current = window.setInterval(() => {
       if (!isHovering && isInViewport) {

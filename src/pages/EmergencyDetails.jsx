@@ -217,7 +217,9 @@ const EmergencyDetails = () => {
             icon="ph:warning-diamond-fill"
             className="text-xs sm:text-sm text-amber-300"
           />
-          <span className="hidden sm:inline text-xs">Emergency Mode • Active</span>
+          <span className="hidden sm:inline text-xs">
+            Emergency Mode • Active
+          </span>
           <span className="sm:hidden text-[10px]">Active</span>
         </div>
       </header>

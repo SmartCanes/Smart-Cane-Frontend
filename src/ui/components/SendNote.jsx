@@ -77,7 +77,9 @@ const SendNote = () => {
         <h3 className="text-xl font-semibold text-gray-900 mb-1">Send Note</h3>
         <p className="text-sm text-gray-500 mb-6">
           Compose and send a message to{" "}
-          {selectedDevice?.vip?.firstName ? selectedDevice?.vip?.firstName : "your device"}
+          {selectedDevice?.vip?.firstName
+            ? selectedDevice?.vip?.firstName
+            : "your device"}
         </p>
 
         <div className="mb-4">

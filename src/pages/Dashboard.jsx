@@ -58,7 +58,10 @@ const Dashboard = () => {
 
           <div className="grid xl:grid-cols-[minmax(0,2fr)_300px] gap-4 sm:gap-8 items-start">
             <div className="flex flex-col gap-4 sm:gap-8">
-              <div data-tour="tour-live-map" className="bg-white rounded-2xl shadow-sm overflow-hidden w-full border border-[#F3F4F6] relative">
+              <div
+                data-tour="tour-live-map"
+                className="bg-white rounded-2xl shadow-sm overflow-hidden w-full border border-[#F3F4F6] relative"
+              >
                 <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <h3 className="text-base sm:text-xl font-semibold text-gray-800 font-poppins">
@@ -92,7 +95,10 @@ const Dashboard = () => {
                   <LiveMap />
                 </div>
 
-                <div data-tour="tour-gps-info" className="w-full border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4">
+                <div
+                  data-tour="tour-gps-info"
+                  className="w-full border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4"
+                >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
@@ -134,12 +140,19 @@ const Dashboard = () => {
               </div>
 
               <div className="grid gap-8 lg:grid-cols-2">
-                <div data-tour="tour-guardian-network"><GuardianNetwork /></div>
-                <div data-tour="tour-recent-alerts"><RecentAlerts /></div>
+                <div data-tour="tour-guardian-network">
+                  <GuardianNetwork />
+                </div>
+                <div data-tour="tour-recent-alerts">
+                  <RecentAlerts />
+                </div>
               </div>
             </div>
 
-            <div data-tour="tour-send-note" className="flex flex-col gap-8 w-full">
+            <div
+              data-tour="tour-send-note"
+              className="flex flex-col gap-8 w-full"
+            >
               <SendNote />
             </div>
           </div>

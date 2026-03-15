@@ -396,7 +396,10 @@ const Devices = () => {
     >
       <div className="mx-auto w-full space-y-4 sm:space-y-6">
         {/* Header */}
-        <div data-tour="tour-devices-header" className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8">
+        <div
+          data-tour="tour-devices-header"
+          className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8"
+        >
           <div className="w-full">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
               Manage Devices
@@ -410,7 +413,10 @@ const Devices = () => {
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full">
-            <div data-tour="tour-add-device" className="flex items-center gap-3 w-full justify-end">
+            <div
+              data-tour="tour-add-device"
+              className="flex items-center gap-3 w-full justify-end"
+            >
               <Button
                 onClick={() => setShowScanner(true)}
                 className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center gap-2 justify-center"

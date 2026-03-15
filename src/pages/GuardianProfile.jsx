@@ -595,8 +595,13 @@ export const GuardianProfile = () => {
                           }
                           className="px-3 py-1.5 bg-white border border-[#11285A] text-[#11285A] text-xs font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1.5 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed cursor-pointer"
                         >
-                          <Icon icon="solar:upload-bold" className="w-3.5 h-3.5" />
-                          {isUploadingImage ? "Uploading..." : "Upload New Photo"}
+                          <Icon
+                            icon="solar:upload-bold"
+                            className="w-3.5 h-3.5"
+                          />
+                          {isUploadingImage
+                            ? "Uploading..."
+                            : "Upload New Photo"}
                         </button>
                         {profileImage !== avatarPlaceholder && (
                           <button
@@ -624,7 +629,8 @@ export const GuardianProfile = () => {
                     )}
                     {imageFile && (
                       <p className="text-xs text-gray-500 mt-1">
-                        Selected: {imageFile.name} ({(imageFile.size / 1024 / 1024).toFixed(2)} MB)
+                        Selected: {imageFile.name} (
+                        {(imageFile.size / 1024 / 1024).toFixed(2)} MB)
                       </p>
                     )}
                   </div>

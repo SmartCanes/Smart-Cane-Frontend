@@ -130,7 +130,10 @@ const ActivityReport = () => {
         </div>
 
         {/* Search Bar */}
-        <div data-tour="tour-activity-search" className="bg-white rounded-t-2xl p-4 md:p-6 border-b border-gray-100">
+        <div
+          data-tour="tour-activity-search"
+          className="bg-white rounded-t-2xl p-4 md:p-6 border-b border-gray-100"
+        >
           <div className="relative max-w-xl">
             <Icon
               icon="ph:magnifying-glass"

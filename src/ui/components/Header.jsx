@@ -930,7 +930,10 @@ const Header = () => {
                     </div>
                   </div>
 
-                  <div data-tour="tour-mobile-connection" className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                  <div
+                    data-tour="tour-mobile-connection"
+                    className="flex items-center justify-between p-3 bg-white/5 rounded-xl"
+                  >
                     <span className="text-white font-medium">Connection</span>
                     <div className="flex items-center gap-2">
                       <div

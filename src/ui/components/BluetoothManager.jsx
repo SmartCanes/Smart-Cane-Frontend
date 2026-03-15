@@ -516,7 +516,8 @@ const BluetoothDeviceCard = ({
   const canConnect = (device) => device.paired && !device.connected;
   const canDisconnect = (device) => device.paired && device.connected;
   const canUnpair = (device) => device.paired;
-  const canForget = (device) => !device.connected && !device.paired && device.trusted;
+  const canForget = (device) =>
+    !device.connected && !device.paired && device.trusted;
 
   return (
     <motion.div

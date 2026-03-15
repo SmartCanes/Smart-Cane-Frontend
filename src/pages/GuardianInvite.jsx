@@ -157,7 +157,9 @@ const GuardianInvite = () => {
     const errResponse = err?.response;
     if (!errResponse) {
       setStatus("error");
-      setMessage("Could not reach the server. Please check your connection and try again.");
+      setMessage(
+        "Could not reach the server. Please check your connection and try again."
+      );
       return;
     }
     if ([404, 400].includes(errResponse.status)) setStatus("invalid_token");

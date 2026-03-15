@@ -148,7 +148,11 @@ const WeatherBoard = () => {
         </div>
 
         {/* LOCATION SEARCH BAR */}
-        <div data-tour="tour-weather-search" ref={searchRef} className="relative space-y-2 md:max-w-xl">
+        <div
+          data-tour="tour-weather-search"
+          ref={searchRef}
+          className="relative space-y-2 md:max-w-xl"
+        >
           <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 transition-all">
             <Icon
               icon="carbon:search"
