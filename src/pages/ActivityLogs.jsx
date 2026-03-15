@@ -1,1122 +1,508 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import { useDevicesStore, useRealtimeStore } from "@/stores/useStore";
-import { motion, AnimatePresence } from "framer-motion";
-import { wsApi } from "@/api/ws-api";
-import BluetoothManager from "@/ui/components/BluetoothManager";
+import ActivityActions from "@/ui/components/ActivityActions";
+import DefaultProfile from "@/ui/components/DefaultProfile";
+import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import { useActivityReportsStore } from "@/stores/useStore";
+import FilterDropdown from "@/ui/components/FilterDropdown"; // ← NEW
 
-const fallbackConfig = {
-  FALL_DETECTION: {
-    config: {
-      enabled: true,
-      fallConfirmationDelay: 3000
-    }
-  },
-
-  OBSTACLE_DETECTION: {
-    config: {
-      enabled: true,
-      obstacleDistanceThreshold: 100.0,
-      measurementInterval: 1000
-    }
-  },
-
-  EDGE_DETECTION: {
-    config: {
-      enabled: true,
-      edgeBeepMin: 400
-    }
-  },
-
-  VOICE_ENGINE: {
-    config: {
-      enabled: true,
-      volume: 0.3,
-      speechSpeed: 150
-    }
-  },
-
-  VISUAL_RECOGNITION: {
-    config: {
-      enabled: true,
-      alertType: "COMBINED",
-      recognitionInterval: 3000
-    }
-  },
-
-  GPS_TRACKING: {
-    config: {
-      enabled: true
-    }
-  }
-};
-const DEVICE_COMPONENT_SCHEMA = {
-  FALL_DETECTION: {
-    enabled: true,
-    config: {
-      fallConfirmationDelay: "fallConfirmationDelay"
-    }
-  },
-
-  OBSTACLE_DETECTION: {
-    enabled: true,
-    config: {
-      obstacleDistanceThreshold: "obstacleDistanceThreshold"
-    }
-  },
-
-  EDGE_DETECTION: {
-    enabled: true,
-    config: {
-      edgeBeepMin: "edgeBeepMin"
-    }
-  },
-
-  VOICE_ENGINE: {
-    enabled: true,
-    config: {
-      volume: "volume",
-      speechSpeed: "speechSpeed"
-    }
-  },
-
-  VISUAL_RECOGNITION: {
-    enabled: true,
-    config: {
-      alertType: "alertType",
-      recognitionInterval: "recognitionInterval"
-    }
-  },
-
-  GPS_TRACKING: {
-    enabled: true,
-    config: {}
-  }
+const ACTION_TYPE_MAP = {
+  CREATE: "device",
+  UPDATE: "settings",
+  DELETE: "alert",
+  PAIR: "device",
+  UNPAIR: "device",
+  INVITE: "settings",
+  REMOVE_GUARDIAN: "alert",
+  UPDATE_ROLE: "settings",
+  ACCEPT_INVITE: "login",
+  LOGIN: "login",
+  SET_EMERGENCY: "emergency",
+  UPDATE_RELATIONSHIP: "relationship"
 };
 
-const componentIdMap = {
-  1: "mpuStatus",
-  2: "infraredStatus",
-  3: "ultrasonicStatus",
-  4: "esp32Status",
-  5: "gpsStatus",
-  6: "raspberryPiStatus"
-};
-
-const componentsData = [
+// filter config van
+const ACTION_OPTIONS = [
+  { value: "LOGIN", label: "Login", icon: "ph:sign-in-bold" },
+  { value: "CREATE", label: "Create", icon: "ph:plus-bold" },
+  { value: "UPDATE", label: "Update", icon: "ph:pencil-bold" },
+  { value: "DELETE", label: "Delete", icon: "ph:trash-bold" },
+  { value: "PAIR", label: "Pair", icon: "ph:link-bold" },
+  { value: "UNPAIR", label: "Unpair", icon: "ph:link-break-bold" },
+  { value: "INVITE", label: "Invite", icon: "ph:envelope-bold" },
   {
-    id: 1,
-    name: "Fall Detection",
-    codeName: "FALL_DETECTION",
-    type: "sensor",
-    description: "Detect cane tilt and fall events",
-    icon: "mdi:human-cane",
-    configurable: true,
-    configOptions: {
-      fallConfirmationDelay: [
-        { label: "2000 ms (Fast Alert)", value: 2000 },
-        { label: "3000 ms (Default)", value: 3000 },
-        { label: "5000 ms (Stable Confirmation)", value: 5000 }
-      ]
-
-      // buzzerPattern: [
-      //   "Continuous Alarm",
-      //   "Slow Pulse Alert",
-      //   "Fast Pulse Alert",
-      //   "Voice Alert Only"
-      // ]
-    }
+    value: "REMOVE_GUARDIAN",
+    label: "Remove Guardian",
+    icon: "ph:user-minus-bold"
   },
-  {
-    id: 2,
-    name: "Obstacle Detection",
-    codeName: "OBSTACLE_DETECTION",
-    type: "sensor",
-    description: "Front obstacle distance monitoring",
-    icon: "mdi:radar",
-    configurable: true,
-    configOptions: {
-      obstacleDistanceThreshold: [
-        { label: "50 cm (High Safety)", value: 50 },
-        { label: "100 cm (Default)", value: 100 },
-        { label: "150 cm (Navigation Preview)", value: 150 },
-        { label: "200 cm (Long Detection)", value: 200 }
-      ],
-
-      measurementInterval: [
-        { label: "200 ms (Fast Scan)", value: 200 },
-        { label: "300 ms (Default)", value: 300 },
-        { label: "500 ms (Stable Scan)", value: 500 },
-        { label: "1000 ms (Energy Saving)", value: 1000 }
-      ]
-
-      // buzzerResponsePattern: [
-      //   "Continuous Warning",
-      //   "Pulsing Warning",
-      //   "Voice Guidance Only"
-      // ]
-    }
-  },
-  {
-    id: 3,
-    name: "Ground & Stair Safety",
-    codeName: "EDGE_DETECTION",
-    type: "sensor",
-    description: "Detect stairs, holes, and dangerous ground elevation changes",
-    icon: "mdi:stairs",
-    configurable: true,
-    configOptions: {
-      stairSafetyDistance: [
-        {
-          label: "High Sensitivity (Maximum Safety)",
-          value: 400,
-          description: "Early warning — detect edge very far"
-        },
-        {
-          label: "Medium Sensitivity (Recommended Default)",
-          value: 500,
-          description: "Balanced walking safety"
-        },
-        {
-          label: "Low Sensitivity (Normal Walking)",
-          value: 708,
-          description: "Warning activates closer to edge"
-        },
-        {
-          label: "Critical Sensitivity (Drop-off Alarm Mode)",
-          value: 709,
-          description: "Only trigger on potential hole or cliff"
-        }
-      ]
-      // buzzerResponsePattern: [
-      //   "Continuous Alert",
-      //   "Pulsing Alert",
-      //   "Adaptive Distance Tone",
-      //   "Voice Guidance Only"
-      // ]
-    }
-  },
-  {
-    id: 4,
-    name: "Visual Recognition",
-    codeName: "VISUAL_RECOGNITION",
-    type: "sensor",
-    description: "Real-time object recognition",
-    icon: "mdi:eye",
-    configurable: true,
-    configOptions: {
-      recognitionInterval: [
-        { label: "3s (Fast)", value: 3000 },
-        { label: "5s (Default)", value: 5000 },
-        { label: "8s (Slow)", value: 8000 }
-      ]
-    }
-  },
-  {
-    id: 5,
-    name: "GPS Module",
-    codeName: "GPS_MODULE",
-    type: "sensor",
-    description: "Global positioning system",
-    icon: "mdi:satellite-variant",
-    configurable: false
-    // configOptions: {
-    //   updateRate: ["1 Hz", "5 Hz", "10 Hz"],
-    //   powerMode: ["Max Performance", "Eco", "Backup"],
-    //   measurementRate: ["1 per second", "2 per second", "5 per second"]
-    // }
-  },
-  {
-    id: 6,
-    name: "ESP32-WROOM-32D",
-    codeName: "ESP32_WROOM_32D",
-    type: "controller",
-    description: "Dual-core WiFi & Bluetooth MCU",
-    icon: "mdi:chip",
-    configurable: false
-  },
-  {
-    id: 7,
-    name: "Raspberry Pi 4",
-    codeName: "RASPBERRY_PI_4",
-    type: "controller",
-    description: "Single-board computer",
-    icon: "mdi:raspberry-pi",
-    configurable: false
-  }
+  { value: "UPDATE_ROLE", label: "Update Role", icon: "ph:shield-bold" },
+  { value: "ACCEPT_INVITE", label: "Accept Invite", icon: "ph:check-bold" },
+  { value: "SET_EMERGENCY", label: "Set Emergency", icon: "ph:warning-bold" },
+  { value: "UPDATE_RELATIONSHIP", label: "Relationship", icon: "ph:users-bold" }
 ];
 
-const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
-  const config = deviceConfig?.config ?? {};
+const ActivityLogs = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const speechSpeed = config.speechSpeed ?? 150;
-  const volume = config.volume ?? 0.3;
-  const uiVolume = Math.round((volume || 0) * 100);
-  const isMuted = uiVolume === 0;
+  // filter to van
+  const [selectedActions, setSelectedActions] = useState([]);
 
-  // useEffect(() => {
-  //   if (!isOnline) return;
-
-  //   if (debounceRef.current) {
-  //     clearTimeout(debounceRef.current);
-  //   }
-
-  //   debounceRef.current = setTimeout(() => {
-  //     onVoiceConfigChange?.({
-  //       volume,
-  //       speechSpeed,
-  //       speakingVoice: selectedVoice,
-  //       muted: isMuted
-  //     });
-  //   }, 600);
-
-  //   return () => {
-  //     if (debounceRef.current) {
-  //       clearTimeout(debounceRef.current);
-  //     }
-  //   };
-  // }, [volume, speechSpeed, selectedVoice, isMuted]);
-
-  const handleVolumeChange = (e) => {
-    const uiVolume = parseInt(e.target.value);
-
-    onVoiceConfigChange?.({
-      ...deviceConfig,
-      config: {
-        ...deviceConfig?.config,
-        volume: uiVolume / 100
-      }
-    });
-  };
-
-  const handleSpeedChange = (e) => {
-    const newSpeed = parseInt(e.target.value);
-
-    onVoiceConfigChange?.({
-      ...deviceConfig,
-      config: {
-        ...deviceConfig?.config,
-        speechSpeed: newSpeed
-      }
-    });
-  };
-
-  const toggleMute = () => {
-    const uiVolume = Math.round((volume || 0) * 100);
-
-    const isCurrentlyMuted = uiVolume === 0;
-
-    const newVolume = isCurrentlyMuted ? 75 : 0;
-
-    onVoiceConfigChange?.({
-      ...deviceConfig,
-      config: {
-        ...deviceConfig?.config,
-        volume: newVolume / 100,
-        muted: !isCurrentlyMuted
-      }
-    });
-  };
-
-  const getVolumeIcon = () => {
-    if (isMuted || volume === 0) return "mdi:volume-off";
-    if (volume < 30) return "mdi:volume-low";
-    if (volume < 70) return "mdi:volume-medium";
-    return "mdi:volume-high";
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border-2 p-3 sm:p-5 md:p-6 ${
-        isOnline
-          ? "border-primary-200 bg-gradient-to-br from-primary-50/50 to-white"
-          : "border-gray-200 bg-gray-50"
-      }`}
-    >
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <div className="flex items-center gap-3">
-          <div
-            className={`p-2 sm:p-3 rounded-xl ${
-              isOnline ? "bg-primary-100" : "bg-gray-200"
-            }`}
-          >
-            <Icon
-              icon="mdi:voice"
-              className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                isOnline ? "text-white" : "text-gray-500"
-              }`}
-            />
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-              Voice Control
-            </h3>
-            <p className="text-xs sm:text-sm text-gray-500">
-              Adjust speech and audio settings
-            </p>
-          </div>
-        </div>
-        <div
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            isOnline
-              ? "bg-green-100 text-green-700"
-              : "bg-gray-100 text-gray-500"
-          }`}
-        >
-          {isOnline ? "Active" : "Offline"}
-        </div>
-      </div>
-
-      {/* Volume Control */}
-      <div className="mb-5 sm:mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
-            <Icon icon="mdi:volume-high" className="w-4 h-4 text-gray-500" />
-            Volume Level
-          </label>
-          <span className="text-xs sm:text-sm font-semibold text-primary-600 bg-primary-50 px-2 py-1 rounded">
-            {uiVolume}%
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={toggleMute}
-            className={`p-2 rounded-lg transition-colors ${
-              isMuted
-                ? "bg-red-100 text-red-600"
-                : "hover:bg-gray-100 text-gray-600"
-            }`}
-            aria-label={isMuted ? "Unmute" : "Mute"}
-          >
-            <Icon icon={getVolumeIcon()} className="w-5 h-5" />
-          </button>
-          <div className="flex-1 relative">
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={uiVolume}
-              onChange={handleVolumeChange}
-              disabled={!isOnline}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                background: `linear-gradient(to right, #2563eb 0%, #2563eb ${uiVolume}%, #e5e7eb ${uiVolume}%, #e5e7eb 100%)`
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Speech Speed Control */}
-      <div className="mb-5 sm:mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
-            <Icon icon="mdi:speedometer" className="w-4 h-4 text-gray-500" />
-            Speech Speed
-          </label>
-          <span className="text-xs sm:text-sm font-semibold text-primary-600 bg-primary-50 px-2 py-1 rounded">
-            {speechSpeed} WPM
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Icon icon="mdi:turtle" className="w-5 h-5 text-gray-400" />
-          <input
-            type="range"
-            min="80"
-            max="350"
-            value={speechSpeed}
-            onChange={handleSpeedChange}
-            disabled={!isOnline}
-            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(to right, #2563eb 0%, #2563eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb 100%)`
-            }}
-          />
-          <Icon icon="mdi:rabbit" className="w-5 h-5 text-gray-400" />
-        </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-1 px-2">
-          <span>Slow</span>
-          <span>Normal</span>
-          <span>Fast</span>
-        </div>
-      </div>
-
-      {/* Voice Type Selection */}
-    </motion.div>
-  );
-};
-
-const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
-  const [config, setConfig] = useState({});
-  const [customRange, setCustomRange] = useState({ min: 2, max: 400 });
+  const { history, isLoading, isRefreshing, error, fetchHistory } =
+    useActivityReportsStore();
 
   useEffect(() => {
-    if (!isOpen || !component) return;
+    fetchHistory();
+  }, [fetchHistory]);
 
-    const schemaOptions = component?.configOptions || {};
-    const storedConfig = deviceConfig.config || {};
-
-    const hydrated = {};
-
-    Object.entries(schemaOptions).forEach(([key, options]) => {
-      const middlewareValue = storedConfig?.[key];
-
-      const match = options.find(
-        (o) => Number(o.value) === Number(middlewareValue)
-      );
-
-      hydrated[key] = match ? Number(match.value) : Number(options?.[0]?.value);
-    });
-
-    setConfig(hydrated);
-  }, [isOpen, component, deviceConfig]);
-
-  const handleSave = async () => {
-    if (!component) return;
-
-    await onSave({
-      [component.codeName]: {
-        ...deviceConfig?.[component.codeName],
-        config: {
-          ...deviceConfig?.[component.codeName]?.config,
-          ...config
-        }
-      }
-    });
-
-    onClose?.();
+  // kasama to van
+  const handleActionChange = (value) => {
+    setSelectedActions((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+    setCurrentPage(1);
   };
 
-  if (!isOpen || !component) return null;
+  const handleClearAll = () => {
+    setSelectedActions([]);
+    setCurrentPage(1);
+  };
 
-  const renderCustomInput = () => {
-    if (config.range === "Custom") {
-      return (
-        <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm font-medium text-gray-700">
-            Custom Range Configuration
-          </p>
+  const activeFilterCount = selectedActions.length;
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">
-                Minimum Distance (cm)
-              </label>
-              <input
-                type="number"
-                value={customRange.min}
-                onChange={(e) =>
-                  setCustomRange((prev) => ({
-                    ...prev,
-                    min: Math.max(2, parseInt(e.target.value) || 2)
-                  }))
-                }
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                min="2"
-                max="400"
-              />
-            </div>
+  // filtering van
+  const filteredActivities = history.filter((activity) => {
+    const matchesSearch =
+      (activity.guardianName || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (activity.description || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (activity.action || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">
-                Maximum Distance (cm)
-              </label>
-              <input
-                type="number"
-                value={customRange.max}
-                onChange={(e) =>
-                  setCustomRange((prev) => ({
-                    ...prev,
-                    max: Math.min(400, parseInt(e.target.value) || 400)
-                  }))
-                }
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                min={customRange.min + 1}
-                max="400"
-              />
-            </div>
-          </div>
+    const matchesAction =
+      selectedActions.length === 0 || selectedActions.includes(activity.action);
 
-          <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-            <p className="text-xs text-blue-700">
-              <strong>
-                {customRange.min}cm - {customRange.max}cm
-              </strong>
+    return matchesSearch && matchesAction;
+  });
+
+  const totalItems = filteredActivities.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const paginatedActivities = filteredActivities.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
+
+  const getVisiblePages = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, "...", totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(
+          1,
+          "...",
+          totalPages - 4,
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages
+        );
+      } else {
+        pages.push(
+          1,
+          "...",
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          "...",
+          totalPages
+        );
+      }
+    }
+    return pages;
+  };
+
+  const renderGuardianAvatar = (activity, size = "w-10 h-10") => {
+    const avatar =
+      activity.guardianProfileImage ||
+      activity.guardianAvatar ||
+      activity.profileImage ||
+      activity.avatar;
+    const guardianName = activity.guardianName || "Guardian";
+    return (
+      <div
+        className={`${size} rounded-full overflow-hidden shrink-0 bg-gray-100`}
+      >
+        {avatar ? (
+          <img
+            loading="lazy"
+            src={resolveProfileImageSrc(avatar)}
+            alt={guardianName}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <DefaultProfile
+            bgColor="bg-primary-100"
+            userInitial={guardianName.charAt(0)}
+          />
+        )}
+      </div>
+    );
+  };
+
+  if (error) {
+    return (
+      <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
+        <div className="w-full font-poppins max-w-5xl mx-auto space-y-6">
+          <div className="mb-4 md:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+              Activity Logs
+            </h2>
+            <p className="text-gray-500 text-xs md:text-sm">
+              Monitor and track all guardian activities in your system
             </p>
           </div>
-        </div>
-      );
-    }
-
-    return null;
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary-100 rounded-lg">
-                <Icon
-                  icon={component.icon}
-                  className="w-5 h-5 text-primary-600"
-                />
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold">
-                  Configure {component.name}
-                </h3>
-                <p className="text-xs text-gray-500">{component.description}</p>
-              </div>
-            </div>
-
+          <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center justify-center gap-3">
+            <Icon
+              icon="ph:warning-circle-bold"
+              className="w-10 h-10 text-red-400"
+            />
+            <p className="text-gray-700 font-medium">{error}</p>
             <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+              onClick={() => window.location.reload()}
+              className="text-sm text-blue-600 hover:underline"
             >
-              <Icon icon="mdi:close" className="w-5 h-5 text-gray-500" />
+              Try again
             </button>
           </div>
+        </div>
+      </main>
+    );
+  }
 
-          <div className="space-y-4 sm:space-y-6">
-            {Object.entries(component.configOptions || {}).map(
-              ([key, options]) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 capitalize">
-                    {key.replace(/([A-Z])/g, " $1").trim()}
-                  </label>
+  return (
+    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
+      <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
+        <div data-tour="tour-activity-header" className="mb-4 md:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
+            Activity Logs
+          </h2>
+          <p className="text-gray-500 text-xs md:text-sm">
+            Monitor and track all guardian activities in your system
+          </p>
+        </div>
 
-                  <div className="relative">
-                    <select
-                      value={config[key] ?? ""}
-                      onChange={(e) =>
-                        setConfig((prev) => ({
-                          ...prev,
-                          [key]: Number(e.target.value)
-                        }))
-                      }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg appearance-none bg-white pr-10"
+        {/* search and filter van */}
+        <div
+          data-tour="tour-activity-search"
+          className="bg-white rounded-t-2xl p-4 md:p-6 border-b border-gray-100"
+        >
+          <div className="flex items-center gap-3">
+            {/* search */}
+            <div className="relative flex-1 max-w-xl">
+              <Icon
+                icon="ph:magnifying-glass"
+                className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg md:text-xl"
+              />
+              <input
+                type="text"
+                placeholder="Search by name, action, or description..."
+                className="w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-gray-600 placeholder-gray-400"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+
+            {/* filter btn van */}
+            <FilterDropdown
+              actionOptions={ACTION_OPTIONS}
+              selectedActions={selectedActions}
+              onActionChange={handleActionChange}
+              onClearAll={handleClearAll}
+              activeCount={activeFilterCount}
+            />
+          </div>
+
+          {/* active filter van */}
+          {selectedActions.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {selectedActions.map((val) => {
+                const opt = ACTION_OPTIONS.find((o) => o.value === val);
+                return (
+                  <span
+                    key={val}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#11285A]/10 text-[#11285A] text-xs font-medium"
+                  >
+                    {opt?.icon && <Icon icon={opt.icon} className="text-sm" />}
+                    {opt?.label || val}
+                    <button
+                      onClick={() => handleActionChange(val)}
+                      className="ml-0.5 hover:text-red-500 cursor-pointer"
                     >
-                      {options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )
-            )}
-
-            {renderCustomInput()}
-
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-700">
-                Configuration Note
-              </p>
-              <p className="text-xs text-gray-600 mt-1">
-                Changes will take effect immediately.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-200 p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleSave}
-              className="flex-1 px-4 py-3 bg-primary-100 text-white rounded-lg hover:bg-primary-700"
-            >
-              Save Changes
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ComponentCard = ({
-  component,
-  deviceConfig,
-  onTogglePower,
-  onConfigure
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  return (
-    <motion.div
-      layout
-      className={`rounded-xl border-2 overflow-hidden transition-all duration-300 hover:shadow-lg ${
-        component.isOnline
-          ? "border-primary-200 bg-gradient-to-br from-primary-50 to-white"
-          : "border-gray-200 bg-white"
-      }`}
-    >
-      <div className="p-3 sm:p-4 w-full">
-        <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
-          <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
-            <div
-              className={`p-2 rounded-lg flex-shrink-0 ${
-                component.isOnline
-                  ? "bg-primary-100 text-primary-600"
-                  : "bg-gray-100 text-gray-400"
-              }`}
-            >
-              <Icon icon={component.icon} className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-tight break-words">
-                {component.name}
-              </h3>
-              <p className="text-xs text-gray-500 leading-relaxed break-words line-clamp-2">
-                {component.description}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 flex-shrink-0 self-start">
-            {component.configurable && (
+                      <Icon icon="ph:x-bold" className="text-[10px]" />
+                    </button>
+                  </span>
+                );
+              })}
               <button
-                onClick={() => onConfigure(component)}
-                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label={`Configure ${component.name}`}
+                onClick={handleClearAll}
+                className="text-xs text-red-500 hover:underline font-medium cursor-pointer"
               >
-                <Icon
-                  icon="mdi:cog"
-                  className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500"
-                />
+                Clear all
+              </button>
+            </div>
+          )}
+        </div>
+
+        {!isLoading && totalItems === 0 ? (
+          <div className="bg-white rounded-b-2xl shadow-sm p-8 md:p-16 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+              <Icon icon="ph:files" className="text-3xl text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-[#11285A] mb-1">
+              {searchTerm || selectedActions.length > 0
+                ? "Nothing to see here"
+                : "No activity yet"}
+            </h3>
+            <p className="text-sm text-gray-500 max-w-xs mx-auto">
+              {searchTerm || selectedActions.length > 0
+                ? "Try adjusting your search or filters."
+                : "Actions you perform will appear here."}
+            </p>
+            {(searchTerm || selectedActions.length > 0) && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  handleClearAll();
+                }}
+                className="mt-6 text-sm font-medium text-blue-600 hover:underline"
+              >
+                Clear filters
               </button>
             )}
-
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label={isExpanded ? "Collapse details" : "Expand details"}
-            >
-              <Icon
-                icon="mdi:chevron-down"
-                className={`w-4 h-4 sm:w-5 sm:h-5 text-gray-500 transition-transform ${
-                  isExpanded ? "rotate-180" : ""
-                }`}
-              />
-            </button>
           </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 sm:mb-4">
-          <div className="flex items-center gap-2 min-w-0">
-            <div
-              className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                component.isOnline ? "bg-green-500 animate-pulse" : "bg-red-500"
-              }`}
-            />
-            <div className="flex flex-wrap items-center gap-2 min-w-0">
-              <span
-                className={`text-xs sm:text-sm font-medium ${
-                  component.isOnline ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {component.isOnline ? "Online" : "Offline"}
-              </span>
-              <span className="hidden sm:inline text-gray-400">•</span>
-              <span className="text-xs text-gray-500 break-words">
-                {component.isOnline ? "Connected" : "Disconnected"}
-              </span>
+        ) : (
+          <>
+            {/* Desktop Table */}
+            <div className="hidden md:block bg-white rounded-b-2xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px]">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[22%]">
+                        Guardian
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[18%]">
+                        Action
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[40%]">
+                        Description
+                      </th>
+                      <th className="text-right py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[20%]">
+                        Date Created
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {isLoading
+                      ? Array.from({ length: itemsPerPage }).map((_, index) => (
+                          <tr key={`sk-${index}`} className="animate-pulse">
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                                <div className="h-4 w-32 bg-gray-200 rounded" />
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="h-7 w-24 bg-gray-200 rounded-full" />
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="space-y-2">
+                                <div className="h-4 w-full bg-gray-200 rounded" />
+                                <div className="h-4 w-4/5 bg-gray-200 rounded" />
+                              </div>
+                            </td>
+                            <td className="py-4 px-6 text-right">
+                              <div className="h-4 w-28 bg-gray-200 rounded ml-auto" />
+                            </td>
+                          </tr>
+                        ))
+                      : paginatedActivities.map((activity, index) => (
+                          <tr
+                            key={activity.historyId ?? index}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-3">
+                                {renderGuardianAvatar(activity, "w-10 h-10")}
+                                <p className="font-semibold text-sm text-gray-900">
+                                  {activity.guardianName || "—"}
+                                </p>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="scale-75 origin-left">
+                                <ActivityActions
+                                  type={
+                                    ACTION_TYPE_MAP[activity.action] ||
+                                    "settings"
+                                  }
+                                />
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <p className="text-sm text-gray-600">
+                                {activity.description || "—"}
+                              </p>
+                            </td>
+                            <td className="py-4 px-6 text-right">
+                              <p className="text-sm text-gray-500 font-medium">
+                                {activity.createdAt
+                                  ? activity.createdAt
+                                      .replace("T", " ")
+                                      .split(".")[0]
+                                  : "—"}
+                              </p>
+                            </td>
+                          </tr>
+                        ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Pagination */}
+              <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+                <p className="text-sm text-gray-500">
+                  Showing{" "}
+                  {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}–
+                  {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
+                  {totalItems.toLocaleString()} activities
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Icon icon="ph:caret-left" />
+                  </button>
+                  {getVisiblePages().map((page, index) =>
+                    typeof page === "number" ? (
+                      <button
+                        key={index}
+                        onClick={() => handlePageChange(page)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg font-medium text-sm transition-colors ${currentPage === page ? "bg-[#11285A] text-white" : "border border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+                      >
+                        {page}
+                      </button>
+                    ) : (
+                      <span key={index} className="text-gray-400 px-1">
+                        ...
+                      </span>
+                    )
+                  )}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Icon icon="ph:caret-right" />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="pt-3 sm:pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-3">
-                  <div className="bg-gray-50 rounded-lg p-3 min-w-0">
-                    <p className="text-xs text-gray-500 mb-1">Component Type</p>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Icon
-                        icon={
-                          component.type === "sensor"
-                            ? "mdi:sensor"
-                            : "mdi:chip"
-                        }
-                        className="w-4 h-4 text-gray-600 flex-shrink-0"
-                      />
-                      <p className="text-sm font-medium capitalize break-words">
-                        {component.type}
-                      </p>
+            {/* Mobile Card View */}
+            <div className="md:hidden bg-white rounded-b-2xl shadow-sm overflow-hidden">
+              <div className="divide-y divide-gray-100">
+                {paginatedActivities.map((activity, index) => (
+                  <div
+                    key={activity.historyId ?? index}
+                    className="p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      {renderGuardianAvatar(activity, "w-11 h-11")}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm text-gray-900 truncate">
+                          {activity.guardianName || "—"}
+                        </p>
+                        <p className="text-xs text-gray-400 font-medium mt-1">
+                          {activity.createdAt
+                            ? activity.createdAt.replace("T", " ").split(".")[0]
+                            : "—"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-3 min-w-0">
-                    <p className="text-xs text-gray-500 mb-1">Component ID</p>
-                    <p className="text-sm font-medium font-mono break-all">
-                      CMP-{component.id.toString().padStart(3, "0")}
+                    <div className="mb-2 inline-block">
+                      <ActivityActions
+                        type={ACTION_TYPE_MAP[activity.action] || "settings"}
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+                      {activity.description || "—"}
                     </p>
                   </div>
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t border-gray-100 bg-gray-50">
+                <p className="text-xs text-gray-500">
+                  Showing{" "}
+                  {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}–
+                  {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
+                  {totalItems.toLocaleString()}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Icon icon="ph:caret-left" />
+                  </button>
+                  {getVisiblePages().map((page, index) =>
+                    typeof page === "number" ? (
+                      <button
+                        key={index}
+                        onClick={() => handlePageChange(page)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg font-medium text-xs transition-colors ${currentPage === page ? "bg-[#11285A] text-white" : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"}`}
+                      >
+                        {page}
+                      </button>
+                    ) : (
+                      <span
+                        key={index}
+                        className="text-gray-400 text-xs px-0.5"
+                      >
+                        ...
+                      </span>
+                    )
+                  )}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Icon icon="ph:caret-right" />
+                  </button>
                 </div>
-
-                <div className="mt-3 p-3 bg-blue-50 rounded-lg min-w-0">
-                  <div className="flex items-start gap-2">
-                    <Icon
-                      icon="mdi:information"
-                      className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"
-                    />
-                    <p className="text-xs text-blue-700 break-words">
-                      {component.configurable
-                        ? "Click the gear icon to configure sensor parameters and performance settings."
-                        : "This component is currently read-only."}
-                    </p>
-                  </div>
-                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </>
+        )}
       </div>
-    </motion.div>
-  );
-};
-
-const buildFullSnapshot = (globalConfig, deviceId) => {
-  const components = Object.entries(DEVICE_COMPONENT_SCHEMA).map(
-    ([codeName, schema]) => {
-      const sourceComponent = globalConfig?.[codeName] || {};
-
-      const component = {
-        codeName,
-        enabled: sourceComponent?.config?.enabled ?? schema.enabled ?? true,
-        config: {}
-      };
-
-      Object.entries(schema.config).forEach(([_, firmwareKey]) => {
-        const value =
-          sourceComponent?.config?.[firmwareKey] ??
-          globalConfig?.[firmwareKey] ??
-          fallbackConfig?.[codeName]?.config?.[firmwareKey] ??
-          0; // HARDWARE SAFE DEFAULT
-
-        component.config[firmwareKey] = value;
-      });
-
-      return component;
-    }
-  );
-
-  return {
-    deviceId,
-    configVersion: Date.now(),
-    components
-  };
-};
-
-function Advanced() {
-  const [components, setComponents] = useState(componentsData);
-  const [selectedComponent, setSelectedComponent] = useState(null);
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("sensors");
-  const { componentHealth, deviceConfig, setDeviceConfig } = useRealtimeStore();
-  const { selectedDevice } = useDevicesStore();
-
-  useEffect(() => {
-    setComponents((prev) =>
-      prev.map((component) => {
-        const healthKey = componentIdMap[component.id];
-        const isOnline = healthKey
-          ? Boolean(componentHealth?.[healthKey])
-          : false;
-
-        return {
-          ...component,
-          isOnline,
-          lastSeen: new Date().toISOString(),
-          uptime: isOnline ? "100%" : "0%"
-        };
-      })
-    );
-  }, [componentHealth]);
-
-  const handleConfigure = (component) => {
-    setSelectedComponent(component);
-    setIsConfigModalOpen(true);
-  };
-
-  const handleDeviceStateUpdate = async (partialUpdate = {}) => {
-    if (!selectedDevice?.deviceSerialNumber) return;
-
-    console.log("Partial Update:", partialUpdate);
-
-    try {
-      const fullConfig = {
-        ...deviceConfig,
-        ...partialUpdate
-      };
-
-      setDeviceConfig(fullConfig);
-
-      const snapshot = buildFullSnapshot(
-        fullConfig,
-        selectedDevice.deviceSerialNumber
-      );
-
-      console.log("Updating device state with snapshot:", snapshot);
-
-      // await wsApi.updateDeviceState(snapshot);
-    } catch (error) {
-      console.error("Update failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleToggle = (codeName) => {
-    if (!deviceConfig?.[codeName]) return;
-
-    const component = deviceConfig[codeName];
-
-    handleDeviceStateUpdate({
-      [codeName]: {
-        ...component,
-        config: {
-          ...component.config,
-          enabled: !component.config.enabled
-        }
-      }
-    });
-  };
-
-  useEffect(() => {
-    wsApi.emit("requestDeviceConfig");
-  }, []);
-
-  const onlineCount = components.filter((c) => c.isOnline).length;
-  const sensorComponents = components.filter((c) => c.type === "sensor");
-  const controllerComponents = components.filter(
-    (c) => c.type === "controller"
-  );
-
-  const tabs = [
-    {
-      id: "sensors",
-      label: "Sensors & Safety",
-      shortLabel: "Sensors",
-      icon: "mdi:radar",
-      count: sensorComponents.length
-    },
-    {
-      id: "voice",
-      label: "Voice & Audio",
-      shortLabel: "Voice",
-      icon: "mdi:voice",
-      count: null
-    },
-    {
-      id: "bluetooth",
-      label: "Bluetooth",
-      shortLabel: "BT",
-      icon: "mdi:bluetooth",
-      count: null
-    }
-  ];
-
-  return (
-    <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6 overflow-x-hidden">
-      <div className="mx-auto w-full space-y-4 sm:space-y-6 ">
-        <div
-          data-tour="tour-advanced-header"
-          className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8"
-        >
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
-              Component Management
-            </h2>
-            <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
-              Monitor and configure your device in real-time
-            </p>
-          </div>
-
-          {/* Compact stats */}
-          <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-3 shadow-sm border w-full sm:w-auto">
-            <div className="flex-1 text-center px-2">
-              <div className="text-lg font-bold text-primary-600">
-                {onlineCount}
-              </div>
-              <div className="text-xs text-gray-500">Online</div>
-            </div>
-            <div className="h-8 w-px bg-gray-200" />
-            <div className="flex-1 text-center px-2">
-              <div className="text-lg font-bold text-gray-800">
-                {components.length}
-              </div>
-              <div className="text-xs text-gray-500">Total</div>
-            </div>
-            <div className="h-8 w-px bg-gray-200" />
-            <div className="flex-1 text-center px-2">
-              <div className="text-lg font-bold text-yellow-600">
-                {Math.round((onlineCount / components.length) * 100)}%
-              </div>
-              <div className="text-xs text-gray-500">Health</div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Tab Navigation ── */}
-        <div className="flex flex-nowrap gap-1 bg-gray-100 p-1 rounded-xl mb-5">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`min-w-0 flex-1 basis-[calc(50%-0.125rem)] sm:basis-0 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all cursor-pointer ${
-                activeTab === tab.id
-                  ? "bg-white text-primary-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <Icon icon={tab.icon} className="w-4 h-4 flex-shrink-0" />
-
-              <span className="sm:hidden text-center leading-tight">
-                {tab.shortLabel}
-              </span>
-
-              <span className="hidden sm:inline text-center leading-tight">
-                {tab.label}
-              </span>
-
-              {tab.count !== null && (
-                <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full leading-none hidden sm:inline-flex items-center justify-center min-w-[20px] ${
-                    activeTab === tab.id
-                      ? "bg-gray-200 text-gray-500"
-                      : "bg-gray-200 text-gray-500"
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* ── Tab Content ── */}
-        <AnimatePresence mode="wait">
-          {activeTab === "sensors" && (
-            <motion.div
-              key="sensors"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-              className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
-            >
-              {sensorComponents.map((component) => (
-                <ComponentCard
-                  key={component.id}
-                  component={component}
-                  deviceConfig={
-                    deviceConfig?.[component.codeName]?.config || {}
-                  }
-                  onTogglePower={handleToggle}
-                  onConfigure={handleConfigure}
-                />
-              ))}
-            </motion.div>
-          )}
-
-          {activeTab === "hardware" && (
-            <motion.div
-              key="hardware"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            >
-              {controllerComponents.map((component) => (
-                <ComponentCard
-                  key={component.id}
-                  component={component}
-                  deviceConfig={
-                    deviceConfig?.[component.codeName]?.config || {}
-                  }
-                  onTogglePower={handleToggle}
-                  onConfigure={handleConfigure}
-                />
-              ))}
-            </motion.div>
-          )}
-
-          {activeTab === "voice" && (
-            <motion.div
-              key="voice"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-            >
-              <VoiceControlPanel
-                isOnline={onlineCount > 0 || true}
-                deviceConfig={deviceConfig["VOICE_ENGINE"] || {}}
-                onVoiceConfigChange={(config) =>
-                  handleDeviceStateUpdate({
-                    components: {
-                      ...deviceConfig?.components,
-                      VOICE_ENGINE: {
-                        ...deviceConfig?.components?.VOICE_ENGINE,
-                        config: {
-                          volume: config.volume,
-                          speechSpeed: config.speechSpeed
-                        }
-                      }
-                    }
-                  })
-                }
-              />
-            </motion.div>
-          )}
-
-          {activeTab === "bluetooth" && (
-            <motion.div
-              key="bluetooth"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-            >
-              <BluetoothManager embedded />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Configuration Modal */}
-      <ConfigModal
-        component={selectedComponent}
-        deviceConfig={deviceConfig?.[selectedComponent?.codeName] || {}}
-        isOpen={isConfigModalOpen}
-        onClose={() => setIsConfigModalOpen(false)}
-        onSave={handleDeviceStateUpdate}
-      />
     </main>
   );
-}
+};
 
-export default Advanced;
+export default ActivityLogs;

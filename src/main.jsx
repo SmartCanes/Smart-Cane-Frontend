@@ -25,7 +25,7 @@ import Advanced from "./pages/ActivityLogs.jsx";
 import Notifications from "./pages/Notifications";
 import EmergencyDetails from "./pages/EmergencyDetails.jsx";
 import DeviceLogs from "./pages/DeviceLogs";
-import ActivityLogs from "./pages/ActivityReport";
+import ActivityLogs from "./pages/ActivityLogs";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
