@@ -128,7 +128,14 @@ const SendNote = () => {
             className="flex items-center justify-center gap-2 flex-1 px-6 py-3 rounded-xl text-sm font-medium text-white bg-primary-100 hover:bg-primary-200 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Icon icon="solar:plain-bold" className="text-lg rotate-45" />
-            {isSubmitting ? "Sending..." : "Send Note"}
+            {isSubmitting ? (
+              "Sending..."
+            ) : (
+              <>
+                <span className="sm:hidden">Send</span>
+                <span className="hidden sm:inline">Send Note</span>
+              </>
+            )}
           </button>
         </div>
       </div>
