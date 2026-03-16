@@ -702,7 +702,7 @@ const VipProfileModal = ({
                       </p>
                     )}
                   </div>
-                  <div className="flex gap-3 text-sm sm:text-base">
+                  <div className="flex gap-3 text-sm">
                     {!isViewMode && (
                       <>
                         <button

@@ -499,7 +499,7 @@ const Devices = () => {
             })
           }
           closeTimer={null}
-          title="Edit Cane Nickname"
+          title="Edit Nickname"
           modalType="info"
           footer={null}
           isSubmitting={nicknameSubmitting || resetNicknameSubmitting}
@@ -515,7 +515,7 @@ const Devices = () => {
               );
             }}
           >
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium text-gray-700">
                 Cane Nickname *
               </label>
@@ -530,20 +530,20 @@ const Devices = () => {
                     deviceName: e.target.value
                   }))
                 }
-                placeholder="Enter new cane nickname"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                placeholder="Enter nickname"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all h-10 sm:h-12"
                 autoFocus
               />
             </div>
 
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-3 mt-4 text-sm">
               <button
                 onClick={() => {
                   handleEditDeviceName(editDeviceModal.deviceId, null, "reset");
                 }}
                 type="button"
                 disabled={nicknameSubmitting || resetNicknameSubmitting}
-                className={`flex justify-center items-center gap-2 flex-1 px-4 py-2.5 border  font-medium rounded-lg  transition-all ${
+                className={`flex justify-center items-center gap-2 flex-1 px-4 py-2.5 border  font-medium rounded-lg  transition-all  ${
                   resetNicknameSubmitting || nicknameSubmitting
                     ? "border-gray-200 text-gray-400 cursor-not-allowed"
                     : "border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer"
@@ -555,7 +555,14 @@ const Devices = () => {
                     className="w-5 h-5 animate-spin"
                   />
                 )}
-                {resetNicknameSubmitting ? "Resetting..." : "Reset to Default"}
+                {resetNicknameSubmitting ? (
+                  "Resetting..."
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">Reset to Default</span>
+                    <span className="sm:hidden">Reset</span>
+                  </>
+                )}
               </button>
               <button
                 type="submit"
@@ -578,7 +585,14 @@ const Devices = () => {
                     className="w-5 h-5 animate-spin"
                   />
                 )}
-                {nicknameSubmitting ? "Saving..." : "Save Changes"}
+                {nicknameSubmitting ? (
+                  "Saving..."
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">Save Changes</span>
+                    <span className="sm:hidden">Save</span>
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -615,7 +629,7 @@ const Devices = () => {
                 : "Create"
               : isSubmitting
                 ? "Updating..."
-                : "Update VIP"
+                : "Update"
           }
           mode={vipModal.mode}
         />

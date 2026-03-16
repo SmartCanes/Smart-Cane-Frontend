@@ -1432,7 +1432,7 @@ const ManageGuardiansModal = ({
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setInviteModalOpen(false)}
-              className="flex-1 border py-2.5 rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer border-gray-300 hover:bg-gray-200 disabled:border-gray-200 disabled:text-gray-400"
+              className="flex-1 border py-2.5 rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer border-gray-300 hover:bg-gray-200 disabled:border-gray-200 disabled:text-gray-400 text-sm"
               disabled={isSubmitting}
             >
               Cancel
@@ -1440,7 +1440,7 @@ const ManageGuardiansModal = ({
             <button
               onClick={handleSendInvite}
               disabled={isSubmitting || !email}
-              className="flex-1 py-2.5 rounded-lg font-bold text-white cursor-pointer bg-[#2ECC71] hover:bg-green-600 "
+              className="flex-1 py-2.5 rounded-lg font-bold text-white cursor-pointer bg-[#2ECC71] hover:bg-green-600 text-sm"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -1451,7 +1451,10 @@ const ManageGuardiansModal = ({
                   Sending...
                 </span>
               ) : (
-                "Send Invitation"
+                <>
+                  <span className="hidden sm:inline">Send Invitation</span>
+                  <span className="sm:hidden">Send</span>
+                </>
               )}
             </button>
           </div>

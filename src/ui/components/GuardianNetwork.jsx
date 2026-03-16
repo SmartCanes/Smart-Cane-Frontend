@@ -173,7 +173,7 @@ const GuardianNetwork = () => {
                   handleSendInvite();
                 }
               }}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full h-10 sm:h-12 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               placeholder="Enter email address"
               disabled={isSubmitting}
             />
@@ -185,7 +185,7 @@ const GuardianNetwork = () => {
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setInviteModalOpen(false)}
-              className="flex-1 border py-2.5 rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer border-gray-300 hover:bg-gray-200 disabled:border-gray-200 disabled:text-gray-400"
+              className="flex-1 border py-2.5 rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer border-gray-300 hover:bg-gray-200 disabled:border-gray-200 disabled:text-gray-400 text-xs sm:text-sm"
               disabled={isSubmitting}
             >
               Cancel
@@ -196,7 +196,7 @@ const GuardianNetwork = () => {
               className="flex-1 py-2.5 rounded-lg font-bold text-white cursor-pointer bg-[#2ECC71] hover:bg-green-600 "
             >
               {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-2 text-xs sm:text-sm">
                   <Icon
                     icon="ph:circle-notch-bold"
                     className="w-5 h-5 animate-spin"
@@ -204,7 +204,10 @@ const GuardianNetwork = () => {
                   Sending...
                 </span>
               ) : (
-                "Send Invitation"
+                <>
+                  <span className="hidden sm:inline">Send Invitation</span>
+                  <span className="sm:hidden">Send</span>
+                </>
               )}
             </button>
           </div>
