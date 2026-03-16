@@ -581,39 +581,44 @@ const Header = () => {
                 style={{ minWidth: vipRef.current?.offsetWidth }}
               >
                 <div className="py-2 max-h-80 overflow-y-auto">
-                  {devices.map((device) => (
-                    <button
-                      key={device.deviceId}
-                      onClick={() => {
-                        setSelectedDevice(device);
-                        setVipOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition"
-                    >
-                      <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0">
-                        {device?.vip?.vipImageUrl ? (
-                          <img
-                            src={resolveProfileImageSrc(
-                              device?.vip?.vipImageUrl
-                            )}
-                            className="w-full h-full object-cover"
-                            alt="VIP"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
-                            {device?.deviceSerialNumber?.slice(-2)}
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-sm font-medium text-gray-800 truncate">
-                        {device.vip?.firstName && device.vip?.lastName
-                          ? capitalizeWords(
-                              device.vip.firstName + " " + device.vip.lastName
-                            )
-                          : device?.deviceSerialNumber}
-                      </p>
-                    </button>
-                  ))}
+                  {devices.map((device) => {
+                    const isSelected =
+                      selectedDevice?.deviceId === device.deviceId;
+                    return (
+                      <button
+                        key={device.deviceId}
+                        onClick={() => {
+                          setVipOpen(false);
+                          if (isSelected) return;
+                          setSelectedDevice(device);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition cursor-pointer"
+                      >
+                        <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                          {device?.vip?.vipImageUrl ? (
+                            <img
+                              src={resolveProfileImageSrc(
+                                device?.vip?.vipImageUrl
+                              )}
+                              className="w-full h-full object-cover"
+                              alt="VIP"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-500">
+                              {device?.deviceSerialNumber?.slice(-2)}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm font-medium text-gray-800 truncate">
+                          {device.vip?.firstName && device.vip?.lastName
+                            ? capitalizeWords(
+                                device.vip.firstName + " " + device.vip.lastName
+                              )
+                            : device?.deviceSerialNumber}
+                        </p>
+                      </button>
+                    );
+                  })}
                   {devices.length === 0 && (
                     <div className="py-8 text-center text-sm text-gray-400">
                       No VIP available
@@ -768,50 +773,55 @@ const Header = () => {
                       Select Device
                     </div>
                     <div className="space-y-2 max-h-[20vh] overflow-y-auto pr-1">
-                      {devices.map((device) => (
-                        <button
-                          key={device.deviceId}
-                          onClick={() => {
-                            setSelectedDevice(device);
-                            setMobileMenuOpen(false);
-                          }}
-                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
-                            selectedDevice?.deviceId === device.deviceId
-                              ? "bg-white/20"
-                              : "bg-white/10 hover:bg-white/15"
-                          }`}
-                        >
-                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
-                            {device?.vip?.vipImageUrl ? (
-                              <img
-                                src={resolveProfileImageSrc(
-                                  device?.vip?.vipImageUrl
-                                )}
-                                className="w-full h-full object-cover"
-                                alt="VIP"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-500">
-                                {device?.deviceSerialNumber?.slice(-2)}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 text-left">
-                            <p className="text-white font-medium">
-                              {device.vip?.firstName && device.vip?.lastName
-                                ? capitalizeWords(
-                                    device.vip.firstName +
-                                      " " +
-                                      device.vip.lastName
-                                  )
-                                : device?.deviceSerialNumber}
-                            </p>
-                            <p className="text-white/60 text-xs">
-                              {device.deviceSerialNumber}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
+                      {devices.map((device) => {
+                        const isSelected =
+                          selectedDevice?.deviceId === device.deviceId;
+                        return (
+                          <button
+                            key={device.deviceId}
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              if (isSelected) return;
+                              setSelectedDevice(device);
+                            }}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                              selectedDevice?.deviceId === device.deviceId
+                                ? "bg-white/20"
+                                : "bg-white/10 hover:bg-white/15"
+                            }`}
+                          >
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                              {device?.vip?.vipImageUrl ? (
+                                <img
+                                  src={resolveProfileImageSrc(
+                                    device?.vip?.vipImageUrl
+                                  )}
+                                  className="w-full h-full object-cover"
+                                  alt="VIP"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-500">
+                                  {device?.deviceSerialNumber?.slice(-2)}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className="text-white font-medium">
+                                {device.vip?.firstName && device.vip?.lastName
+                                  ? capitalizeWords(
+                                      device.vip.firstName +
+                                        " " +
+                                        device.vip.lastName
+                                    )
+                                  : device?.deviceSerialNumber}
+                              </p>
+                              <p className="text-white/60 text-xs">
+                                {device.deviceSerialNumber}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
                       {devices.length === 0 && (
                         <div className="text-center text-white/60 py-4">
                           No VIP devices
@@ -827,10 +837,12 @@ const Header = () => {
                     <span className="text-white font-medium">Connection</span>
                     <div className="flex items-center gap-2">
                       <div
-                        className={`w-2 h-2 rounded-full ${connectionStatus ? "bg-green-400" : "bg-red-400"}`}
+                        className={`w-2 h-2 rounded-full ${componentHealth.raspberryPiStatus ? "bg-green-400" : "bg-red-400"}`}
                       />
                       <span className="text-white/80 text-sm">
-                        {connectionStatus ? "Connected" : "Disconnected"}
+                        {componentHealth.raspberryPiStatus
+                          ? "Connected"
+                          : "Disconnected"}
                       </span>
                     </div>
                   </div>
