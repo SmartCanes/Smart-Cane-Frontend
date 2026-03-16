@@ -47,11 +47,10 @@ export const useRealtimeStore = create(
   persist(
     (set, get) => ({
       _wsConnected: false,
-      connectionStatus: false,
       _guardianWatchId: null,
       emergency: false,
       fall: false,
-      canePosition: null,
+      lastKnownCanePosition: null,
       guardianPosition: null,
       deviceConfig: {},
       gps: {
@@ -65,8 +64,8 @@ export const useRealtimeStore = create(
       },
       componentHealth: {
         gpsStatus: false,
-        ultrasonicStatus: false,
-        infraredStatus: false,
+        obstacleDetectionStatus: false,
+        edgeDetectionStatus: false,
         accelerometerStatus: false,
         esp32Status: false,
         raspberryPiStatus: false
@@ -83,13 +82,13 @@ export const useRealtimeStore = create(
         wsApi.connect();
 
         let heartbeatTimeout;
+        const toBool = (value) => value === true || value === "true";
 
         const resetHeartbeat = () => {
           if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
           heartbeatTimeout = setTimeout(() => {
-            set({ connectionStatus: false });
-            console.log("WebSocket connection lost (timeout)");
-          }, 12000);
+            get().resetRealtimeState();
+          }, 20000);
         };
 
         wsApi.on("connect", () => {
@@ -102,16 +101,14 @@ export const useRealtimeStore = create(
           }
 
           wsApi.emit("requestGuardianPresence");
+          wsApi.emit("requestStatus");
+          // wsApi.emit("requestDeviceConfig");
         });
 
         wsApi.on("disconnect", () => {
           console.log("WebSocket disconnected");
-          set({ _wsConnected: false, connectionStatus: false });
+          set({ _wsConnected: false });
           clearTimeout(heartbeatTimeout);
-
-          setTimeout(() => {
-            get().connectWs();
-          }, 5000);
         });
 
         wsApi.on("guardianPresence", (data) => {
@@ -130,32 +127,30 @@ export const useRealtimeStore = create(
         });
 
         wsApi.on("status", (data) => {
-          console.log(data);
-          set({
-            connectionStatus: data.status === "online",
-            emergency: data.emergency,
-            fall: data.fall === true || data.fall === "true",
+          set((state) => ({
+            emergency: toBool(data.emergency),
+            fall: toBool(data.fall),
             componentHealth: {
-              gpsStatus: Number(data.gpsStatus) === 2,
-              ultrasonicStatus:
-                data.ultrasonicStatus === true ||
-                data.ultrasonicStatus === "false",
-              infraredStatus:
-                data.infraredStatus === true || data.infraredStatus === "false",
-              mpuStatus: data.mpuStatus === true || data.mpuStatus === "false",
-              esp32Status: data.status === "online"
+              ...state.componentHealth,
+              obstacleDetectionStatus: toBool(data.obstacleDetectionStatus),
+              edgeDetectionStatus: toBool(data.edgeDetectionStatus),
+              accelerometerStatus: toBool(data.accelerometerStatus),
+              esp32Status: data.esp32Status === "online"
             }
-          });
+          }));
           resetHeartbeat();
         });
 
         wsApi.on("piStatus", (data) => {
+          const payload = data?.payload || data;
           set((state) => ({
             componentHealth: {
               ...state.componentHealth,
-              raspberryPiStatus: data.alive === true || data.alive === "false"
+              raspberryPiStatus:
+                payload.alive === true || payload.alive === "true"
             }
           }));
+
           resetHeartbeat();
         });
 
@@ -166,15 +161,21 @@ export const useRealtimeStore = create(
           const lng = payload?.lng;
 
           set((state) => ({
-            canePosition:
-              lat != null && lng != null ? [lat, lng] : state.canePosition,
+            componentHealth: {
+              ...state.componentHealth,
+              gpsStatus: true
+            },
+            lastKnownCanePosition:
+              lat != null && lng != null
+                ? [lat, lng]
+                : state.lastKnownCanePosition,
             gps: {
               status: Number(payload?.status || 0),
               sats: Number(payload?.sats || 0),
-              fix: Boolean(payload?.fix),
+              fix: toBool(payload?.fix),
               hdop:
                 payload?.hdop != null ? Number(payload.hdop).toFixed(2) : null,
-              ready: Boolean(payload?.ready),
+              ready: toBool(payload?.ready),
               lat: lat ?? null,
               lng: lng ?? null
             }
@@ -228,9 +229,33 @@ export const useRealtimeStore = create(
 
       disconnectWs: () => {
         wsApi.disconnect();
-        set({ _wsConnected: false, connectionStatus: false });
+        set({ _wsConnected: false });
       },
-
+      resetRealtimeState: () =>
+        set((state) => ({
+          ...state,
+          emergency: false,
+          fall: false,
+          lastKnownCanePosition: null,
+          deviceConfig: {},
+          gps: {
+            status: 0,
+            sats: 0,
+            fix: false,
+            hdop: null,
+            ready: false,
+            lat: null,
+            lng: null
+          },
+          componentHealth: {
+            gpsStatus: false,
+            obstacleDetectionStatus: false,
+            edgeDetectionStatus: false,
+            accelerometerStatus: false,
+            esp32Status: false,
+            raspberryPiStatus: false
+          }
+        })),
       setDeviceConfig: (config) =>
         set((state) => ({
           deviceConfig: {
@@ -313,10 +338,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                  d.deviceId === updatedDevice.deviceId
-                    ? { ...d, ...updatedDevice }
-                    : d
-                )
+                d.deviceId === updatedDevice.deviceId
+                  ? { ...d, ...updatedDevice }
+                  : d
+              )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -341,11 +366,12 @@ export const useDevicesStore = create(
       setSelectedDevice: (device) => {
         set({ selectedDevice: device });
 
+        useRealtimeStore.getState().resetRealtimeState();
+
         const serial = device?.deviceSerialNumber;
 
         if (serial) {
           wsApi.emit("subscribe", { serial });
-          console.log("Switching to serial:", serial);
 
           wsApi.emit("requestStatus", { serial });
           wsApi.emit("requestDeviceConfig", { serial });
@@ -409,10 +435,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                    g.guardianId === guardian.guardianId
-                      ? { ...g, ...guardian }
-                      : g
-                  )
+                  g.guardianId === guardian.guardianId
+                    ? { ...g, ...guardian }
+                    : g
+                )
                 : [...d.guardians, guardian]
             };
           })
@@ -431,11 +457,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                  ...d,
-                  guardians: d.guardians.filter(
-                    (g) => g.guardianId !== guardianId
-                  )
-                }
+                ...d,
+                guardians: d.guardians.filter(
+                  (g) => g.guardianId !== guardianId
+                )
+              }
               : d
           )
         })),
@@ -705,11 +731,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: true,
-                    trusted: true
-                  }
+                  ...d,
+                  paired: true,
+                  connected: true,
+                  trusted: true
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -738,11 +764,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: true,
-                    trusted: true
-                  }
+                  ...d,
+                  paired: true,
+                  connected: true,
+                  trusted: true
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -771,10 +797,10 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: false
-                  }
+                  ...d,
+                  paired: true,
+                  connected: false
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -957,7 +983,7 @@ export const useSettingsStore = create(
         },
         privacy: {
           location: true,
-          twoFactor: false, //default is fasle van
+          twoFactor: false,
           analytics: false
         },
         demoMode: false

@@ -95,12 +95,11 @@ const DEVICE_COMPONENT_SCHEMA = {
 };
 
 const componentIdMap = {
-  1: "mpuStatus",
-  2: "infraredStatus",
-  3: "ultrasonicStatus",
-  4: "esp32Status",
-  5: "gpsStatus",
-  6: "raspberryPiStatus"
+  1: "accelerometerStatus",
+  2: "obstacleDetectionStatus",
+  3: "edgeDetectionStatus",
+  4: "raspberryPiStatus",
+  5: "gpsStatus"
 };
 
 const componentsData = [
@@ -225,24 +224,6 @@ const componentsData = [
     //   powerMode: ["Max Performance", "Eco", "Backup"],
     //   measurementRate: ["1 per second", "2 per second", "5 per second"]
     // }
-  },
-  {
-    id: 6,
-    name: "ESP32-WROOM-32D",
-    codeName: "ESP32_WROOM_32D",
-    type: "controller",
-    description: "Dual-core WiFi & Bluetooth MCU",
-    icon: "mdi:chip",
-    configurable: false
-  },
-  {
-    id: 7,
-    name: "Raspberry Pi 4",
-    codeName: "RASPBERRY_PI_4",
-    type: "controller",
-    description: "Single-board computer",
-    icon: "mdi:raspberry-pi",
-    configurable: false
   }
 ];
 
@@ -805,20 +786,33 @@ const ComponentCard = ({
           <div className="flex items-center gap-2 min-w-0">
             <div
               className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                component.isOnline ? "bg-green-500 animate-pulse" : "bg-red-500"
+                component.statusColor === "green"
+                  ? "bg-green-500 animate-pulse"
+                  : component.statusColor === "yellow"
+                    ? "bg-yellow-500 animate-pulse"
+                    : "bg-red-500"
               }`}
             />
             <div className="flex flex-wrap items-center gap-2 min-w-0">
               <span
                 className={`text-xs sm:text-sm font-medium ${
-                  component.isOnline ? "text-green-600" : "text-red-600"
+                  component.statusColor === "green"
+                    ? "text-green-600"
+                    : component.statusColor === "yellow"
+                      ? "text-yellow-600"
+                      : "text-red-600"
                 }`}
               >
-                {component.isOnline ? "Online" : "Offline"}
+                {component.statusLabel ||
+                  (component.isOnline ? "Online" : "Offline")}
               </span>
               <span className="hidden sm:inline text-gray-400">•</span>
               <span className="text-xs text-gray-500 break-words">
-                {component.isOnline ? "Connected" : "Disconnected"}
+                {component.statusLabel === "Not Ready"
+                  ? "Waiting for GPS Signal"
+                  : component.isOnline
+                    ? "Connected"
+                    : "Disconnected"}
               </span>
             </div>
           </div>
@@ -919,26 +913,53 @@ function Advanced() {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("sensors");
-  const { componentHealth, deviceConfig, setDeviceConfig } = useRealtimeStore();
+  const { componentHealth, deviceConfig, setDeviceConfig, gps } =
+    useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
 
   useEffect(() => {
     setComponents((prev) =>
       prev.map((component) => {
-        const healthKey = componentIdMap[component.id];
-        const isOnline = healthKey
-          ? Boolean(componentHealth?.[healthKey])
-          : false;
+        let isOnline = false;
+        let statusLabel = "Offline";
+        let statusColor = "red";
+
+        if (
+          component.codeName === "GPS_MODULE" ||
+          component.codeName === "GPS_TRACKING"
+        ) {
+          const gpsAlive = Boolean(gps?.status === 1);
+          if (!gpsAlive) {
+            isOnline = false;
+            statusLabel = "Offline";
+            statusColor = "red";
+          } else if (!gps?.ready || !gps?.fix) {
+            isOnline = false;
+            statusLabel = "Not Ready";
+            statusColor = "yellow";
+          } else {
+            isOnline = true;
+            statusLabel = "Online";
+            statusColor = "green";
+          }
+        } else {
+          const healthKey = componentIdMap[component.id];
+          isOnline = healthKey ? Boolean(componentHealth?.[healthKey]) : false;
+          statusLabel = isOnline ? "Online" : "Offline";
+          statusColor = isOnline ? "green" : "red";
+        }
 
         return {
           ...component,
           isOnline,
+          statusLabel,
+          statusColor,
           lastSeen: new Date().toISOString(),
           uptime: isOnline ? "100%" : "0%"
         };
       })
     );
-  }, [componentHealth]);
+  }, [componentHealth, gps]);
 
   const handleConfigure = (component) => {
     setSelectedComponent(component);
@@ -995,9 +1016,9 @@ function Advanced() {
 
   const onlineCount = components.filter((c) => c.isOnline).length;
   const sensorComponents = components.filter((c) => c.type === "sensor");
-  const controllerComponents = components.filter(
-    (c) => c.type === "controller"
-  );
+  // const controllerComponents = components.filter(
+  //   (c) => c.type === "controller"
+  // );
 
   const tabs = [
     {
@@ -1126,7 +1147,7 @@ function Advanced() {
             </motion.div>
           )}
 
-          {activeTab === "hardware" && (
+          {/* {activeTab === "hardware" && (
             <motion.div
               key="hardware"
               initial={{ opacity: 0, y: 8 }}
@@ -1147,7 +1168,7 @@ function Advanced() {
                 />
               ))}
             </motion.div>
-          )}
+          )} */}
 
           {activeTab === "voice" && (
             <motion.div

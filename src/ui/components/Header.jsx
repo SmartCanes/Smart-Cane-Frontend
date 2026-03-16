@@ -367,7 +367,7 @@ const Header = () => {
   const { devices, clearDevices, selectedDevice, setSelectedDevice } =
     useDevicesStore();
   const { clearAllGuardians } = useGuardiansStore();
-  const { connectionStatus, disconnectWs } = useRealtimeStore();
+  const { disconnectWs, componentHealth } = useRealtimeStore();
   const { clearRoute } = useRouteStore();
   const { clearHistory } = useActivityReportsStore();
 
@@ -628,15 +628,15 @@ const Header = () => {
           <div
             data-tour="tour-connection-status"
             className={`flex items-center gap-1.5 text-white px-3 py-1.5 rounded-full font-poppins text-xs font-medium whitespace-nowrap ${
-              connectionStatus ? "bg-[#55B938]" : "bg-gray-500"
+              componentHealth.raspberryPiStatus ? "bg-[#55B938]" : "bg-gray-500"
             }`}
           >
             <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
             <span className="hidden lg:inline">
-              {connectionStatus ? "Connected" : "Disconnected"}
+              {componentHealth.raspberryPiStatus ? "Connected" : "Disconnected"}
             </span>
             <span className="lg:hidden">
-              {connectionStatus ? "Connected" : "Disconnected"}
+              {componentHealth.raspberryPiStatus ? "Connected" : "Disconnected"}
             </span>
           </div>
 
@@ -651,7 +651,7 @@ const Header = () => {
               <Icon icon="ph:bell" className="w-6 h-6" />
               {/* unread count van */}
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100">
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100 text-xxxs">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}

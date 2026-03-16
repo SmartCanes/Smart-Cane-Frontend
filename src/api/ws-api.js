@@ -49,7 +49,11 @@ class SocketAPI {
 
     this.socket.onclose = (event) => {
       console.log("Disconnected from WebSocket server", event.reason);
-      setTimeout(() => this.connect(), 3000); // reconnect
+
+      const disconnectCb = this.listeners.get("disconnect");
+      if (disconnectCb) disconnectCb(event);
+
+      setTimeout(() => this.connect(), 3000);
     };
 
     this.socket.onerror = (err) => {
