@@ -125,21 +125,29 @@ export default function Modal({
                   <button
                     onClick={onClose}
                     disabled={isSubmitting}
-                    className={`absolute top-4 right-4 text-gray-400  transition ${isSubmitting ? "cursor-default hover:none" : "cursor-pointer hover:text-gray-600"}`}
+                    className={`absolute top-4 right-4 text-gray-400  transition hidden sm:flex ${isSubmitting ? "cursor-default hover:none" : "cursor-pointer hover:text-gray-600"}`}
                   >
                     <Icon icon="ph:x-bold" className="w-6 h-6" />
                   </button>
                 )}
 
                 <div className="flex items-start gap-3 mb-4">
-                  <Icon
-                    icon={icon || type.icon}
-                    className={`w-10 h-10 ${type.bg} p-1 rounded-full text-white`}
-                  />
+                  <div
+                    className={`flex-shrink-0 w-7 h-7 sm:w-10 sm:h-10 max-w-10 max-h-10 rounded-full ${type.bg} flex items-center justify-center`}
+                  >
+                    <Icon
+                      icon={icon || type.icon}
+                      className="w-5 h-5 text-white"
+                    />
+                  </div>
                   <div>
-                    <p className="text-lg font-medium text-gray-900">{title}</p>
+                    <p className="text-base sm:text-lg font-medium text-gray-900">
+                      {title}
+                    </p>
                     {!children && message && (
-                      <p className="text-sm text-gray-700 mt-1">{message}</p>
+                      <p className="text-xs sm:text-sm text-gray-700 mt-1">
+                        {message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -153,7 +161,7 @@ export default function Modal({
                     <button
                       onClick={handleCancel || onClose}
                       disabled={isSubmitting}
-                      className={`flex-1 px-4 py-2 border rounded-lg transition  ${
+                      className={`flex-1 px-4 py-2 border rounded-lg transition text-xs sm:text-base  ${
                         isSubmitting
                           ? "border-gray-200 text-gray-400 cursor-not-allowed"
                           : "border-gray-300 hover:bg-gray-200 cursor-pointer"
@@ -164,7 +172,7 @@ export default function Modal({
 
                     <button
                       onClick={handleConfirm}
-                      className={`flex justify-center items-center gap-2 flex-1 px-4 py-2 rounded-lg font-bold text-white transition-colors  ${type.buttonColor} ${!isSubmitting ? `${type.hover} cursor-pointer` : "cursor-not-allowed opacity-70"}`}
+                      className={`flex justify-center items-center gap-2 flex-1 px-4 py-2 rounded-lg font-bold text-white transition-colors text-xs sm:text-base ${type.buttonColor} ${!isSubmitting ? `${type.hover} cursor-pointer` : "cursor-not-allowed opacity-70"}`}
                       disabled={isSubmitting}
                     >
                       {isSubmitting && (
