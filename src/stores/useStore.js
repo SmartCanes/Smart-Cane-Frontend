@@ -232,30 +232,36 @@ export const useRealtimeStore = create(
         set({ _wsConnected: false });
       },
       resetRealtimeState: () =>
-        set((state) => ({
-          ...state,
-          emergency: false,
-          fall: false,
-          lastKnownCanePosition: null,
-          deviceConfig: {},
-          gps: {
-            status: 0,
-            sats: 0,
-            fix: false,
-            hdop: null,
-            ready: false,
-            lat: null,
-            lng: null
-          },
-          componentHealth: {
-            gpsStatus: false,
-            obstacleDetectionStatus: false,
-            edgeDetectionStatus: false,
-            accelerometerStatus: false,
-            esp32Status: false,
-            raspberryPiStatus: false
-          }
-        })),
+        set((state) => {
+          const isDemoMode = useSettingsStore.getState().settings.demoMode;
+
+          return {
+            ...state,
+            emergency: false,
+            fall: false,
+            lastKnownCanePosition: null,
+            deviceConfig: {},
+            gps: isDemoMode
+              ? state.gps
+              : {
+                  status: 0,
+                  sats: 0,
+                  fix: false,
+                  hdop: null,
+                  ready: false,
+                  lat: null,
+                  lng: null
+                },
+            componentHealth: {
+              gpsStatus: false,
+              obstacleDetectionStatus: false,
+              edgeDetectionStatus: false,
+              accelerometerStatus: false,
+              esp32Status: false,
+              raspberryPiStatus: false
+            }
+          };
+        }),
       setDeviceConfig: (config) =>
         set((state) => ({
           deviceConfig: {
@@ -338,10 +344,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -435,10 +441,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                  g.guardianId === guardian.guardianId
-                    ? { ...g, ...guardian }
-                    : g
-                )
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
                 : [...d.guardians, guardian]
             };
           })
@@ -457,11 +463,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                ...d,
-                guardians: d.guardians.filter(
-                  (g) => g.guardianId !== guardianId
-                )
-              }
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
               : d
           )
         })),
@@ -731,11 +737,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: true,
-                  trusted: true
-                }
+                    ...d,
+                    paired: true,
+                    connected: true,
+                    trusted: true
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -764,11 +770,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: true,
-                  trusted: true
-                }
+                    ...d,
+                    paired: true,
+                    connected: true,
+                    trusted: true
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -797,10 +803,10 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: false
-                }
+                    ...d,
+                    paired: true,
+                    connected: false
+                  }
                 : d
             ),
             isBluetoothProcessing: false,

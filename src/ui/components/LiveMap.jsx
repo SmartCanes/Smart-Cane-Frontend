@@ -147,7 +147,7 @@ const haversine = (a, b) => {
 
 function LiveMap() {
   const { user } = useUserStore();
-  const { canePosition, guardianPosition } = useRealtimeStore();
+  const { guardianPosition, gps } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
   const {
     destinationPos,
@@ -176,6 +176,7 @@ function LiveMap() {
   const routeRequestedRef = useRef(false);
   const routeCoordsRef = useRef([]);
   const activeIndexRef = useRef(0);
+  const canePosition = gps?.lat && gps?.lng ? [gps.lat, gps.lng] : null;
 
   useEffect(() => {
     if (routeCoords?.length) {
