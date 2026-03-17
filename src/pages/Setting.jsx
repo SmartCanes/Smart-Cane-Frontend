@@ -625,8 +625,12 @@ const Setting = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { _guardianWatchId, startGuardianTracking, stopGuardianTracking } =
-    useRealtimeStore();
+  const {
+    _guardianWatchId,
+    startGuardianTracking,
+    stopGuardianTracking,
+    componentHealth
+  } = useRealtimeStore();
 
   const isLocationTrackingEnabled = _guardianWatchId !== null;
 
@@ -751,10 +755,11 @@ const Setting = () => {
               <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
                 <button
                   onClick={() => toggleDemoMode()}
-                  className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
+                  disabled={!componentHealth.raspberryPiStatus}
+                  className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer disabled:bg-gray-100 ${
                     settings.demoMode
                       ? "bg-green-600 text-white hover:bg-green-700"
-                      : "border border-[#11285A] text-[#11285A] hover:bg-blue-50 hover:border-[#0d1f4a]"
+                      : "border border-[#11285A] text-[#11285A] hover:bg-blue-50 hover:border-[#0d1f4a] disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
                   }`}
                 >
                   <Icon

@@ -1196,7 +1196,7 @@ function Advanced() {
               transition={{ duration: 0.15 }}
             >
               <VoiceControlPanel
-                isOnline={onlineCount > 0 || true}
+                isOnline={componentHealth.raspberryPiStatus}
                 deviceConfig={deviceConfig["VOICE_ENGINE"] || {}}
                 onVoiceConfigChange={(config) =>
                   handleDeviceStateUpdate({
