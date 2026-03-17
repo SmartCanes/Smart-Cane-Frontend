@@ -3,12 +3,13 @@ import { Icon } from "@iconify/react";
 import Toast from "./Toast";
 import { validateField } from "@/utils/ValidationHelper";
 import { wsApi } from "@/api/ws-api";
-import { useDevicesStore } from "@/stores/useStore";
+import { useDevicesStore, useRealtimeStore } from "@/stores/useStore";
 
 const SendNote = () => {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { selectedDevice } = useDevicesStore();
+  const { componentHealth } = useRealtimeStore();
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     title: "",
@@ -123,7 +124,9 @@ const SendNote = () => {
             Cancel
           </button>
           <button
-            disabled={isSubmitting || hasErrors()}
+            disabled={
+              !componentHealth.raspberryPiStatus || isSubmitting || hasErrors()
+            }
             onClick={handleSend}
             className="flex items-center justify-center gap-2 flex-1 px-6 py-3 rounded-xl text-sm font-medium text-white bg-primary-100 hover:bg-primary-200 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
