@@ -130,25 +130,32 @@ class SocketAPI {
 
   async updateDeviceState(configPayload) {
     return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        this.off("configSaved");
-        reject(new Error("Config save timeout"));
-      }, 2000);
+      const requestId = crypto.randomUUID();
 
-      this.on("configSaved", (payload) => {
+      const handler = (payload) => {
+        console.log("Received configSaved event with payload:", payload);
+        if (payload?.requestId !== requestId) return;
+
         clearTimeout(timeout);
-        this.off("configSaved");
+        this.off("configSaved", handler);
 
         if (payload?.success) {
           resolve(payload);
         } else {
           reject(new Error(payload?.error || "Config save failed"));
         }
+      };
+
+      const timeout = setTimeout(() => {
+        this.off("configSaved", handler);
+        reject(new Error("Config save timeout"));
+      }, 8000);
+
+      this.on("configSaved", handler);
+      this.emit("updateDeviceConfig", {
+        ...configPayload,
+        requestId
       });
-
-      console.log(configPayload);
-
-      this.emit("updateDeviceState", configPayload);
     });
   }
 }

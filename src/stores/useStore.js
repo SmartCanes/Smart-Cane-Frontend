@@ -78,7 +78,7 @@ export const useRealtimeStore = create(
         wsApi.off("guardianPresence");
         wsApi.off("guardianPresenceSnapshot");
         wsApi.off("piStatus");
-        wsApi.off("deviceConfig");
+        wsApi.off("configSaved");
         wsApi.connect();
 
         let heartbeatTimeout;
@@ -189,14 +189,20 @@ export const useRealtimeStore = create(
           resetHeartbeat();
         });
 
-        wsApi.on("deviceConfig", (data) => {
-          if (!data) return;
+        wsApi.on("configSaved", (data) => {
+          const payload = data?.payload || data;
+          if (!payload) return;
 
-          set((state) => ({
-            deviceConfig: {
-              ...data
-            }
-          }));
+          if (payload.success === false) {
+            console.error("Device rejected config:", payload.error);
+            return;
+          }
+
+          if (payload.config) {
+            set({
+              deviceConfig: payload.config
+            });
+          }
 
           resetHeartbeat();
         });

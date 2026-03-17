@@ -39,17 +39,11 @@ const fallbackConfig = {
   VISUAL_RECOGNITION: {
     config: {
       enabled: true,
-      alertType: "COMBINED",
       recognitionInterval: 3000
-    }
-  },
-
-  GPS_TRACKING: {
-    config: {
-      enabled: true
     }
   }
 };
+
 const DEVICE_COMPONENT_SCHEMA = {
   FALL_DETECTION: {
     enabled: true,
@@ -59,7 +53,7 @@ const DEVICE_COMPONENT_SCHEMA = {
   },
 
   OBSTACLE_DETECTION: {
-    enabled: true,
+    enabled: false,
     config: {
       obstacleDistanceThreshold: "obstacleDistanceThreshold"
     }
@@ -86,11 +80,6 @@ const DEVICE_COMPONENT_SCHEMA = {
       alertType: "alertType",
       recognitionInterval: "recognitionInterval"
     }
-  },
-
-  GPS_TRACKING: {
-    enabled: true,
-    config: {}
   }
 };
 
@@ -449,15 +438,15 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
   useEffect(() => {
     if (!isOpen || !component) return;
 
-    const schemaOptions = component?.configOptions || {};
+    const schemaOptions = component.configOptions || {};
     const storedConfig = deviceConfig?.config || {};
     const hydrated = {};
 
     Object.entries(schemaOptions).forEach(([key, options]) => {
-      const middlewareValue = storedConfig?.[key];
+      const currentValue = storedConfig?.[key];
 
       const match = options.find(
-        (o) => Number(o.value) === Number(middlewareValue)
+        (o) => Number(o.value) === Number(currentValue)
       );
 
       hydrated[key] = match ? Number(match.value) : Number(options?.[0]?.value);
@@ -465,7 +454,7 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
 
     setConfig(hydrated);
     setOpenDropdown(null);
-  }, [isOpen, component, deviceConfig]);
+  }, [isOpen, component?.codeName]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -986,8 +975,6 @@ function Advanced() {
   const handleDeviceStateUpdate = async (partialUpdate = {}) => {
     if (!selectedDevice?.deviceSerialNumber) return;
 
-    console.log("Partial Update:", partialUpdate);
-
     try {
       const fullConfig = {
         ...deviceConfig,
@@ -1001,9 +988,7 @@ function Advanced() {
         selectedDevice.deviceSerialNumber
       );
 
-      console.log("Updating device state with snapshot:", snapshot);
-
-      // await wsApi.updateDeviceState(snapshot);
+      await wsApi.updateDeviceState(snapshot);
     } catch (error) {
       console.error("Update failed:", error);
     } finally {
@@ -1028,8 +1013,12 @@ function Advanced() {
   };
 
   useEffect(() => {
-    wsApi.emit("requestDeviceConfig");
-  }, []);
+    if (!selectedDevice?.deviceSerialNumber) return;
+
+    wsApi.emit("requestDeviceConfig", {
+      deviceId: selectedDevice.deviceSerialNumber
+    });
+  }, [selectedDevice?.deviceSerialNumber]);
 
   const onlineCount = components.filter((c) => c.isOnline).length;
   const sensorComponents = components.filter((c) => c.type === "sensor");
