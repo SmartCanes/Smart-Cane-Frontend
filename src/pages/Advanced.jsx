@@ -451,7 +451,6 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
 
     const schemaOptions = component?.configOptions || {};
     const storedConfig = deviceConfig?.config || {};
-
     const hydrated = {};
 
     Object.entries(schemaOptions).forEach(([key, options]) => {
@@ -469,21 +468,22 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
   }, [isOpen, component, deviceConfig]);
 
   useEffect(() => {
-    if (!openDropdown) return;
+    if (!isOpen) return;
 
-    const handleClickOutside = () => setOpenDropdown(null);
     const handleEscape = (e) => {
-      if (e.key === "Escape") setOpenDropdown(null);
+      if (e.key === "Escape") {
+        if (openDropdown) {
+          setOpenDropdown(null);
+          return;
+        }
+
+        onClose?.();
+      }
     };
 
-    document.addEventListener("click", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [openDropdown]);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, openDropdown, onClose]);
 
   const handleSave = async () => {
     if (!component) return;
@@ -500,8 +500,6 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
 
     onClose?.();
   };
-
-  if (!isOpen || !component) return null;
 
   const renderCustomInput = () => {
     if (config.range === "Custom") {
@@ -522,7 +520,7 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
                 onChange={(e) =>
                   setCustomRange((prev) => ({
                     ...prev,
-                    min: Math.max(2, parseInt(e.target.value) || 2)
+                    min: Math.max(2, parseInt(e.target.value, 10) || 2)
                   }))
                 }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
@@ -541,7 +539,7 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
                 onChange={(e) =>
                   setCustomRange((prev) => ({
                     ...prev,
-                    max: Math.min(400, parseInt(e.target.value) || 400)
+                    max: Math.min(400, parseInt(e.target.value, 10) || 400)
                   }))
                 }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
@@ -566,150 +564,169 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 p-4 overflow-y-auto">
-      <div className="min-h-full flex items-center justify-center py-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-visible flex flex-col">
-          <div className="p-4 sm:p-6 flex-1 overflow-visible min-w-0">
-            <div className="flex items-start justify-between gap-3 mb-4 sm:mb-6 min-w-0">
-              <div className="flex items-start gap-3 min-w-0 flex-1">
-                <div className="p-2 bg-primary-100 rounded-lg flex-shrink-0">
-                  <Icon
-                    icon={component.icon}
-                    className="w-5 h-5 text-primary-600"
-                  />
-                </div>
+    <AnimatePresence mode="wait">
+      {isOpen && component && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <motion.div
+            key="config-modal-overlay"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-visible flex flex-col mx-5"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="p-4 sm:p-6 flex-1 overflow-visible min-w-0">
+                <div className="flex items-start justify-between gap-3 mb-4 sm:mb-6 min-w-0">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="p-2 bg-primary-100 rounded-lg flex-shrink-0">
+                      <Icon
+                        icon={component.icon}
+                        className="w-5 h-5 text-white"
+                      />
+                    </div>
 
-                <div className="min-w-0">
-                  <h3 className="text-lg font-semibold break-words">
-                    Configure {component.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 break-words">
-                    {component.description}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg flex-shrink-0"
-              >
-                <Icon icon="mdi:close" className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-
-            <div className="space-y-4 sm:space-y-6 min-w-0">
-              {Object.entries(component.configOptions || {}).map(
-                ([key, options]) => (
-                  <div key={key} className="min-w-0">
-                    <label className="block text-sm font-medium text-gray-700 mb-2 capitalize break-words">
-                      {key.replace(/([A-Z])/g, " $1").trim()}
-                    </label>
-
-                    <div className="relative min-w-0">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenDropdown((prev) =>
-                            prev === key ? null : key
-                          );
-                        }}
-                        className="relative w-full min-w-0 px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white pr-10 text-left"
-                      >
-                        <span className="block truncate pr-2 text-xs sm:text-sm">
-                          {options.find(
-                            (option) =>
-                              Number(option.value) === Number(config[key])
-                          )?.label || options?.[0]?.label}
-                        </span>
-
-                        <Icon
-                          icon="mdi:chevron-down"
-                          className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-transform ${
-                            openDropdown === key ? "rotate-180" : ""
-                          }`}
-                        />
-                      </button>
-
-                      {openDropdown === key && (
-                        <div
-                          onClick={(e) => e.stopPropagation()}
-                          className="absolute left-0 right-0 top-full mt-2 z-[60] max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
-                        >
-                          {options.map((option) => {
-                            const isSelected =
-                              Number(config[key]) === Number(option.value);
-
-                            return (
-                              <button
-                                key={option.value}
-                                type="button"
-                                onClick={() => {
-                                  setConfig((prev) => ({
-                                    ...prev,
-                                    [key]: Number(option.value)
-                                  }));
-                                  setOpenDropdown(null);
-                                }}
-                                className={`w-full px-3 py-2 text-xs sm:text-sm text-left flex items-start justify-between gap-2 hover:bg-gray-50 ${
-                                  isSelected
-                                    ? "bg-primary-50 text-primary-700 font-medium"
-                                    : "text-gray-700"
-                                }`}
-                              >
-                                <span className="break-words">
-                                  {option.label}
-                                </span>
-
-                                {isSelected && (
-                                  <Icon
-                                    icon="mdi:check"
-                                    className="w-4 h-4 mt-0.5 flex-shrink-0"
-                                  />
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-semibold break-words">
+                        Configure {component.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 break-words">
+                        {component.description}
+                      </p>
                     </div>
                   </div>
-                )
-              )}
 
-              {renderCustomInput()}
+                  <button
+                    onClick={onClose}
+                    className="p-2 rounded-lg flex-shrink-0 cursor-pointer transition hover:bg-gray-100"
+                  >
+                    <Icon icon="mdi:close" className="w-5 h-5 text-gray-500" />
+                  </button>
+                </div>
 
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm font-medium text-gray-700">
-                  Configuration Note
-                </p>
-                <p className="text-xs text-gray-600 mt-1">
-                  Changes will take effect immediately.
-                </p>
+                <div className="space-y-4 sm:space-y-6 min-w-0">
+                  {Object.entries(component.configOptions || {}).map(
+                    ([key, options]) => (
+                      <div key={key} className="min-w-0">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 capitalize break-words">
+                          {key.replace(/([A-Z])/g, " $1").trim()}
+                        </label>
+
+                        <div className="relative min-w-0">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenDropdown((prev) =>
+                                prev === key ? null : key
+                              );
+                            }}
+                            className="relative w-full min-w-0 px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white pr-10 text-left cursor-pointer transition hover:border-gray-400 hover:bg-gray-50"
+                          >
+                            <span className="block truncate pr-2 text-xs sm:text-sm">
+                              {options.find(
+                                (option) =>
+                                  Number(option.value) === Number(config[key])
+                              )?.label || options?.[0]?.label}
+                            </span>
+
+                            <Icon
+                              icon="mdi:chevron-down"
+                              className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-transform ${
+                                openDropdown === key ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+
+                          {openDropdown === key && (
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute left-0 right-0 top-full mt-2 z-[60] max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+                            >
+                              {options.map((option) => {
+                                const isSelected =
+                                  Number(config[key]) === Number(option.value);
+
+                                return (
+                                  <button
+                                    key={option.value}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setConfig((prev) => ({
+                                        ...prev,
+                                        [key]: Number(option.value)
+                                      }));
+                                      setOpenDropdown(null);
+                                    }}
+                                    className={`w-full px-3 py-2 text-xs sm:text-sm text-left flex items-start justify-between gap-2 cursor-pointer transition hover:bg-gray-50 ${
+                                      isSelected
+                                        ? "bg-primary-50 text-primary-700 font-medium"
+                                        : "text-gray-700"
+                                    }`}
+                                  >
+                                    <span className="break-words">
+                                      {option.label}
+                                    </span>
+
+                                    {isSelected && (
+                                      <Icon
+                                        icon="mdi:check"
+                                        className="w-4 h-4 mt-0.5 flex-shrink-0"
+                                      />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  )}
+
+                  {renderCustomInput()}
+
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm font-medium text-gray-700">
+                      Configuration Note
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Changes will take effect immediately.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="border-t border-gray-200 p-4 sm:p-6 text-sm sm:text-base">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={onClose}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg"
-              >
-                Cancel
-              </button>
+              <div className="border-t border-gray-200 p-4 sm:p-6 text-sm sm:text-base">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={onClose}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg cursor-pointer transition hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
 
-              <button
-                onClick={handleSave}
-                className="flex-1 px-4 py-3 bg-primary-100 text-white rounded-lg hover:bg-primary-700"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
+                  <button
+                    onClick={handleSave}
+                    className="flex-1 px-4 py-3 bg-primary-100 hover:bg-[#0d1b3d] text-white rounded-lg cursor-pointer transition hover:bg-primary-700"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };
 
@@ -736,7 +753,7 @@ const ComponentCard = ({
             <div
               className={`p-2 rounded-lg flex-shrink-0 ${
                 component.isOnline
-                  ? "bg-primary-100 text-primary-600"
+                  ? "bg-primary-100 text-white"
                   : "bg-gray-100 text-gray-400"
               }`}
             >
@@ -757,7 +774,7 @@ const ComponentCard = ({
             {component.configurable && (
               <button
                 onClick={() => onConfigure(component)}
-                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
                 aria-label={`Configure ${component.name}`}
               >
                 <Icon
@@ -769,7 +786,7 @@ const ComponentCard = ({
 
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
               aria-label={isExpanded ? "Collapse details" : "Expand details"}
             >
               <Icon
