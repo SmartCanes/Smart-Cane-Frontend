@@ -5,32 +5,116 @@ import DefaultProfile from "@/ui/components/DefaultProfile";
 import FilterDropdown from "@/ui/components/FilterDropdown"; // ← NEW
 
 const activityLogs = [
-  { id: 1, vipName: "Althea De Vera", activity: "Walk to Park", location: "Home (123 Main St)", destination: "Central Park", duration: "45 mins", dateTime: "Today at 2:45 PM", date: new Date(), status: "Completed" },
-  { id: 2, vipName: "Sarah Chua", activity: "Grocery Shopping", location: "Home", destination: "Whole Foods", duration: "1 hr 15 mins", dateTime: "Today at 10:30 AM", date: new Date(), status: "Completed" },
-  { id: 3, vipName: "Isabel Garcia", activity: "Daily Walk", location: "Home", destination: "Neighborhood Loop", duration: "20 mins", dateTime: "Yesterday at 4:00 PM", date: (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d; })(), status: "Completed" },
-  { id: 4, vipName: "Daniel Flores", activity: "Doctor Appointment", location: "Clinic", destination: "Home", duration: "30 mins", dateTime: "Yesterday at 1:15 PM", date: (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d; })(), status: "Completed" },
-  { id: 5, vipName: "Jose Reyes", activity: "Morning Walk", location: "Home", destination: "Local Cafe", duration: "15 mins", dateTime: "Oct 24, 2023 at 8:00 AM", date: new Date("2023-10-24"), status: "Ongoing" },
-  { id: 6, vipName: "Rafael Mendoza", activity: "Emergency Assistance Request", location: "5th Avenue Crossing", destination: "Nearest Safe Point", duration: "2 mins", dateTime: "Today at 3:12 PM", date: new Date(), status: "Emergency" },
-  { id: 7, vipName: "Gabriel Reyes", activity: "Fall Detected", location: "Near Pharmacy Entrance", destination: "Awaiting Assistance", duration: "1 min", dateTime: "Today at 11:08 AM", date: new Date(), status: "Fall Detected" },
+  {
+    id: 1,
+    vipName: "Althea De Vera",
+    activity: "Walk to Park",
+    location: "Home (123 Main St)",
+    destination: "Central Park",
+    duration: "45 mins",
+    dateTime: "Today at 2:45 PM",
+    date: new Date(),
+    status: "Completed"
+  },
+  {
+    id: 2,
+    vipName: "Sarah Chua",
+    activity: "Grocery Shopping",
+    location: "Home",
+    destination: "Whole Foods",
+    duration: "1 hr 15 mins",
+    dateTime: "Today at 10:30 AM",
+    date: new Date(),
+    status: "Completed"
+  },
+  {
+    id: 3,
+    vipName: "Isabel Garcia",
+    activity: "Daily Walk",
+    location: "Home",
+    destination: "Neighborhood Loop",
+    duration: "20 mins",
+    dateTime: "Yesterday at 4:00 PM",
+    date: (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d;
+    })(),
+    status: "Completed"
+  },
+  {
+    id: 4,
+    vipName: "Daniel Flores",
+    activity: "Doctor Appointment",
+    location: "Clinic",
+    destination: "Home",
+    duration: "30 mins",
+    dateTime: "Yesterday at 1:15 PM",
+    date: (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d;
+    })(),
+    status: "Completed"
+  },
+  {
+    id: 5,
+    vipName: "Jose Reyes",
+    activity: "Morning Walk",
+    location: "Home",
+    destination: "Local Cafe",
+    duration: "15 mins",
+    dateTime: "Oct 24, 2023 at 8:00 AM",
+    date: new Date("2023-10-24"),
+    status: "Ongoing"
+  },
+  {
+    id: 6,
+    vipName: "Rafael Mendoza",
+    activity: "Emergency Assistance Request",
+    location: "5th Avenue Crossing",
+    destination: "Nearest Safe Point",
+    duration: "2 mins",
+    dateTime: "Today at 3:12 PM",
+    date: new Date(),
+    status: "Emergency"
+  },
+  {
+    id: 7,
+    vipName: "Gabriel Reyes",
+    activity: "Fall Detected",
+    location: "Near Pharmacy Entrance",
+    destination: "Awaiting Assistance",
+    duration: "1 min",
+    dateTime: "Today at 11:08 AM",
+    date: new Date(),
+    status: "Fall Detected"
+  }
 ];
 
 // filter config to van
 const STATUS_OPTIONS = [
-  { value: "Completed",    label: "Completed",    dotColor: "bg-green-500" },
-  { value: "Ongoing",      label: "Ongoing",      dotColor: "bg-blue-500" },
-  { value: "Emergency",    label: "Emergency",    dotColor: "bg-red-500" },
-  { value: "Fall Detected",label: "Fall Detected",dotColor: "bg-orange-500" },
-  { value: "Cancelled",    label: "Cancelled",    dotColor: "bg-gray-400" },
+  { value: "Completed", label: "Completed", dotColor: "bg-green-500" },
+  { value: "Ongoing", label: "Ongoing", dotColor: "bg-blue-500" },
+  { value: "Emergency", label: "Emergency", dotColor: "bg-red-500" },
+  { value: "Fall Detected", label: "Fall Detected", dotColor: "bg-orange-500" },
+  { value: "Cancelled", label: "Cancelled", dotColor: "bg-gray-400" }
 ];
 
 const getStatusColor = (status) => {
   switch (status.toLowerCase()) {
-    case "completed":    return "bg-green-100 text-green-700";
-    case "ongoing":      return "bg-blue-100 text-blue-700";
-    case "cancelled":    return "bg-red-100 text-red-700";
-    case "emergency":    return "bg-red-100 text-red-700";
-    case "fall detected":return "bg-orange-100 text-orange-700";
-    default:             return "bg-gray-100 text-gray-700";
+    case "completed":
+      return "bg-green-100 text-green-700";
+    case "ongoing":
+      return "bg-blue-100 text-blue-700";
+    case "cancelled":
+      return "bg-red-100 text-red-700";
+    case "emergency":
+      return "bg-red-100 text-red-700";
+    case "fall detected":
+      return "bg-orange-100 text-orange-700";
+    default:
+      return "bg-gray-100 text-gray-700";
   }
 };
 
@@ -78,7 +162,9 @@ const DeviceLogs = () => {
       log.vipName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.activity.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (log.device || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (log.guardian?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+      (log.guardian?.name || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       selectedStatuses.length === 0 || selectedStatuses.includes(log.status);
@@ -87,8 +173,10 @@ const DeviceLogs = () => {
       if (!startDate) return true;
       const logDate = log.date instanceof Date ? log.date : new Date(log.date);
       const end = endDate || startDate;
-      const dayStart = new Date(startDate); dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(end); dayEnd.setHours(23, 59, 59, 999);
+      const dayStart = new Date(startDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(end);
+      dayEnd.setHours(23, 59, 59, 999);
       return logDate >= dayStart && logDate <= dayEnd;
     })();
 
@@ -110,22 +198,47 @@ const DeviceLogs = () => {
       if (currentPage <= 4) {
         pages.push(1, 2, 3, 4, 5, "...", totalPages);
       } else if (currentPage >= totalPages - 3) {
-        pages.push(1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(
+          1,
+          "...",
+          totalPages - 4,
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages
+        );
       } else {
-        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+        pages.push(
+          1,
+          "...",
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          "...",
+          totalPages
+        );
       }
     }
     return pages;
   };
 
-  const fmt = (d) => d?.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const fmt = (d) =>
+    d?.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
 
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
       <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
         <div className="mb-4 md:mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">Device Logs</h2>
-          <p className="text-gray-500 text-xs md:text-sm">Monitor and track detailed VIP movement and activity history.</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
+            Device Logs
+          </h2>
+          <p className="text-gray-500 text-xs md:text-sm">
+            Monitor and track detailed VIP movement and activity history.
+          </p>
         </div>
 
         {/* search and filter to van */}
@@ -133,13 +246,19 @@ const DeviceLogs = () => {
           <div className="flex items-center gap-3">
             {/* search */}
             <div className="relative flex-1 max-w-xl">
-              <Icon icon="ph:magnifying-glass" className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg md:text-xl" />
+              <Icon
+                icon="ph:magnifying-glass"
+                className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg md:text-xl"
+              />
               <input
                 type="text"
                 placeholder="Search by guardian, VIP, activity, or device..."
                 className="w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-gray-600 placeholder-gray-400"
                 value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
 
@@ -163,10 +282,18 @@ const DeviceLogs = () => {
               {selectedStatuses.map((val) => {
                 const opt = STATUS_OPTIONS.find((o) => o.value === val);
                 return (
-                  <span key={val} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#11285A]/10 text-[#11285A] text-xs font-medium">
-                    <span className={`w-1.5 h-1.5 rounded-full ${opt?.dotColor}`} />
+                  <span
+                    key={val}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#11285A]/10 text-[#11285A] text-xs font-medium"
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${opt?.dotColor}`}
+                    />
                     {opt?.label || val}
-                    <button onClick={() => handleStatusChange(val)} className="ml-0.5 hover:text-red-500 cursor-pointer">
+                    <button
+                      onClick={() => handleStatusChange(val)}
+                      className="ml-0.5 hover:text-red-500 cursor-pointer"
+                    >
                       <Icon icon="ph:x-bold" className="text-[10px]" />
                     </button>
                   </span>
@@ -175,13 +302,25 @@ const DeviceLogs = () => {
               {startDate && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#11285A]/10 text-[#11285A] text-xs font-medium">
                   <Icon icon="ph:calendar" className="text-sm" />
-                  {fmt(startDate)}{endDate && endDate.toDateString() !== startDate.toDateString() ? ` → ${fmt(endDate)}` : ""}
-                  <button onClick={() => handleDateChange({ startDate: null, endDate: null })} className="ml-0.5 hover:text-red-500 cursor-pointer">
+                  {fmt(startDate)}
+                  {endDate &&
+                  endDate.toDateString() !== startDate.toDateString()
+                    ? ` → ${fmt(endDate)}`
+                    : ""}
+                  <button
+                    onClick={() =>
+                      handleDateChange({ startDate: null, endDate: null })
+                    }
+                    className="ml-0.5 hover:text-red-500 cursor-pointer"
+                  >
                     <Icon icon="ph:x-bold" className="text-[10px]" />
                   </button>
                 </span>
               )}
-              <button onClick={handleClearAll} className="text-xs text-red-500 hover:underline font-medium cursor-pointer">
+              <button
+                onClick={handleClearAll}
+                className="text-xs text-red-500 hover:underline font-medium cursor-pointer"
+              >
                 Clear all
               </button>
             </div>
@@ -193,13 +332,21 @@ const DeviceLogs = () => {
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
               <Icon icon="ph:files" className="text-3xl text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-[#11285A] mb-1">Nothing to see here</h3>
+            <h3 className="text-lg font-semibold text-[#11285A] mb-1">
+              Nothing to see here
+            </h3>
             <p className="text-sm text-gray-500 max-w-xs mx-auto">
               {searchTerm || activeFilterCount > 0
                 ? "Try adjusting your search or filters."
                 : `We couldn't find any activities matching "${searchTerm}".`}
             </p>
-            <button onClick={() => { setSearchTerm(""); handleClearAll(); }} className="mt-6 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline">
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                handleClearAll();
+              }}
+              className="mt-6 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
+            >
               Clear filters
             </button>
           </div>
@@ -211,48 +358,100 @@ const DeviceLogs = () => {
                 <table className="w-full min-w-[1000px]">
                   <thead>
                     <tr className="border-b border-gray-100">
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">VIP</th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">VIP Name</th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Activity</th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Locations</th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date & Time</th>
-                      <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        VIP
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        VIP Name
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Activity
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Locations
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Date & Time
+                      </th>
+                      <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {filteredLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                      <tr
+                        key={log.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
                         <td className="py-4 px-6">
                           <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
                             {log.avatar ? (
-                              <img loading="lazy" src={resolveProfileImageSrc(log.avatar)} alt={log.vipName} className="w-full h-full object-cover bg-gray-200" />
+                              <img
+                                loading="lazy"
+                                src={resolveProfileImageSrc(log.avatar)}
+                                alt={log.vipName}
+                                className="w-full h-full object-cover bg-gray-200"
+                              />
                             ) : (
-                              <DefaultProfile bgColor="bg-primary-100" userInitial={log.vipName?.charAt(0)} />
+                              <DefaultProfile
+                                bgColor="bg-primary-100"
+                                userInitial={log.vipName?.charAt(0)}
+                              />
                             )}
                           </div>
                         </td>
-                        <td className="py-4 px-6"><p className="text-sm font-medium text-gray-800 whitespace-nowrap">{log.vipName}</p></td>
-                        <td className="py-4 px-6"><p className="text-sm text-gray-700 font-medium">{log.activity}</p></td>
+                        <td className="py-4 px-6">
+                          <p className="text-sm font-medium text-gray-800 whitespace-nowrap">
+                            {log.vipName}
+                          </p>
+                        </td>
+                        <td className="py-4 px-6">
+                          <p className="text-sm text-gray-700 font-medium">
+                            {log.activity}
+                          </p>
+                        </td>
                         <td className="py-4 px-6">
                           <div className="flex flex-col gap-1 text-xs">
                             <div className="flex items-center gap-1.5 text-gray-600 truncate max-w-[200px]">
-                              <Icon icon="ph:map-pin-line" className="text-blue-500 shrink-0" />
-                              <span className="truncate" title={log.location}>{log.location}</span>
+                              <Icon
+                                icon="ph:map-pin-line"
+                                className="text-blue-500 shrink-0"
+                              />
+                              <span className="truncate" title={log.location}>
+                                {log.location}
+                              </span>
                             </div>
                             <div className="flex items-center gap-1.5 text-gray-600 truncate max-w-[200px]">
-                              <Icon icon="ph:flag-checkered" className="text-green-500 shrink-0" />
-                              <span className="truncate" title={log.destination}>{log.destination}</span>
+                              <Icon
+                                icon="ph:flag-checkered"
+                                className="text-green-500 shrink-0"
+                              />
+                              <span
+                                className="truncate"
+                                title={log.destination}
+                              >
+                                {log.destination}
+                              </span>
                             </div>
                           </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex flex-col">
-                            <p className="text-sm text-gray-800 whitespace-nowrap">{log.dateTime}</p>
-                            <p className="text-xs text-gray-500 font-medium">{log.duration}</p>
+                            <p className="text-sm text-gray-800 whitespace-nowrap">
+                              {log.dateTime}
+                            </p>
+                            <p className="text-xs text-gray-500 font-medium">
+                              {log.duration}
+                            </p>
                           </div>
                         </td>
                         <td className="py-4 px-6 text-center">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(log.status)}`}>{log.status}</span>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(log.status)}`}
+                          >
+                            {log.status}
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -265,22 +464,41 @@ const DeviceLogs = () => {
             <div className="lg:hidden bg-white rounded-b-2xl shadow-sm overflow-hidden">
               <div className="divide-y divide-gray-100">
                 {filteredLogs.map((log) => (
-                  <div key={log.id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <div
+                    key={log.id}
+                    className="p-4 hover:bg-gray-50 transition-colors"
+                  >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
                           {log?.avatar ? (
-                            <img loading="lazy" src={resolveProfileImageSrc(log.avatar)} alt={log.vipName} className="w-full h-full object-cover bg-gray-200" />
+                            <img
+                              loading="lazy"
+                              src={resolveProfileImageSrc(log.avatar)}
+                              alt={log.vipName}
+                              className="w-full h-full object-cover bg-gray-200"
+                            />
                           ) : (
-                            <DefaultProfile bgColor="bg-primary-100" userInitial={log.vipName?.charAt(0)} />
+                            <DefaultProfile
+                              bgColor="bg-primary-100"
+                              userInitial={log.vipName?.charAt(0)}
+                            />
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-gray-900 truncate">{log.vipName}</p>
-                          <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] font-medium text-purple-700 bg-purple-100 rounded-lg">{log.device || "No Device"}</span>
+                          <p className="font-bold text-gray-900 truncate">
+                            {log.vipName}
+                          </p>
+                          <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] font-medium text-purple-700 bg-purple-100 rounded-lg">
+                            {log.device || "No Device"}
+                          </span>
                         </div>
                       </div>
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${getStatusColor(log.status)}`}>{log.status}</span>
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${getStatusColor(log.status)}`}
+                      >
+                        {log.status}
+                      </span>
                     </div>
                     <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4">
                       <div className="flex items-center gap-2 mb-2 text-[#11285A] font-semibold text-sm">
@@ -294,8 +512,12 @@ const DeviceLogs = () => {
                             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-gray-500 block text-[10px] uppercase font-semibold">Origin</span>
-                            <span className="text-gray-700 truncate block">{log.location}</span>
+                            <span className="text-gray-500 block text-[10px] uppercase font-semibold">
+                              Origin
+                            </span>
+                            <span className="text-gray-700 truncate block">
+                              {log.location}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-start gap-2 text-xs">
@@ -303,15 +525,23 @@ const DeviceLogs = () => {
                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-gray-500 block text-[10px] uppercase font-semibold">Destination</span>
-                            <span className="text-gray-700 truncate block">{log.destination}</span>
+                            <span className="text-gray-500 block text-[10px] uppercase font-semibold">
+                              Destination
+                            </span>
+                            <span className="text-gray-700 truncate block">
+                              {log.destination}
+                            </span>
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                      <p className="text-xs text-gray-800 font-medium">{log.dateTime}</p>
-                      <p className="text-[10px] text-gray-500 inline-flex items-center gap-1"><Icon icon="ph:clock" /> {log.duration}</p>
+                      <p className="text-xs text-gray-800 font-medium">
+                        {log.dateTime}
+                      </p>
+                      <p className="text-[10px] text-gray-500 inline-flex items-center gap-1">
+                        <Icon icon="ph:clock" /> {log.duration}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -321,18 +551,44 @@ const DeviceLogs = () => {
             {/* Pagination */}
             <div className="bg-white px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-100 rounded-b-2xl">
               <p className="text-xs sm:text-sm text-gray-500">
-                Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems.toLocaleString()}
+                Showing{" "}
+                {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}-
+                {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
+                {totalItems.toLocaleString()}
               </p>
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"><Icon icon="ph:caret-left" /></button>
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Icon icon="ph:caret-left" />
+                </button>
                 {getVisiblePages().map((page, index) =>
                   typeof page === "number" ? (
-                    <button key={index} onClick={() => handlePageChange(page)} className={`w-8 h-8 flex items-center justify-center rounded-lg font-medium text-xs sm:text-sm transition-colors ${currentPage === page ? "bg-[#11285A] text-white" : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"}`}>{page}</button>
+                    <button
+                      key={index}
+                      onClick={() => handlePageChange(page)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg font-medium text-xs sm:text-sm transition-colors ${currentPage === page ? "bg-[#11285A] text-white" : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"}`}
+                    >
+                      {page}
+                    </button>
                   ) : (
-                    <span key={index} className="text-gray-400 text-xs sm:text-sm px-0.5 sm:px-1">...</span>
+                    <span
+                      key={index}
+                      className="text-gray-400 text-xs sm:text-sm px-0.5 sm:px-1"
+                    >
+                      ...
+                    </span>
                   )
                 )}
-                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"><Icon icon="ph:caret-right" /></button>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Icon icon="ph:caret-right" />
+                </button>
               </div>
             </div>
           </>

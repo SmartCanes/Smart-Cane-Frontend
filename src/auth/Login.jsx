@@ -17,7 +17,10 @@ const Login = () => {
   const { isAnimationDone } = useUIStore();
   const { settings } = useSettingsStore();
 
-  const [credentials, setCredentials] = useState({ identifier: "", password: "" });
+  const [credentials, setCredentials] = useState({
+    identifier: "",
+    password: ""
+  });
   const [guardianId, setGuardianId] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -83,9 +86,11 @@ const Login = () => {
     }
 
     const newErrors = {};
-    if (!credentials.identifier.trim()) newErrors.identifier = "Email or Username is required";
+    if (!credentials.identifier.trim())
+      newErrors.identifier = "Email or Username is required";
     if (!credentials.password) newErrors.password = "Password is required";
-    if (shouldShowCaptcha && !captchaValue) newErrors.captcha = "Please complete the CAPTCHA";
+    if (shouldShowCaptcha && !captchaValue)
+      newErrors.captcha = "Please complete the CAPTCHA";
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -192,10 +197,15 @@ const Login = () => {
 
   const handleOtpPaste = (e) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
     if (!pasted) return;
     const newOtp = [...otp];
-    pasted.split("").forEach((char, i) => { newOtp[i] = char; });
+    pasted.split("").forEach((char, i) => {
+      newOtp[i] = char;
+    });
     setOtp(newOtp);
     setOtpError("");
     const nextIndex = Math.min(pasted.length, 5);
@@ -268,7 +278,10 @@ const Login = () => {
   useEffect(() => {
     if (!modalConfig.isOpen || !modalConfig.autoRedirect) return;
     if (redirectSeconds === null) return;
-    if (redirectSeconds === 0) { handleLogin(); return; }
+    if (redirectSeconds === 0) {
+      handleLogin();
+      return;
+    }
     const timer = setTimeout(() => setRedirectSeconds((s) => s - 1), 1000);
     return () => clearTimeout(timer);
   }, [modalConfig.isOpen, modalConfig.autoRedirect, redirectSeconds]);
@@ -316,7 +329,9 @@ const Login = () => {
         {!showScanner && (
           <motion.div
             initial={{ opacity: 0, y: 18 }}
-            animate={isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
+            animate={
+              isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }
+            }
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             className="flex-1 flex flex-col gap-6 sm:gap-7 justify-start sm:justify-center items-center pt-4 sm:pt-8 pb-6 sm:pb-8 px-4 sm:px-6 transform-gpu will-change-transform"
           >
@@ -327,13 +342,21 @@ const Login = () => {
               <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
                 Ready to go? Log in and jump straight into your dashboard.
               </p>
-              <p className="sm:hidden text-[#1C253C] text-base">Login to your account</p>
+              <p className="sm:hidden text-[#1C253C] text-base">
+                Login to your account
+              </p>
             </div>
 
             <motion.form
               initial={{ opacity: 0, y: 16 }}
-              animate={isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
+              animate={
+                isAnimationDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }
+              }
+              transition={{
+                duration: 0.4,
+                ease: [0.22, 1, 0.36, 1],
+                delay: 0.05
+              }}
               className="w-full max-w-md sm:max-w-none lg:max-w-lg transform-gpu will-change-transform"
               onSubmit={handleSubmit}
               noValidate
@@ -387,18 +410,23 @@ const Login = () => {
                 {shouldShowCaptcha && (
                   <div className="captcha-container">
                     {captchaLoading && (
-                      <p className="text-center text-gray-500 mb-2">Loading CAPTCHA...</p>
+                      <p className="text-center text-gray-500 mb-2">
+                        Loading CAPTCHA...
+                      </p>
                     )}
                     <ReCAPTCHA
                       sitekey={import.meta.env.VITE_CAPTCHA_KEY}
                       onChange={(value) => {
                         setCaptchaValue(value);
-                        if (errors.captcha) setErrors((prev) => ({ ...prev, captcha: "" }));
+                        if (errors.captcha)
+                          setErrors((prev) => ({ ...prev, captcha: "" }));
                       }}
                       asyncScriptOnLoad={() => setCaptchaLoading(false)}
                     />
                     {errors.captcha && (
-                      <p className="font-poppins text-[#CE4B34] text-sm mt-2">{errors.captcha}</p>
+                      <p className="font-poppins text-[#CE4B34] text-sm mt-2">
+                        {errors.captcha}
+                      </p>
                     )}
                   </div>
                 )}
@@ -415,7 +443,10 @@ const Login = () => {
 
             <p className="text-center text-base sm:text-[18px]">
               Didn't have an account?{" "}
-              <Link to="/register" className="font-poppins text-blue-500 hover:underline text-base sm:text-[18px]">
+              <Link
+                to="/register"
+                className="font-poppins text-blue-500 hover:underline text-base sm:text-[18px]"
+              >
                 Sign Up
               </Link>
             </p>
@@ -429,7 +460,8 @@ const Login = () => {
                 Scan your iCane Device
               </h1>
               <p className="text-[#1C253C] text-sm sm:text-base text-center">
-                Point your camera at the QR code on your iCane device to pair it automatically.
+                Point your camera at the QR code on your iCane device to pair it
+                automatically.
               </p>
             </div>
             <ScannerCamera onSuccess={handleOnScan} guardianId={guardianId} />
@@ -457,8 +489,8 @@ const Login = () => {
               </h2>
               <p className="font-poppins text-[#1C253C] text-sm">
                 Enter the{" "}
-                <span className="font-bold">6-digit verification code</span>{" "}
-                we sent to your email address.
+                <span className="font-bold">6-digit verification code</span> we
+                sent to your email address.
               </p>
               <p className="text-sm text-gray-500">{twoFAEmail}</p>
             </div>
@@ -483,7 +515,9 @@ const Login = () => {
 
             {/* OTP error */}
             {otpError && (
-              <p className="text-center text-red-500 text-sm mb-3">{otpError}</p>
+              <p className="text-center text-red-500 text-sm mb-3">
+                {otpError}
+              </p>
             )}
 
             {/* Resend */}
@@ -504,8 +538,8 @@ const Login = () => {
                 {isSendingOtp
                   ? "Sending..."
                   : countdown > 0
-                  ? `Resend in ${countdown}s`
-                  : "Resend Verification Code"}
+                    ? `Resend in ${countdown}s`
+                    : "Resend Verification Code"}
               </button>
             </div>
 
@@ -552,7 +586,9 @@ const Login = () => {
               <p className="text-sm text-gray-700 mt-1">
                 You can now continue to dashboard and start using your account.
               </p>
-              <p className="text-sm opacity-70">Redirecting in {redirectSeconds}s…</p>
+              <p className="text-sm opacity-70">
+                Redirecting in {redirectSeconds}s…
+              </p>
             </div>
           ) : (
             modalConfig.message

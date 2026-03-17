@@ -1,14 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 
-// Tiny calendar 
+// Tiny calendar
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const MONTHS = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December"
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
 ];
 
-const CalendarMonth = ({ year, month, startDate, endDate, hoverDate, onDayClick, onDayHover }) => {
+const CalendarMonth = ({
+  year,
+  month,
+  startDate,
+  endDate,
+  hoverDate,
+  onDayClick,
+  onDayHover
+}) => {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const cells = [];
@@ -16,8 +34,10 @@ const CalendarMonth = ({ year, month, startDate, endDate, hoverDate, onDayClick,
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
 
-  const isStart = (d) => d && startDate && d.toDateString() === startDate.toDateString();
-  const isEnd = (d) => d && endDate && d.toDateString() === endDate.toDateString();
+  const isStart = (d) =>
+    d && startDate && d.toDateString() === startDate.toDateString();
+  const isEnd = (d) =>
+    d && endDate && d.toDateString() === endDate.toDateString();
   const inRange = (d) => {
     if (!d || !startDate) return false;
     const end = endDate || hoverDate;
@@ -33,7 +53,12 @@ const CalendarMonth = ({ year, month, startDate, endDate, hoverDate, onDayClick,
       </p>
       <div className="grid grid-cols-7 mb-1">
         {DAYS.map((d) => (
-          <div key={d} className="text-center text-[10px] font-semibold text-gray-400 py-1">{d}</div>
+          <div
+            key={d}
+            className="text-center text-[10px] font-semibold text-gray-400 py-1"
+          >
+            {d}
+          </div>
         ))}
       </div>
       <div className="grid grid-cols-7">
@@ -41,7 +66,8 @@ const CalendarMonth = ({ year, month, startDate, endDate, hoverDate, onDayClick,
           const start = isStart(date);
           const end = isEnd(date);
           const range = inRange(date);
-          const today = date && date.toDateString() === new Date().toDateString();
+          const today =
+            date && date.toDateString() === new Date().toDateString();
           const future = date && date > new Date();
 
           return (
@@ -72,7 +98,7 @@ const CalendarMonth = ({ year, month, startDate, endDate, hoverDate, onDayClick,
   );
 };
 
-// Main FilterDropdown 
+// Main FilterDropdown
 const FilterDropdown = ({
   // Action filter props
   actionOptions,
@@ -91,24 +117,58 @@ const FilterDropdown = ({
   onDateChange, // ({ startDate, endDate }) => void
 
   onClearAll,
-  activeCount,
+  activeCount
 }) => {
   const [open, setOpen] = useState(false);
-  const [calView, setCalView] = useState({ year: new Date().getFullYear(), month: new Date().getMonth() });
+  const [calView, setCalView] = useState({
+    year: new Date().getFullYear(),
+    month: new Date().getMonth()
+  });
   const [hoverDate, setHoverDate] = useState(null);
   const [pickingEnd, setPickingEnd] = useState(false);
   const ref = useRef(null);
 
   const DATE_PRESETS = [
-    { label: "Today", fn: () => { const d = new Date(); return { s: d, e: d }; } },
-    { label: "Yesterday", fn: () => { const d = new Date(); d.setDate(d.getDate() - 1); return { s: d, e: d }; } },
-    { label: "Last 7 days", fn: () => { const e = new Date(); const s = new Date(); s.setDate(s.getDate() - 6); return { s, e }; } },
-    { label: "Last 30 days", fn: () => { const e = new Date(); const s = new Date(); s.setDate(s.getDate() - 29); return { s, e }; } },
+    {
+      label: "Today",
+      fn: () => {
+        const d = new Date();
+        return { s: d, e: d };
+      }
+    },
+    {
+      label: "Yesterday",
+      fn: () => {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return { s: d, e: d };
+      }
+    },
+    {
+      label: "Last 7 days",
+      fn: () => {
+        const e = new Date();
+        const s = new Date();
+        s.setDate(s.getDate() - 6);
+        return { s, e };
+      }
+    },
+    {
+      label: "Last 30 days",
+      fn: () => {
+        const e = new Date();
+        const s = new Date();
+        s.setDate(s.getDate() - 29);
+        return { s, e };
+      }
+    }
   ];
 
   // Close on outside click
   useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
@@ -131,22 +191,34 @@ const FilterDropdown = ({
     setHoverDate(null);
   };
 
-  const prevMonth = () => setCalView((v) => {
-    if (v.month === 0) return { year: v.year - 1, month: 11 };
-    return { ...v, month: v.month - 1 };
-  });
+  const prevMonth = () =>
+    setCalView((v) => {
+      if (v.month === 0) return { year: v.year - 1, month: 11 };
+      return { ...v, month: v.month - 1 };
+    });
 
-  const nextMonth = () => setCalView((v) => {
-    if (v.month === 11) return { year: v.year + 1, month: 0 };
-    return { ...v, month: v.month + 1 };
-  });
+  const nextMonth = () =>
+    setCalView((v) => {
+      if (v.month === 11) return { year: v.year + 1, month: 0 };
+      return { ...v, month: v.month + 1 };
+    });
 
-  const fmt = (d) => d ? d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+  const fmt = (d) =>
+    d
+      ? d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        })
+      : "";
 
   const isPresetActive = (preset) => {
     if (!startDate || !endDate) return false;
     const { s, e } = preset.fn();
-    return startDate.toDateString() === s.toDateString() && endDate.toDateString() === e.toDateString();
+    return (
+      startDate.toDateString() === s.toDateString() &&
+      endDate.toDateString() === e.toDateString()
+    );
   };
 
   return (
@@ -155,16 +227,19 @@ const FilterDropdown = ({
       <button
         onClick={() => setOpen((v) => !v)}
         className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all cursor-pointer
-          ${open || activeCount > 0
-            ? "border-[#11285A] bg-[#11285A] text-white shadow-sm"
-            : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+          ${
+            open || activeCount > 0
+              ? "border-[#11285A] bg-[#11285A] text-white shadow-sm"
+              : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
           }`}
       >
         <Icon icon="ph:funnel-bold" className="text-base shrink-0" />
         <span className="hidden sm:inline">Filter</span>
         {activeCount > 0 && (
-          <span className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold
-            ${open || activeCount > 0 ? "bg-white text-[#11285A]" : "bg-[#11285A] text-white"}`}>
+          <span
+            className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold
+            ${open || activeCount > 0 ? "bg-white text-[#11285A]" : "bg-[#11285A] text-white"}`}
+          >
             {activeCount}
           </span>
         )}
@@ -178,7 +253,9 @@ const FilterDropdown = ({
             <span className="text-sm font-bold text-[#11285A]">Filters</span>
             {activeCount > 0 && (
               <button
-                onClick={() => { onClearAll(); }}
+                onClick={() => {
+                  onClearAll();
+                }}
                 className="text-xs text-red-500 hover:text-red-600 font-medium hover:underline cursor-pointer"
               >
                 Clear all
@@ -187,7 +264,6 @@ const FilterDropdown = ({
           </div>
 
           <div className="p-4 space-y-5 max-h-[70vh] overflow-y-auto">
-
             {/* Action type filter */}
             {actionOptions && (
               <div>
@@ -202,12 +278,15 @@ const FilterDropdown = ({
                         key={opt.value}
                         onClick={() => onActionChange(opt.value)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer
-                          ${active
-                            ? "bg-[#11285A] text-white border-[#11285A]"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-[#11285A] hover:text-[#11285A]"
+                          ${
+                            active
+                              ? "bg-[#11285A] text-white border-[#11285A]"
+                              : "bg-white text-gray-600 border-gray-200 hover:border-[#11285A] hover:text-[#11285A]"
                           }`}
                       >
-                        {opt.icon && <Icon icon={opt.icon} className="text-sm" />}
+                        {opt.icon && (
+                          <Icon icon={opt.icon} className="text-sm" />
+                        )}
                         {opt.label}
                       </button>
                     );
@@ -230,12 +309,15 @@ const FilterDropdown = ({
                         key={opt.value}
                         onClick={() => onStatusChange(opt.value)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer
-                          ${active
-                            ? "bg-[#11285A] text-white border-[#11285A]"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-[#11285A] hover:text-[#11285A]"
+                          ${
+                            active
+                              ? "bg-[#11285A] text-white border-[#11285A]"
+                              : "bg-white text-gray-600 border-gray-200 hover:border-[#11285A] hover:text-[#11285A]"
                           }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${opt.dotColor}`} />
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${opt.dotColor}`}
+                        />
                         {opt.label}
                       </button>
                     );
@@ -258,9 +340,10 @@ const FilterDropdown = ({
                       key={preset.label}
                       onClick={() => handlePreset(preset.fn())}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer
-                        ${isPresetActive(preset)
-                          ? "bg-[#11285A] text-white border-[#11285A]"
-                          : "bg-white text-gray-600 border-gray-200 hover:border-[#11285A] hover:text-[#11285A]"
+                        ${
+                          isPresetActive(preset)
+                            ? "bg-[#11285A] text-white border-[#11285A]"
+                            : "bg-white text-gray-600 border-gray-200 hover:border-[#11285A] hover:text-[#11285A]"
                         }`}
                     >
                       {preset.label}
@@ -274,12 +357,16 @@ const FilterDropdown = ({
                     <Icon icon="ph:calendar-check" className="shrink-0" />
                     <span>
                       {fmt(startDate)}
-                      {endDate && endDate.toDateString() !== startDate?.toDateString()
+                      {endDate &&
+                      endDate.toDateString() !== startDate?.toDateString()
                         ? ` → ${fmt(endDate)}`
                         : ""}
                     </span>
                     <button
-                      onClick={() => { onDateChange({ startDate: null, endDate: null }); setPickingEnd(false); }}
+                      onClick={() => {
+                        onDateChange({ startDate: null, endDate: null });
+                        setPickingEnd(false);
+                      }}
                       className="ml-auto text-gray-400 hover:text-red-500 cursor-pointer"
                     >
                       <Icon icon="ph:x-bold" />
