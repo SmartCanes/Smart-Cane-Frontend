@@ -88,7 +88,7 @@ export const useRealtimeStore = create(
           if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
           heartbeatTimeout = setTimeout(() => {
             get().resetRealtimeState();
-          }, 20000);
+          }, 15000);
         };
 
         wsApi.on("connect", () => {
@@ -370,17 +370,21 @@ export const useDevicesStore = create(
         }),
 
       setSelectedDevice: (device) => {
+        const prev = get().selectedDevice;
+        const nextSerial = device?.deviceSerialNumber;
+        const prevSerial = prev?.deviceSerialNumber;
+
         set({ selectedDevice: device });
 
-        useRealtimeStore.getState().resetRealtimeState();
+        if (prevSerial !== nextSerial) {
+          useRealtimeStore.getState().resetRealtimeState();
+          useRouteStore.getState().clearRoute();
+        }
 
-        const serial = device?.deviceSerialNumber;
-
-        if (serial) {
-          wsApi.emit("subscribe", { serial });
-
-          wsApi.emit("requestStatus", { serial });
-          wsApi.emit("requestDeviceConfig", { serial });
+        if (nextSerial) {
+          wsApi.emit("subscribe", { serial: nextSerial });
+          wsApi.emit("requestStatus", { serial: nextSerial });
+          wsApi.emit("requestDeviceConfig", { serial: nextSerial });
         }
       }
     }),
