@@ -14,7 +14,9 @@ import { useToast } from "@/context/ToastContext";
 
 const BluetoothManager = ({ embedded = false }) => {
   const { user } = useUserStore();
-  const { _wsConnected, connectionStatus } = useRealtimeStore();
+  const { raspberryPiStatus: connectionStatus } = useRealtimeStore(
+    (state) => state.componentHealth
+  );
   const { currentGuardianRole } = useGuardiansStore();
   const {
     requestScan,
@@ -230,9 +232,9 @@ const BluetoothManager = ({ embedded = false }) => {
   };
 
   useEffect(() => {
-    if (!_wsConnected || !connectionStatus) return;
+    if (!connectionStatus) return;
     refreshBluetoothDevices();
-  }, [_wsConnected, connectionStatus, refreshBluetoothDevices]);
+  }, [connectionStatus, refreshBluetoothDevices]);
 
   const startAction = (action) => {
     setPendingAction(action);
@@ -302,7 +304,7 @@ const BluetoothManager = ({ embedded = false }) => {
         <div className="flex flex-col gap-3 w-full sm:w-auto">
           <Button
             onClick={scanForDevices}
-            disabled={isScanning || !_wsConnected || !connectionStatus}
+            disabled={isScanning || !connectionStatus}
             className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center gap-2 justify-center"
           >
             <Icon
@@ -362,6 +364,7 @@ const BluetoothManager = ({ embedded = false }) => {
                   action: device.connected ? "disconnect" : "connect"
                 })
               }
+              connectionStatus={connectionStatus}
               canManage={canManageBluetooth}
             />
           ))}
@@ -437,12 +440,14 @@ const BluetoothDeviceCard = ({
   onUnpair,
   onForget,
   onConnect,
+  connectionStatus,
   canManage
 }) => {
   const [showActions, setShowActions] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
+  const isDisabled = !connectionStatus || !canManage;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -514,6 +519,7 @@ const BluetoothDeviceCard = ({
   };
 
   const handleActionClick = (action) => {
+    if (isDisabled) return;
     setShowActions(false);
     action();
   };
@@ -726,15 +732,18 @@ const BluetoothDeviceCard = ({
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
           {device.paired ? (
             <motion.button
+              disabled={isDisabled}
               whileTap={{ scale: 0.98 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onConnect();
               }}
               className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-1.5 text-sm font-medium rounded-xl sm:rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                device.connected
-                  ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
-                  : "bg-green-100 text-green-700 hover:bg-green-200"
+                isDisabled
+                  ? "opacity-50 cursor-not-allowed bg-gray-200 text-gray-500"
+                  : device.connected
+                    ? "bg-orange-100 text-orange-700 hover:bg-orange-200 cursor-pointer"
+                    : "bg-green-100 text-green-700 hover:bg-green-200 cursor-pointer"
               }`}
             >
               <Icon
@@ -752,7 +761,8 @@ const BluetoothDeviceCard = ({
                 e.stopPropagation();
                 onPair();
               }}
-              className="flex-1 sm:flex-none px-4 py-2.5 sm:py-1.5 text-sm font-medium bg-blue-600 text-white rounded-xl sm:rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow"
+              disabled={isDisabled}
+              className="flex-1 sm:flex-none px-4 py-2.5 sm:py-1.5 text-sm font-medium bg-blue-600 text-white rounded-xl sm:rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
             >
               <Icon icon="ph:link-bold" className="w-4 h-4" />
               <span>Pair Device</span>
@@ -763,7 +773,8 @@ const BluetoothDeviceCard = ({
             <button
               ref={buttonRef}
               onClick={handleManageClick}
-              className="w-full sm:w-auto px-4 py-2.5 sm:py-1.5 text-sm text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-xl sm:rounded-lg transition-all flex items-center justify-center gap-2 border border-gray-200 cursor-pointer"
+              disabled={isDisabled}
+              className="w-full sm:w-auto px-4 py-2.5 sm:py-1.5 text-sm text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-xl sm:rounded-lg transition-all flex items-center justify-center gap-2 border border-gray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
             >
               <span className="sm:hidden">Options</span>
               <span className="hidden sm:inline">Manage</span>
