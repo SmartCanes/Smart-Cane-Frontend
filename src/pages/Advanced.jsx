@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useDevicesStore, useRealtimeStore } from "@/stores/useStore";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,38 +7,38 @@ import BluetoothManager from "@/ui/components/BluetoothManager";
 
 const fallbackConfig = {
   FALL_DETECTION: {
+    enabled: true,
     config: {
-      enabled: true,
       fallConfirmationDelay: 3000
     }
   },
 
   OBSTACLE_DETECTION: {
+    enabled: true,
     config: {
-      enabled: true,
       obstacleDistanceThreshold: 300.0,
       obstacleFeedbackPattern: 0
     }
   },
 
   EDGE_DETECTION: {
+    enabled: true,
     config: {
-      enabled: true,
       stairSafetyDistance: 300
     }
   },
 
   VOICE_ENGINE: {
+    enabled: true,
     config: {
-      enabled: true,
       volume: 0.3,
       speechSpeed: 150
     }
   },
 
   VISUAL_RECOGNITION: {
+    enabled: true,
     config: {
-      enabled: true,
       recognitionInterval: 3000
     }
   },
@@ -52,11 +52,12 @@ const fallbackConfig = {
   },
 
   GPS_TRACKING: {
-    config: {
-      enabled: true
-    }
+    enabled: true,
+    config: {}
   }
 };
+
+const PI_COMPONENT_KEYS = ["VOICE_ENGINE", "VISUAL_RECOGNITION"];
 
 const DEVICE_COMPONENT_SCHEMA = {
   FALL_DETECTION: {
@@ -81,6 +82,16 @@ const DEVICE_COMPONENT_SCHEMA = {
     }
   },
 
+  EMERGENCY_SYSTEM: {
+    config: {
+      emergencyTrigger: "emergencyTrigger",
+      emergencyBuzzerDuration: "emergencyBuzzerDuration",
+      emergencyBuzzerPattern: "emergencyBuzzerPattern"
+    }
+  }
+};
+
+const PI_COMPONENT_SCHEMA = {
   VOICE_ENGINE: {
     enabled: true,
     config: {
@@ -92,16 +103,7 @@ const DEVICE_COMPONENT_SCHEMA = {
   VISUAL_RECOGNITION: {
     enabled: true,
     config: {
-      alertType: "alertType",
       recognitionInterval: "recognitionInterval"
-    }
-  },
-
-  EMERGENCY_SYSTEM: {
-    config: {
-      emergencyTrigger: "emergencyTrigger",
-      emergencyBuzzerDuration: "emergencyBuzzerDuration",
-      emergencyBuzzerPattern: "emergencyBuzzerPattern"
     }
   }
 };
@@ -267,81 +269,107 @@ const componentsData = [
 ];
 
 const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
-  const config = deviceConfig?.config ?? {};
+  const initialConfig = deviceConfig?.config ?? {};
 
-  const speechSpeed = config.speechSpeed ?? 150;
-  const volume = config.volume ?? 0.3;
+  const [localConfig, setLocalConfig] = useState({
+    volume: initialConfig.volume ?? 0.3,
+    speechSpeed: initialConfig.speechSpeed ?? 150,
+    muted: initialConfig.muted ?? false
+  });
+
+  const debounceRef = useRef(null);
+  const isFirstRenderRef = useRef(true);
+
+  useEffect(() => {
+    setLocalConfig({
+      volume: deviceConfig?.config?.volume ?? 0.3,
+      speechSpeed: deviceConfig?.config?.speechSpeed ?? 150,
+      muted: deviceConfig?.config?.muted ?? false
+    });
+  }, [
+    deviceConfig?.config?.volume,
+    deviceConfig?.config?.speechSpeed,
+    deviceConfig?.config?.muted
+  ]);
+
+  const speechSpeed = localConfig.speechSpeed ?? 150;
+  const volume = localConfig.volume ?? 0.3;
   const uiVolume = Math.round((volume || 0) * 100);
-  const isMuted = uiVolume === 0;
+  const isMuted = uiVolume === 0 || Boolean(localConfig.muted);
 
-  // useEffect(() => {
-  //   if (!isOnline) return;
+  useEffect(() => {
+    if (!isOnline) return;
 
-  //   if (debounceRef.current) {
-  //     clearTimeout(debounceRef.current);
-  //   }
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
 
-  //   debounceRef.current = setTimeout(() => {
-  //     onVoiceConfigChange?.({
-  //       volume,
-  //       speechSpeed,
-  //       speakingVoice: selectedVoice,
-  //       muted: isMuted
-  //     });
-  //   }, 600);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
 
-  //   return () => {
-  //     if (debounceRef.current) {
-  //       clearTimeout(debounceRef.current);
-  //     }
-  //   };
-  // }, [volume, speechSpeed, selectedVoice, isMuted]);
+    debounceRef.current = setTimeout(() => {
+      onVoiceConfigChange?.({
+        ...deviceConfig,
+        enabled: deviceConfig?.enabled ?? true,
+        config: {
+          ...deviceConfig?.config,
+          volume: localConfig.volume,
+          speechSpeed: localConfig.speechSpeed,
+          muted: localConfig.muted
+        }
+      });
+    }, 500);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [
+    localConfig.volume,
+    localConfig.speechSpeed,
+    localConfig.muted,
+    isOnline
+  ]);
 
   const handleVolumeChange = (e) => {
-    const uiVolume = parseInt(e.target.value);
+    const nextUiVolume = Number.parseInt(e.target.value, 10);
 
-    onVoiceConfigChange?.({
-      ...deviceConfig,
-      config: {
-        ...deviceConfig?.config,
-        volume: uiVolume / 100
-      }
-    });
+    setLocalConfig((prev) => ({
+      ...prev,
+      volume: nextUiVolume / 100,
+      muted: nextUiVolume === 0
+    }));
   };
 
   const handleSpeedChange = (e) => {
-    const newSpeed = parseInt(e.target.value);
+    const nextSpeed = Number.parseInt(e.target.value, 10);
 
-    onVoiceConfigChange?.({
-      ...deviceConfig,
-      config: {
-        ...deviceConfig?.config,
-        speechSpeed: newSpeed
-      }
-    });
+    setLocalConfig((prev) => ({
+      ...prev,
+      speechSpeed: nextSpeed
+    }));
   };
 
   const toggleMute = () => {
-    const uiVolume = Math.round((volume || 0) * 100);
+    setLocalConfig((prev) => {
+      const currentUiVolume = Math.round((prev.volume || 0) * 100);
+      const currentlyMuted = currentUiVolume === 0 || Boolean(prev.muted);
 
-    const isCurrentlyMuted = uiVolume === 0;
-
-    const newVolume = isCurrentlyMuted ? 75 : 0;
-
-    onVoiceConfigChange?.({
-      ...deviceConfig,
-      config: {
-        ...deviceConfig?.config,
-        volume: newVolume / 100,
-        muted: !isCurrentlyMuted
-      }
+      return {
+        ...prev,
+        volume: currentlyMuted ? 0.75 : 0,
+        muted: !currentlyMuted
+      };
     });
   };
 
   const getVolumeIcon = () => {
     if (isMuted || volume === 0) return "mdi:volume-off";
-    if (volume < 30) return "mdi:volume-low";
-    if (volume < 70) return "mdi:volume-medium";
+    if (uiVolume < 30) return "mdi:volume-low";
+    if (uiVolume < 70) return "mdi:volume-medium";
     return "mdi:volume-high";
   };
 
@@ -389,7 +417,6 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
         </div>
       </div>
 
-      {/* Volume Control */}
       <div className="mb-5 sm:mb-6">
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
@@ -403,15 +430,17 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={toggleMute}
+            disabled={!isOnline}
             className={`p-2 rounded-lg transition-colors ${
               isMuted
                 ? "bg-red-100 text-red-600"
                 : "hover:bg-gray-100 text-gray-600"
-            }`}
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
             aria-label={isMuted ? "Unmute" : "Mute"}
           >
             <Icon icon={getVolumeIcon()} className="w-5 h-5" />
           </button>
+
           <div className="flex-1 relative">
             <input
               type="range"
@@ -429,7 +458,6 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
         </div>
       </div>
 
-      {/* Speech Speed Control */}
       <div className="mb-5 sm:mb-6">
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
@@ -440,6 +468,7 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
             {speechSpeed} WPM
           </span>
         </div>
+
         <div className="flex items-center gap-3">
           <Icon icon="mdi:turtle" className="w-5 h-5 text-gray-400" />
           <input
@@ -451,19 +480,20 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
             disabled={!isOnline}
             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: `linear-gradient(to right, #2563eb 0%, #2563eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb 100%)`
+              background: `linear-gradient(to right, #2563eb 0%, #2563eb ${
+                ((speechSpeed - 80) / (350 - 80)) * 100
+              }%, #e5e7eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb 100%)`
             }}
           />
           <Icon icon="mdi:rabbit" className="w-5 h-5 text-gray-400" />
         </div>
+
         <div className="flex justify-between text-xs text-gray-500 mt-1 px-2">
           <span>Slow</span>
           <span>Normal</span>
           <span>Fast</span>
         </div>
       </div>
-
-      {/* Voice Type Selection */}
     </motion.div>
   );
 };
@@ -931,23 +961,22 @@ const ComponentCard = ({
   );
 };
 
-const buildFullSnapshot = (globalConfig, deviceId) => {
+const buildDeviceSnapshot = (globalConfig, deviceId) => {
   const components = Object.entries(DEVICE_COMPONENT_SCHEMA).map(
     ([codeName, schema]) => {
       const sourceComponent = globalConfig?.[codeName] || {};
 
       const component = {
         codeName,
-        enabled: sourceComponent?.config?.enabled ?? schema.enabled ?? true,
+        enabled: sourceComponent?.enabled ?? schema.enabled ?? true,
         config: {}
       };
 
       Object.entries(schema.config).forEach(([_, firmwareKey]) => {
         const value =
           sourceComponent?.config?.[firmwareKey] ??
-          globalConfig?.[firmwareKey] ??
           fallbackConfig?.[codeName]?.config?.[firmwareKey] ??
-          0; // HARDWARE SAFE DEFAULT
+          0;
 
         component.config[firmwareKey] = value;
       });
@@ -960,6 +989,32 @@ const buildFullSnapshot = (globalConfig, deviceId) => {
     deviceId,
     configVersion: Date.now(),
     components
+  };
+};
+
+const buildPiPayload = (
+  globalConfig,
+  deviceId,
+  changedKeys = PI_COMPONENT_KEYS
+) => {
+  const config = {};
+
+  changedKeys.forEach((key) => {
+    const sourceComponent = globalConfig?.[key] || fallbackConfig[key];
+    if (!sourceComponent) return;
+
+    config[key] = {
+      enabled: sourceComponent?.enabled ?? true,
+      config: {
+        ...(sourceComponent?.config || {})
+      }
+    };
+  });
+
+  return {
+    deviceId,
+    configVersion: Date.now(),
+    components: config
   };
 };
 
@@ -1022,25 +1077,72 @@ function Advanced() {
     setIsConfigModalOpen(true);
   };
 
-  const handleDeviceStateUpdate = async (partialUpdate = {}) => {
+  const handleConfigSave = async (partialUpdate) => {
+    const updatedKeys = Object.keys(partialUpdate);
+
+    const isPiConfig = updatedKeys.some((key) =>
+      PI_COMPONENT_KEYS.includes(key)
+    );
+
+    if (isPiConfig) {
+      await handlePiConfigUpdate(partialUpdate);
+    } else {
+      await handleDeviceConfigUpdate(partialUpdate);
+    }
+  };
+
+  const handleDeviceConfigUpdate = async (partialUpdate = {}) => {
     if (!selectedDevice?.deviceSerialNumber) return;
 
+    setIsLoading(true);
+
     try {
-      const fullConfig = {
+      const mergedConfig = {
         ...deviceConfig,
         ...partialUpdate
       };
 
-      setDeviceConfig(fullConfig);
+      setDeviceConfig(mergedConfig);
 
-      const snapshot = buildFullSnapshot(
-        fullConfig,
+      const snapshot = buildDeviceSnapshot(
+        mergedConfig,
         selectedDevice.deviceSerialNumber
       );
 
       await wsApi.updateDeviceState(snapshot);
     } catch (error) {
-      console.error("Update failed:", error);
+      console.error("Device config update failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePiConfigUpdate = async (partialUpdate = {}) => {
+    if (!selectedDevice?.deviceSerialNumber) return;
+
+    setIsLoading(true);
+
+    try {
+      const mergedConfig = {
+        ...deviceConfig,
+        ...partialUpdate
+      };
+
+      setDeviceConfig(mergedConfig);
+
+      const changedKeys = Object.keys(partialUpdate).filter((key) =>
+        PI_COMPONENT_KEYS.includes(key)
+      );
+
+      const piPayload = buildPiPayload(
+        mergedConfig,
+        selectedDevice.deviceSerialNumber,
+        changedKeys
+      );
+
+      await wsApi.updatePiConfig(piPayload);
+    } catch (error) {
+      console.error("Pi config update failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -1051,15 +1153,21 @@ function Advanced() {
 
     const component = deviceConfig[codeName];
 
-    handleDeviceStateUpdate({
+    const update = {
       [codeName]: {
         ...component,
+        enabled: !(component.enabled ?? true),
         config: {
-          ...component.config,
-          enabled: !component.config.enabled
+          ...component.config
         }
       }
-    });
+    };
+
+    if (PI_COMPONENT_KEYS.includes(codeName)) {
+      handlePiConfigUpdate(update);
+    } else {
+      handleDeviceConfigUpdate(update);
+    }
   };
 
   const onlineCount = components.filter((c) => c.isOnline).length;
@@ -1229,16 +1337,14 @@ function Advanced() {
               <VoiceControlPanel
                 isOnline={componentHealth.raspberryPiStatus}
                 deviceConfig={deviceConfig["VOICE_ENGINE"] || {}}
-                onVoiceConfigChange={(config) =>
-                  handleDeviceStateUpdate({
-                    components: {
-                      ...deviceConfig?.components,
-                      VOICE_ENGINE: {
-                        ...deviceConfig?.components?.VOICE_ENGINE,
-                        config: {
-                          volume: config.volume,
-                          speechSpeed: config.speechSpeed
-                        }
+                onVoiceConfigChange={(updatedVoiceEngine) =>
+                  handlePiConfigUpdate({
+                    VOICE_ENGINE: {
+                      ...deviceConfig?.VOICE_ENGINE,
+                      enabled: updatedVoiceEngine?.enabled ?? true,
+                      config: {
+                        ...deviceConfig?.VOICE_ENGINE?.config,
+                        ...updatedVoiceEngine?.config
                       }
                     }
                   })
@@ -1267,7 +1373,7 @@ function Advanced() {
         deviceConfig={deviceConfig?.[selectedComponent?.codeName] || {}}
         isOpen={isConfigModalOpen}
         onClose={() => setIsConfigModalOpen(false)}
-        onSave={handleDeviceStateUpdate}
+        onSave={handleConfigSave}
       />
     </main>
   );
