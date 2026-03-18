@@ -79,6 +79,7 @@ export const useRealtimeStore = create(
         wsApi.off("guardianPresenceSnapshot");
         wsApi.off("piStatus");
         wsApi.off("configSaved");
+        wsApi.off("deviceConfig");
         wsApi.connect();
 
         let heartbeatTimeout;
@@ -187,6 +188,25 @@ export const useRealtimeStore = create(
           }));
 
           resetHeartbeat();
+        });
+
+        wsApi.on("deviceConfig", (data) => {
+          const payload = data?.payload || data;
+          if (!payload) return;
+
+          const normalizedConfig = Object.fromEntries(
+            (payload.components || []).map((component) => [
+              component.codeName,
+              {
+                enabled: component.enabled,
+                config: component.config || {}
+              }
+            ])
+          );
+
+          set({
+            deviceConfig: normalizedConfig
+          });
         });
 
         wsApi.on("configSaved", (data) => {
