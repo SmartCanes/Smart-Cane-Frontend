@@ -347,7 +347,7 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
 
       return {
         ...prev,
-        volume: currentlyMuted ? 0.75 : 0,
+        volume: currentlyMuted ? 0.3 : 0,
         muted: !currentlyMuted
       };
     });
@@ -461,14 +461,14 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
           <input
             type="range"
             min="80"
-            max="350"
+            max="250"
             value={speechSpeed}
             onChange={handleSpeedChange}
             disabled={!isOnline}
             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: `linear-gradient(to right, #2563eb 0%, #2563eb ${
-                ((speechSpeed - 80) / (350 - 80)) * 100
+                ((speechSpeed - 80) / (250 - 80)) * 100
               }%, #e5e7eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb 100%)`
             }}
           />
