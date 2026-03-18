@@ -131,9 +131,9 @@ class SocketAPI {
   async updateDeviceState(configPayload) {
     return new Promise((resolve, reject) => {
       const requestId = crypto.randomUUID();
+      console.log(configPayload);
 
       const handler = (payload) => {
-        console.log("Received configSaved event with payload:", payload);
         if (payload?.requestId !== requestId) return;
 
         clearTimeout(timeout);
@@ -156,6 +156,35 @@ class SocketAPI {
         ...configPayload,
         requestId
       });
+    });
+  }
+
+  async updatePiConfig(piPayload) {
+    return new Promise((resolve, reject) => {
+      const handleSuccess = (payload) => {
+        clearTimeout(timeout);
+        this.off("piConfigUpdated", handleSuccess);
+        this.off("piConfigError", handleError);
+        resolve(payload);
+      };
+
+      const handleError = (payload) => {
+        clearTimeout(timeout);
+        this.off("piConfigUpdated", handleSuccess);
+        this.off("piConfigError", handleError);
+        reject(new Error(payload || "Pi config update failed"));
+      };
+
+      const timeout = setTimeout(() => {
+        this.off("piConfigUpdated", handleSuccess);
+        this.off("piConfigError", handleError);
+        reject(new Error("Pi config update timeout"));
+      }, 8000);
+
+      this.on("piConfigUpdated", handleSuccess);
+      this.on("piConfigError", handleError);
+
+      this.emit("updatePiConfig", piPayload);
     });
   }
 }

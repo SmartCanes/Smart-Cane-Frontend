@@ -4,6 +4,7 @@ import { useDevicesStore, useRealtimeStore } from "@/stores/useStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { wsApi } from "@/api/ws-api";
 import BluetoothManager from "@/ui/components/BluetoothManager";
+import { useToast } from "@/context/ToastContext";
 
 const fallbackConfig = {
   FALL_DETECTION: {
@@ -498,7 +499,14 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
   );
 };
 
-const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
+const ConfigModal = ({
+  component,
+  deviceConfig,
+  isOpen,
+  isSaving,
+  onClose,
+  onSave
+}) => {
   const [config, setConfig] = useState({});
   const [customRange, setCustomRange] = useState({ min: 2, max: 400 });
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -540,6 +548,8 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
     if (!isOpen) return;
 
     const handleEscape = (e) => {
+      if (isSaving) return;
+
       if (e.key === "Escape") {
         if (openDropdown) {
           setOpenDropdown(null);
@@ -552,12 +562,12 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
 
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, openDropdown, onClose]);
+  }, [isOpen, isSaving, openDropdown, onClose]);
 
   const handleSave = async () => {
-    if (!component) return;
+    if (!component || isSaving) return;
 
-    await onSave({
+    const saved = await onSave({
       [component.codeName]: {
         ...deviceConfig,
         config: {
@@ -567,7 +577,9 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
       }
     });
 
-    onClose?.();
+    if (saved) {
+      onClose?.();
+    }
   };
 
   const renderCustomInput = () => {
@@ -639,7 +651,9 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
           <motion.div
             key="config-modal-overlay"
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={onClose}
+            onClick={() => {
+              if (!isSaving) onClose?.();
+            }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -674,7 +688,8 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
 
                   <button
                     onClick={onClose}
-                    className="p-2 rounded-lg flex-shrink-0 cursor-pointer transition hover:bg-gray-100"
+                    disabled={isSaving}
+                    className="p-2 rounded-lg flex-shrink-0 cursor-pointer transition hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Icon icon="mdi:close" className="w-5 h-5 text-gray-500" />
                   </button>
@@ -778,16 +793,18 @@ const ConfigModal = ({ component, deviceConfig, isOpen, onClose, onSave }) => {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg cursor-pointer transition hover:bg-gray-100"
+                    disabled={isSaving}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg cursor-pointer transition hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
 
                   <button
                     onClick={handleSave}
-                    className="flex-1 px-4 py-3 bg-primary-100 hover:bg-[#0d1b3d] text-white rounded-lg cursor-pointer transition hover:bg-primary-700"
+                    disabled={isSaving}
+                    className="flex-1 px-4 py-3 bg-primary-100 hover:bg-[#0d1b3d] text-white rounded-lg cursor-pointer transition hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Save Changes
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </div>
@@ -997,24 +1014,25 @@ const buildPiPayload = (
   deviceId,
   changedKeys = PI_COMPONENT_KEYS
 ) => {
-  const config = {};
+  const components = changedKeys
+    .map((key) => {
+      const sourceComponent = globalConfig?.[key] || fallbackConfig[key];
+      if (!sourceComponent) return null;
 
-  changedKeys.forEach((key) => {
-    const sourceComponent = globalConfig?.[key] || fallbackConfig[key];
-    if (!sourceComponent) return;
-
-    config[key] = {
-      enabled: sourceComponent?.enabled ?? true,
-      config: {
-        ...(sourceComponent?.config || {})
-      }
-    };
-  });
+      return {
+        codeName: key,
+        enabled: sourceComponent?.enabled ?? true,
+        config: {
+          ...(sourceComponent?.config || {})
+        }
+      };
+    })
+    .filter(Boolean);
 
   return {
     deviceId,
     configVersion: Date.now(),
-    components: config
+    components
   };
 };
 
@@ -1024,6 +1042,7 @@ function Advanced() {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("sensors");
+  const { showToast } = useToast();
   const { componentHealth, deviceConfig, setDeviceConfig, gps } =
     useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
@@ -1085,14 +1104,28 @@ function Advanced() {
     );
 
     if (isPiConfig) {
-      await handlePiConfigUpdate(partialUpdate);
+      return handlePiConfigUpdate(partialUpdate);
     } else {
-      await handleDeviceConfigUpdate(partialUpdate);
+      return handleDeviceConfigUpdate(partialUpdate);
     }
   };
 
-  const handleDeviceConfigUpdate = async (partialUpdate = {}) => {
-    if (!selectedDevice?.deviceSerialNumber) return;
+  const handleDeviceConfigUpdate = async (
+    partialUpdate = {},
+    options = { showStatusToast: true }
+  ) => {
+    const { showStatusToast = true } = options;
+
+    if (!selectedDevice?.deviceSerialNumber) {
+      if (showStatusToast) {
+        showToast({
+          type: "error",
+          message: "Please select a device first."
+        });
+      }
+
+      return false;
+    }
 
     setIsLoading(true);
 
@@ -1110,15 +1143,47 @@ function Advanced() {
       );
 
       await wsApi.updateDeviceState(snapshot);
+
+      if (showStatusToast) {
+        showToast({
+          type: "success",
+          message: "Configuration saved successfully."
+        });
+      }
+
+      return true;
     } catch (error) {
       console.error("Device config update failed:", error);
+
+      if (showStatusToast) {
+        showToast({
+          type: "error",
+          message: error?.message || "Failed to save configuration."
+        });
+      }
+
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePiConfigUpdate = async (partialUpdate = {}) => {
-    if (!selectedDevice?.deviceSerialNumber) return;
+  const handlePiConfigUpdate = async (
+    partialUpdate = {},
+    options = { showStatusToast: true }
+  ) => {
+    const { showStatusToast = true } = options;
+
+    if (!selectedDevice?.deviceSerialNumber) {
+      if (showStatusToast) {
+        showToast({
+          type: "error",
+          message: "Please select a device first."
+        });
+      }
+
+      return false;
+    }
 
     setIsLoading(true);
 
@@ -1140,9 +1205,31 @@ function Advanced() {
         changedKeys
       );
 
-      await wsApi.updatePiConfig(piPayload);
+      const response = await wsApi.updatePiConfig(piPayload);
+
+      if (response?.success === false) {
+        throw new Error(response?.error || "Pi config update failed");
+      }
+
+      if (showStatusToast) {
+        showToast({
+          type: "success",
+          message: "Configuration saved successfully."
+        });
+      }
+
+      return true;
     } catch (error) {
       console.error("Pi config update failed:", error);
+
+      if (showStatusToast) {
+        showToast({
+          type: "error",
+          message: error?.message || "Failed to save configuration."
+        });
+      }
+
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -1338,16 +1425,19 @@ function Advanced() {
                 isOnline={componentHealth.raspberryPiStatus}
                 deviceConfig={deviceConfig["VOICE_ENGINE"] || {}}
                 onVoiceConfigChange={(updatedVoiceEngine) =>
-                  handlePiConfigUpdate({
-                    VOICE_ENGINE: {
-                      ...deviceConfig?.VOICE_ENGINE,
-                      enabled: updatedVoiceEngine?.enabled ?? true,
-                      config: {
-                        ...deviceConfig?.VOICE_ENGINE?.config,
-                        ...updatedVoiceEngine?.config
+                  handlePiConfigUpdate(
+                    {
+                      VOICE_ENGINE: {
+                        ...deviceConfig?.VOICE_ENGINE,
+                        enabled: updatedVoiceEngine?.enabled ?? true,
+                        config: {
+                          ...deviceConfig?.VOICE_ENGINE?.config,
+                          ...updatedVoiceEngine?.config
+                        }
                       }
-                    }
-                  })
+                    },
+                    { showStatusToast: false }
+                  )
                 }
               />
             </motion.div>
@@ -1372,6 +1462,7 @@ function Advanced() {
         component={selectedComponent}
         deviceConfig={deviceConfig?.[selectedComponent?.codeName] || {}}
         isOpen={isConfigModalOpen}
+        isSaving={isLoading}
         onClose={() => setIsConfigModalOpen(false)}
         onSave={handleConfigSave}
       />
