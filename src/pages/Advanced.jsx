@@ -16,14 +16,15 @@ const fallbackConfig = {
   OBSTACLE_DETECTION: {
     config: {
       enabled: true,
-      obstacleDistanceThreshold: 300.0
+      obstacleDistanceThreshold: 300.0,
+      obstacleFeedbackPattern: 0
     }
   },
 
   EDGE_DETECTION: {
     config: {
       enabled: true,
-      edgeBeepMin: 300
+      stairSafetyDistance: 300
     }
   },
 
@@ -44,9 +45,9 @@ const fallbackConfig = {
 
   EMERGENCY_SYSTEM: {
     config: {
-      emergencyDelay: 3000,
+      emergencyTrigger: 3000,
       emergencyBuzzerDuration: 60000,
-      emergencyBuzzerInterval: 100
+      emergencyBuzzerPattern: 100
     }
   },
 
@@ -68,14 +69,15 @@ const DEVICE_COMPONENT_SCHEMA = {
   OBSTACLE_DETECTION: {
     enabled: false,
     config: {
-      obstacleDistanceThreshold: "obstacleDistanceThreshold"
+      obstacleDistanceThreshold: "obstacleDistanceThreshold",
+      obstacleFeedbackPattern: "obstacleFeedbackPattern"
     }
   },
 
   EDGE_DETECTION: {
-    enabled: false,
+    enabled: true,
     config: {
-      edgeBeepMin: "edgeBeepMin"
+      stairSafetyDistance: "stairSafetyDistance"
     }
   },
 
@@ -97,9 +99,9 @@ const DEVICE_COMPONENT_SCHEMA = {
 
   EMERGENCY_SYSTEM: {
     config: {
-      emergencyDelay: "emergencyDelay",
+      emergencyTrigger: "emergencyTrigger",
       emergencyBuzzerDuration: "emergencyBuzzerDuration",
-      emergencyBuzzerInterval: "emergencyBuzzerInterval"
+      emergencyBuzzerPattern: "emergencyBuzzerPattern"
     }
   }
 };
@@ -124,9 +126,9 @@ const componentsData = [
     configurable: true,
     configOptions: {
       fallConfirmationDelay: [
-        { label: "2000 ms (Fast Alert)", value: 2000 },
-        { label: "3000 ms (Default)", value: 3000 },
-        { label: "5000 ms (Stable Confirmation)", value: 5000 }
+        { label: "3s (Default)", value: 3000 },
+        { label: "2s (Fast Alert)", value: 2000 },
+        { label: "5s (Stable Confirmation)", value: 5000 }
       ]
 
       // buzzerPattern: [
@@ -147,9 +149,14 @@ const componentsData = [
     configurable: true,
     configOptions: {
       obstacleDistanceThreshold: [
-        { label: "300 cm (Default)", value: 300 },
-        { label: "400 cm (High Safety)", value: 400 },
-        { label: "200 cm (Short Detection)", value: 200 }
+        { label: "Medium Sensitivity (Default)", value: 300 },
+        { label: "High Sensitivity", value: 400 },
+        { label: "Low Sensitivity", value: 200 }
+      ],
+      obstacleFeedbackPattern: [
+        { label: "Continuous (Default)", value: 0 },
+        { label: "Pulsing Pattern", value: 1 }
+        // { label: "Buzzer Pattern", value: 2 }
       ]
 
       // measurementInterval: [
@@ -177,23 +184,18 @@ const componentsData = [
     configOptions: {
       stairSafetyDistance: [
         {
-          label: "Medium Sensitivity (Recommended Default)",
+          label: "High Sensitivity (Default)",
           value: 300,
           description: "Balanced walking safety"
         },
         {
-          label: "High Sensitivity (Maximum Safety)",
-          value: 200,
-          description: "Early warning — detect edge very far"
-        },
-        {
-          label: "Low Sensitivity (Normal Walking)",
-          value: 350,
+          label: "Medium Sensitivity",
+          value: 400,
           description: "Warning activates closer to edge"
         },
         {
-          label: "Critical Sensitivity (Drop-off Alarm Mode)",
-          value: 400,
+          label: "Low Sensitivity",
+          value: 500,
           description: "Only trigger on potential hole or cliff"
         }
       ]
@@ -231,20 +233,20 @@ const componentsData = [
     icon: "mdi:alert-decagram",
     configurable: true,
     configOptions: {
-      emergencyDelay: [
-        { label: "1 second (Fast Response)", value: 1000 },
+      emergencyTrigger: [
         { label: "3 seconds (Default)", value: 3000 },
-        { label: "5 seconds (Extended Confirmation)", value: 20000 }
+        { label: "1 second (Fast Response)", value: 1000 },
+        { label: "5 seconds (Extended Confirmation)", value: 5000 }
       ],
       emergencyBuzzerDuration: [
-        { label: "30 seconds (Short Alert)", value: 30000 },
         { label: "60 seconds (Default)", value: 60000 },
+        { label: "30 seconds (Short Alert)", value: 30000 },
         { label: "120 seconds (Extended Alert)", value: 120000 }
       ],
-      emergencyBuzzerInterval: [
-        { label: "Continuous (Maximum Urgency)", value: 0 },
+      emergencyBuzzerPattern: [
         { label: "Normal (Default)", value: 100 },
-        { label: "2 seconds (Slow)", value: 2000 }
+        { label: "Continuous (Maximum Urgency)", value: 0 },
+        { label: "Long Pulse", value: 2000 }
       ]
     }
   },
@@ -1059,14 +1061,6 @@ function Advanced() {
       }
     });
   };
-
-  useEffect(() => {
-    if (!selectedDevice?.deviceSerialNumber) return;
-
-    wsApi.emit("requestDeviceConfig", {
-      deviceId: selectedDevice.deviceSerialNumber
-    });
-  }, [selectedDevice?.deviceSerialNumber]);
 
   const onlineCount = components.filter((c) => c.isOnline).length;
   const sensorComponents = components.filter((c) => c.type === "sensor");
