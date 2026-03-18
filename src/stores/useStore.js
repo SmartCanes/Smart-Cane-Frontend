@@ -85,6 +85,37 @@ export const useRealtimeStore = create(
         let heartbeatTimeout;
         const toBool = (value) => value === true || value === "true";
 
+        // Supports both middleware formats:
+        // 1) keyed object: { FALL_DETECTION: { enabled, config } }
+        // 2) array payload: { components: [{ codeName, enabled, config }] }
+        const normalizeIncomingConfig = (rawConfig) => {
+          if (!rawConfig || typeof rawConfig !== "object") return {};
+
+          if (Array.isArray(rawConfig.components)) {
+            return Object.fromEntries(
+              rawConfig.components
+                .filter((component) => component?.codeName)
+                .map((component) => [
+                  component.codeName,
+                  {
+                    enabled: component.enabled,
+                    config: component.config || {}
+                  }
+                ])
+            );
+          }
+
+          return Object.fromEntries(
+            Object.entries(rawConfig).map(([codeName, component]) => [
+              codeName,
+              {
+                enabled: component?.enabled,
+                config: component?.config || {}
+              }
+            ])
+          );
+        };
+
         const resetHeartbeat = () => {
           if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
           heartbeatTimeout = setTimeout(() => {
@@ -194,15 +225,7 @@ export const useRealtimeStore = create(
           const payload = data?.payload || data;
           if (!payload) return;
 
-          const normalizedConfig = Object.fromEntries(
-            (payload.components || []).map((component) => [
-              component.codeName,
-              {
-                enabled: component.enabled,
-                config: component.config || {}
-              }
-            ])
-          );
+          const normalizedConfig = normalizeIncomingConfig(payload);
 
           set({
             deviceConfig: normalizedConfig
@@ -220,7 +243,7 @@ export const useRealtimeStore = create(
 
           if (payload.config) {
             set({
-              deviceConfig: payload.config
+              deviceConfig: normalizeIncomingConfig(payload.config)
             });
           }
 

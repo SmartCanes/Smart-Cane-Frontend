@@ -92,23 +92,6 @@ const DEVICE_COMPONENT_SCHEMA = {
   }
 };
 
-const PI_COMPONENT_SCHEMA = {
-  VOICE_ENGINE: {
-    enabled: true,
-    config: {
-      volume: "volume",
-      speechSpeed: "speechSpeed"
-    }
-  },
-
-  VISUAL_RECOGNITION: {
-    enabled: true,
-    config: {
-      recognitionInterval: "recognitionInterval"
-    }
-  }
-};
-
 const componentIdMap = {
   1: "accelerometerStatus",
   2: "obstacleDetectionStatus",
@@ -220,8 +203,8 @@ const componentsData = [
     configurable: true,
     configOptions: {
       recognitionInterval: [
-        { label: "5s (Default)", value: 5000 },
-        { label: "3s (Fast)", value: 3000 },
+        { label: "3s (Fast Default)", value: 3000 },
+        { label: "5s (Medium)", value: 5000 },
         { label: "8s (Slow)", value: 8000 }
       ]
     }
