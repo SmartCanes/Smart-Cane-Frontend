@@ -6,6 +6,9 @@ import { wsApi } from "@/api/ws-api";
 import BluetoothManager from "@/ui/components/BluetoothManager";
 import { useToast } from "@/context/ToastContext";
 
+const POWER_OVERRIDE_ENABLED =
+  String(import.meta.env.VITE_OVERRIDE).toLowerCase() === "true";
+
 const fallbackConfig = {
   FALL_DETECTION: {
     enabled: true,
@@ -69,7 +72,7 @@ const DEVICE_COMPONENT_SCHEMA = {
   },
 
   OBSTACLE_DETECTION: {
-    enabled: false,
+    enabled: true,
     config: {
       obstacleDistanceThreshold: "obstacleDistanceThreshold",
       obstacleFeedbackPattern: "obstacleFeedbackPattern"
@@ -806,6 +809,7 @@ const ComponentCard = ({
   onConfigure
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const isEnabled = deviceConfig?.enabled ?? true;
 
   return (
     <motion.div
@@ -840,6 +844,20 @@ const ComponentCard = ({
           </div>
 
           <div className="flex items-center gap-1 flex-shrink-0 self-start">
+            {POWER_OVERRIDE_ENABLED && (
+              <button
+                onClick={() => onTogglePower(component.codeName)}
+                className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
+                  isEnabled
+                    ? "bg-green-100 text-green-700 hover:bg-green-200"
+                    : "bg-red-100 text-red-700 hover:bg-red-200"
+                }`}
+                aria-label={`${isEnabled ? "Turn off" : "Turn on"} ${component.name}`}
+              >
+                {isEnabled ? "On" : "Off"}
+              </button>
+            )}
+
             {component.configurable && (
               <button
                 onClick={() => onConfigure(component)}
@@ -1019,6 +1037,21 @@ const buildPiPayload = (
   };
 };
 
+const buildDefaultConfig = () =>
+  Object.fromEntries(
+    Object.entries(fallbackConfig).map(([codeName, component]) => [
+      codeName,
+      {
+        ...(typeof component?.enabled === "boolean"
+          ? { enabled: component.enabled }
+          : {}),
+        config: {
+          ...(component?.config || {})
+        }
+      }
+    ])
+  );
+
 function Advanced() {
   const [components, setComponents] = useState(componentsData);
   const [selectedComponent, setSelectedComponent] = useState(null);
@@ -1113,8 +1146,9 @@ function Advanced() {
     setIsLoading(true);
 
     try {
+      const latestConfig = useRealtimeStore.getState().deviceConfig || {};
       const mergedConfig = {
-        ...deviceConfig,
+        ...latestConfig,
         ...partialUpdate
       };
 
@@ -1171,8 +1205,9 @@ function Advanced() {
     setIsLoading(true);
 
     try {
+      const latestConfig = useRealtimeStore.getState().deviceConfig || {};
       const mergedConfig = {
-        ...deviceConfig,
+        ...latestConfig,
         ...partialUpdate
       };
 
@@ -1240,6 +1275,46 @@ function Advanced() {
     }
   };
 
+  const handleResetToDefaults = async () => {
+    const defaultConfig = buildDefaultConfig();
+
+    setDeviceConfig(defaultConfig);
+
+    const piDefaults = Object.fromEntries(
+      Object.entries(defaultConfig).filter(([key]) =>
+        PI_COMPONENT_KEYS.includes(key)
+      )
+    );
+    const deviceDefaults = Object.fromEntries(
+      Object.entries(defaultConfig).filter(
+        ([key]) => !PI_COMPONENT_KEYS.includes(key)
+      )
+    );
+
+    const deviceResetSuccess = await handleDeviceConfigUpdate(deviceDefaults, {
+      showStatusToast: false
+    });
+
+    if (!deviceResetSuccess) {
+      showToast({
+        type: "error",
+        message: "Failed to reset configurations."
+      });
+      return;
+    }
+
+    const piResetSuccess = await handlePiConfigUpdate(piDefaults, {
+      showStatusToast: false
+    });
+
+    showToast({
+      type: piResetSuccess ? "success" : "error",
+      message: piResetSuccess
+        ? "Configurations reset to default successfully."
+        : "Device settings were reset, but Pi settings failed to reset."
+    });
+  };
+
   const onlineCount = components.filter((c) => c.isOnline).length;
   const sensorComponents = components.filter((c) => c.type === "sensor");
   // const controllerComponents = components.filter(
@@ -1277,7 +1352,7 @@ function Advanced() {
           data-tour="tour-advanced-header"
           className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 sm:mb-8"
         >
-          <div>
+          <div className="min-w-0">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
               Component Management
             </h2>
@@ -1286,27 +1361,46 @@ function Advanced() {
             </p>
           </div>
 
-          {/* Compact stats */}
-          <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-3 shadow-sm border w-full sm:w-auto">
-            <div className="flex-1 text-center px-2">
-              <div className="text-lg font-bold text-primary-600">
-                {onlineCount}
+          <div className="flex w-full sm:w-auto flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3">
+            <button
+              type="button"
+              onClick={handleResetToDefaults}
+              disabled={isLoading}
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-gray-700 shadow-sm transition hover:border-primary-200 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label="Reset all configurations to default"
+            >
+              <Icon icon="mdi:restore" className="h-5 w-5 flex-shrink-0" />
+              <span className="truncate">
+                {isLoading ? "Resetting..." : "Reset to Default"}
+              </span>
+            </button>
+
+            {/* Compact stats */}
+            <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-3 shadow-sm border w-full sm:w-auto">
+              <div className="flex-1 text-center px-2">
+                <div className="text-lg font-bold text-primary-600">
+                  {onlineCount}
+                </div>
+                <div className="text-xs text-gray-500">Online</div>
               </div>
-              <div className="text-xs text-gray-500">Online</div>
-            </div>
-            <div className="h-8 w-px bg-gray-200" />
-            <div className="flex-1 text-center px-2">
-              <div className="text-lg font-bold text-gray-800">
-                {components.length}
+
+              <div className="h-8 w-px bg-gray-200" />
+
+              <div className="flex-1 text-center px-2">
+                <div className="text-lg font-bold text-gray-800">
+                  {components.length}
+                </div>
+                <div className="text-xs text-gray-500">Total</div>
               </div>
-              <div className="text-xs text-gray-500">Total</div>
-            </div>
-            <div className="h-8 w-px bg-gray-200" />
-            <div className="flex-1 text-center px-2">
-              <div className="text-lg font-bold text-yellow-600">
-                {Math.round((onlineCount / components.length) * 100)}%
+
+              <div className="h-8 w-px bg-gray-200" />
+
+              <div className="flex-1 text-center px-2">
+                <div className="text-lg font-bold text-yellow-600">
+                  {Math.round((onlineCount / components.length) * 100)}%
+                </div>
+                <div className="text-xs text-gray-500">Health</div>
               </div>
-              <div className="text-xs text-gray-500">Health</div>
             </div>
           </div>
         </div>
@@ -1363,9 +1457,7 @@ function Advanced() {
                 <ComponentCard
                   key={component.id}
                   component={component}
-                  deviceConfig={
-                    deviceConfig?.[component.codeName]?.config || {}
-                  }
+                  deviceConfig={deviceConfig?.[component.codeName] || {}}
                   onTogglePower={handleToggle}
                   onConfigure={handleConfigure}
                 />
