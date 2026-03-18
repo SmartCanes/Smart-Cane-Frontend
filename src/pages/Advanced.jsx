@@ -16,15 +16,14 @@ const fallbackConfig = {
   OBSTACLE_DETECTION: {
     config: {
       enabled: true,
-      obstacleDistanceThreshold: 100.0,
-      measurementInterval: 1000
+      obstacleDistanceThreshold: 300.0
     }
   },
 
   EDGE_DETECTION: {
     config: {
       enabled: true,
-      edgeBeepMin: 400
+      edgeBeepMin: 300
     }
   },
 
@@ -40,6 +39,20 @@ const fallbackConfig = {
     config: {
       enabled: true,
       recognitionInterval: 3000
+    }
+  },
+
+  EMERGENCY_SYSTEM: {
+    config: {
+      emergencyDelay: 3000,
+      emergencyBuzzerDuration: 60000,
+      emergencyBuzzerInterval: 100
+    }
+  },
+
+  GPS_TRACKING: {
+    config: {
+      enabled: true
     }
   }
 };
@@ -60,7 +73,7 @@ const DEVICE_COMPONENT_SCHEMA = {
   },
 
   EDGE_DETECTION: {
-    enabled: true,
+    enabled: false,
     config: {
       edgeBeepMin: "edgeBeepMin"
     }
@@ -80,6 +93,14 @@ const DEVICE_COMPONENT_SCHEMA = {
       alertType: "alertType",
       recognitionInterval: "recognitionInterval"
     }
+  },
+
+  EMERGENCY_SYSTEM: {
+    config: {
+      emergencyDelay: "emergencyDelay",
+      emergencyBuzzerDuration: "emergencyBuzzerDuration",
+      emergencyBuzzerInterval: "emergencyBuzzerInterval"
+    }
   }
 };
 
@@ -88,7 +109,8 @@ const componentIdMap = {
   2: "obstacleDetectionStatus",
   3: "edgeDetectionStatus",
   4: "raspberryPiStatus",
-  5: "gpsStatus"
+  5: "esp32Status",
+  6: "gpsStatus"
 };
 
 const componentsData = [
@@ -125,18 +147,17 @@ const componentsData = [
     configurable: true,
     configOptions: {
       obstacleDistanceThreshold: [
-        { label: "50 cm (High Safety)", value: 50 },
-        { label: "100 cm (Default)", value: 100 },
-        { label: "150 cm (Navigation Preview)", value: 150 },
-        { label: "200 cm (Long Detection)", value: 200 }
-      ],
-
-      measurementInterval: [
-        { label: "200 ms (Fast Scan)", value: 200 },
-        { label: "300 ms (Default)", value: 300 },
-        { label: "500 ms (Stable Scan)", value: 500 },
-        { label: "1000 ms (Energy Saving)", value: 1000 }
+        { label: "300 cm (Default)", value: 300 },
+        { label: "400 cm (High Safety)", value: 400 },
+        { label: "200 cm (Short Detection)", value: 200 }
       ]
+
+      // measurementInterval: [
+      //   { label: "200 ms (Fast Scan)", value: 200 },
+      //   { label: "300 ms (Default)", value: 300 },
+      //   { label: "500 ms (Stable Scan)", value: 500 },
+      //   { label: "1000 ms (Energy Saving)", value: 1000 }
+      // ]
 
       // buzzerResponsePattern: [
       //   "Continuous Warning",
@@ -156,23 +177,23 @@ const componentsData = [
     configOptions: {
       stairSafetyDistance: [
         {
-          label: "High Sensitivity (Maximum Safety)",
-          value: 400,
-          description: "Early warning — detect edge very far"
-        },
-        {
           label: "Medium Sensitivity (Recommended Default)",
-          value: 500,
+          value: 300,
           description: "Balanced walking safety"
         },
         {
+          label: "High Sensitivity (Maximum Safety)",
+          value: 200,
+          description: "Early warning — detect edge very far"
+        },
+        {
           label: "Low Sensitivity (Normal Walking)",
-          value: 708,
+          value: 350,
           description: "Warning activates closer to edge"
         },
         {
           label: "Critical Sensitivity (Drop-off Alarm Mode)",
-          value: 709,
+          value: 400,
           description: "Only trigger on potential hole or cliff"
         }
       ]
@@ -194,14 +215,41 @@ const componentsData = [
     configurable: true,
     configOptions: {
       recognitionInterval: [
-        { label: "3s (Fast)", value: 3000 },
         { label: "5s (Default)", value: 5000 },
+        { label: "3s (Fast)", value: 3000 },
         { label: "8s (Slow)", value: 8000 }
       ]
     }
   },
   {
     id: 5,
+    name: "Emergency System",
+    codeName: "EMERGENCY_SYSTEM",
+    type: "sensor",
+    description:
+      "Automated emergency response with customizable alert patterns",
+    icon: "mdi:alert-decagram",
+    configurable: true,
+    configOptions: {
+      emergencyDelay: [
+        { label: "1 second (Fast Response)", value: 1000 },
+        { label: "3 seconds (Default)", value: 3000 },
+        { label: "5 seconds (Extended Confirmation)", value: 20000 }
+      ],
+      emergencyBuzzerDuration: [
+        { label: "30 seconds (Short Alert)", value: 30000 },
+        { label: "60 seconds (Default)", value: 60000 },
+        { label: "120 seconds (Extended Alert)", value: 120000 }
+      ],
+      emergencyBuzzerInterval: [
+        { label: "Continuous (Maximum Urgency)", value: 0 },
+        { label: "Normal (Default)", value: 100 },
+        { label: "2 seconds (Slow)", value: 2000 }
+      ]
+    }
+  },
+  {
+    id: 6,
     name: "GPS Module",
     codeName: "GPS_MODULE",
     type: "sensor",
