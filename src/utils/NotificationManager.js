@@ -1,6 +1,59 @@
 // src/utils/NotificationManager.js
 
-export const triggerSmartCaneNotification = (type, message) => {
+const NOTIFICATION_META = {
+  WEATHER: {
+    title: "Weather Alert",
+    icon: "/vite.svg"
+  },
+  SOS: {
+    title: "Emergency Alert",
+    icon: "/vite.svg"
+  },
+  ARRIVAL: {
+    title: "Destination Reached",
+    icon: "/vite.svg"
+  },
+  FALL: {
+    title: "Fall Detected",
+    icon: "/vite.svg"
+  }
+};
+
+const resolveNotificationPayload = (
+  typeOrOptions,
+  maybeMessage,
+  maybeOptions
+) => {
+  if (typeof typeOrOptions === "object" && typeOrOptions !== null) {
+    return {
+      type: typeOrOptions.type || "SYSTEM",
+      title: typeOrOptions.title,
+      message: typeOrOptions.message || "",
+      icon: typeOrOptions.icon,
+      tag: typeOrOptions.tag,
+      requireInteraction: typeOrOptions.requireInteraction,
+      path: typeOrOptions.path
+    };
+  }
+
+  return {
+    type: typeOrOptions || "SYSTEM",
+    message: maybeMessage || "",
+    ...(maybeOptions || {})
+  };
+};
+
+export const triggerSmartCaneNotification = (
+  typeOrOptions,
+  maybeMessage,
+  maybeOptions
+) => {
+  const payload = resolveNotificationPayload(
+    typeOrOptions,
+    maybeMessage,
+    maybeOptions
+  );
+
   // 1. Check kung supported ng browser
   if (!("Notification" in window)) {
     console.warn("Browser does not support notifications.");
@@ -8,27 +61,13 @@ export const triggerSmartCaneNotification = (type, message) => {
   }
 
   // 2. Define Icons & Titles based on Type
-  let title = "Smart Cane Alert";
-  // Siguraduhin na ang '/vite.svg' ay nasa PUBLIC folder mo
-  let icon = "/vite.svg";
-
-  switch (type) {
-    case "WEATHER":
-      title = "Weather Warning 🌧️";
-      break;
-    case "SOS":
-      title = "EMERGENCY ALERT 🚨";
-      break;
-    case "ARRIVAL":
-      title = "Destination Reached 📍";
-      break;
-    default:
-      title = "Notification";
-  }
+  const meta = NOTIFICATION_META[payload.type] || {};
+  const title = payload.title || meta.title || "Smart Cane Alert";
+  const icon = payload.icon || meta.icon || "/vite.svg";
 
   // 3. Helper function to show notif
   const show = () => {
-    console.log(`Attempting to trigger: ${type}`); // Debug log
+    console.log(`Attempting to trigger: ${payload.type}`); // Debug log
 
     // A. HARDWARE VIBRATION (Unahin natin ito para sigurado)
     // Gagana ito sa Android Chrome
@@ -45,16 +84,20 @@ export const triggerSmartCaneNotification = (type, message) => {
     // B. VISUAL NOTIFICATION
     try {
       const notif = new Notification(title, {
-        body: message,
+        body: payload.message,
         icon: icon,
         silent: false, // Tutunog kung supported
-        tag: type, // Para hindi magpatong-patong
+        tag: payload.tag || payload.type, // Para hindi magpatong-patong
+        requireInteraction: Boolean(payload.requireInteraction),
         vibrate: [200, 100, 200] // Backup vibration pattern for Service Workers
       });
 
       // Optional: Click event
       notif.onclick = () => {
         window.focus();
+        if (payload.path) {
+          window.location.assign(payload.path);
+        }
         notif.close();
       };
 

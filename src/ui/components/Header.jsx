@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react"; // added useMemo van
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ import {
 import { logoutApi } from "@/api/authService";
 import DefaultProfile from "./DefaultProfile";
 import { capitalizeWords } from "@/utils/Capitalize";
+import { openNotificationTarget } from "@/utils/importantNotifications";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
 function showLogoutModal(message = "Logging out...") {
@@ -286,7 +287,7 @@ const NotificationDropdown = ({
                   onClick={() => {
                     if (!notif.read) markAsRead(notif.historyId); // mark read on click van
                     onClose();
-                    onNotifClick();
+                    onNotifClick(notif);
                   }}
                   className={`w-full text-left p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
                     !notif.read ? "bg-blue-50/50" : ""
@@ -373,14 +374,11 @@ const Header = () => {
 
   // real notifications van
   const { history, fetchHistory } = useActivityReportsStore();
-  const { readIds, getNotifications, markAllRead } = useNotificationsStore(); // added van
+  const { getNotifications, markAllRead } = useNotificationsStore(); // added van
   const currentGuardianId = user?.guardian_id ?? user?.guardianId; // added van
 
   // notifications from history van
-  const allNotifications = useMemo(
-    () => getNotifications(history, currentGuardianId),
-    [history, readIds, currentGuardianId]
-  );
+  const allNotifications = getNotifications(history, currentGuardianId);
 
   // real unread count van
   const unreadCount = allNotifications.filter((n) => !n.read).length;
@@ -392,8 +390,6 @@ const Header = () => {
   }, [fetchHistory]);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [showScanner, setShowScanner] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [imageError, setImageError] = useState(false);
   const [vipOpen, setVipOpen] = useState(false);
@@ -465,7 +461,6 @@ const Header = () => {
     }
     const enablePage = showLogoutModal("Logging out...");
     try {
-      setIsLoggingOut(true);
       const response = await logoutApi();
       if (response.success) {
         clearUser();
@@ -475,13 +470,11 @@ const Header = () => {
         clearRoute();
         clearHistory();
         setIsDropdownOpen(false);
-        setIsLoggingOut(false);
         navigate("/login");
       }
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
-      setIsLoggingOut(false);
       enablePage();
     }
   };
@@ -493,6 +486,10 @@ const Header = () => {
   const handleNavigateToNotifications = () => {
     setIsNotificationOpen(false);
     navigate("/notifications");
+  };
+
+  const handleNotificationItemClick = (notification) => {
+    openNotificationTarget(navigate, notification);
   };
 
   const showImage = profileImageUrl && !imageError;
@@ -669,7 +666,7 @@ const Header = () => {
                   notifications={allNotifications}
                   unreadCount={unreadCount}
                   onClose={() => setIsNotificationOpen(false)}
-                  onNotifClick={() => navigate("/activity-logs")}
+                  onNotifClick={handleNotificationItemClick}
                   onSeeAll={handleNavigateToNotifications}
                   onMarkAllRead={() => markAllRead(allIds)}
                 />

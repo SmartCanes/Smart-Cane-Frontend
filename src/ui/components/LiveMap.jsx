@@ -25,7 +25,6 @@ import {
   useDevicesStore,
   useRealtimeStore,
   useRouteStore,
-  useSettingsStore,
   useUserStore
 } from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
@@ -163,10 +162,8 @@ function LiveMap() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const ignoreNextFetch = useRef(false);
-  const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [markerPos, setMarkerPos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [previewPos, setPreviewPos] = useState(null);
   const [isUserFollowingCane, setIsUserFollowingCane] = useState(false);
@@ -199,12 +196,6 @@ function LiveMap() {
       setPreviewPos(null);
       setIsUserFollowingCane(false);
       setIsFreeMode(false);
-
-      setToast({
-        show: true,
-        type: "info",
-        message: "Destination reached and cleared"
-      });
     };
 
     const handleDestinationCleared = () => {
@@ -217,12 +208,6 @@ function LiveMap() {
       routeCoordsRef.current = [];
       activeIndexRef.current = 0;
       routeRequestedRef.current = false;
-
-      setToast({
-        show: true,
-        type: "info",
-        message: "Destination cleared"
-      });
     };
 
     wsApi.on("destinationReached", handleDestinationReached);
@@ -232,7 +217,7 @@ function LiveMap() {
       wsApi.off("destinationReached", handleDestinationReached);
       wsApi.off("destinationCleared", handleDestinationCleared);
     };
-  }, []);
+  }, [clearRoute]);
 
   useEffect(() => {
     if (!destinationPos || !selectedDevice) return;
@@ -276,7 +261,6 @@ function LiveMap() {
     const coords = routeCoordsRef.current;
     if (!coords.length) return;
 
-    let closestPointOnRoute = null;
     let minDist = Infinity;
     let segmentIndex = -1;
     let t = 0;
@@ -291,7 +275,6 @@ function LiveMap() {
 
       if (dist < minDist) {
         minDist = dist;
-        closestPointOnRoute = closest;
         segmentIndex = i;
         // Calculate interpolation factor
         const segmentLength = haversine(a, b);
@@ -420,7 +403,6 @@ function LiveMap() {
     if (mapRef.current) {
       mapRef.current.flyTo(position, 18);
     }
-    setMarkerPos(position);
     ignoreNextFetch.current = true;
     setSearchQuery(item.properties.name);
     setSearchResults([]);

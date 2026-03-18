@@ -5,6 +5,7 @@ import DashboardSide from "@/ui/components/DashboardSide";
 import EmergencyOverlay from "@/ui/components/EmergencyOverlay";
 import FallOverlay from "@/ui/components/FallOverlay";
 import Header from "@/ui/components/Header";
+import ImportantNotificationsBridge from "@/ui/components/ImportantNotificationsBridge";
 import TourGuide from "@/ui/components/TourGuide";
 import { createContext, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
@@ -104,6 +105,7 @@ const DashboardLayoutContent = () => {
         {activeAlert === "fall" && <FallOverlay fall={true} />}
         {activeAlert === "emergency" && <EmergencyOverlay emergency={true} />}
         <TourGuide />
+        <ImportantNotificationsBridge />
 
         <div
           className={`transition-all duration-300 ease-in-out z-20 w-full md:mt-0 ${showNav ? "mt-0" : "-mt-[var(--header-height)]"}`}

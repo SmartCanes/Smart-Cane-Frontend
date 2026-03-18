@@ -298,14 +298,14 @@ export const useRealtimeStore = create(
             gps: isDemoMode
               ? state.gps
               : {
-                status: 0,
-                sats: 0,
-                fix: false,
-                hdop: null,
-                ready: false,
-                lat: null,
-                lng: null
-              },
+                  status: 0,
+                  sats: 0,
+                  fix: false,
+                  hdop: null,
+                  ready: false,
+                  lat: null,
+                  lng: null
+                },
             componentHealth: {
               gpsStatus: false,
               obstacleDetectionStatus: false,
@@ -317,7 +317,7 @@ export const useRealtimeStore = create(
           };
         }),
       setDeviceConfig: (config) =>
-        set((state) => ({
+        set(() => ({
           deviceConfig: {
             ...config
           }
@@ -398,10 +398,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -499,10 +499,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                  g.guardianId === guardian.guardianId
-                    ? { ...g, ...guardian }
-                    : g
-                )
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
                 : [...d.guardians, guardian]
             };
           })
@@ -521,11 +521,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                ...d,
-                guardians: d.guardians.filter(
-                  (g) => g.guardianId !== guardianId
-                )
-              }
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
               : d
           )
         })),
@@ -655,7 +655,7 @@ export const useGuardiansStore = create(
 
 export const useRouteStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       destinationPos: null,
       routeCoords: [],
       completedRoute: [],
@@ -795,11 +795,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: true,
-                  trusted: true
-                }
+                    ...d,
+                    paired: true,
+                    connected: true,
+                    trusted: true
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -828,11 +828,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: true,
-                  trusted: true
-                }
+                    ...d,
+                    paired: true,
+                    connected: true,
+                    trusted: true
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -861,10 +861,10 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: false
-                }
+                    ...d,
+                    paired: true,
+                    connected: false
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -1004,7 +1004,7 @@ export const useActivityReportsStore = create(
             lastFetchedAt: Date.now(),
             error: null
           });
-        } catch (e) {
+        } catch {
           set({ error: "Failed to load activity history" });
         } finally {
           if (silent) set({ isRefreshing: false });
@@ -1166,6 +1166,29 @@ export const useSettingsStore = create(
 
 // Notif van copy mo na lang hanggang dulo
 const EXCLUDED_ACTIONS = new Set(["LOGIN"]);
+const MAX_EVENT_NOTIFICATIONS = 50;
+const MAX_EVENT_COOLDOWN_KEYS = 50;
+
+const toNotificationTime = (value) => {
+  if (!value) return 0;
+
+  const date = new Date(value);
+  const time = date.getTime();
+
+  return Number.isNaN(time) ? 0 : time;
+};
+
+const sortNotificationsByTimestamp = (notifications) =>
+  [...notifications].sort(
+    (a, b) => toNotificationTime(b.timestamp) - toNotificationTime(a.timestamp)
+  );
+
+const trimEventCooldowns = (cooldowns) =>
+  Object.fromEntries(
+    Object.entries(cooldowns)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, MAX_EVENT_COOLDOWN_KEYS)
+  );
 
 export const NOTIFICATION_META = {
   CREATE: {
@@ -1206,6 +1229,26 @@ export const NOTIFICATION_META = {
     label: "Relationship Updated",
     icon: "ph:users",
     color: "blue"
+  },
+  LIVE_WEATHER: {
+    label: "Weather Alert",
+    icon: "ph:cloud-rain",
+    color: "orange"
+  },
+  LIVE_EMERGENCY: {
+    label: "Emergency Alert",
+    icon: "ph:warning-octagon",
+    color: "red"
+  },
+  LIVE_FALL: {
+    label: "Fall Detected",
+    icon: "ph:person-simple-run",
+    color: "orange"
+  },
+  ROUTE_ARRIVAL: {
+    label: "Destination Reached",
+    icon: "ph:map-pin-area",
+    color: "green"
   }
 };
 
@@ -1213,6 +1256,8 @@ export const useNotificationsStore = create(
   persist(
     (set, get) => ({
       readIds: [],
+      eventNotifications: [],
+      eventCooldowns: {},
 
       markAsRead: (historyId) =>
         set((state) => ({
@@ -1228,9 +1273,76 @@ export const useNotificationsStore = create(
 
       clearRead: () => set({ readIds: [] }),
 
+      addEventNotification: (notification, options = {}) => {
+        const { dedupeKey = null, cooldownMs = 0 } = options;
+        const now = Date.now();
+        const lastTriggeredAt = dedupeKey
+          ? get().eventCooldowns?.[dedupeKey]
+          : null;
+
+        if (
+          dedupeKey &&
+          lastTriggeredAt &&
+          now - lastTriggeredAt < cooldownMs
+        ) {
+          return false;
+        }
+
+        const action = notification?.action || "SYSTEM_ALERT";
+        const meta = NOTIFICATION_META[action] || {};
+        const historyId = String(
+          notification?.historyId || notification?.id || crypto.randomUUID()
+        );
+
+        const normalizedNotification = {
+          id: historyId,
+          historyId,
+          action,
+          title: notification?.title || meta.label || "System Alert",
+          message:
+            notification?.message ||
+            "Important activity was detected on iCane.",
+          guardianName: notification?.guardianName || "iCane System",
+          color: notification?.color || meta.color || "gray",
+          icon: notification?.icon || meta.icon || "ph:bell",
+          timestamp: notification?.timestamp || new Date(now).toISOString(),
+          navigation: notification?.navigation || null
+        };
+
+        set((state) => {
+          const nextEventNotifications = sortNotificationsByTimestamp([
+            normalizedNotification,
+            ...state.eventNotifications.filter(
+              (item) => item.historyId !== historyId
+            )
+          ]).slice(0, MAX_EVENT_NOTIFICATIONS);
+
+          const nextCooldowns = dedupeKey
+            ? trimEventCooldowns({
+                ...state.eventCooldowns,
+                [dedupeKey]: now
+              })
+            : state.eventCooldowns;
+
+          return {
+            eventNotifications: nextEventNotifications,
+            eventCooldowns: nextCooldowns
+          };
+        });
+
+        return true;
+      },
+
       getNotifications: (history, currentGuardianId) => {
         const readIds = get().readIds;
-        return (history || [])
+        const eventNotifications = (get().eventNotifications || []).map(
+          (notification) => ({
+            ...notification,
+            read: readIds.includes(notification.historyId)
+          })
+        );
+
+        const historyNotifications = (history || [])
           .filter((h) => !EXCLUDED_ACTIONS.has(h.action))
           .filter((h) => Number(h.guardianId) !== Number(currentGuardianId))
           .map((h) => ({
@@ -1245,12 +1357,21 @@ export const useNotificationsStore = create(
             timestamp: h.createdAt,
             read: readIds.includes(h.historyId)
           }));
+
+        return sortNotificationsByTimestamp([
+          ...eventNotifications,
+          ...historyNotifications
+        ]);
       }
     }),
     {
       name: "notifications-storage",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ readIds: state.readIds })
+      partialize: (state) => ({
+        readIds: state.readIds,
+        eventNotifications: state.eventNotifications,
+        eventCooldowns: state.eventCooldowns
+      })
     }
   )
 );

@@ -112,8 +112,10 @@ const RecentAlerts = () => {
     loadWeather();
   }, [fetchHistory]);
 
+  const notifications = getNotifications(history, currentGuardianId);
+
   const latestAlerts = useMemo(() => {
-    const notifications = [...getNotifications(history, currentGuardianId)]
+    const recentNotifications = [...notifications]
       .sort((a, b) => {
         const aTime = toValidDate(a.timestamp)?.getTime() ?? 0;
         const bTime = toValidDate(b.timestamp)?.getTime() ?? 0;
@@ -144,8 +146,8 @@ const RecentAlerts = () => {
         ]
       : [];
 
-    return [...weatherAlert, ...notifications];
-  }, [history, currentGuardianId, getNotifications, weather]);
+    return [...weatherAlert, ...recentNotifications];
+  }, [notifications, weather]);
 
   const isWeatherLoading = weather === null;
 

@@ -7,6 +7,7 @@ import {
   useNotificationsStore,
   useUserStore
 } from "@/stores/useStore";
+import { openNotificationTarget } from "@/utils/importantNotifications";
 
 // ── color ng notification types van
 const COLOR = {
@@ -125,7 +126,7 @@ const NotifCard = ({ notif, onRead, onNavigate, index }) => {
 
   const handleClick = () => {
     if (!notif.read) onRead(notif.historyId);
-    onNavigate(notif.historyId);
+    onNavigate(notif);
   };
 
   return (
@@ -236,8 +237,7 @@ const Notifications = () => {
 
   // real data van
   const { history, isLoading, fetchHistory } = useActivityReportsStore();
-  const { readIds, getNotifications, markAsRead, markAllRead } =
-    useNotificationsStore();
+  const { getNotifications, markAsRead, markAllRead } = useNotificationsStore();
   const { user } = useUserStore();
   const currentGuardianId = user?.guardian_id ?? user?.guardianId;
 
@@ -247,10 +247,7 @@ const Notifications = () => {
   }, [fetchHistory]);
 
   //  real data van
-  const allNotifications = useMemo(
-    () => getNotifications(history, currentGuardianId),
-    [history, readIds, currentGuardianId]
-  );
+  const allNotifications = getNotifications(history, currentGuardianId);
 
   //  read/unread filter van
   const filtered = useMemo(() => {
@@ -264,8 +261,8 @@ const Notifications = () => {
   const allIds = allNotifications.map((n) => n.historyId);
 
   // navigate to activity reports van
-  const handleNavigate = (historyId) => {
-    navigate("/activity-logs", { state: { highlightId: historyId } });
+  const handleNavigate = (notification) => {
+    openNotificationTarget(navigate, notification);
   };
 
   return (
@@ -349,7 +346,7 @@ const Notifications = () => {
               <p className="text-gray-400">
                 {filter === "Unread"
                   ? "No unread notifications right now."
-                  : "Activity on your shared devices will appear here."}
+                  : "Critical live alerts and device activity will appear here."}
               </p>
             </div>
           ) : (

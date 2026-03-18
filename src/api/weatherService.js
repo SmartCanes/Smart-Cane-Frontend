@@ -13,6 +13,8 @@ const GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const RAIN_CODES = [
   51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99
 ];
+const STORM_CODES = [95, 96, 99];
+const STRONG_WIND_THRESHOLD = 35;
 
 // 0. Search locations via Open-Meteo Geocoding API
 export const searchLocations = async (query) => {
@@ -62,6 +64,68 @@ export const fetchWeatherAlert = async () => {
     };
   } catch (error) {
     console.error(error);
+    return null;
+  }
+};
+
+export const fetchImportantWeatherAlert = async (
+  lat = DEFAULT_LOCATION.lat,
+  lon = DEFAULT_LOCATION.lon,
+  locationName = DEFAULT_LOCATION.name
+) => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,wind_speed_10m&timezone=auto&forecast_days=1`
+    );
+
+    if (!response.ok)
+      throw new Error("Failed to fetch important weather alert");
+
+    const data = await response.json();
+    const code = data.current?.weathercode;
+    const temp = Math.round(data.current?.temperature_2m ?? 0);
+    const windSpeed = Math.round(data.current?.wind_speed_10m ?? 0);
+
+    const isStorm = STORM_CODES.includes(code);
+    const isRain = RAIN_CODES.includes(code);
+    const isWindy = windSpeed >= STRONG_WIND_THRESHOLD;
+
+    if (!isStorm && !isRain && !isWindy) {
+      return null;
+    }
+
+    const roundedLat = Number(lat).toFixed(2);
+    const roundedLon = Number(lon).toFixed(2);
+
+    if (isStorm) {
+      return {
+        type: "storm",
+        temp,
+        windSpeed,
+        locationName,
+        dedupeKey: `weather:${roundedLat}:${roundedLon}:storm`
+      };
+    }
+
+    if (isRain) {
+      return {
+        type: "rain",
+        temp,
+        windSpeed,
+        locationName,
+        dedupeKey: `weather:${roundedLat}:${roundedLon}:rain`
+      };
+    }
+
+    return {
+      type: "wind",
+      temp,
+      windSpeed,
+      locationName,
+      dedupeKey: `weather:${roundedLat}:${roundedLon}:wind`
+    };
+  } catch (error) {
+    console.error("Important weather alert error:", error);
     return null;
   }
 };

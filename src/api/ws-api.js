@@ -24,8 +24,8 @@ class SocketAPI {
     this.socket.onopen = () => {
       console.log("Connected to WebSocket server");
 
-      const connectCb = this.listeners.get("connect");
-      if (connectCb) connectCb();
+      const connectCallbacks = this.listeners.get("connect");
+      connectCallbacks?.forEach((cb) => cb());
 
       const serial = this.getSerial?.();
       if (serial) {
@@ -50,8 +50,8 @@ class SocketAPI {
     this.socket.onclose = (event) => {
       console.log("Disconnected from WebSocket server", event.reason);
 
-      const disconnectCb = this.listeners.get("disconnect");
-      if (disconnectCb) disconnectCb(event);
+      const disconnectCallbacks = this.listeners.get("disconnect");
+      disconnectCallbacks?.forEach((cb) => cb(event));
 
       setTimeout(() => this.connect(), 3000);
     };
@@ -63,8 +63,8 @@ class SocketAPI {
     this.socket.onmessage = (msg) => {
       try {
         const { event, payload } = JSON.parse(msg.data);
-        const cb = this.listeners.get(event);
-        if (cb) cb(payload);
+        const callbacks = this.listeners.get(event);
+        callbacks?.forEach((cb) => cb(payload));
       } catch (e) {
         console.error("Invalid message format", e);
       }
@@ -93,12 +93,29 @@ class SocketAPI {
   }
 
   on(event, cb) {
-    this.listeners.set(event, cb);
+    const existingListeners = this.listeners.get(event) || new Set();
+    existingListeners.add(cb);
+    this.listeners.set(event, existingListeners);
     this.connect();
   }
 
-  off(event) {
-    this.listeners.delete(event);
+  off(event, cb) {
+    if (!cb) {
+      this.listeners.delete(event);
+      return;
+    }
+
+    const existingListeners = this.listeners.get(event);
+    if (!existingListeners) return;
+
+    existingListeners.delete(cb);
+
+    if (existingListeners.size === 0) {
+      this.listeners.delete(event);
+      return;
+    }
+
+    this.listeners.set(event, existingListeners);
   }
 
   disconnect() {
