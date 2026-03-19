@@ -1,96 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import DefaultProfile from "@/ui/components/DefaultProfile";
 import FilterDropdown from "@/ui/components/FilterDropdown"; // ← NEW
-
-const activityLogs = [
-  {
-    id: 1,
-    vipName: "Althea De Vera",
-    activity: "Walk to Park",
-    location: "Home (123 Main St)",
-    destination: "Central Park",
-    duration: "45 mins",
-    dateTime: "Today at 2:45 PM",
-    date: new Date(),
-    status: "Completed"
-  },
-  {
-    id: 2,
-    vipName: "Sarah Chua",
-    activity: "Grocery Shopping",
-    location: "Home",
-    destination: "Whole Foods",
-    duration: "1 hr 15 mins",
-    dateTime: "Today at 10:30 AM",
-    date: new Date(),
-    status: "Completed"
-  },
-  {
-    id: 3,
-    vipName: "Isabel Garcia",
-    activity: "Daily Walk",
-    location: "Home",
-    destination: "Neighborhood Loop",
-    duration: "20 mins",
-    dateTime: "Yesterday at 4:00 PM",
-    date: (() => {
-      const d = new Date();
-      d.setDate(d.getDate() - 1);
-      return d;
-    })(),
-    status: "Completed"
-  },
-  {
-    id: 4,
-    vipName: "Daniel Flores",
-    activity: "Doctor Appointment",
-    location: "Clinic",
-    destination: "Home",
-    duration: "30 mins",
-    dateTime: "Yesterday at 1:15 PM",
-    date: (() => {
-      const d = new Date();
-      d.setDate(d.getDate() - 1);
-      return d;
-    })(),
-    status: "Completed"
-  },
-  {
-    id: 5,
-    vipName: "Jose Reyes",
-    activity: "Morning Walk",
-    location: "Home",
-    destination: "Local Cafe",
-    duration: "15 mins",
-    dateTime: "Oct 24, 2023 at 8:00 AM",
-    date: new Date("2023-10-24"),
-    status: "Ongoing"
-  },
-  {
-    id: 6,
-    vipName: "Rafael Mendoza",
-    activity: "Emergency Assistance Request",
-    location: "5th Avenue Crossing",
-    destination: "Nearest Safe Point",
-    duration: "2 mins",
-    dateTime: "Today at 3:12 PM",
-    date: new Date(),
-    status: "Emergency"
-  },
-  {
-    id: 7,
-    vipName: "Gabriel Reyes",
-    activity: "Fall Detected",
-    location: "Near Pharmacy Entrance",
-    destination: "Awaiting Assistance",
-    duration: "1 min",
-    dateTime: "Today at 11:08 AM",
-    date: new Date(),
-    status: "Fall Detected"
-  }
-];
+import { useDeviceLogsStore, useDevicesStore } from "@/stores/useStore";
 
 // filter config to van
 const STATUS_OPTIONS = [
@@ -101,37 +15,27 @@ const STATUS_OPTIONS = [
   { value: "Cancelled", label: "Cancelled", dotColor: "bg-gray-400" }
 ];
 
-const getStatusColor = (status) => {
-  switch (status.toLowerCase()) {
-    case "completed":
-      return "bg-green-100 text-green-700";
-    case "ongoing":
-      return "bg-blue-100 text-blue-700";
-    case "cancelled":
-      return "bg-red-100 text-red-700";
-    case "emergency":
-      return "bg-red-100 text-red-700";
-    case "fall detected":
-      return "bg-orange-100 text-orange-700";
-    default:
-      return "bg-gray-100 text-gray-700";
-  }
-};
-
-const isSameDay = (a, b) =>
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
-
 const DeviceLogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const { selectedDevice } = useDevicesStore();
+  const {
+    getDeviceLogs,
+    isLoadingDeviceLogs,
+    getDeviceLogsError,
+    fetchDeviceLogs
+  } = useDeviceLogsStore();
+  const navigate = useNavigate();
 
   //filter state to van
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const deviceId = selectedDevice?.deviceId;
+  const deviceLogs = getDeviceLogs(deviceId);
+  const isLoading = isLoadingDeviceLogs(deviceId);
+  const error = getDeviceLogsError(deviceId);
 
   const handleStatusChange = (value) => {
     setSelectedStatuses((prev) =>
@@ -157,14 +61,12 @@ const DeviceLogs = () => {
     selectedStatuses.length + (startDate || endDate ? 1 : 0);
 
   // filtering to van
-  const filteredLogs = activityLogs.filter((log) => {
+  const filteredLogs = deviceLogs.filter((log) => {
     const matchesSearch =
       log.vipName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.activity.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (log.device || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (log.guardian?.name || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      (log.guardianName || "").toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       selectedStatuses.length === 0 || selectedStatuses.includes(log.status);
@@ -184,7 +86,51 @@ const DeviceLogs = () => {
   });
 
   const totalItems = filteredLogs.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const totalPages = Math.max(Math.ceil(totalItems / itemsPerPage), 1);
+
+  useEffect(() => {
+    // Clamp the current page when filters shrink the result set
+    setCurrentPage((prev) => Math.min(prev, totalPages));
+  }, [totalPages]);
+
+  useEffect(() => {
+    if (!deviceId) return;
+
+    // Initial fetch + light polling to keep device logs fresh
+    fetchDeviceLogs(deviceId, { silent: true, selectedDevice });
+    const interval = setInterval(() => {
+      fetchDeviceLogs(deviceId, { silent: true, selectedDevice });
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [deviceId, fetchDeviceLogs, selectedDevice]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedLogs = filteredLogs.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  const handleViewOnMap = (log) => {
+    if (!Array.isArray(log.coordinates) || log.coordinates.length !== 2) return;
+
+    const label =
+      log.isRoute && log.destination
+        ? `${log.location} → ${log.destination}`
+        : log.lastLocation || log.location;
+
+    navigate("/dashboard", {
+      state: {
+        historyLocation: {
+          coords: log.coordinates,
+          label,
+          timestamp: log.dateTime,
+          status: log.status,
+          id: log.id
+        }
+      }
+    });
+  };
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
@@ -240,6 +186,12 @@ const DeviceLogs = () => {
             Monitor and track detailed VIP movement and activity history.
           </p>
         </div>
+
+        {error && !deviceLogs.length && (
+          <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* search and filter to van */}
         <div className="bg-white rounded-t-2xl p-4 md:p-6 border-b border-gray-100 shadow-sm">
@@ -327,7 +279,23 @@ const DeviceLogs = () => {
           )}
         </div>
 
-        {totalItems === 0 ? (
+        {isLoading && !deviceLogs.length ? (
+          <div className="bg-white rounded-b-2xl shadow-sm p-8 md:p-16 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+              <Icon
+                icon="eos-icons:loading"
+                className="text-3xl text-gray-400 animate-spin"
+              />
+            </div>
+            <h3 className="text-lg font-semibold text-[#11285A] mb-1">
+              Loading device logs
+            </h3>
+            <p className="text-sm text-gray-500 max-w-xs mx-auto">
+              Pulling the latest fall, emergency, and route updates for this
+              device.
+            </p>
+          </div>
+        ) : totalItems === 0 ? (
           <div className="bg-white rounded-b-2xl shadow-sm p-8 md:p-16 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
               <Icon icon="ph:files" className="text-3xl text-gray-400" />
@@ -353,65 +321,63 @@ const DeviceLogs = () => {
         ) : (
           <>
             {/* Desktop Table*/}
-            <div className="hidden lg:block bg-white rounded-b-2xl shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1000px]">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        VIP
-                      </th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        VIP Name
-                      </th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Activity
-                      </th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Locations
-                      </th>
-                      <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Date & Time
-                      </th>
-                      <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {filteredLogs.map((log) => (
-                      <tr
-                        key={log.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="py-4 px-6">
-                          <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
-                            {log.avatar ? (
-                              <img
-                                loading="lazy"
-                                src={resolveProfileImageSrc(log.avatar)}
-                                alt={log.vipName}
-                                className="w-full h-full object-cover bg-gray-200"
-                              />
-                            ) : (
-                              <DefaultProfile
-                                bgColor="bg-primary-100"
-                                userInitial={log.vipName?.charAt(0)}
-                              />
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <p className="text-sm font-medium text-gray-800 whitespace-nowrap">
-                            {log.vipName}
-                          </p>
-                        </td>
-                        <td className="py-4 px-6">
-                          <p className="text-sm text-gray-700 font-medium">
-                            {log.activity}
-                          </p>
-                        </td>
-                        <td className="py-4 px-6">
+            <div className="hidden lg:block bg-white rounded-b-2xl shadow-sm overflow-x-auto">
+              <table className="w-full min-w-[1100px]">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      VIP
+                    </th>
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      VIP Name
+                    </th>
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Activity
+                    </th>
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Locations
+                    </th>
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Date & Time
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {paginatedLogs.map((log) => (
+                    <tr
+                      key={log.id}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => handleViewOnMap(log)}
+                    >
+                      <td className="py-4 px-6">
+                        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
+                          {log.avatar ? (
+                            <img
+                              loading="lazy"
+                              src={resolveProfileImageSrc(log.avatar)}
+                              alt={log.vipName}
+                              className="w-full h-full object-cover bg-gray-200"
+                            />
+                          ) : (
+                            <DefaultProfile
+                              bgColor="bg-primary-100"
+                              userInitial={log.vipName?.charAt(0)}
+                            />
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <p className="text-sm font-medium text-gray-800 whitespace-nowrap">
+                          {log.vipName}
+                        </p>
+                      </td>
+                      <td className="py-4 px-6">
+                        <p className="text-sm text-gray-700 font-medium">
+                          {log.activity}
+                        </p>
+                      </td>
+                      <td className="py-4 px-6">
+                        {log.isRoute ? (
                           <div className="flex flex-col gap-1 text-xs">
                             <div className="flex items-center gap-1.5 text-gray-600 truncate max-w-[200px]">
                               <Icon
@@ -435,38 +401,39 @@ const DeviceLogs = () => {
                               </span>
                             </div>
                           </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="flex flex-col">
-                            <p className="text-sm text-gray-800 whitespace-nowrap">
-                              {log.dateTime}
-                            </p>
-                            <p className="text-xs text-gray-500 font-medium">
-                              {log.duration}
-                            </p>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-xs text-gray-600 truncate max-w-[200px]">
+                            <Icon
+                              icon="ph:map-pin-line"
+                              className="text-blue-500 shrink-0"
+                            />
+                            <span className="truncate" title={log.lastLocation}>
+                              {log.lastLocation || "Location unavailable"}
+                            </span>
                           </div>
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(log.status)}`}
-                          >
-                            {log.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        )}
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex flex-col">
+                          <p className="text-sm text-gray-800 whitespace-nowrap">
+                            {log.dateTime}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             {/* Mobile / Tablet Card View  */}
             <div className="lg:hidden bg-white rounded-b-2xl shadow-sm overflow-hidden">
               <div className="divide-y divide-gray-100">
-                {filteredLogs.map((log) => (
+                {paginatedLogs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-4 hover:bg-gray-50 transition-colors"
+                    className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => handleViewOnMap(log)}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3 min-w-0">
@@ -494,53 +461,61 @@ const DeviceLogs = () => {
                           </span>
                         </div>
                       </div>
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${getStatusColor(log.status)}`}
-                      >
-                        {log.status}
-                      </span>
                     </div>
                     <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4">
                       <div className="flex items-center gap-2 mb-2 text-[#11285A] font-semibold text-sm">
                         <Icon icon="ph:activity-light" className="text-lg" />
                         {log.activity}
                       </div>
-                      <div className="flex flex-col gap-2 relative pl-2">
-                        <div className="absolute left-[13px] top-[14px] bottom-[14px] w-px bg-gray-300"></div>
-                        <div className="flex items-start gap-2 text-xs">
-                          <div className="shrink-0 mt-0.5 relative z-10 w-4 h-4 rounded-full bg-blue-100 border border-blue-300 flex items-center justify-center">
+                      {log.isRoute ? (
+                        <div className="flex flex-col gap-2 relative pl-2">
+                          <div className="absolute left-[13px] top-[14px] bottom-[14px] w-px bg-gray-300"></div>
+                          <div className="flex items-start gap-2 text-xs">
+                            <div className="shrink-0 mt-0.5 relative z-10 w-4 h-4 rounded-full bg-blue-100 border border-blue-300 flex items-center justify-center">
+                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-gray-500 block text-[10px] uppercase font-semibold">
+                                Origin
+                              </span>
+                              <span className="text-gray-700 truncate block">
+                                {log.location}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2 text-xs">
+                            <div className="shrink-0 mt-0.5 relative z-10 w-4 h-4 rounded-full bg-green-100 border border-green-300 flex items-center justify-center">
+                              <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-gray-500 block text-[10px] uppercase font-semibold">
+                                Destination
+                              </span>
+                              <span className="text-gray-700 truncate block">
+                                {log.destination}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-xs">
+                          <div className="shrink-0 mt-0.5 w-4 h-4 rounded-full bg-blue-100 border border-blue-300 flex items-center justify-center">
                             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                           </div>
                           <div className="flex-1 min-w-0">
                             <span className="text-gray-500 block text-[10px] uppercase font-semibold">
-                              Origin
+                              Last location
                             </span>
                             <span className="text-gray-700 truncate block">
-                              {log.location}
+                              {log.lastLocation || "Location unavailable"}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-start gap-2 text-xs">
-                          <div className="shrink-0 mt-0.5 relative z-10 w-4 h-4 rounded-full bg-green-100 border border-green-300 flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-gray-500 block text-[10px] uppercase font-semibold">
-                              Destination
-                            </span>
-                            <span className="text-gray-700 truncate block">
-                              {log.destination}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <p className="text-xs text-gray-800 font-medium">
                         {log.dateTime}
-                      </p>
-                      <p className="text-[10px] text-gray-500 inline-flex items-center gap-1">
-                        <Icon icon="ph:clock" /> {log.duration}
                       </p>
                     </div>
                   </div>

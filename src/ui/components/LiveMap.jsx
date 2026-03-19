@@ -13,7 +13,7 @@ import { Icon } from "@iconify/react";
 import "leaflet/dist/leaflet.css";
 import { AnimatePresence, motion } from "framer-motion";
 import L from "leaflet";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CustomZoomControl from "./CustomZoomControl";
 import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
@@ -23,6 +23,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import {
+  useDeviceLogsStore,
   useDevicesStore,
   useRealtimeStore,
   useRouteStore,
@@ -49,6 +50,26 @@ const circleAvatarIcon = (imgUrl, size = 40) => {
     iconAnchor: [size / 2, size / 2]
   });
 };
+
+const historyMarkerIcon = () =>
+  L.divIcon({
+    html: `<div style="
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #4f46e5;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      border: 2px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    ">H</div>`,
+    className: "",
+    iconSize: [36, 36],
+    iconAnchor: [18, 36]
+  });
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -151,9 +172,11 @@ const haversine = (a, b) => {
 
 function LiveMap() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useUserStore();
   const { guardianPosition, gps } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
+  const { fetchDeviceLogs } = useDeviceLogsStore();
   const {
     destinationPos,
     routeCoords,
@@ -178,6 +201,7 @@ function LiveMap() {
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
   const [showLocationEnablePrompt, setShowLocationEnablePrompt] =
     useState(false);
+  const [historyPin, setHistoryPin] = useState(null);
   const routeRequestedRef = useRef(false);
   const routeCoordsRef = useRef([]);
   const activeIndexRef = useRef(0);
@@ -191,6 +215,40 @@ function LiveMap() {
   }, []);
 
   useEffect(() => {
+    const incoming = location.state?.historyLocation;
+
+    if (
+      incoming &&
+      Array.isArray(incoming.coords) &&
+      incoming.coords.length === 2
+    ) {
+      setHistoryPin({
+        coords: incoming.coords,
+        label: incoming.label || "History location",
+        timestamp: incoming.timestamp || null
+      });
+
+      setPreviewPos(null);
+      setIsUserFollowingCane(false);
+      setIsFreeMode(true);
+
+      if (mapRef.current) {
+        mapRef.current.flyTo(incoming.coords, 17, { duration: 0.6 });
+      }
+    }
+
+    if (incoming) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.pathname, location.state?.historyLocation, navigate]);
+
+  useEffect(() => {
+    const refreshDeviceLogs = () => {
+      if (!selectedDevice?.deviceId) return;
+
+      fetchDeviceLogs(selectedDevice.deviceId);
+    };
+
     const handleDestinationReached = () => {
       const { clearRoute } = useRouteStore.getState();
 
@@ -204,6 +262,7 @@ function LiveMap() {
       setPreviewPos(null);
       setIsUserFollowingCane(false);
       setIsFreeMode(false);
+      refreshDeviceLogs();
     };
 
     const handleDestinationCleared = () => {
@@ -216,6 +275,7 @@ function LiveMap() {
       routeCoordsRef.current = [];
       activeIndexRef.current = 0;
       routeRequestedRef.current = false;
+      refreshDeviceLogs();
     };
 
     wsApi.on("destinationReached", handleDestinationReached);
@@ -225,7 +285,7 @@ function LiveMap() {
       wsApi.off("destinationReached", handleDestinationReached);
       wsApi.off("destinationCleared", handleDestinationCleared);
     };
-  }, [clearRoute]);
+  }, [clearRoute, fetchDeviceLogs, selectedDevice]);
 
   useEffect(() => {
     if (!destinationPos || !selectedDevice) return;
@@ -249,6 +309,10 @@ function LiveMap() {
         destinationPos,
         routeCoords: leafletCoords
       });
+
+      if (selectedDevice?.deviceId) {
+        fetchDeviceLogs(selectedDevice.deviceId);
+      }
     };
 
     const handleError = () => {
@@ -263,7 +327,7 @@ function LiveMap() {
       wsApi.off("routeResponse", handleRoute);
       wsApi.off("routeError", handleError);
     };
-  }, [destinationPos, selectedDevice]);
+  }, [destinationPos, fetchDeviceLogs, selectedDevice, setRoute, clearRoute]);
 
   const advanceRoute = (currentPos) => {
     const coords = routeCoordsRef.current;
@@ -486,6 +550,17 @@ function LiveMap() {
     setIsFreeMode(true);
   };
 
+  const handleFocusOnHistory = () => {
+    if (!historyPin?.coords || !mapRef.current) return;
+    mapRef.current.flyTo(historyPin.coords, 17, { duration: 0.5 });
+    setIsFreeMode(true);
+    setIsUserFollowingCane(false);
+  };
+
+  const handleClearHistoryPin = () => {
+    setHistoryPin(null);
+  };
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       const active = document.fullscreenElement === mapContainerRef.current;
@@ -575,127 +650,169 @@ function LiveMap() {
           : "relative w-full h-full z-0"
       }
     >
-      <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between gap-2 ">
-        {/* Search container */}
-        <div className="flex-1 sm:max-w-sm relative">
-          <input
-            type="text"
-            placeholder="Search location..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full h-12 pl-12 pr-12 font-poppins text-sm text-gray-800 placeholder-gray-400 border-0
-          shadow-md transition duration-200 ease-in-out focus:outline-none bg-white 
-          ${isLoading || (searchQuery && searchResults.length > 0) ? "rounded-t-2xl" : "rounded-2xl"}`}
-          />
+      <div className="absolute top-4 left-4 right-4 z-30 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col lg:flex-row gap-2 lg:items-center lg:flex-1 min-w-0">
+          {/* Search container */}
+          <div className="flex-1 sm:max-w-sm relative">
+            <input
+              type="text"
+              placeholder="Search location..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`w-full h-12 pl-12 pr-12 font-poppins text-sm text-gray-800 placeholder-gray-400 border-0
+            shadow-md transition duration-200 ease-in-out focus:outline-none bg-white 
+            ${isLoading || (searchQuery && searchResults.length > 0) ? "rounded-t-2xl" : "rounded-2xl"}`}
+            />
 
-          <Icon
-            icon="mdi:magnify"
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg pointer-events-none"
-          />
+            <Icon
+              icon="mdi:magnify"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-lg pointer-events-none"
+            />
 
-          {searchQuery && !isLoading && (
+            {searchQuery && !isLoading && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+
+            <AnimatePresence>
+              {(isLoading || searchResults.length > 0) && (
+                <motion.div className="absolute top-12 left-0 w-full bg-white shadow-md rounded-b-2xl overflow-hidden z-20">
+                  {isLoading
+                    ? Array(3)
+                        .fill(0)
+                        .map((_, idx) => (
+                          <motion.div
+                            key={idx}
+                            className="h-12 px-3 flex items-center gap-3 border-b border-gray-100"
+                            initial={{ opacity: 0.3 }}
+                            animate={{ opacity: 1 }}
+                            transition={{
+                              repeat: Infinity,
+                              repeatType: "mirror",
+                              duration: 0.8,
+                              delay: idx * 0.1
+                            }}
+                          >
+                            <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                            <div className="flex-1 space-y-1 py-1">
+                              <div className="h-3 bg-gray-200 rounded w-3/4" />
+                              <div className="h-2 bg-gray-200 rounded w-1/2" />
+                            </div>
+                          </motion.div>
+                        ))
+                    : searchResults.map((result, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => handleResultClick(result)}
+                          className="cursor-pointer hover:bg-blue-50 transition border-b border-gray-100 p-3 flex items-center gap-3"
+                        >
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Icon
+                              icon="mdi:map-marker"
+                              className="text-blue-600 text-xl"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-poppins font-medium text-sm text-gray-800">
+                              {result.properties.name}
+                            </p>
+                            <p className="font-poppins text-xs text-gray-500">
+                              {result.properties.city ||
+                                result.properties.state ||
+                                "Philippines"}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {historyPin?.coords && (
+            <div className="bg-white/95 backdrop-blur-sm border border-gray-200 shadow-md rounded-2xl p-3 flex items-start gap-3 w-full lg:w-auto">
+              <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold shrink-0">
+                H
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] uppercase font-semibold text-gray-500">
+                  History pin
+                </p>
+                <p
+                  className="text-sm font-semibold text-gray-800 truncate"
+                  title={historyPin.label}
+                >
+                  {historyPin.label}
+                </p>
+                {historyPin.timestamp ? (
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    {historyPin.timestamp}
+                  </p>
+                ) : null}
+                <button
+                  onClick={handleFocusOnHistory}
+                  className="mt-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 cursor-pointer"
+                >
+                  View on map
+                </button>
+              </div>
+              <button
+                onClick={handleClearHistoryPin}
+                className="p-2 text-gray-400 hover:text-gray-600 transition cursor-pointer shrink-0"
+                aria-label="Close history pin"
+              >
+                <Icon icon="mdi:close" className="text-lg" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          {destinationPos && (
             <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition cursor-pointer"
+              onClick={() => {
+                if (!selectedDevice?.deviceSerialNumber) return;
+
+                wsApi.emit("clearDestination");
+              }}
+              className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 hover:text-red-600 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 hover:border-red-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
+              aria-label="Clear destination"
             >
-              ✕
+              <Icon
+                icon="mdi:close"
+                className="w-5 h-5 group-hover:scale-110 transition-transform"
+              />
+              <span className="hidden sm:inline ml-2">Clear Destination</span>
             </button>
           )}
-
-          <AnimatePresence>
-            {(isLoading || searchResults.length > 0) && (
-              <motion.div className="absolute top-12 left-0 w-full bg-white shadow-md rounded-b-2xl overflow-hidden z-20">
-                {isLoading
-                  ? Array(3)
-                      .fill(0)
-                      .map((_, idx) => (
-                        <motion.div
-                          key={idx}
-                          className="h-12 px-3 flex items-center gap-3 border-b border-gray-100"
-                          initial={{ opacity: 0.3 }}
-                          animate={{ opacity: 1 }}
-                          transition={{
-                            repeat: Infinity,
-                            repeatType: "mirror",
-                            duration: 0.8,
-                            delay: idx * 0.1
-                          }}
-                        >
-                          <div className="w-10 h-10 bg-gray-200 rounded-full" />
-                          <div className="flex-1 space-y-1 py-1">
-                            <div className="h-3 bg-gray-200 rounded w-3/4" />
-                            <div className="h-2 bg-gray-200 rounded w-1/2" />
-                          </div>
-                        </motion.div>
-                      ))
-                  : searchResults.map((result, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => handleResultClick(result)}
-                        className="cursor-pointer hover:bg-blue-50 transition border-b border-gray-100 p-3 flex items-center gap-3"
-                      >
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Icon
-                            icon="mdi:map-marker"
-                            className="text-blue-600 text-xl"
-                          />
-                        </div>
-                        <div>
-                          <p className="font-poppins font-medium text-sm text-gray-800">
-                            {result.properties.name}
-                          </p>
-                          <p className="font-poppins text-xs text-gray-500">
-                            {result.properties.city ||
-                              result.properties.state ||
-                              "Philippines"}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        {destinationPos && (
           <button
-            onClick={() => {
-              if (!selectedDevice?.deviceSerialNumber) return;
-
-              wsApi.emit("clearDestination");
-            }}
-            className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 hover:text-red-600 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 hover:border-red-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
-            aria-label="Clear destination"
+            onClick={handleToggleFullscreen}
+            className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
+            aria-label={
+              isFullscreen || isPseudoFullscreen
+                ? "Exit fullscreen map"
+                : "Open fullscreen map"
+            }
           >
             <Icon
-              icon="mdi:close"
+              icon={
+                isFullscreen || isPseudoFullscreen
+                  ? "mdi:fullscreen-exit"
+                  : "mdi:fullscreen"
+              }
               className="w-5 h-5 group-hover:scale-110 transition-transform"
             />
-            <span className="hidden sm:inline ml-2">Clear Destination</span>
+            <span className="hidden sm:inline ml-2">
+              {isFullscreen || isPseudoFullscreen
+                ? "Exit Fullscreen"
+                : "Fullscreen"}
+            </span>
           </button>
-        )}
-        <button
-          onClick={handleToggleFullscreen}
-          className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
-          aria-label={
-            isFullscreen || isPseudoFullscreen
-              ? "Exit fullscreen map"
-              : "Open fullscreen map"
-          }
-        >
-          <Icon
-            icon={
-              isFullscreen || isPseudoFullscreen
-                ? "mdi:fullscreen-exit"
-                : "mdi:fullscreen"
-            }
-            className="w-5 h-5 group-hover:scale-110 transition-transform"
-          />
-          <span className="hidden sm:inline ml-2">
-            {isFullscreen || isPseudoFullscreen
-              ? "Exit Fullscreen"
-              : "Fullscreen"}
-          </span>
-        </button>
+        </div>
       </div>
 
       <MapContainer
@@ -734,6 +851,22 @@ function LiveMap() {
             icon={circleAvatarIcon(selectedDevice?.vip?.vipImageUrl)}
             popupText="VIP current location."
           />
+        )}
+
+        {historyPin?.coords && (
+          <Marker position={historyPin.coords} icon={historyMarkerIcon()}>
+            <Popup>
+              <div className="space-y-1">
+                <p className="font-semibold text-sm">History location</p>
+                <p className="text-xs text-gray-700">{historyPin.label}</p>
+                {historyPin.timestamp ? (
+                  <p className="text-[11px] text-gray-500">
+                    {historyPin.timestamp}
+                  </p>
+                ) : null}
+              </div>
+            </Popup>
+          </Marker>
         )}
 
         <SetMapBounds />

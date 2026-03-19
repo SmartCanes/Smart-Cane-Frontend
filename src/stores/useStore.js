@@ -1,12 +1,28 @@
 import {
   getAccountHistory,
   getAllDeviceGuardians,
+  getDeviceLog,
   getDevices,
   getPendingInvites
 } from "@/api/backendService";
 import { wsApi } from "@/api/ws-api";
+import {
+  mapActivityHistoryToNotifications,
+  mapDeviceLogsToNotifications,
+  normalizeDeviceLogs
+} from "@/utils/deviceLogs";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+
+const ensureSerialPrefix = (serial) => {
+  if (!serial) return null;
+
+  const normalized = String(serial).trim();
+  if (!normalized) return null;
+
+  const withoutPrefix = normalized.replace(/^SC-?/i, "");
+  return `SC-${withoutPrefix}`;
+};
 
 export const useUserStore = create(
   persist(
@@ -293,9 +309,9 @@ export const useRealtimeStore = create(
                   set((state) =>
                     state._guardianWatchId === watchId
                       ? {
-                          _guardianWatchId: null,
-                          guardianPosition: null
-                        }
+                        _guardianWatchId: null,
+                        guardianPosition: null
+                      }
                       : state
                   );
                 },
@@ -359,14 +375,14 @@ export const useRealtimeStore = create(
             gps: isDemoMode
               ? state.gps
               : {
-                  status: 0,
-                  sats: 0,
-                  fix: false,
-                  hdop: null,
-                  ready: false,
-                  lat: null,
-                  lng: null
-                },
+                status: 0,
+                sats: 0,
+                fix: false,
+                hdop: null,
+                ready: false,
+                lat: null,
+                lng: null
+              },
             componentHealth: {
               gpsStatus: false,
               obstacleDetectionStatus: false,
@@ -459,10 +475,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                  d.deviceId === updatedDevice.deviceId
-                    ? { ...d, ...updatedDevice }
-                    : d
-                )
+                d.deviceId === updatedDevice.deviceId
+                  ? { ...d, ...updatedDevice }
+                  : d
+              )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -560,10 +576,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                    g.guardianId === guardian.guardianId
-                      ? { ...g, ...guardian }
-                      : g
-                  )
+                  g.guardianId === guardian.guardianId
+                    ? { ...g, ...guardian }
+                    : g
+                )
                 : [...d.guardians, guardian]
             };
           })
@@ -582,11 +598,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                  ...d,
-                  guardians: d.guardians.filter(
-                    (g) => g.guardianId !== guardianId
-                  )
-                }
+                ...d,
+                guardians: d.guardians.filter(
+                  (g) => g.guardianId !== guardianId
+                )
+              }
               : d
           )
         })),
@@ -856,11 +872,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: true,
-                    trusted: true
-                  }
+                  ...d,
+                  paired: true,
+                  connected: true,
+                  trusted: true
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -889,11 +905,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: true,
-                    trusted: true
-                  }
+                  ...d,
+                  paired: true,
+                  connected: true,
+                  trusted: true
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -922,10 +938,10 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: false
-                  }
+                  ...d,
+                  paired: true,
+                  connected: false
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -1039,8 +1055,6 @@ export const useActivityReportsStore = create(
         const { history } = get();
         const hasCache = Array.isArray(history) && history.length > 0;
 
-        // if cache exists -> refresh silently (keeps UI)
-        // else -> show loading
         await get().fetch({ silent: hasCache });
       },
       fetch: async ({ silent } = { silent: false }) => {
@@ -1092,6 +1106,215 @@ export const useActivityReportsStore = create(
       onRehydrateStorage: () => (state) => {
         state?.setState?.({ hasHydrated: true });
       }
+    }
+  )
+);
+
+export const useDeviceLogsStore = create(
+  persist(
+    (set, get) => ({
+      logsByDevice: {},
+      isLoadingByDevice: {},
+      isRefreshingByDevice: {},
+      errorsByDevice: {},
+      lastFetchedAtByDevice: {},
+      lastRequestedAtByDevice: {},
+      blockedUntilByDevice: {},
+
+      fetchDeviceLogs: async (deviceId, options = {}) => {
+        if (!deviceId) return;
+
+        const {
+          force = false,
+          silent = undefined,
+          selectedDevice = null
+        } = options;
+        const cachedLogs = get().logsByDevice?.[deviceId] || [];
+        const hasCache = Array.isArray(cachedLogs) && cachedLogs.length > 0;
+        const lastRequestedAt = get().lastRequestedAtByDevice?.[deviceId] || 0;
+        const blockedUntil = get().blockedUntilByDevice?.[deviceId] || 0;
+        const now = Date.now();
+
+        if (!force) {
+          if (blockedUntil > now) return;
+          if (now - lastRequestedAt < 15_000) return;
+        }
+
+        await get().fetch({
+          deviceId,
+          selectedDevice,
+          silent: silent ?? hasCache
+        });
+      },
+
+      fetch: async ({ deviceId, selectedDevice = null, silent = false }) => {
+        if (!deviceId) return;
+
+        const { isLoadingByDevice, isRefreshingByDevice } = get();
+
+        if (!silent && isLoadingByDevice?.[deviceId]) return;
+        if (silent && isRefreshingByDevice?.[deviceId]) return;
+
+        const resolvedDevice =
+          selectedDevice ||
+          useDevicesStore
+            .getState()
+            .devices.find(
+              (device) => Number(device.deviceId) === Number(deviceId)
+            ) ||
+          null;
+
+        if (silent) {
+          set((state) => ({
+            isRefreshingByDevice: {
+              ...state.isRefreshingByDevice,
+              [deviceId]: true
+            },
+            errorsByDevice: {
+              ...state.errorsByDevice,
+              [deviceId]: null
+            },
+            lastRequestedAtByDevice: {
+              ...state.lastRequestedAtByDevice,
+              [deviceId]: Date.now()
+            }
+          }));
+        } else {
+          set((state) => ({
+            isLoadingByDevice: {
+              ...state.isLoadingByDevice,
+              [deviceId]: true
+            },
+            errorsByDevice: {
+              ...state.errorsByDevice,
+              [deviceId]: null
+            },
+            lastRequestedAtByDevice: {
+              ...state.lastRequestedAtByDevice,
+              [deviceId]: Date.now()
+            }
+          }));
+        }
+
+        try {
+          const serialSource =
+            resolvedDevice?.deviceSerialNumber ||
+            resolvedDevice?.device_serial_number ||
+            (typeof deviceId === "string" ? deviceId : null);
+
+          const deviceSerial = ensureSerialPrefix(serialSource);
+
+          if (!deviceSerial) {
+            throw new Error("Device serial unavailable for log request");
+          }
+
+          const response = await getDeviceLog(deviceSerial);
+          if (response?.success === false) throw new Error("Failed");
+
+          const responseSerial = ensureSerialPrefix(
+            response?.data?.deviceSerialNumber || response?.deviceSerialNumber
+          );
+
+          const effectiveSerial = responseSerial || deviceSerial;
+
+          const rawLogs =
+            response?.data?.logs ||
+            response?.data?.deviceLogs ||
+            response?.data?.data?.logs ||
+            response?.logs ||
+            response?.deviceLogs ||
+            (Array.isArray(response) ? response : []);
+
+          const normalizedDevice = resolvedDevice
+            ? { ...resolvedDevice, deviceSerialNumber: effectiveSerial }
+            : { deviceSerialNumber: effectiveSerial };
+
+          const normalizedLogs = normalizeDeviceLogs(
+            rawLogs,
+            normalizedDevice
+          );
+
+          set((state) => ({
+            logsByDevice: {
+              ...state.logsByDevice,
+              [deviceId]: normalizedLogs
+            },
+            lastFetchedAtByDevice: {
+              ...state.lastFetchedAtByDevice,
+              [deviceId]: Date.now()
+            },
+            errorsByDevice: {
+              ...state.errorsByDevice,
+              [deviceId]: null
+            },
+            blockedUntilByDevice: {
+              ...state.blockedUntilByDevice,
+              [deviceId]: 0
+            }
+          }));
+        } catch (error) {
+          const statusCode = error?.response?.status;
+          const retryDelay = statusCode === 404 ? 5 * 60 * 1000 : 30 * 1000;
+
+          set((state) => ({
+            errorsByDevice: {
+              ...state.errorsByDevice,
+              [deviceId]:
+                statusCode === 404
+                  ? "Device logs endpoint is not available."
+                  : "Failed to load device logs"
+            },
+            blockedUntilByDevice: {
+              ...state.blockedUntilByDevice,
+              [deviceId]: Date.now() + retryDelay
+            }
+          }));
+        } finally {
+          if (silent) {
+            set((state) => ({
+              isRefreshingByDevice: {
+                ...state.isRefreshingByDevice,
+                [deviceId]: false
+              }
+            }));
+          } else {
+            set((state) => ({
+              isLoadingByDevice: {
+                ...state.isLoadingByDevice,
+                [deviceId]: false
+              }
+            }));
+          }
+        }
+      },
+
+      getDeviceLogs: (deviceId) => get().logsByDevice?.[deviceId] || [],
+      isLoadingDeviceLogs: (deviceId) =>
+        Boolean(get().isLoadingByDevice?.[deviceId]),
+      isRefreshingDeviceLogs: (deviceId) =>
+        Boolean(get().isRefreshingByDevice?.[deviceId]),
+      getDeviceLogsError: (deviceId) =>
+        get().errorsByDevice?.[deviceId] || null,
+
+      clearDeviceLogs: () =>
+        set({
+          logsByDevice: {},
+          isLoadingByDevice: {},
+          isRefreshingByDevice: {},
+          errorsByDevice: {},
+          lastFetchedAtByDevice: {},
+          lastRequestedAtByDevice: {},
+          blockedUntilByDevice: {}
+        })
+    }),
+    {
+      name: "device-logs-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        logsByDevice: state.logsByDevice,
+        lastFetchedAtByDevice: state.lastFetchedAtByDevice,
+        blockedUntilByDevice: state.blockedUntilByDevice
+      })
     }
   )
 );
@@ -1226,7 +1449,6 @@ export const useSettingsStore = create(
 );
 
 // Notif van copy mo na lang hanggang dulo
-const EXCLUDED_ACTIONS = new Set(["LOGIN"]);
 const MAX_EVENT_NOTIFICATIONS = 50;
 const MAX_EVENT_COOLDOWN_KEYS = 50;
 
@@ -1380,9 +1602,9 @@ export const useNotificationsStore = create(
 
           const nextCooldowns = dedupeKey
             ? trimEventCooldowns({
-                ...state.eventCooldowns,
-                [dedupeKey]: now
-              })
+              ...state.eventCooldowns,
+              [dedupeKey]: now
+            })
             : state.eventCooldowns;
 
           return {
@@ -1394,33 +1616,26 @@ export const useNotificationsStore = create(
         return true;
       },
 
-      getNotifications: (history, currentGuardianId) => {
+      getNotifications: (history, deviceLogs, currentGuardianId) => {
         const readIds = get().readIds;
-        const eventNotifications = (get().eventNotifications || []).map(
-          (notification) => ({
-            ...notification,
-            read: readIds.includes(notification.historyId)
-          })
-        );
+        const deviceNotifications = mapDeviceLogsToNotifications(
+          deviceLogs
+        ).map((notification) => ({
+          ...notification,
+          read: readIds.includes(notification.historyId)
+        }));
 
-        const historyNotifications = (history || [])
-          .filter((h) => !EXCLUDED_ACTIONS.has(h.action))
-          .filter((h) => Number(h.guardianId) !== Number(currentGuardianId))
-          .map((h) => ({
-            id: h.historyId,
-            historyId: h.historyId,
-            action: h.action,
-            title: NOTIFICATION_META[h.action]?.label || h.action,
-            message: h.description || "—",
-            guardianName: h.guardianName || "Unknown",
-            color: NOTIFICATION_META[h.action]?.color || "gray",
-            icon: NOTIFICATION_META[h.action]?.icon || "ph:bell",
-            timestamp: h.createdAt,
-            read: readIds.includes(h.historyId)
-          }));
+        const historyNotifications = mapActivityHistoryToNotifications(
+          history,
+          currentGuardianId,
+          NOTIFICATION_META
+        ).map((notification) => ({
+          ...notification,
+          read: readIds.includes(notification.historyId)
+        }));
 
         return sortNotificationsByTimestamp([
-          ...eventNotifications,
+          ...deviceNotifications,
           ...historyNotifications
         ]);
       }

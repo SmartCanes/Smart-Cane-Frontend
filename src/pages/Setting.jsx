@@ -10,6 +10,7 @@ import Modal from "@/ui/components/Modal";
 import PermissionPreferencesModal from "@/ui/components/PermissionPreferencesModal";
 import {
   useActivityReportsStore,
+  useDeviceLogsStore,
   useDevicesStore,
   useGuardiansStore,
   useRealtimeStore,
@@ -296,6 +297,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
   const { clearUser } = useUserStore();
   const { clearDevices } = useDevicesStore();
   const { clearHistory } = useActivityReportsStore();
+  const { clearDeviceLogs } = useDeviceLogsStore();
   const { clearAllGuardians } = useGuardiansStore();
   const { disconnectWs } = useRealtimeStore();
   const { clearRoute } = useRouteStore();
@@ -438,6 +440,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
           disconnectWs();
           clearRoute();
           clearHistory();
+          clearDeviceLogs();
           navigate("/login", { replace: true });
         }
       } finally {

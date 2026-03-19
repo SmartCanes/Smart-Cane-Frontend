@@ -194,3 +194,8 @@ export const deletePushSubscription = (payload) =>
       }
     })
   );
+
+export const getDeviceLog = (deviceSerial) =>
+  handleRequest(() =>
+    backendApi.get(`/device/log/${encodeURIComponent(deviceSerial)}`)
+  );

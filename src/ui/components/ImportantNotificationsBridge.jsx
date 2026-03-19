@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
 import { DEFAULT_LOCATION } from "@/api/weatherService";
 import { wsApi } from "@/api/ws-api";
-import { useDevicesStore, useRealtimeStore } from "@/stores/useStore";
+import {
+  useDeviceLogsStore,
+  useDevicesStore,
+  useRealtimeStore
+} from "@/stores/useStore";
 import {
   checkImportantWeatherUpdates,
   notifyEmergencyAlert,
@@ -36,6 +40,7 @@ const buildIncidentContext = (latestContext, payload = {}) => ({
 const ImportantNotificationsBridge = () => {
   const { emergency, fall, gps } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
+  const { fetchDeviceLogs } = useDeviceLogsStore();
   const latestContextRef = useRef({
     vipName: "the VIP",
     deviceSerial: null,
@@ -86,8 +91,15 @@ const ImportantNotificationsBridge = () => {
   }, [fall]);
 
   useEffect(() => {
+    const refreshDeviceLogs = () => {
+      if (!selectedDevice?.deviceId) return;
+
+      fetchDeviceLogs(selectedDevice.deviceId);
+    };
+
     const handleDestinationReached = () => {
       notifyRouteArrival(latestContextRef.current);
+      refreshDeviceLogs();
     };
 
     const handleEmergencyTriggered = (payload) => {
@@ -95,6 +107,7 @@ const ImportantNotificationsBridge = () => {
         buildIncidentContext(latestContextRef.current, payload)
       );
       previousAlertStateRef.current.emergency = true;
+      refreshDeviceLogs();
     };
 
     const handleEmergencyStopped = () => {
@@ -104,6 +117,7 @@ const ImportantNotificationsBridge = () => {
     const handleFallDetected = (payload) => {
       notifyFallAlert(buildIncidentContext(latestContextRef.current, payload));
       previousAlertStateRef.current.fall = true;
+      refreshDeviceLogs();
     };
 
     const handleFallCleared = () => {
@@ -123,7 +137,7 @@ const ImportantNotificationsBridge = () => {
       wsApi.off("fallDetected", handleFallDetected);
       wsApi.off("fallCleared", handleFallCleared);
     };
-  }, []);
+  }, [fetchDeviceLogs, selectedDevice]);
 
   useEffect(() => {
     checkImportantWeatherUpdates(latestContextRef.current);

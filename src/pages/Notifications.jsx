@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import {
   useActivityReportsStore,
+  useDeviceLogsStore,
+  useDevicesStore,
   useNotificationsStore,
-  useSettingsStore,
   useUserStore
 } from "@/stores/useStore";
 import { openNotificationTarget } from "@/utils/importantNotifications";
@@ -237,35 +238,22 @@ const Notifications = () => {
   const [filter, setFilter] = useState("All");
 
   // real data van
-  const { history, isLoading, fetchHistory } = useActivityReportsStore();
+  const { history, isLoading } = useActivityReportsStore();
+  const { getDeviceLogs, isLoadingDeviceLogs } = useDeviceLogsStore();
+  const { selectedDevice } = useDevicesStore();
   const { getNotifications, markAsRead, markAllRead } = useNotificationsStore();
-  const { settings } = useSettingsStore();
   const { user } = useUserStore();
   const currentGuardianId = user?.guardian_id ?? user?.guardianId;
-
-  useEffect(() => {
-    const needsLocation = !settings?.privacy?.location;
-    const needsPush = !settings?.notifications?.push;
-
-    if (!needsLocation && !needsPush) return;
-
-    const required = [
-      ...(needsLocation ? ["location"] : []),
-      ...(needsPush ? ["push"] : [])
-    ].join(",");
-
-    navigate(`/settings?permissions=required&required=${required}`, {
-      replace: true
-    });
-  }, [navigate, settings?.notifications?.push, settings?.privacy?.location]);
-
-  // fetch history van
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+  const deviceLogs = getDeviceLogs(selectedDevice?.deviceId);
 
   //  real data van
-  const allNotifications = getNotifications(history, currentGuardianId);
+  const allNotifications = getNotifications(
+    history,
+    deviceLogs,
+    currentGuardianId
+  );
+  const isPageLoading =
+    isLoading || isLoadingDeviceLogs(selectedDevice?.deviceId);
 
   //  read/unread filter van
   const filtered = useMemo(() => {
@@ -296,7 +284,7 @@ const Notifications = () => {
               Notifications
             </h2>
             <p className="text-gray-500 text-sm mt-1">
-              {isLoading
+              {isPageLoading
                 ? "Loading…"
                 : `${allNotifications.length} total • ${unreadCount} unread`}
             </p>
@@ -348,7 +336,7 @@ const Notifications = () => {
 
         {/* Notifications listvan ── */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          {isLoading ? (
+          {isPageLoading ? (
             //  skeleton  loading van
             <Skeleton />
           ) : filtered.length === 0 ? (
@@ -389,7 +377,7 @@ const Notifications = () => {
         </div>
 
         {/* ── Stats cards van ── */}
-        {!isLoading && allNotifications.length > 0 && (
+        {!isPageLoading && allNotifications.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* total count van */}
             <div className="bg-white p-4 rounded-xl shadow-sm">

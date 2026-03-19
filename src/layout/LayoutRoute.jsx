@@ -1,6 +1,8 @@
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import SidebarContent from "@/ui/components/SidebarContent";
 import {
+  useActivityReportsStore,
+  useDeviceLogsStore,
   useDevicesStore,
   useGuardiansStore,
   useRealtimeStore,
@@ -14,24 +16,35 @@ const ProtectedLayout = () => {
   // const navigate = useNavigate();
   // const [isAuthChecked, setIsAuthChecked] = useState(false);
   const { user } = useUserStore();
-  const { fetchDevices } = useDevicesStore();
+  const { fetchDevices, selectedDevice } = useDevicesStore();
+  const { fetchHistory } = useActivityReportsStore();
+  const { fetchDeviceLogs } = useDeviceLogsStore();
   const { startGuardianTracking, stopGuardianTracking } = useRealtimeStore();
   const locationTrackingEnabled = useSettingsStore(
     (state) => state.settings.privacy.location
   );
   const { fetchGuardiansAndInvites } = useGuardiansStore();
+  const selectedDeviceId = selectedDevice?.deviceId;
 
   useEffect(() => {
     fetchDevices();
     fetchGuardiansAndInvites();
+    fetchHistory();
 
     const interval = setInterval(() => {
       fetchDevices();
       fetchGuardiansAndInvites();
+      fetchHistory();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [fetchDevices, fetchGuardiansAndInvites]);
+  }, [fetchDevices, fetchGuardiansAndInvites, fetchHistory]);
+
+  useEffect(() => {
+    if (!selectedDeviceId) return;
+
+    fetchDeviceLogs(selectedDeviceId);
+  }, [fetchDeviceLogs, selectedDeviceId]);
 
   useEffect(() => {
     let isMounted = true;

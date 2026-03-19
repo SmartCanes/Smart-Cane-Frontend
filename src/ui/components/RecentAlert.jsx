@@ -1,11 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Icon } from "@iconify/react";
 import { fetchWeatherAlert } from "@/api/weatherService";
-import {
-  useActivityReportsStore,
-  useNotificationsStore,
-  useUserStore
-} from "@/stores/useStore";
+import { useDeviceLogsStore, useDevicesStore } from "@/stores/useStore";
 
 const toValidDate = (raw) => {
   if (!raw) return null;
@@ -91,15 +87,11 @@ const getNotificationStyle = (color) => {
 const RecentAlerts = () => {
   const [weather, setWeather] = useState(null);
 
-  const { history, fetchHistory } = useActivityReportsStore();
-  const { getNotifications } = useNotificationsStore();
-  const { user } = useUserStore();
-
-  const currentGuardianId = user?.guardian_id ?? user?.guardianId;
+  const { selectedDevice } = useDevicesStore();
+  const { getDeviceLogs } = useDeviceLogsStore();
+  const deviceLogs = getDeviceLogs(selectedDevice?.deviceId);
 
   useEffect(() => {
-    fetchHistory();
-
     const loadWeather = async () => {
       try {
         const data = await fetchWeatherAlert();
@@ -110,12 +102,10 @@ const RecentAlerts = () => {
     };
 
     loadWeather();
-  }, [fetchHistory]);
-
-  const notifications = getNotifications(history, currentGuardianId);
+  }, []);
 
   const latestAlerts = useMemo(() => {
-    const recentNotifications = [...notifications]
+    const recentDeviceLogs = [...deviceLogs]
       .sort((a, b) => {
         const aTime = toValidDate(a.timestamp)?.getTime() ?? 0;
         const bTime = toValidDate(b.timestamp)?.getTime() ?? 0;
@@ -123,8 +113,8 @@ const RecentAlerts = () => {
       })
       .slice(0, weather ? 2 : 3)
       .map((item) => ({
-        id: `notif-${item.id}`,
-        type: "notification",
+        id: item.id,
+        type: "device-log",
         title: item.title,
         message: item.message,
         icon: item.icon || "ph:bell",
@@ -146,8 +136,8 @@ const RecentAlerts = () => {
         ]
       : [];
 
-    return [...weatherAlert, ...recentNotifications];
-  }, [notifications, weather]);
+    return [...weatherAlert, ...recentDeviceLogs];
+  }, [deviceLogs, weather]);
 
   const isWeatherLoading = weather === null;
 
@@ -222,7 +212,7 @@ const RecentAlerts = () => {
                     {alert.title}
                   </p>
                   <p className={`text-xs ${style.messageColor}`}>
-                    {alert.message} - {formatAlertTime(alert.timestamp)}
+                    {alert.message}
                   </p>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Icon } from "@iconify/react";
 import ActivityActions from "@/ui/components/ActivityActions";
 import DefaultProfile from "@/ui/components/DefaultProfile";
@@ -49,12 +49,7 @@ const ActivityLogs = () => {
   // filter to van
   const [selectedActions, setSelectedActions] = useState([]);
 
-  const { history, isLoading, isRefreshing, error, fetchHistory } =
-    useActivityReportsStore();
-
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+  const { history, isLoading, error } = useActivityReportsStore();
 
   // kasama to van
   const handleActionChange = (value) => {

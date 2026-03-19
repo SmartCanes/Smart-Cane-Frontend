@@ -7,6 +7,7 @@ import { BlinkingIcon } from "@/wrapper/MotionWrapper";
 import { Link } from "react-router-dom";
 import {
   useActivityReportsStore,
+  useDeviceLogsStore,
   useDevicesStore,
   useGuardiansStore,
   useNotificationsStore, // added van
@@ -367,27 +368,28 @@ const Header = () => {
   const { setMobileMenuOpen, isMobileMenuOpen } = useUIStore();
   const { devices, clearDevices, selectedDevice, setSelectedDevice } =
     useDevicesStore();
+  const { clearDeviceLogs, getDeviceLogs } = useDeviceLogsStore();
   const { clearAllGuardians } = useGuardiansStore();
   const { disconnectWs, componentHealth } = useRealtimeStore();
   const { clearRoute } = useRouteStore();
   const { clearHistory } = useActivityReportsStore();
 
   // real notifications van
-  const { history, fetchHistory } = useActivityReportsStore();
+  const { history } = useActivityReportsStore();
   const { getNotifications, markAllRead } = useNotificationsStore(); // added van
   const currentGuardianId = user?.guardian_id ?? user?.guardianId; // added van
+  const deviceLogs = getDeviceLogs(selectedDevice?.deviceId);
 
   // notifications from history van
-  const allNotifications = getNotifications(history, currentGuardianId);
+  const allNotifications = getNotifications(
+    history,
+    deviceLogs,
+    currentGuardianId
+  );
 
   // real unread count van
   const unreadCount = allNotifications.filter((n) => !n.read).length;
   const allIds = allNotifications.map((n) => n.historyId); // added van
-
-  // fetch history van
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
@@ -469,6 +471,7 @@ const Header = () => {
         disconnectWs();
         clearRoute();
         clearHistory();
+        clearDeviceLogs();
         setIsDropdownOpen(false);
         navigate("/login");
       }
