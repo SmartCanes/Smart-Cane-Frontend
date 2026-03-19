@@ -647,7 +647,7 @@ const Header = () => {
             <button
               data-tour="tour-notifications"
               onClick={handleNotificationClick}
-              className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors notification-button"
+              className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors notification-button cursor-pointer"
               aria-label="Notifications"
             >
               <Icon icon="ph:bell" className="w-6 h-6" />
