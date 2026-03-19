@@ -51,13 +51,13 @@ const circleAvatarIcon = (imgUrl, size = 40) => {
   });
 };
 
-const historyMarkerIcon = () =>
+const historyMarkerIcon = (color = "#4f46e5", label = "H") =>
   L.divIcon({
     html: `<div style="
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: #4f46e5;
+      background: ${color};
       color: white;
       display: flex;
       align-items: center;
@@ -65,7 +65,7 @@ const historyMarkerIcon = () =>
       font-weight: 700;
       border: 2px solid white;
       box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-    ">H</div>`,
+    ">${label || "H"}</div>`,
     className: "",
     iconSize: [36, 36],
     iconAnchor: [18, 36]
@@ -225,7 +225,11 @@ function LiveMap() {
       setHistoryPin({
         coords: incoming.coords,
         label: incoming.label || "History location",
-        timestamp: incoming.timestamp || null
+        timestamp: incoming.timestamp || null,
+        status: incoming.status || null,
+        activity: incoming.activity || incoming.action || null,
+        color: incoming.color || null,
+        icon: incoming.icon || null
       });
 
       setPreviewPos(null);
@@ -735,12 +739,20 @@ function LiveMap() {
 
           {historyPin?.coords && (
             <div className="bg-white/95 backdrop-blur-sm border border-gray-200 shadow-md rounded-2xl p-3 flex items-start gap-3 w-full lg:w-auto">
-              <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold shrink-0">
-                H
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center font-semibold shrink-0"
+                style={{
+                  background: historyPin.color || "#eef2ff",
+                  color: historyPin.color ? "#fff" : "#4f46e5"
+                }}
+              >
+                {(historyPin.activity || historyPin.label || "H")
+                  .slice(0, 1)
+                  .toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] uppercase font-semibold text-gray-500">
-                  History pin
+                  {historyPin.activity || "History pin"}
                 </p>
                 <p
                   className="text-sm font-semibold text-gray-800 truncate"
@@ -748,6 +760,11 @@ function LiveMap() {
                 >
                   {historyPin.label}
                 </p>
+                {/* {historyPin.activity ? (
+                  <p className="text-xs text-gray-600 mt-0.5 truncate">
+                    {historyPin.activity}
+                  </p>
+                ) : null} */}
                 {historyPin.timestamp ? (
                   <p className="text-[11px] text-gray-500 mt-0.5">
                     {historyPin.timestamp}
@@ -854,11 +871,24 @@ function LiveMap() {
         )}
 
         {historyPin?.coords && (
-          <Marker position={historyPin.coords} icon={historyMarkerIcon()}>
+          <Marker
+            position={historyPin.coords}
+            icon={historyMarkerIcon(
+              historyPin.color || undefined,
+              (historyPin.activity || historyPin.label || "H")
+                .slice(0, 1)
+                .toUpperCase()
+            )}
+          >
             <Popup>
               <div className="space-y-1">
-                <p className="font-semibold text-sm">History location</p>
+                <p className="font-semibold text-sm">
+                  {historyPin.status || "History location"}
+                </p>
                 <p className="text-xs text-gray-700">{historyPin.label}</p>
+                {historyPin.activity ? (
+                  <p className="text-xs text-gray-600">{historyPin.activity}</p>
+                ) : null}
                 {historyPin.timestamp ? (
                   <p className="text-[11px] text-gray-500">
                     {historyPin.timestamp}

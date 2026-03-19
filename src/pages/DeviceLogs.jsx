@@ -126,7 +126,11 @@ const DeviceLogs = () => {
           label,
           timestamp: log.dateTime,
           status: log.status,
-          id: log.id
+          id: log.id,
+          activity: log.activity,
+          action: log.action || log.activityType,
+          color: log.color,
+          icon: log.icon
         }
       }
     });
