@@ -55,7 +55,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow
 });
 
-const SmoothMarker = ({ position, icon, duration = 400 }) => {
+const SmoothMarker = ({ position, icon, duration = 400, popupText }) => {
   const markerRef = useRef(null);
   const [currentPos, setCurrentPos] = useState(position);
 
@@ -89,7 +89,11 @@ const SmoothMarker = ({ position, icon, duration = 400 }) => {
     animatePosition(currentPos, position, duration);
   }, [position]);
 
-  return <Marker position={currentPos} icon={icon} ref={markerRef} />;
+  return (
+    <Marker position={currentPos} icon={icon} ref={markerRef}>
+      {popupText ? <Popup>{popupText}</Popup> : null}
+    </Marker>
+  );
 };
 
 const FitBoundsToRoute = ({ canePos, destPos, route, shouldFit }) => {
@@ -668,6 +672,7 @@ function LiveMap() {
           </span>
         </button>
       </div>
+
       <MapContainer
         center={guardianPosition}
         zoom={16}

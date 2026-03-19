@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import LiveMap from "@/ui/components/LiveMap";
 import RecentAlerts from "@/ui/components/RecentAlert";
@@ -6,11 +6,7 @@ import GuardianNetwork from "@/ui/components/GuardianNetwork";
 import SendNote from "@/ui/components/SendNote";
 import { motion, useAnimation } from "framer-motion";
 import { useRealtimeStore } from "@/stores/useStore";
-
-const formatCoordinate = (value) => {
-  if (value == null || Number.isNaN(Number(value))) return "--";
-  return Number(value).toFixed(6);
-};
+import { getLocationByCoords } from "@/api/locationsApi";
 
 const getGpsBadge = (gps) => {
   if (!gps || Number(gps.status) === 0) {
@@ -36,8 +32,76 @@ const getGpsBadge = (gps) => {
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("track");
   const controls = useAnimation();
-  const { gps } = useRealtimeStore();
+  const { gps, lastKnownCanePosition } = useRealtimeStore();
+  const [lastLocationLabel, setLastLocationLabel] = useState("Resolving...");
+  const [isResolvingLastLocation, setIsResolvingLastLocation] = useState(false);
+  const lastResolvedCoordsRef = useRef(null);
   const badge = getGpsBadge(gps);
+  const canePosition =
+    gps?.lat != null && gps?.lng != null ? [gps.lat, gps.lng] : null;
+  const trackedCanePosition = canePosition || lastKnownCanePosition;
+
+  const formatLocationLabel = (feature) => {
+    const props = feature?.properties || {};
+    const parts = [
+      props.name,
+      props.street,
+      props.district,
+      props.suburb,
+      props.city,
+      props.state
+    ].filter(Boolean);
+
+    if (parts.length > 0) {
+      return parts.join(", ");
+    }
+
+    return "Unknown area";
+  };
+
+  useEffect(() => {
+    if (!trackedCanePosition) {
+      setLastLocationLabel("No location available");
+      return;
+    }
+
+    const [lat, lon] = trackedCanePosition;
+    const coordKey = `${Number(lat).toFixed(5)},${Number(lon).toFixed(5)}`;
+
+    if (lastResolvedCoordsRef.current === coordKey) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const resolveLastLocation = async () => {
+      setIsResolvingLastLocation(true);
+
+      try {
+        const data = await getLocationByCoords(lat, lon);
+        const label = formatLocationLabel(data?.features?.[0]);
+
+        if (!cancelled) {
+          setLastLocationLabel(label);
+          lastResolvedCoordsRef.current = coordKey;
+        }
+      } catch {
+        if (!cancelled) {
+          setLastLocationLabel("Unable to resolve location");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsResolvingLastLocation(false);
+        }
+      }
+    };
+
+    resolveLastLocation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [trackedCanePosition]);
 
   return (
     <>
@@ -129,9 +193,9 @@ const Dashboard = () => {
                           Last Location
                         </p>
                         <p className="text-sm sm:text-base font-medium text-gray-800 break-all">
-                          {gps?.lat != null && gps?.lng != null
-                            ? `${formatCoordinate(gps.lat)}, ${formatCoordinate(gps.lng)}`
-                            : "No location available"}
+                          {isResolvingLastLocation
+                            ? "Resolving location..."
+                            : lastLocationLabel}
                         </p>
                       </div>
                     </div>

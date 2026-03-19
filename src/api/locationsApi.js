@@ -78,3 +78,13 @@ export const getLocation = (query) =>
     );
     return res;
   });
+
+export const getLocationByCoords = (lat, lon) =>
+  handleRequest(async () => {
+    const res = await api.get(
+      `https://photon.komoot.io/reverse?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=1`
+    );
+    return res;
+  });
+
+
