@@ -253,22 +253,83 @@ export const useRealtimeStore = create(
 
       setGuardianLocation: (loc) => set({ guardianPosition: loc }),
 
-      startGuardianTracking: () => {
-        if ("geolocation" in navigator && get()._guardianWatchId === null) {
-          const watchId = navigator.geolocation.watchPosition(
+      startGuardianTracking: () =>
+        new Promise((resolve) => {
+          if (!("geolocation" in navigator)) {
+            console.error("Geolocation is not supported by this browser.");
+            resolve({
+              success: false,
+              reason: "unsupported"
+            });
+            return;
+          }
+
+          const existingWatchId = get()._guardianWatchId;
+          if (existingWatchId !== null) {
+            resolve({
+              success: true,
+              reason: "already-tracking"
+            });
+            return;
+          }
+
+          navigator.geolocation.getCurrentPosition(
             (position) => {
               const { latitude, longitude } = position.coords;
-              set({ guardianPosition: [latitude, longitude] });
+              const watchId = navigator.geolocation.watchPosition(
+                (trackedPosition) => {
+                  const {
+                    latitude: trackedLatitude,
+                    longitude: trackedLongitude
+                  } = trackedPosition.coords;
+
+                  set({
+                    guardianPosition: [trackedLatitude, trackedLongitude]
+                  });
+                },
+                (error) => {
+                  console.error("Failed to track guardian:", error.message);
+                  navigator.geolocation.clearWatch(watchId);
+                  set((state) =>
+                    state._guardianWatchId === watchId
+                      ? {
+                          _guardianWatchId: null,
+                          guardianPosition: null
+                        }
+                      : state
+                  );
+                },
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+              );
+
+              set({
+                _guardianWatchId: watchId,
+                guardianPosition: [latitude, longitude]
+              });
+
+              resolve({
+                success: true,
+                coords: [latitude, longitude]
+              });
             },
-            (error) =>
-              console.error("Failed to track guardian:", error.message),
+            (error) => {
+              console.error(
+                "Failed to start guardian tracking:",
+                error.message
+              );
+              set({
+                _guardianWatchId: null,
+                guardianPosition: null
+              });
+              resolve({
+                success: false,
+                reason: error?.code,
+                error
+              });
+            },
             { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
           );
-          set({ _guardianWatchId: watchId });
-        } else if (!("geolocation" in navigator)) {
-          console.error("Geolocation is not supported by this browser.");
-        }
-      },
+        }),
 
       stopGuardianTracking: () => {
         const watchId = get()._guardianWatchId;
@@ -1040,13 +1101,13 @@ export const useSettingsStore = create(
     (set, get) => ({
       settings: {
         notifications: {
-          push: true,
+          push: false,
           email: true,
           sms: false,
           emergency: true
         },
         privacy: {
-          location: true,
+          location: false,
           twoFactor: false,
           analytics: false
         },
@@ -1137,14 +1198,14 @@ export const useSettingsStore = create(
         set({
           settings: {
             notifications: {
-              push: true,
+              push: false,
               email: true,
               sms: false,
               emergency: true
             },
             privacy: {
-              location: true,
-              twoFactor: true,
+              location: false,
+              twoFactor: false,
               analytics: false
             },
             demoMode: false

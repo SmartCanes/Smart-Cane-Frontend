@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
 import { changePasswordApi, logoutApi } from "@/api/authService";
-import { useNavigate } from "react-router-dom";
+import {
+  ensureBrowserPushSubscription,
+  removeBrowserPushSubscription
+} from "@/utils/pushNotifications";
+import { useLocation, useNavigate } from "react-router-dom";
 import Modal from "@/ui/components/Modal";
+import PermissionPreferencesModal from "@/ui/components/PermissionPreferencesModal";
 import {
   useActivityReportsStore,
   useDevicesStore,
@@ -620,10 +625,22 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 };
 
 const Setting = () => {
-  const { settings, setSettings, toggleNotification, toggleDemoMode } =
+  const location = useLocation();
+  const { settings, toggleDemoMode, updateNotifications, updatePrivacy } =
     useSettingsStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [permissionsModal, setPermissionsModal] = useState({
+    isOpen: false,
+    highlightedKey: null
+  });
+  const [permissionError, setPermissionError] = useState("");
+  const [permissionBusyKey, setPermissionBusyKey] = useState(null);
+  const hasAutoOpenedPermissionsRef = useRef(false);
+  const [browserPermissionState, setBrowserPermissionState] = useState({
+    location: "unsupported",
+    push: "unsupported"
+  });
 
   const {
     _guardianWatchId,
@@ -635,42 +652,281 @@ const Setting = () => {
   const isLocationTrackingEnabled = _guardianWatchId !== null;
 
   useEffect(() => {
-    setSettings((prev) => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        location: isLocationTrackingEnabled
-      }
-    }));
-  }, [isLocationTrackingEnabled, setSettings]);
+    updatePrivacy({ location: isLocationTrackingEnabled });
+  }, [isLocationTrackingEnabled, updatePrivacy]);
 
-  const handleNotificationToggle = (key) => {
-    toggleNotification(key);
+  useEffect(() => {
+    let cancelled = false;
+    let geolocationPermissionStatus;
+
+    const syncPermissions = async () => {
+      const nextPushState =
+        typeof Notification === "undefined"
+          ? "unsupported"
+          : Notification.permission;
+
+      let nextLocationState = "unsupported";
+      if ("geolocation" in navigator) {
+        nextLocationState = isLocationTrackingEnabled ? "granted" : "prompt";
+      }
+
+      if ("permissions" in navigator && navigator.permissions?.query) {
+        try {
+          geolocationPermissionStatus = await navigator.permissions.query({
+            name: "geolocation"
+          });
+
+          nextLocationState = geolocationPermissionStatus.state;
+          geolocationPermissionStatus.onchange = () => {
+            setBrowserPermissionState((prev) => ({
+              ...prev,
+              location: geolocationPermissionStatus.state
+            }));
+          };
+        } catch (error) {
+          console.error("Unable to read geolocation permission state:", error);
+        }
+      }
+
+      if (!cancelled) {
+        setBrowserPermissionState({
+          location: nextLocationState,
+          push: nextPushState
+        });
+      }
+    };
+
+    syncPermissions();
+
+    return () => {
+      cancelled = true;
+      if (geolocationPermissionStatus) {
+        geolocationPermissionStatus.onchange = null;
+      }
+    };
+  }, [isLocationTrackingEnabled]);
+
+  const openPermissionsModal = (highlightedKey = null) => {
+    setPermissionError("");
+    setPermissionsModal({
+      isOpen: true,
+      highlightedKey
+    });
   };
 
-  const togglePrivacy = async (key) => {
-    if (key === "location") {
-      if (!("geolocation" in navigator)) {
-        alert("Geolocation is not supported by this browser.");
+  const openBrowserPermissionSettings = (type) => {
+    const ua = navigator.userAgent || "";
+    const isChrome = /Chrome/.test(ua) && !/Edg|OPR/.test(ua);
+    const isEdge = /Edg/.test(ua);
+    const isFirefox = /Firefox/.test(ua);
+
+    if (isChrome || isEdge) {
+      const path =
+        type === "location"
+          ? "chrome://settings/content/location"
+          : "chrome://settings/content/notifications";
+      window.open(path, "_blank");
+      return;
+    }
+
+    if (isFirefox) {
+      window.open("about:preferences#privacy", "_blank");
+      return;
+    }
+
+    window.open("about:preferences", "_blank");
+  };
+
+  const closePermissionsModal = () => {
+    if (permissionBusyKey) return;
+
+    setPermissionError("");
+    setPermissionsModal({
+      isOpen: false,
+      highlightedKey: null
+    });
+  };
+
+  const refreshPushPermission = () => {
+    setBrowserPermissionState((prev) => ({
+      ...prev,
+      push:
+        typeof Notification === "undefined"
+          ? "unsupported"
+          : Notification.permission
+    }));
+  };
+
+  const handleNotificationToggle = async (key) => {
+    setPermissionError("");
+
+    if (key === "push") {
+      if (settings.notifications.push) {
+        setPermissionBusyKey("push");
+
+        try {
+          await removeBrowserPushSubscription();
+          updateNotifications({ push: false });
+        } finally {
+          refreshPushPermission();
+          setPermissionBusyKey(null);
+        }
+
         return;
       }
 
-      if (isLocationTrackingEnabled) {
+      openPermissionsModal("push");
+      return;
+    }
+
+    if (!settings.notifications[key]) {
+      openPermissionsModal(key);
+      return;
+    }
+
+    updateNotifications({ [key]: false });
+  };
+
+  const handlePrivacyToggle = (key) => {
+    if (key === "location") {
+      if (settings.privacy.location) {
         stopGuardianTracking();
-      } else {
-        startGuardianTracking();
+        updatePrivacy({ location: false });
+        return;
+      }
+
+      openPermissionsModal("location");
+      return;
+    }
+
+    updatePrivacy({ [key]: !settings.privacy[key] });
+  };
+
+  const handleLocationAction = async () => {
+    setPermissionError("");
+
+    if (settings.privacy.location) {
+      stopGuardianTracking();
+      updatePrivacy({ location: false });
+      return;
+    }
+
+    setPermissionBusyKey("location");
+
+    try {
+      const result = await startGuardianTracking();
+
+      if (!result?.success) {
+        updatePrivacy({ location: false });
+
+        if (
+          result?.reason === 1 ||
+          browserPermissionState.location === "denied"
+        ) {
+          openBrowserPermissionSettings("location");
+        }
+
+        setPermissionError(
+          result?.reason === "unsupported"
+            ? "This browser does not support location services."
+            : "Location access was not granted. Please allow it in your browser prompt or settings."
+        );
+        return;
+      }
+
+      updatePrivacy({ location: true });
+    } finally {
+      setPermissionBusyKey(null);
+    }
+  };
+
+  const handlePushAction = async () => {
+    setPermissionError("");
+
+    if (settings.notifications.push) {
+      setPermissionBusyKey("push");
+
+      try {
+        await removeBrowserPushSubscription();
+        updateNotifications({ push: false });
+      } finally {
+        refreshPushPermission();
+        setPermissionBusyKey(null);
       }
 
       return;
     }
 
-    setSettings((prev) => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        [key]: !prev.privacy[key]
+    if (typeof Notification === "undefined") {
+      setPermissionError("This browser does not support push notifications.");
+      return;
+    }
+
+    setPermissionBusyKey("push");
+
+    try {
+      const subscription = await ensureBrowserPushSubscription({
+        requestPermission: true
+      });
+
+      refreshPushPermission();
+
+      if (!subscription) {
+        updateNotifications({ push: false });
+
+        if (Notification.permission === "denied") {
+          openBrowserPermissionSettings("push");
+        }
+
+        setPermissionError(
+          Notification.permission === "denied"
+            ? "Notifications are blocked in your browser settings."
+            : "Notification permission was not granted."
+        );
+        return;
       }
-    }));
+
+      updateNotifications({ push: true });
+    } finally {
+      setPermissionBusyKey(null);
+    }
+  };
+
+  useEffect(() => {
+    if (hasAutoOpenedPermissionsRef.current) return;
+
+    const params = new URLSearchParams(location.search);
+    const requiredFlag = params.get("permissions") === "required";
+    const requiredQuery = params.get("required") || "";
+
+    const requiredFromQuery = requiredQuery
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    const required = requiredFromQuery.length
+      ? requiredFromQuery
+      : [
+          ...(!settings?.privacy?.location ? ["location"] : []),
+          ...(!settings?.notifications?.push ? ["push"] : [])
+        ];
+
+    if (!requiredFlag && required.length === 0) return;
+
+    hasAutoOpenedPermissionsRef.current = true;
+    openPermissionsModal(required[0] || null);
+  }, [
+    location.search,
+    settings?.notifications?.push,
+    settings?.privacy?.location
+  ]);
+
+  const handleEmailAction = () => {
+    updateNotifications({ email: !settings.notifications.email });
+  };
+
+  const handleSmsAction = () => {
+    updateNotifications({ sms: !settings.notifications.sms });
   };
 
   const openModal = () => {
@@ -693,12 +949,25 @@ const Setting = () => {
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 overflow-hidden">
             <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm border border-gray-100">
               <div className="mb-6 sm:mb-8">
-                <h3 className="text-base sm:text-lg font-bold text-[#11285A]">
-                  Notification Preferences
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                  Choose how you want to be notified
-                </p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-[#11285A]">
+                      Notification Preferences
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                      Choose how you want to be notified
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => openPermissionsModal()}
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#11285A] px-4 py-2 text-sm font-semibold text-[#11285A] transition-colors hover:bg-blue-50"
+                  >
+                    <Icon icon="solar:tuning-2-bold" className="text-base" />
+                    Review Access
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1">
@@ -707,21 +976,21 @@ const Setting = () => {
                   title="Push Notifications"
                   description="Receive alerts on your device"
                   checked={settings.notifications.push}
-                  onChange={() => toggleNotification("push")}
+                  onChange={() => handleNotificationToggle("push")}
                 />
                 <ToggleItem
                   icon="solar:letter-bold"
                   title="Email Notifications"
                   description="Get updates via email"
                   checked={settings.notifications.email}
-                  onChange={() => toggleNotification("email")}
+                  onChange={() => handleNotificationToggle("email")}
                 />
                 <ToggleItem
                   icon="solar:chat-round-dots-bold"
                   title="SMS Alerts"
                   description="Receive text messages for urgent alerts"
                   checked={settings.notifications.sms}
-                  onChange={() => toggleNotification("sms")}
+                  onChange={() => handleNotificationToggle("sms")}
                 />
               </div>
             </div>
@@ -742,14 +1011,18 @@ const Setting = () => {
                   title="Location Tracking"
                   description="Allow guardians to view your location"
                   checked={settings.privacy.location}
-                  onChange={() => togglePrivacy("location")}
+                  onChange={() => handlePrivacyToggle("location")}
                 />
                 <ToggleItem
                   icon="solar:shield-check-bold"
                   title="Two-Factor Authentication"
-                  description="Extra security for your account"
+                  description={
+                    settings.privacy.twoFactor
+                      ? "Your account now requires a verification code during sign in"
+                      : "Turn this on to require a verification code during sign in"
+                  }
                   checked={settings.privacy.twoFactor}
-                  onChange={() => togglePrivacy("twoFactor")}
+                  onChange={() => handlePrivacyToggle("twoFactor")}
                 />
               </div>
               <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
@@ -788,6 +1061,23 @@ const Setting = () => {
         </div>
 
         <ChangePasswordModal isOpen={isModalOpen} onClose={closeModal} />
+        <PermissionPreferencesModal
+          isOpen={permissionsModal.isOpen}
+          onClose={closePermissionsModal}
+          highlightedKey={permissionsModal.highlightedKey}
+          locationEnabled={settings.privacy.location}
+          locationBrowserState={browserPermissionState.location}
+          pushEnabled={settings.notifications.push}
+          pushBrowserState={browserPermissionState.push}
+          emailEnabled={settings.notifications.email}
+          smsEnabled={settings.notifications.sms}
+          busyKey={permissionBusyKey}
+          errorMessage={permissionError}
+          onLocationAction={handleLocationAction}
+          onPushAction={handlePushAction}
+          onEmailAction={handleEmailAction}
+          onSmsAction={handleSmsAction}
+        />
       </main>
     </>
   );

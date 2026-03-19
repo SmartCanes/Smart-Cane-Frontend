@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   useActivityReportsStore,
   useNotificationsStore,
+  useSettingsStore,
   useUserStore
 } from "@/stores/useStore";
 import { openNotificationTarget } from "@/utils/importantNotifications";
@@ -238,8 +239,25 @@ const Notifications = () => {
   // real data van
   const { history, isLoading, fetchHistory } = useActivityReportsStore();
   const { getNotifications, markAsRead, markAllRead } = useNotificationsStore();
+  const { settings } = useSettingsStore();
   const { user } = useUserStore();
   const currentGuardianId = user?.guardian_id ?? user?.guardianId;
+
+  useEffect(() => {
+    const needsLocation = !settings?.privacy?.location;
+    const needsPush = !settings?.notifications?.push;
+
+    if (!needsLocation && !needsPush) return;
+
+    const required = [
+      ...(needsLocation ? ["location"] : []),
+      ...(needsPush ? ["push"] : [])
+    ].join(",");
+
+    navigate(`/settings?permissions=required&required=${required}`, {
+      replace: true
+    });
+  }, [navigate, settings?.notifications?.push, settings?.privacy?.location]);
 
   // fetch history van
   useEffect(() => {

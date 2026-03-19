@@ -73,6 +73,13 @@ const Login = () => {
     navigate("/dashboard", { state: { showModal: true }, replace: true });
   };
 
+  const closeTwoFAModal = () => {
+    setShow2FAModal(false);
+    setTwoFAUserData(null);
+    setTwoFAEmail("");
+    resetOtpState();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -118,9 +125,10 @@ const Login = () => {
     };
 
     const response = await loginApi(payload);
+    const responseData = response?.data || response;
 
-    if (response.data.deviceRegistered === false) {
-      setGuardianId(response.data.guardianId);
+    if (responseData?.deviceRegistered === false) {
+      setGuardianId(responseData.guardianId);
       setModalConfig({
         isOpen: true,
         variant: "banner",
@@ -134,16 +142,26 @@ const Login = () => {
       return;
     }
 
-    const userData = response.data.user || response.data;
+    const userData = responseData?.user || responseData;
 
     // check if 2fa is enable to van
     if (settings.privacy.twoFactor) {
       const email = userData.email;
+
+      if (!email) {
+        setLoading(false);
+        setErrors({
+          general: "Two-factor authentication requires a valid email address."
+        });
+        return;
+      }
+
       setTwoFAEmail(email);
       setTwoFAUserData(userData);
       setLoading(false);
-      await sendTwoFAOtp(email);
       setShow2FAModal(true);
+      resetOtpState();
+      void sendTwoFAOtp(email);
       return;
     }
 
@@ -222,8 +240,7 @@ const Login = () => {
     setOtpError("");
     try {
       await verifyOTPApi(twoFAEmail, otpCode);
-      setShow2FAModal(false);
-      resetOtpState();
+      closeTwoFAModal();
       await completeLogin(twoFAUserData);
     } catch (err) {
       setOtpError(
@@ -559,12 +576,7 @@ const Login = () => {
                 text="Cancel"
                 variant="outline"
                 type="button"
-                onClick={() => {
-                  setShow2FAModal(false);
-                  resetOtpState();
-                  setTwoFAUserData(null);
-                  setTwoFAEmail("");
-                }}
+                onClick={closeTwoFAModal}
                 disabled={otpLoading}
               />
             </div>

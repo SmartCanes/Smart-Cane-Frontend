@@ -4,6 +4,7 @@ import {
   useDevicesStore,
   useGuardiansStore,
   useRealtimeStore,
+  useSettingsStore,
   useUIStore,
   useUserStore
 } from "@/stores/useStore";
@@ -15,6 +16,9 @@ const ProtectedLayout = () => {
   const { user } = useUserStore();
   const { fetchDevices } = useDevicesStore();
   const { startGuardianTracking, stopGuardianTracking } = useRealtimeStore();
+  const locationTrackingEnabled = useSettingsStore(
+    (state) => state.settings.privacy.location
+  );
   const { fetchGuardiansAndInvites } = useGuardiansStore();
 
   useEffect(() => {
@@ -27,14 +31,33 @@ const ProtectedLayout = () => {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchDevices, fetchGuardiansAndInvites]);
 
   useEffect(() => {
-    startGuardianTracking();
+    let isMounted = true;
+
+    if (!locationTrackingEnabled) {
+      stopGuardianTracking();
+      return undefined;
+    }
+
+    const enableTracking = async () => {
+      const result = await startGuardianTracking();
+
+      if (!isMounted || result?.success) {
+        return;
+      }
+
+      useSettingsStore.getState().updatePrivacy({ location: false });
+    };
+
+    enableTracking();
+
     return () => {
+      isMounted = false;
       stopGuardianTracking();
     };
-  }, [startGuardianTracking, stopGuardianTracking]);
+  }, [locationTrackingEnabled, startGuardianTracking, stopGuardianTracking]);
 
   const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
 

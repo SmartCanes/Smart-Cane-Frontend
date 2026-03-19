@@ -92,14 +92,5 @@ export const triggerSmartCaneNotification = async (
   if (Notification.permission === "granted") {
     await show();
     await ensureBrowserPushSubscription();
-    return;
-  }
-
-  if (Notification.permission !== "denied") {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      await show();
-      await ensureBrowserPushSubscription();
-    }
   }
 };

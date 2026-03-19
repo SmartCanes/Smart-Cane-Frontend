@@ -1,13 +1,24 @@
 import { useEffect } from "react";
 import {
   ensureBrowserPushSubscription,
-  registerPushServiceWorker
+  registerPushServiceWorker,
+  removeBrowserPushSubscription
 } from "@/utils/pushNotifications";
+import { useSettingsStore } from "@/stores/useStore";
 
 const PushNotificationsBridge = () => {
+  const pushEnabled = useSettingsStore(
+    (state) => state.settings.notifications.push
+  );
+
   useEffect(() => {
     const setup = async () => {
       try {
+        if (!pushEnabled) {
+          await removeBrowserPushSubscription();
+          return;
+        }
+
         await registerPushServiceWorker();
         await ensureBrowserPushSubscription({ requestPermission: false });
       } catch (error) {
@@ -16,7 +27,7 @@ const PushNotificationsBridge = () => {
     };
 
     setup();
-  }, []);
+  }, [pushEnabled]);
 
   return null;
 };
