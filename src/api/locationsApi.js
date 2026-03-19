@@ -82,9 +82,10 @@ export const getLocation = (query) =>
 export const getLocationByCoords = (lat, lon) =>
   handleRequest(async () => {
     const res = await api.get(
-      `https://photon.komoot.io/reverse?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=1`
+      `https://reverse.icane.org/reverse?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&format=geocodejson&addressdetails=1&zoom=17`
     );
+    // const label = res?.data?.features[0]?.properties?.geocoding?.label;
+    // console.log(label);
+    console.log(res);
     return res;
   });
-
-
