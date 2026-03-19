@@ -13,6 +13,7 @@ import { Icon } from "@iconify/react";
 import "leaflet/dist/leaflet.css";
 import { AnimatePresence, motion } from "framer-motion";
 import L from "leaflet";
+import { useNavigate } from "react-router-dom";
 import CustomZoomControl from "./CustomZoomControl";
 import saintFrancis from "@/data/saint-francis";
 import { getLocation } from "@/api/locationsApi";
@@ -149,6 +150,7 @@ const haversine = (a, b) => {
 };
 
 function LiveMap() {
+  const navigate = useNavigate();
   const { user } = useUserStore();
   const { guardianPosition, gps } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
@@ -174,6 +176,8 @@ function LiveMap() {
   const [isFreeMode, setIsFreeMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
+  const [showLocationEnablePrompt, setShowLocationEnablePrompt] =
+    useState(false);
   const routeRequestedRef = useRef(false);
   const routeCoordsRef = useRef([]);
   const activeIndexRef = useRef(0);
@@ -458,7 +462,12 @@ function LiveMap() {
   };
 
   const handleFocusOnUser = () => {
-    if (!guardianPosition) return;
+    if (!guardianPosition) {
+      setShowLocationEnablePrompt(true);
+
+      return;
+    }
+
     if (mapRef.current)
       mapRef.current.flyTo(guardianPosition, mapRef.current.getZoom(), {
         duration: 0.5
@@ -540,6 +549,22 @@ function LiveMap() {
 
     setIsPseudoFullscreen((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (!showLocationEnablePrompt) return;
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        setShowLocationEnablePrompt(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [showLocationEnablePrompt]);
 
   return (
     <div
@@ -732,6 +757,8 @@ function LiveMap() {
           onZoomOut={handleZoomOut}
           isUserFollowingCane={isUserFollowingCane}
           setIsUserFollowingCane={setIsUserFollowingCane}
+          canFocusOnCane={Boolean(canePosition)}
+          canFocusOnUser={Boolean(guardianPosition)}
         />
 
         {destinationPos && (
@@ -799,6 +826,69 @@ function LiveMap() {
           />
         )}
       </MapContainer>
+
+      <AnimatePresence>
+        {showLocationEnablePrompt && (
+          <motion.div
+            className="absolute inset-0 z-[1200] flex items-center justify-center bg-black/30 backdrop-blur-[1px] p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowLocationEnablePrompt(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 8 }}
+              transition={{ duration: 0.18 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-xl"
+            >
+              <div className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <Icon
+                      icon="mdi:map-marker-off-outline"
+                      className="h-6 w-6"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-base font-semibold text-gray-900">
+                      Location Access Needed
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                      Your current location is turned off. Enable location in
+                      Settings so we can center the map on you.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationEnablePrompt(false)}
+                    className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    Not now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLocationEnablePrompt(false);
+                      navigate(
+                        "/settings?permissions=required&required=location"
+                      );
+                    }}
+                    className="flex-1 rounded-xl bg-[#11285A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0d1f4a] transition-colors cursor-pointer"
+                  >
+                    Open Settings
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

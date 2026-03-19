@@ -1,4 +1,3 @@
-import { useMap } from "react-leaflet";
 import { Icon } from "@iconify/react";
 import { useEffect, useRef } from "react";
 import L from "leaflet";
@@ -11,9 +10,10 @@ function CustomZoomControl({
   onZoomIn,
   onZoomOut,
   isUserFollowingCane,
-  setIsUserFollowingCane
+  setIsUserFollowingCane,
+  canFocusOnCane = true,
+  canFocusOnUser = true
 }) {
-  const map = useMap();
   const controlRef = useRef(null);
 
   useEffect(() => {
@@ -31,22 +31,28 @@ function CustomZoomControl({
     >
       <button
         onClick={() => {
+          if (!canFocusOnCane) return;
           setIsFreeMode((prev) => !prev);
           setIsUserFollowingCane(false);
         }}
+        disabled={!canFocusOnCane}
         className={`
     w-10 h-10 rounded-full shadow-md flex items-center justify-center
-    transition-all duration-200 cursor-pointer
+    transition-all duration-200
     ${
-      isFreeMode
-        ? "bg-white text-gray-700 hover:bg-gray-50"
-        : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+      !canFocusOnCane
+        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+        : isFreeMode
+          ? "bg-white text-gray-700 hover:bg-gray-50"
+          : "bg-blue-50 text-blue-600 hover:bg-blue-100"
     }
   `}
         title={
-          isFreeMode
-            ? "Free Mode (Click to lock to route)"
-            : "Locked to route (Click for free mode)"
+          !canFocusOnCane
+            ? "Unavailable: cane location not detected"
+            : isFreeMode
+              ? "Free Mode (Click to lock to route)"
+              : "Locked to route (Click for free mode)"
         }
       >
         <Icon
@@ -57,12 +63,21 @@ function CustomZoomControl({
 
       <button
         onClick={onFocusOnCane}
-        className={`w-10 h-10 rounded-full shadow-md flex items-center justify-center cursor-pointer transition-all ${
-          isUserFollowingCane
-            ? "bg-blue-100 text-blue-600 border-2 border-blue-300"
-            : "bg-white text-gray-700 hover:bg-gray-100"
+        disabled={!canFocusOnCane}
+        className={`w-10 h-10 rounded-full shadow-md flex items-center justify-center transition-all ${
+          !canFocusOnCane
+            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            : isUserFollowingCane
+              ? "bg-blue-100 text-blue-600 border-2 border-blue-300"
+              : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
         }`}
-        title={isUserFollowingCane ? "Stop following VIP" : "Follow VIP"}
+        title={
+          canFocusOnCane
+            ? isUserFollowingCane
+              ? "Stop following VIP"
+              : "Follow VIP"
+            : "Unavailable: cane location not detected"
+        }
       >
         <Icon
           icon={
@@ -76,8 +91,16 @@ function CustomZoomControl({
 
       <button
         onClick={onFocusOnUser}
-        className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-gray-700 hover:bg-gray-100 cursor-pointer"
-        title="Center on my location"
+        className={`w-10 h-10 rounded-full shadow-md flex items-center justify-center transition-all ${
+          canFocusOnUser
+            ? "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
+            : "bg-amber-50 text-amber-600 hover:bg-amber-100 cursor-pointer"
+        }`}
+        title={
+          canFocusOnUser
+            ? "Center on my location"
+            : "Location is off. Click to enable it"
+        }
       >
         <Icon icon="mdi:crosshairs-gps" className="w-6 h-6" />
       </button>
