@@ -96,6 +96,8 @@ export const useRealtimeStore = create(
         wsApi.off("piStatus");
         wsApi.off("configSaved");
         wsApi.off("deviceConfig");
+        wsApi.off("emergencyTriggered");
+        wsApi.off("fallDetected");
         wsApi.connect();
 
         let heartbeatTimeout;
@@ -173,6 +175,19 @@ export const useRealtimeStore = create(
 
           useGuardiansStore.getState().setGuardianPresenceSnapshot(onlineIds);
         });
+
+        const refreshDeviceLogs = () => {
+          const selectedDevice = useDevicesStore.getState().selectedDevice;
+          const deviceId = selectedDevice?.deviceId;
+
+          if (!deviceId) return;
+
+          useDeviceLogsStore.getState().fetchDeviceLogs(deviceId, {
+            force: true,
+            silent: true,
+            selectedDevice
+          });
+        };
 
         wsApi.on("status", (data) => {
           set((state) => ({
@@ -264,6 +279,15 @@ export const useRealtimeStore = create(
           }
 
           resetHeartbeat();
+        });
+
+        wsApi.on("emergencyTriggered", () => {
+          console.log("Emergency triggered");
+          setTimeout(() => refreshDeviceLogs(), 400);
+        });
+
+        wsApi.on("fallDetected", () => {
+          setTimeout(() => refreshDeviceLogs(), 400);
         });
       },
 
