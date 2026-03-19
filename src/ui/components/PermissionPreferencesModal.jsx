@@ -19,31 +19,31 @@ const PermissionCard = ({
   isHighlighted = false
 }) => (
   <div
-    className={`rounded-2xl border p-4 transition-colors ${
+    className={`rounded-2xl border p-3 sm:p-4 transition-colors ${
       isHighlighted
         ? "border-[#11285A] bg-[#F7F9FF]"
         : "border-gray-200 bg-white"
     }`}
   >
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F0F4FF]">
-          <Icon icon={icon} className="text-2xl text-[#11285A]" />
+    <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
+        <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F0F4FF]">
+          <Icon icon={icon} className="text-xl sm:text-2xl text-[#11285A]" />
         </div>
 
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h4 className="text-sm font-semibold text-[#1F2937] sm:text-base">
+          <div className="flex flex-wrap items-start gap-1.5 sm:gap-2">
+            <h4 className="text-sm font-semibold text-[#1F2937] sm:text-base leading-snug break-words">
               {title}
             </h4>
             <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${STATUS_STYLES[status.tone] || STATUS_STYLES.inactive}`}
+              className={`inline-flex max-w-full items-center rounded-full border px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-medium whitespace-nowrap ${STATUS_STYLES[status.tone] || STATUS_STYLES.inactive}`}
             >
               {status.label}
             </span>
           </div>
 
-          <p className="mt-1 text-sm leading-relaxed text-[#6B7280]">
+          <p className="mt-1 text-xs sm:text-sm leading-relaxed text-[#6B7280] break-words">
             {description}
           </p>
         </div>
@@ -53,7 +53,7 @@ const PermissionCard = ({
         type="button"
         onClick={onAction}
         disabled={isBusy}
-        className={`inline-flex min-w-[150px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+        className={`inline-flex w-full sm:w-auto sm:min-w-[150px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
           isBusy
             ? "cursor-not-allowed bg-gray-100 text-gray-400"
             : "cursor-pointer bg-[#11285A] text-white hover:bg-[#0D1F4A]"
@@ -183,14 +183,15 @@ const PermissionPreferencesModal = ({
       closeTimer={0}
       icon="solar:shield-keyhole-bold"
       width="max-w-3xl"
+      maxHeight="max-h-[92dvh]"
     >
-      <div className="space-y-4">
-        <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-[#1E3A8A]">
+      <div className="space-y-3 sm:space-y-4 max-h-[72dvh] overflow-y-auto pr-1 sm:pr-2">
+        <div className="rounded-2xl border border-blue-100 bg-blue-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#1E3A8A] leading-relaxed">
           Browser prompts only appear after you press an allow button below.
         </div>
 
         {errorMessage && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700 leading-relaxed break-words">
             {errorMessage}
           </div>
         )}
