@@ -19,6 +19,20 @@ const buildVipName = (selectedDevice) => {
   return fullName || firstName || "the VIP";
 };
 
+const buildIncidentContext = (latestContext, payload = {}) => ({
+  ...latestContext,
+  vipName:
+    payload?.vipName ||
+    payload?.vip?.name ||
+    payload?.vip?.fullName ||
+    latestContext.vipName,
+  deviceSerial:
+    payload?.serial ||
+    payload?.deviceSerial ||
+    payload?.deviceSerialNumber ||
+    latestContext.deviceSerial
+});
+
 const ImportantNotificationsBridge = () => {
   const { emergency, fall, gps } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
@@ -76,10 +90,38 @@ const ImportantNotificationsBridge = () => {
       notifyRouteArrival(latestContextRef.current);
     };
 
+    const handleEmergencyTriggered = (payload) => {
+      notifyEmergencyAlert(
+        buildIncidentContext(latestContextRef.current, payload)
+      );
+      previousAlertStateRef.current.emergency = true;
+    };
+
+    const handleEmergencyStopped = () => {
+      previousAlertStateRef.current.emergency = false;
+    };
+
+    const handleFallDetected = (payload) => {
+      notifyFallAlert(buildIncidentContext(latestContextRef.current, payload));
+      previousAlertStateRef.current.fall = true;
+    };
+
+    const handleFallCleared = () => {
+      previousAlertStateRef.current.fall = false;
+    };
+
     wsApi.on("destinationReached", handleDestinationReached);
+    wsApi.on("emergencyTriggered", handleEmergencyTriggered);
+    wsApi.on("emergencyStopped", handleEmergencyStopped);
+    wsApi.on("fallDetected", handleFallDetected);
+    wsApi.on("fallCleared", handleFallCleared);
 
     return () => {
       wsApi.off("destinationReached", handleDestinationReached);
+      wsApi.off("emergencyTriggered", handleEmergencyTriggered);
+      wsApi.off("emergencyStopped", handleEmergencyStopped);
+      wsApi.off("fallDetected", handleFallDetected);
+      wsApi.off("fallCleared", handleFallCleared);
     };
   }, []);
 

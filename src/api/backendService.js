@@ -1,6 +1,10 @@
 import { backendApi } from "./index.js";
 import { handleRequest } from "./requestHandler.js";
 
+const PUSH_SUBSCRIPTION_ENDPOINT =
+  import.meta.env.VITE_PUSH_SUBSCRIPTION_ENDPOINT ||
+  "/guardian/push-subscription";
+
 // Guardian
 export const getGuardiansByVIP = (vip_id) =>
   handleRequest(() => backendApi.get(`/guardian?vip_id=${vip_id}`));
@@ -171,3 +175,22 @@ export const uploadVIPImage = (vipId, imageFile) => {
 // account history
 export const getAccountHistory = () =>
   handleRequest(() => backendApi.get("/guardian/history"));
+
+export const savePushSubscription = (payload) =>
+  handleRequest(() =>
+    backendApi.post(PUSH_SUBSCRIPTION_ENDPOINT, payload, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+  );
+
+export const deletePushSubscription = (payload) =>
+  handleRequest(() =>
+    backendApi.delete(PUSH_SUBSCRIPTION_ENDPOINT, {
+      data: payload,
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+  );
