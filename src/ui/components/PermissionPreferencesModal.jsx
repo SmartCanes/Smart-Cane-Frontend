@@ -195,16 +195,14 @@ const PermissionPreferencesModal = ({
           </div>
         )}
 
-        <div className="grid gap-3">
-          {cards.map((card) => (
-            <PermissionCard
-              key={card.key}
-              {...card}
-              isBusy={busyKey === card.key}
-              isHighlighted={highlightedKey === card.key}
-            />
-          ))}
-        </div>
+        {cards.map(({ key, ...card }) => (
+          <PermissionCard
+            key={key}
+            {...card}
+            isBusy={busyKey === key}
+            isHighlighted={highlightedKey === key}
+          />
+        ))}
       </div>
     </Modal>
   );

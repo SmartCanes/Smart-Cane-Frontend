@@ -962,7 +962,7 @@ const Setting = () => {
                   <button
                     type="button"
                     onClick={() => openPermissionsModal()}
-                    className="inline-flex items-center gap-2 rounded-xl border border-[#11285A] px-4 py-2 text-sm font-semibold text-[#11285A] transition-colors hover:bg-blue-50"
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#11285A] px-4 py-2 text-sm font-semibold text-[#11285A] transition-colors hover:bg-blue-50 cursor-pointer"
                   >
                     <Icon icon="solar:tuning-2-bold" className="text-base" />
                     Review Access
