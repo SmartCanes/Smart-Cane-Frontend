@@ -6,6 +6,7 @@ import {
   getLastLocation,
   getPendingInvites
 } from "@/api/backendService";
+import { getLocationByCoords } from "@/api/locationsApi";
 import { wsApi } from "@/api/ws-api";
 import {
   mapActivityHistoryToNotifications,
@@ -103,6 +104,40 @@ export const useRealtimeStore = create(
 
         let heartbeatTimeout;
         const toBool = (value) => value === true || value === "true";
+        const locationLabelCache = new Map();
+
+        const resolveRealtimeLocationLabel = async (lat, lng) => {
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+          const cacheKey = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+          if (locationLabelCache.has(cacheKey)) {
+            return locationLabelCache.get(cacheKey);
+          }
+
+          try {
+            const res = await getLocationByCoords(lat, lng);
+            const features = res?.features || res?.data?.features;
+            const feature = Array.isArray(features) ? features[0] : null;
+            const geocoding = feature?.properties?.geocoding || feature?.properties;
+            const label =
+              geocoding?.label ||
+              geocoding?.name ||
+              geocoding?.street ||
+              geocoding?.city ||
+              feature?.properties?.name ||
+              null;
+
+            const cleaned = typeof label === "string" ? label.trim() : null;
+            if (cleaned) {
+              locationLabelCache.set(cacheKey, cleaned);
+            }
+
+            return cleaned;
+          } catch (error) {
+            console.error("Failed to resolve realtime location label:", error);
+            return null;
+          }
+        };
 
         // Supports both middleware formats:
         // 1) keyed object: { FALL_DETECTION: { enabled, config } }
@@ -195,7 +230,7 @@ export const useRealtimeStore = create(
           });
         };
 
-        const pushRealtimeAlertLog = (type, payload = {}) => {
+        const pushRealtimeAlertLog = async (type, payload = {}) => {
           const selectedDevice = useDevicesStore.getState().selectedDevice;
           const deviceId = selectedDevice?.deviceId;
           if (!deviceId) return;
@@ -208,6 +243,10 @@ export const useRealtimeStore = create(
             payload?.locationLabel ||
             payload?.address ||
             payload?.placeName ||
+            (await resolveRealtimeLocationLabel(
+              Number(lat ?? NaN),
+              Number(lng ?? NaN)
+            )) ||
             null;
 
           const rawLog = {
@@ -359,8 +398,9 @@ export const useRealtimeStore = create(
                 : state.lastKnownCanePosition
           }));
 
-          pushRealtimeAlertLog("EMERGENCY", payload);
-          setTimeout(() => refreshDeviceLogs(), 400);
+          pushRealtimeAlertLog("EMERGENCY", payload).then(() => {
+            setTimeout(() => refreshDeviceLogs(), 400);
+          });
         });
 
         wsApi.on("fallDetected", (data) => {
@@ -377,8 +417,9 @@ export const useRealtimeStore = create(
                 : state.lastKnownCanePosition
           }));
 
-          pushRealtimeAlertLog("FALL", payload);
-          setTimeout(() => refreshDeviceLogs(), 400);
+          pushRealtimeAlertLog("FALL", payload).then(() => {
+            setTimeout(() => refreshDeviceLogs(), 400);
+          });
         });
       },
 
