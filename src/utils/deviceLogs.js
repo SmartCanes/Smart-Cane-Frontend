@@ -291,6 +291,10 @@ const buildLocation = (metadata, coordsDisplay = null) =>
     metadata?.location?.label,
     metadata?.location?.name,
     metadata?.location?.address,
+    metadata?.payload?.location,
+    metadata?.payload?.locationLabel,
+    metadata?.payload?.address,
+    metadata?.payload?.placeName,
     pickNestedValue(metadata, LOCATION_KEYS),
     pickNestedValue(metadata?.route, LOCATION_KEYS),
     coordsDisplay
@@ -420,9 +424,7 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
         )
       );
       const coords = buildCoords(metadata);
-      const location = isAlert
-        ? buildLocation(metadata, coords?.display)
-        : buildLocation(metadata, coords?.display);
+      const location = buildLocation(metadata, isAlert ? null : coords?.display);
       const destination = isRoute ? buildDestination(metadata) : null;
 
       return {

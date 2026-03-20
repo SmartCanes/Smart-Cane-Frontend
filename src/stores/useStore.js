@@ -195,10 +195,67 @@ export const useRealtimeStore = create(
           });
         };
 
+        const pushRealtimeAlertLog = (type, payload = {}) => {
+          const selectedDevice = useDevicesStore.getState().selectedDevice;
+          const deviceId = selectedDevice?.deviceId;
+          if (!deviceId) return;
+
+          const nowIso = new Date().toISOString();
+          const lat = payload?.lat ?? payload?.latitude ?? null;
+          const lng = payload?.lng ?? payload?.lon ?? payload?.longitude ?? null;
+          const locationLabel =
+            payload?.location ||
+            payload?.locationLabel ||
+            payload?.address ||
+            payload?.placeName ||
+            null;
+
+          const rawLog = {
+            log_id: `realtime-${type}-${Date.now()}`,
+            activity_type: type,
+            status: type,
+            created_at: nowIso,
+            metadata: {
+              payload: {
+                lat,
+                lng,
+                location: locationLabel,
+                locationLabel,
+                address: payload?.address || null,
+                placeName: payload?.placeName || null,
+                source: payload?.source || null,
+                timestamp: payload?.timestamp || Date.now()
+              },
+              location: locationLabel ? { label: locationLabel } : undefined
+            }
+          };
+
+          const normalized = normalizeDeviceLogs([rawLog], selectedDevice);
+          if (!normalized.length) return;
+
+          const logEntry = normalized[0];
+
+          useDeviceLogsStore.setState((state) => {
+            const existing = state.logsByDevice?.[deviceId] || [];
+            return {
+              logsByDevice: {
+                ...state.logsByDevice,
+                [deviceId]: [logEntry, ...existing]
+              },
+              lastFetchedAtByDevice: {
+                ...state.lastFetchedAtByDevice,
+                [deviceId]: Date.now()
+              }
+            };
+          });
+        };
+
         wsApi.on("status", (data) => {
+          const emergency = toBool(data.emergency);
+
           set((state) => ({
-            emergency: toBool(data.emergency),
-            fall: toBool(data.fall),
+            emergency,
+            fall: emergency ? false : toBool(data.fall),
             componentHealth: {
               ...state.componentHealth,
               obstacleDetectionStatus: toBool(data.obstacleDetectionStatus),
@@ -287,12 +344,40 @@ export const useRealtimeStore = create(
           resetHeartbeat();
         });
 
-        wsApi.on("emergencyTriggered", () => {
-          console.log("Emergency triggered");
+        wsApi.on("emergencyTriggered", (data) => {
+          const payload = data?.payload || data || {};
+
+          const lat = payload?.lat;
+          const lng = payload?.lng;
+
+          set((state) => ({
+            emergency: true,
+            fall: false,
+            lastKnownCanePosition:
+              lat != null && lng != null
+                ? [Number(lat), Number(lng)]
+                : state.lastKnownCanePosition
+          }));
+
+          pushRealtimeAlertLog("EMERGENCY", payload);
           setTimeout(() => refreshDeviceLogs(), 400);
         });
 
-        wsApi.on("fallDetected", () => {
+        wsApi.on("fallDetected", (data) => {
+          const payload = data?.payload || data || {};
+
+          const lat = payload?.lat;
+          const lng = payload?.lng;
+
+          set((state) => ({
+            fall: true,
+            lastKnownCanePosition:
+              lat != null && lng != null
+                ? [Number(lat), Number(lng)]
+                : state.lastKnownCanePosition
+          }));
+
+          pushRealtimeAlertLog("FALL", payload);
           setTimeout(() => refreshDeviceLogs(), 400);
         });
       },
