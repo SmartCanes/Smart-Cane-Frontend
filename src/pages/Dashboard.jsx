@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import LiveMap from "@/ui/components/LiveMap";
 import RecentAlerts from "@/ui/components/RecentAlert";
@@ -51,6 +52,7 @@ const getDistanceMeters = (lat1, lon1, lat2, lon2) => {
 };
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("track");
   const controls = useAnimation();
   const { gps, lastKnownCanePosition } = useRealtimeStore();
@@ -73,35 +75,91 @@ const Dashboard = () => {
   const lat = trackedCanePosition?.[0] ?? null;
   const lon = trackedCanePosition?.[1] ?? null;
 
-  const cleanPart = (value) => {
+  const cleanPart = useCallback((value) => {
     if (typeof value !== "string") return "";
     return value.replace(/\s+/g, " ").trim();
-  };
+  }, []);
 
-  const formatLocationLabel = (feature) => {
-    const geocoding = feature?.properties?.geocoding;
+  const formatLocationLabel = useCallback(
+    (feature) => {
+      const geocoding = feature?.properties?.geocoding;
 
-    const candidates = [
-      cleanPart(geocoding?.name),
-      cleanPart(geocoding?.locality),
-      cleanPart(geocoding?.admin?.level10),
-      cleanPart(geocoding?.city)
-    ];
+      const candidates = [
+        cleanPart(geocoding?.name),
+        cleanPart(geocoding?.locality),
+        cleanPart(geocoding?.admin?.level10),
+        cleanPart(geocoding?.city)
+      ];
 
-    const parts = candidates.filter(
-      (part, index, array) => part && array.indexOf(part) === index
-    );
+      const parts = candidates.filter(
+        (part, index, array) => part && array.indexOf(part) === index
+      );
 
-    return parts.length > 0 ? parts.join(", ") : "Unknown area";
-  };
+      return parts.length > 0 ? parts.join(", ") : "Unknown area";
+    },
+    [cleanPart]
+  );
+
+  const resolveLocation = useCallback(
+    async ({ force } = {}) => {
+      if (lat == null || lon == null) {
+        setLastLocationLabel("No location available");
+        return;
+      }
+
+      const cacheKey = `${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
+
+      if (!force && locationCacheRef.current.has(cacheKey)) {
+        setLastLocationLabel(locationCacheRef.current.get(cacheKey));
+        lastResolvedPointRef.current = { lat, lon };
+        lastResolvedTimeRef.current = Date.now();
+        return;
+      }
+
+      if (isFetchingLocationRef.current) return;
+
+      isFetchingLocationRef.current = true;
+      setIsResolvingLastLocation(true);
+
+      try {
+        const response = await getLocationByCoords(lat, lon);
+        const feature = response?.features?.[0];
+        const label = formatLocationLabel(feature) || "Last known location";
+
+        locationCacheRef.current.set(cacheKey, label);
+        setLastLocationLabel(label);
+        lastResolvedPointRef.current = { lat, lon };
+        lastResolvedTimeRef.current = Date.now();
+        return label;
+      } catch (error) {
+        console.error("Failed to resolve location:", error);
+        setLastLocationLabel("Unable to resolve location");
+        return null;
+      } finally {
+        isFetchingLocationRef.current = false;
+        setIsResolvingLastLocation(false);
+      }
+    },
+    [formatLocationLabel, lat, lon]
+  );
+
+  const resolveLabelForCoords = useCallback(
+    async (latVal, lonVal) => {
+      try {
+        const response = await getLocationByCoords(latVal, lonVal);
+        const feature = response?.features?.[0];
+        return formatLocationLabel(feature) || "Last known location";
+      } catch (error) {
+        console.error("Failed to resolve label for coords:", error);
+        return "Last known location";
+      }
+    },
+    [formatLocationLabel]
+  );
 
   useEffect(() => {
     if (lat == null || lon == null) {
       setLastLocationLabel("No location available");
-      return;
-    }
-
-    if (!gps?.ready) {
       return;
     }
 
@@ -129,41 +187,29 @@ const Dashboard = () => {
     ) {
       resolveLocation();
     }
+  }, [lat, lon, resolveLocation]);
 
-    async function resolveLocation() {
-      if (isFetchingLocationRef.current) return;
+  const handleShowLastLocation = async () => {
+    const sourceCoords =
+      Array.isArray(lastKnownCanePosition) && lastKnownCanePosition.length === 2
+        ? lastKnownCanePosition
+        : trackedCanePosition;
 
-      const cacheKey = `${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
+    if (!sourceCoords) return;
 
-      if (locationCacheRef.current.has(cacheKey)) {
-        setLastLocationLabel(locationCacheRef.current.get(cacheKey));
-        lastResolvedPointRef.current = { lat, lon };
-        lastResolvedTimeRef.current = Date.now();
-        return;
+    const [srcLat, srcLon] = sourceCoords;
+    const resolvedLabel = await resolveLabelForCoords(srcLat, srcLon);
+
+    navigate(".", {
+      state: {
+        historyLocation: {
+          coords: [srcLat, srcLon],
+          label: resolvedLabel || "Last known location",
+          status: "Last known location"
+        }
       }
-
-      isFetchingLocationRef.current = true;
-      setIsResolvingLastLocation(true);
-
-      try {
-        const response = await getLocationByCoords(lat, lon);
-        console.log("Location resolution response:", response);
-        const feature = response?.features[0];
-        const label = formatLocationLabel(feature);
-
-        locationCacheRef.current.set(cacheKey, label);
-        setLastLocationLabel(label);
-        lastResolvedPointRef.current = { lat, lon };
-        lastResolvedTimeRef.current = Date.now();
-      } catch (error) {
-        console.error("Failed to resolve location:", error);
-        setLastLocationLabel("Unable to resolve location");
-      } finally {
-        isFetchingLocationRef.current = false;
-        setIsResolvingLastLocation(false);
-      }
-    }
-  }, [lat, lon, gps?.ready]);
+    });
+  };
 
   return (
     <motion.main
@@ -243,12 +289,17 @@ const Dashboard = () => {
                   </div>
 
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleShowLastLocation}
+                      className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0 hover:bg-green-100"
+                      aria-label="Show last location"
+                    >
                       <Icon
                         icon="mdi:map-marker-radius"
                         className="text-green-600 text-xl"
                       />
-                    </div>
+                    </button>
                     <div className="min-w-0">
                       <p className="text-xs text-gray-500 font-medium">
                         Last Location

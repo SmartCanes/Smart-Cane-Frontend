@@ -3,6 +3,7 @@ import {
   getAllDeviceGuardians,
   getDeviceLog,
   getDevices,
+  getLastLocation,
   getPendingInvites
 } from "@/api/backendService";
 import { wsApi } from "@/api/ws-api";
@@ -153,6 +154,11 @@ export const useRealtimeStore = create(
           wsApi.emit("requestGuardianPresence");
           wsApi.emit("requestStatus");
           // wsApi.emit("requestDeviceConfig");
+
+          const selected = useDevicesStore.getState().selectedDevice;
+          if (!get().lastKnownCanePosition && selected?.deviceSerialNumber) {
+            get().loadLastLocation(selected.deviceSerialNumber);
+          }
         });
 
         wsApi.on("disconnect", () => {
@@ -382,6 +388,34 @@ export const useRealtimeStore = create(
         }
       },
 
+      setLastKnownCanePosition: (coords) =>
+        set({ lastKnownCanePosition: coords }),
+
+      loadLastLocation: async (deviceSerial) => {
+        const serial = ensureSerialPrefix(deviceSerial);
+        if (!serial) return null;
+
+        try {
+          const response = await getLastLocation(serial);
+          if (!response?.success) return null;
+
+          const payload = response?.data?.lastLocation || response?.data || null;
+          const lat = payload?.lat != null ? Number(payload.lat) : null;
+          const lng = payload?.lng != null ? Number(payload.lng) : null;
+
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+            return null;
+          }
+
+          const coords = [lat, lng];
+          set({ lastKnownCanePosition: coords });
+          return coords;
+        } catch (error) {
+          console.error("Failed to load last location:", error);
+          return null;
+        }
+      },
+
       disconnectWs: () => {
         wsApi.disconnect();
         set({ _wsConnected: false });
@@ -394,7 +428,7 @@ export const useRealtimeStore = create(
             ...state,
             emergency: false,
             fall: false,
-            lastKnownCanePosition: null,
+            lastKnownCanePosition: state.lastKnownCanePosition,
             deviceConfig: {},
             gps: isDemoMode
               ? state.gps
@@ -428,7 +462,8 @@ export const useRealtimeStore = create(
       name: "realtime-storage",
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
-        deviceConfig: state.deviceConfig
+        deviceConfig: state.deviceConfig,
+        lastKnownCanePosition: state.lastKnownCanePosition
       })
     }
   )
@@ -540,6 +575,9 @@ export const useDevicesStore = create(
           wsApi.emit("subscribe", { serial: nextSerial });
           wsApi.emit("requestStatus", { serial: nextSerial });
           wsApi.emit("requestDeviceConfig", { serial: nextSerial });
+
+
+          useRealtimeStore.getState().loadLastLocation(nextSerial);
         }
       }
     }),

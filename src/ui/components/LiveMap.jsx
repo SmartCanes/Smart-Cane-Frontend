@@ -174,7 +174,7 @@ function LiveMap() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUserStore();
-  const { guardianPosition, gps } = useRealtimeStore();
+  const { guardianPosition, gps, lastKnownCanePosition } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
   const { fetchDeviceLogs } = useDeviceLogsStore();
   const {
@@ -205,7 +205,9 @@ function LiveMap() {
   const routeRequestedRef = useRef(false);
   const routeCoordsRef = useRef([]);
   const activeIndexRef = useRef(0);
-  const canePosition = gps?.lat && gps?.lng ? [gps.lat, gps.lng] : null;
+  const canePosition =
+    gps?.lat != null && gps?.lng != null ? [gps.lat, gps.lng] : null;
+  const showCaneMarker = Boolean(canePosition && !historyPin);
 
   useEffect(() => {
     if (routeCoords?.length) {
@@ -862,7 +864,7 @@ function LiveMap() {
           />
         )}
 
-        {canePosition && (
+        {showCaneMarker && (
           <SmoothMarker
             position={canePosition}
             icon={circleAvatarIcon(selectedDevice?.vip?.vipImageUrl)}

@@ -199,3 +199,8 @@ export const getDeviceLog = (deviceSerial) =>
   handleRequest(() =>
     backendApi.get(`/device/log/${encodeURIComponent(deviceSerial)}`)
   );
+
+export const getLastLocation = (deviceSerial) =>
+  handleRequest(() =>
+    backendApi.get(`/device/last-location/${encodeURIComponent(deviceSerial)}`)
+  );
