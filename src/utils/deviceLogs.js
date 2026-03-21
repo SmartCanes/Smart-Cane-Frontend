@@ -6,7 +6,13 @@ const DEVICE_LOG_TYPE_ALIASES = {
   SOS: "EMERGENCY",
   LIVE_EMERGENCY: "EMERGENCY",
   SET_EMERGENCY: "EMERGENCY",
+
+  ROUTE: "ROUTE_HISTORY",
+  ROUTE_ACTIVE: "SET_ROUTE",
+  ROUTE_COMPLETED: "REACH_DESTINATION",
   ROUTE_CLEARED: "ROUTE_CLEARED",
+  ROUTE_FAILED: "ROUTE_CLEARED",
+
   CLEAR_ROUTE: "ROUTE_CLEARED",
   ROUTE_CLEAR: "ROUTE_CLEARED",
   DESTINATION_CLEARED: "ROUTE_CLEARED",
@@ -286,25 +292,144 @@ const buildAvatar = (selectedDevice, metadata) =>
     selectedDevice?.vip?.vipImageUrl
   );
 
-const buildLocation = (metadata, coordsDisplay = null) =>
-  pickFirstString(
-    metadata?.location?.label,
-    metadata?.location?.name,
-    metadata?.location?.address,
-    metadata?.payload?.location,
-    metadata?.payload?.locationLabel,
-    metadata?.payload?.address,
-    metadata?.payload?.placeName,
-    pickNestedValue(metadata, LOCATION_KEYS),
-    pickNestedValue(metadata?.route, LOCATION_KEYS),
-    coordsDisplay
-  ) || "No origin available";
+const toNumber = (value) => {
+  if (value === null || value === undefined || value === "") return null;
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  return Number.isFinite(num) ? num : null;
+};
 
-const buildDestination = (metadata) =>
-  pickFirstString(
-    pickNestedValue(metadata, DESTINATION_KEYS),
-    pickNestedValue(metadata?.route, DESTINATION_KEYS)
-  ) || "No destination available";
+const formatCoordsLabel = (lat, lng) => {
+  const parsedLat = toNumber(lat);
+  const parsedLng = toNumber(lng);
+
+  if (parsedLat == null || parsedLng == null) return null;
+  return `${parsedLat.toFixed(6)}, ${parsedLng.toFixed(6)}`;
+};
+
+const getRouteCoordinates = (metadata = {}) => {
+  const coordinates =
+    metadata?.routeGeoJson?.coordinates ||
+    metadata?.route_geojson?.coordinates ||
+    metadata?.providerPayload?.paths?.[0]?.points?.coordinates ||
+    metadata?.provider_payload?.paths?.[0]?.points?.coordinates ||
+    metadata?.route?.routeGeoJson?.coordinates ||
+    metadata?.route?.route_geojson?.coordinates ||
+    [];
+
+  return Array.isArray(coordinates) ? coordinates : [];
+};
+
+const toLatLngRoute = (coordinates = []) =>
+  coordinates
+    .filter((point) => Array.isArray(point) && point.length >= 2)
+    .map(([lng, lat]) => [toNumber(lat), toNumber(lng)])
+    .filter((point) => Number.isFinite(point[0]) && Number.isFinite(point[1]));
+
+const getRouteOriginCoords = (metadata = {}) => {
+  const coordinates = getRouteCoordinates(metadata);
+  const first = coordinates[0];
+
+  if (Array.isArray(first) && first.length >= 2) {
+    const [lng, lat] = first;
+    return {
+      lat: toNumber(lat),
+      lng: toNumber(lng)
+    };
+  }
+
+  return null;
+};
+
+const getRouteDestinationCoords = (metadata = {}) => {
+  const explicitLat =
+    metadata?.destination?.lat ??
+    metadata?.destination?.latitude ??
+    metadata?.route?.destination?.lat ??
+    metadata?.route?.destination?.latitude;
+
+  const explicitLng =
+    metadata?.destination?.lng ??
+    metadata?.destination?.lon ??
+    metadata?.destination?.longitude ??
+    metadata?.route?.destination?.lng ??
+    metadata?.route?.destination?.lon ??
+    metadata?.route?.destination?.longitude;
+
+  const parsedLat = toNumber(explicitLat);
+  const parsedLng = toNumber(explicitLng);
+
+  if (parsedLat != null && parsedLng != null) {
+    return {
+      lat: parsedLat,
+      lng: parsedLng
+    };
+  }
+
+  const coordinates = getRouteCoordinates(metadata);
+  const last = coordinates[coordinates.length - 1];
+
+  if (Array.isArray(last) && last.length >= 2) {
+    const [lng, lat] = last;
+    return {
+      lat: toNumber(lat),
+      lng: toNumber(lng)
+    };
+  }
+
+  return null;
+};
+
+const buildLocation = (metadata, coordsDisplay = null) => {
+  const routeOrigin = getRouteOriginCoords(metadata);
+  const routeOriginLabel =
+    pickFirstString(
+      metadata?.origin?.label,
+      metadata?.origin?.name,
+      metadata?.origin?.address,
+      metadata?.route?.origin?.label,
+      metadata?.route?.origin?.name,
+      metadata?.route?.origin?.address
+    ) || formatCoordsLabel(routeOrigin?.lat, routeOrigin?.lng);
+
+  return (
+    routeOriginLabel ||
+    pickFirstString(
+      metadata?.location?.label,
+      metadata?.location?.name,
+      metadata?.location?.address,
+      metadata?.payload?.location,
+      metadata?.payload?.locationLabel,
+      metadata?.payload?.address,
+      metadata?.payload?.placeName,
+      pickNestedValue(metadata, LOCATION_KEYS),
+      pickNestedValue(metadata?.route, LOCATION_KEYS),
+      coordsDisplay
+    ) ||
+    "No origin available"
+  );
+};
+
+const buildDestination = (metadata) => {
+  const routeDestination = getRouteDestinationCoords(metadata);
+  const routeDestinationLabel =
+    pickFirstString(
+      metadata?.destination?.label,
+      metadata?.destination?.name,
+      metadata?.destination?.address,
+      metadata?.route?.destination?.label,
+      metadata?.route?.destination?.name,
+      metadata?.route?.destination?.address
+    ) || formatCoordsLabel(routeDestination?.lat, routeDestination?.lng);
+
+  return (
+    routeDestinationLabel ||
+    pickFirstString(
+      pickNestedValue(metadata, DESTINATION_KEYS),
+      pickNestedValue(metadata?.route, DESTINATION_KEYS)
+    ) ||
+    "No destination available"
+  );
+};
 
 const buildDuration = (metadata, fallback) =>
   pickFirstString(
@@ -316,12 +441,24 @@ const buildDuration = (metadata, fallback) =>
     humanizeDuration(metadata?.route?.duration),
     humanizeDuration(metadata?.route?.duration_seconds),
     humanizeDuration(metadata?.route?.durationSeconds),
+    humanizeDuration(metadata?.durationMs ? metadata.durationMs / 1000 : null),
+    humanizeDuration(
+      metadata?.route?.durationMs ? metadata.route.durationMs / 1000 : null
+    ),
     pickNestedValue(metadata, ROUTE_DURATION_KEYS),
     pickNestedValue(metadata?.route, ROUTE_DURATION_KEYS),
     fallback
   ) || fallback;
 
 const buildCoords = (metadata) => {
+  const routeOrigin = getRouteOriginCoords(metadata);
+  if (routeOrigin?.lat != null && routeOrigin?.lng != null) {
+    return {
+      coords: [routeOrigin.lat, routeOrigin.lng],
+      display: formatCoordsLabel(routeOrigin.lat, routeOrigin.lng)
+    };
+  }
+
   const rawLat =
     metadata?.payload?.lat ??
     metadata?.payload?.latitude ??
@@ -345,13 +482,13 @@ const buildCoords = (metadata) => {
     metadata?.lon ??
     metadata?.longitude;
 
-  const lat = typeof rawLat === "string" ? parseFloat(rawLat) : rawLat;
-  const lng = typeof rawLng === "string" ? parseFloat(rawLng) : rawLng;
+  const lat = toNumber(rawLat);
+  const lng = toNumber(rawLng);
 
-  if (typeof lat === "number" && !Number.isNaN(lat) && typeof lng === "number" && !Number.isNaN(lng)) {
+  if (lat != null && lng != null) {
     return {
       coords: [lat, lng],
-      display: `${lat}, ${lng}`
+      display: formatCoordsLabel(lat, lng)
     };
   }
 
@@ -369,9 +506,13 @@ const normalizeStatus = (rawStatus, fallbackStatus) => {
       return "Emergency";
     case "ONGOING":
     case "IN_PROGRESS":
+    case "ACTIVE":
+    case "PENDING":
       return "Ongoing";
     case "CANCELLED":
     case "CANCELED":
+    case "CLEARED":
+    case "FAILED":
       return "Cancelled";
     case "COMPLETED":
     case "SUCCESS":
@@ -393,11 +534,25 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
     .map((log) => {
       const metadata =
         log?.metadata_json || log?.metadataJson || log?.metadata || {};
-      const normalizedType = normalizeDeviceLogType(
-        log?.activity_type || log?.activityType
-      );
 
-      if (!normalizedType) {
+      const rawType = toLookupKey(log?.activity_type || log?.activityType);
+      const rawStatus = toLookupKey(log?.status);
+
+      let normalizedType = DEVICE_LOG_TYPE_ALIASES[rawType] || rawType;
+
+      if (rawType === "ROUTE") {
+        if (rawStatus === "ACTIVE" || rawStatus === "PENDING") {
+          normalizedType = "SET_ROUTE";
+        } else if (rawStatus === "COMPLETED") {
+          normalizedType = "REACH_DESTINATION";
+        } else if (rawStatus === "CLEARED" || rawStatus === "FAILED") {
+          normalizedType = "ROUTE_CLEARED";
+        } else {
+          normalizedType = "ROUTE_HISTORY";
+        }
+      }
+
+      if (!DEVICE_LOG_META[normalizedType]) {
         return null;
       }
 
@@ -407,12 +562,16 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
         log?.device_id ?? log?.deviceId ?? selectedDevice?.deviceId;
       const rawTimestamp = log?.created_at || log?.createdAt;
       const status = normalizeStatus(log?.status, meta.status);
+
       const isRoute =
         normalizedType === "SET_ROUTE" ||
         normalizedType === "REACH_DESTINATION" ||
         normalizedType === "ROUTE_CLEARED" ||
         normalizedType === "ROUTE_HISTORY";
-      const isAlert = normalizedType === "EMERGENCY" || normalizedType === "FALL";
+
+      const isAlert =
+        normalizedType === "EMERGENCY" || normalizedType === "FALL";
+
       const deviceSerial = prefixSerial(
         pickFirstString(
           log?.deviceSerialNumber,
@@ -423,9 +582,48 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
           selectedDevice?.deviceSerialNumber
         )
       );
+
       const coords = buildCoords(metadata);
-      const location = buildLocation(metadata, isAlert ? null : coords?.display);
+      const originCoordsObj = getRouteOriginCoords(metadata);
+      const destinationCoordsObj = getRouteDestinationCoords(metadata);
+      const routeCoordinates = getRouteCoordinates(metadata);
+      const routeLatLng = toLatLngRoute(routeCoordinates);
+
+      const location = buildLocation(
+        metadata,
+        isAlert ? null : coords?.display
+      );
       const destination = isRoute ? buildDestination(metadata) : null;
+
+      const originCoords =
+        originCoordsObj?.lat != null && originCoordsObj?.lng != null
+          ? [originCoordsObj.lat, originCoordsObj.lng]
+          : null;
+
+      const destinationCoords =
+        destinationCoordsObj?.lat != null && destinationCoordsObj?.lng != null
+          ? [destinationCoordsObj.lat, destinationCoordsObj.lng]
+          : null;
+
+      let mapMode = "point";
+      let isClickable = true;
+
+      if (normalizedType === "SET_ROUTE") {
+        mapMode = "destination-only";
+        isClickable = Boolean(destinationCoords);
+      } else if (normalizedType === "REACH_DESTINATION") {
+        mapMode = "route-history";
+        isClickable = routeLatLng.length >= 2;
+      } else if (normalizedType === "ROUTE_CLEARED") {
+        mapMode = "none";
+        isClickable = false;
+      } else if (normalizedType === "FALL" || normalizedType === "EMERGENCY") {
+        mapMode = "point";
+        isClickable = Boolean(coords?.coords);
+      } else if (normalizedType === "ROUTE_HISTORY") {
+        mapMode = routeLatLng.length >= 2 ? "route-history" : "point";
+        isClickable = routeLatLng.length >= 2 || Boolean(coords?.coords);
+      }
 
       return {
         id: `device-log-${logId}`,
@@ -446,7 +644,19 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
         avatar: buildAvatar(selectedDevice, metadata),
         location,
         destination,
-        coordinates: coords?.coords || null,
+        coordinates:
+          normalizedType === "SET_ROUTE"
+            ? destinationCoords || coords?.coords || null
+            : coords?.coords || null,
+        originCoords,
+        destinationCoords,
+        routeCoords: routeLatLng,
+        routeGeoJson:
+          metadata?.routeGeoJson ||
+          metadata?.route_geojson ||
+          metadata?.route?.routeGeoJson ||
+          metadata?.route?.route_geojson ||
+          null,
         duration: buildDuration(metadata, meta.duration),
         status,
         date: toLogDate(rawTimestamp) || new Date(),
@@ -457,6 +667,8 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
         deviceSerialNumber: deviceSerial,
         isRoute,
         isAlert,
+        isClickable,
+        mapMode,
         lastLocation: location,
         color: meta.color,
         icon: meta.icon,

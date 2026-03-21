@@ -112,6 +112,61 @@ const DeviceLogs = () => {
   );
 
   const handleViewOnMap = (log) => {
+    if (!log?.isClickable) return;
+
+    if (log.mapMode === "destination-only") {
+      const coords = log.destinationCoords || log.coordinates;
+      if (!Array.isArray(coords) || coords.length !== 2) return;
+
+      navigate("/dashboard", {
+        state: {
+          historyLocation: {
+            mode: "destination-only",
+            coords,
+            destinationCoords: coords,
+            label: log.destination || "Selected destination",
+            timestamp: log.dateTime,
+            status: log.status,
+            id: log.id,
+            activity: log.activity,
+            action: log.action || log.activityType,
+            color: log.color,
+            icon: log.icon
+          }
+        }
+      });
+      return;
+    }
+
+    if (log.mapMode === "route-history") {
+      if (!Array.isArray(log.routeCoords) || log.routeCoords.length < 2) return;
+
+      navigate("/dashboard", {
+        state: {
+          historyLocation: {
+            mode: "route-history",
+            coords: log.originCoords || log.coordinates,
+            originCoords: log.originCoords,
+            destinationCoords: log.destinationCoords,
+            routeCoords: log.routeCoords,
+            routeGeoJson: log.routeGeoJson,
+            label:
+              log.location && log.destination
+                ? `${log.location} → ${log.destination}`
+                : log.destination || log.location || "Route history",
+            timestamp: log.dateTime,
+            status: log.status,
+            id: log.id,
+            activity: log.activity,
+            action: log.action || log.activityType,
+            color: log.color,
+            icon: log.icon
+          }
+        }
+      });
+      return;
+    }
+
     if (!Array.isArray(log.coordinates) || log.coordinates.length !== 2) return;
 
     const label =
@@ -122,6 +177,7 @@ const DeviceLogs = () => {
     navigate("/dashboard", {
       state: {
         historyLocation: {
+          mode: "point",
           coords: log.coordinates,
           label,
           timestamp: log.dateTime,
@@ -350,8 +406,14 @@ const DeviceLogs = () => {
                   {paginatedLogs.map((log) => (
                     <tr
                       key={log.id}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => handleViewOnMap(log)}
+                      className={`transition-colors ${
+                        log.isClickable
+                          ? "hover:bg-gray-50 cursor-pointer"
+                          : "bg-gray-50/40 cursor-default opacity-80"
+                      }`}
+                      onClick={() => {
+                        if (log.isClickable) handleViewOnMap(log);
+                      }}
                     >
                       <td className="py-4 px-6">
                         <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">

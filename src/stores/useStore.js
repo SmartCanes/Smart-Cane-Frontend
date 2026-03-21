@@ -1296,6 +1296,90 @@ export const useActivityReportsStore = create(
   )
 );
 
+const routeLabelCache = new Map();
+
+const resolveLocationLabelByCoords = async (lat, lng) => {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+  const cacheKey = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+  if (routeLabelCache.has(cacheKey)) {
+    return routeLabelCache.get(cacheKey);
+  }
+
+  try {
+    const res = await getLocationByCoords(lat, lng);
+    const features = res?.features || res?.data?.features;
+    const feature = Array.isArray(features) ? features[0] : null;
+    const geocoding = feature?.properties?.geocoding || feature?.properties;
+
+    const label =
+      geocoding?.label ||
+      geocoding?.name ||
+      geocoding?.street ||
+      geocoding?.city ||
+      feature?.properties?.name ||
+      null;
+
+    const cleaned = typeof label === "string" ? label.trim() : null;
+
+    if (cleaned) {
+      routeLabelCache.set(cacheKey, cleaned);
+    }
+
+    return cleaned;
+  } catch (error) {
+    console.error("Failed to reverse geocode route label:", error);
+    return null;
+  }
+};
+
+const enrichRouteLabels = async (logs = []) => {
+  const enriched = await Promise.all(
+    logs.map(async (log) => {
+      if (log.action !== "REACH_DESTINATION" && log.action !== "SET_ROUTE") {
+        return log;
+      }
+
+      const next = { ...log };
+
+      if (
+        Array.isArray(log.originCoords) &&
+        log.originCoords.length === 2 &&
+        (!log.location || log.location === "No origin available" || /^\-?\d+\.\d+,\s*\-?\d+\.\d+$/.test(log.location))
+      ) {
+        const label = await resolveLocationLabelByCoords(
+          log.originCoords[0],
+          log.originCoords[1]
+        );
+        if (label) {
+          next.location = label;
+          next.lastLocation = label;
+        }
+      }
+
+      if (
+        Array.isArray(log.destinationCoords) &&
+        log.destinationCoords.length === 2 &&
+        (!log.destination ||
+          log.destination === "No destination available" ||
+          /^\-?\d+\.\d+,\s*\-?\d+\.\d+$/.test(log.destination))
+      ) {
+        const label = await resolveLocationLabelByCoords(
+          log.destinationCoords[0],
+          log.destinationCoords[1]
+        );
+        if (label) {
+          next.destination = label;
+        }
+      }
+
+      return next;
+    })
+  );
+
+  return enriched;
+};
+
 export const useDeviceLogsStore = create(
   persist(
     (set, get) => ({
@@ -1415,9 +1499,8 @@ export const useDeviceLogsStore = create(
             ? { ...resolvedDevice, deviceSerialNumber: effectiveSerial }
             : { deviceSerialNumber: effectiveSerial };
 
-          const normalizedLogs = normalizeDeviceLogs(
-            rawLogs,
-            normalizedDevice
+          const normalizedLogs = await enrichRouteLabels(
+            normalizeDeviceLogs(rawLogs, normalizedDevice)
           );
 
           set((state) => ({

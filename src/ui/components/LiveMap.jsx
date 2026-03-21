@@ -199,11 +199,16 @@ function LiveMap() {
   const [showLocationEnablePrompt, setShowLocationEnablePrompt] =
     useState(false);
   const [historyPin, setHistoryPin] = useState(null);
+  const [historyRoute, setHistoryRoute] = useState(null);
+  const [historyDestinationPin, setHistoryDestinationPin] = useState(null);
   const routeCoordsRef = useRef([]);
   const activeIndexRef = useRef(0);
+
   const canePosition =
     gps?.lat != null && gps?.lng != null ? [gps.lat, gps.lng] : null;
-  const showCaneMarker = Boolean(canePosition && !historyPin);
+  const showCaneMarker = Boolean(
+    canePosition && !historyPin && !historyRoute && !historyDestinationPin
+  );
 
   useEffect(() => {
     routeCoordsRef.current = routeCoords || [];
@@ -213,11 +218,93 @@ function LiveMap() {
   useEffect(() => {
     const incoming = location.state?.historyLocation;
 
-    if (
-      incoming &&
-      Array.isArray(incoming.coords) &&
-      incoming.coords.length === 2
-    ) {
+    if (!incoming) return;
+
+    setPreviewPos(null);
+    setIsUserFollowingCane(false);
+    setIsFreeMode(true);
+
+    if (incoming.mode === "route-history") {
+      setHistoryPin(
+        Array.isArray(incoming.originCoords) &&
+          incoming.originCoords.length === 2
+          ? {
+              coords: incoming.originCoords,
+              label: "Route origin",
+              timestamp: incoming.timestamp || null,
+              status: incoming.status || null,
+              activity: incoming.activity || incoming.action || null,
+              color: incoming.color || null,
+              icon: incoming.icon || null
+            }
+          : null
+      );
+
+      setHistoryDestinationPin(
+        Array.isArray(incoming.destinationCoords) &&
+          incoming.destinationCoords.length === 2
+          ? {
+              coords: incoming.destinationCoords,
+              label: incoming.label || "Destination",
+              timestamp: incoming.timestamp || null,
+              status: incoming.status || null,
+              activity: incoming.activity || incoming.action || null,
+              color: incoming.color || null,
+              icon: incoming.icon || null
+            }
+          : null
+      );
+
+      setHistoryRoute({
+        coords: Array.isArray(incoming.routeCoords) ? incoming.routeCoords : [],
+        label: incoming.label || "Route history",
+        timestamp: incoming.timestamp || null,
+        status: incoming.status || null,
+        activity: incoming.activity || incoming.action || null,
+        color: incoming.color || "#16a34a"
+      });
+
+      if (
+        mapRef.current &&
+        Array.isArray(incoming.routeCoords) &&
+        incoming.routeCoords.length >= 2
+      ) {
+        const bounds = L.latLngBounds(incoming.routeCoords);
+        mapRef.current.fitBounds(bounds, { padding: [50, 50], animate: true });
+      }
+    } else if (incoming.mode === "destination-only") {
+      setHistoryRoute(null);
+      setHistoryPin(null);
+      setHistoryDestinationPin(
+        Array.isArray(incoming.destinationCoords || incoming.coords) &&
+          (incoming.destinationCoords || incoming.coords).length === 2
+          ? {
+              coords: incoming.destinationCoords || incoming.coords,
+              label: incoming.label || "Selected destination",
+              timestamp: incoming.timestamp || null,
+              status: incoming.status || null,
+              activity: incoming.activity || incoming.action || null,
+              color: incoming.color || null,
+              icon: incoming.icon || null
+            }
+          : null
+      );
+
+      if (
+        mapRef.current &&
+        Array.isArray(incoming.destinationCoords || incoming.coords)
+      ) {
+        mapRef.current.flyTo(
+          incoming.destinationCoords || incoming.coords,
+          17,
+          {
+            duration: 0.6
+          }
+        );
+      }
+    } else if (Array.isArray(incoming.coords) && incoming.coords.length === 2) {
+      setHistoryRoute(null);
+      setHistoryDestinationPin(null);
       setHistoryPin({
         coords: incoming.coords,
         label: incoming.label || "History location",
@@ -228,18 +315,12 @@ function LiveMap() {
         icon: incoming.icon || null
       });
 
-      setPreviewPos(null);
-      setIsUserFollowingCane(false);
-      setIsFreeMode(true);
-
       if (mapRef.current) {
         mapRef.current.flyTo(incoming.coords, 17, { duration: 0.6 });
       }
     }
 
-    if (incoming) {
-      navigate(location.pathname, { replace: true });
-    }
+    navigate(location.pathname, { replace: true });
   }, [location.pathname, location.state?.historyLocation, navigate]);
 
   const advanceRoute = (currentPos) => {
@@ -473,6 +554,8 @@ function LiveMap() {
 
   const handleClearHistoryPin = () => {
     setHistoryPin(null);
+    setHistoryRoute(null);
+    setHistoryDestinationPin(null);
   };
 
   useEffect(() => {
@@ -899,6 +982,60 @@ function LiveMap() {
             lineCap="round"
             lineJoin="round"
           />
+        )}
+
+        {historyRoute?.coords?.length >= 2 && (
+          <Polyline
+            positions={historyRoute.coords}
+            pathOptions={{
+              color: historyRoute.color || "#16a34a",
+              weight: 5,
+              opacity: 0.9
+            }}
+          />
+        )}
+
+        {historyDestinationPin?.coords && (
+          <Marker
+            position={historyDestinationPin.coords}
+            icon={historyMarkerIcon(
+              historyDestinationPin.color || "#2563eb",
+              "D"
+            )}
+          >
+            <Popup>
+              <div className="font-poppins">
+                <div className="font-semibold">
+                  {historyDestinationPin.label || "Destination"}
+                </div>
+                {historyDestinationPin.timestamp ? (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {historyDestinationPin.timestamp}
+                  </div>
+                ) : null}
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {historyPin?.coords && (
+          <Marker
+            position={historyPin.coords}
+            icon={historyMarkerIcon(historyPin.color || "#4f46e5", "H")}
+          >
+            <Popup>
+              <div className="font-poppins">
+                <div className="font-semibold">
+                  {historyPin.label || "History"}
+                </div>
+                {historyPin.timestamp ? (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {historyPin.timestamp}
+                  </div>
+                ) : null}
+              </div>
+            </Popup>
+          </Marker>
         )}
       </MapContainer>
 
