@@ -15,6 +15,7 @@ import {
 } from "@/utils/deviceLogs";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { useRouteStore } from "./useRouteStore";
 
 const ensureSerialPrefix = (serial) => {
   if (!serial) return null;
@@ -100,6 +101,10 @@ export const useRealtimeStore = create(
         wsApi.off("deviceConfig");
         wsApi.off("emergencyTriggered");
         wsApi.off("fallDetected");
+        wsApi.off("routeResponse");
+        wsApi.off("destinationReached");
+        wsApi.off("destinationCleared");
+        wsApi.off("routeError");
         wsApi.connect();
 
         let heartbeatTimeout;
@@ -139,9 +144,7 @@ export const useRealtimeStore = create(
           }
         };
 
-        // Supports both middleware formats:
-        // 1) keyed object: { FALL_DETECTION: { enabled, config } }
-        // 2) array payload: { components: [{ codeName, enabled, config }] }
+
         const normalizeIncomingConfig = (rawConfig) => {
           if (!rawConfig || typeof rawConfig !== "object") return {};
 
@@ -421,6 +424,38 @@ export const useRealtimeStore = create(
             setTimeout(() => refreshDeviceLogs(), 400);
           });
         });
+
+        // ROUTE RELATED EVENTS
+        const refreshSharedRoute = async () => {
+          const selectedDevice = useDevicesStore.getState().selectedDevice;
+          const deviceId = selectedDevice?.deviceId;
+
+          if (!deviceId) return;
+
+          await useRouteStore.getState().fetchSharedRoute(deviceId);
+        };
+
+        wsApi.on("routeResponse", async () => {
+          await refreshSharedRoute();
+          refreshDeviceLogs();
+        });
+
+        wsApi.on("destinationReached", async () => {
+          await refreshSharedRoute();
+          refreshDeviceLogs();
+        });
+
+        wsApi.on("destinationCleared", async () => {
+          await refreshSharedRoute();
+          refreshDeviceLogs();
+        });
+
+        wsApi.on("routeError", async () => {
+          await refreshSharedRoute();
+          refreshDeviceLogs();
+        });
+
+
       },
 
       setGuardianLocation: (loc) => set({ guardianPosition: loc }),
@@ -685,7 +720,7 @@ export const useDevicesStore = create(
           selectedDevice: null
         }),
 
-      setSelectedDevice: (device) => {
+      setSelectedDevice: async (device) => {
         const prev = get().selectedDevice;
         const nextSerial = device?.deviceSerialNumber;
         const prevSerial = prev?.deviceSerialNumber;
@@ -704,6 +739,10 @@ export const useDevicesStore = create(
 
 
           useRealtimeStore.getState().loadLastLocation(nextSerial);
+
+          if (device?.deviceId) {
+            await useRouteStore.getState().fetchSharedRoute(device.deviceId);
+          }
         }
       }
     }),
@@ -914,47 +953,6 @@ export const useGuardiansStore = create(
         guardiansByDevice: state.guardiansByDevice,
         pendingInvitesByDevice: state.pendingInvitesByDevice
       })
-    }
-  )
-);
-
-export const useRouteStore = create(
-  persist(
-    (set) => ({
-      destinationPos: null,
-      routeCoords: [],
-      completedRoute: [],
-      remainingRoute: [],
-      activeIndex: 0,
-
-      setRoute: ({ destinationPos, routeCoords }) =>
-        set({
-          destinationPos,
-          routeCoords,
-          completedRoute: [],
-          remainingRoute: routeCoords,
-          activeIndex: 0
-        }),
-
-      updateProgress: ({ completedRoute, remainingRoute, activeIndex }) =>
-        set({
-          completedRoute,
-          remainingRoute,
-          activeIndex
-        }),
-
-      clearRoute: () =>
-        set({
-          destinationPos: null,
-          routeCoords: [],
-          completedRoute: [],
-          remainingRoute: [],
-          activeIndex: 0
-        })
-    }),
-    {
-      name: "route-storage",
-      storage: createJSONStorage(() => localStorage)
     }
   )
 );

@@ -14,10 +14,11 @@ import {
   useDevicesStore,
   useGuardiansStore,
   useRealtimeStore,
-  useRouteStore,
   useSettingsStore,
   useUserStore
 } from "@/stores/useStore";
+
+import { useRouteStore } from "@/stores/useRouteStore";
 
 // src/ui/utils/logoutModal.js
 function showLogoutModal(message = "Logging out...") {

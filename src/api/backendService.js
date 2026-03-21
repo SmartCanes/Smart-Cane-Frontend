@@ -205,11 +205,6 @@ export const getLastLocation = (deviceSerial) =>
     backendApi.get(`/device/last-location/${encodeURIComponent(deviceSerial)}`)
   );
 
-export const getDeviceRoute = (deviceId) =>
-  handleRequest(() => backendApi.get(`/device/${deviceId}/route`));
-
-export const saveDeviceRoute = (deviceId, payload) =>
-  handleRequest(() => backendApi.put(`/device/${deviceId}/route`, payload));
-
-export const updateDeviceRouteStatus = (deviceId, payload) =>
-  handleRequest(() => backendApi.patch(`/device/${deviceId}/route/status`, payload));
+export const getSharedDeviceRoute = async (deviceId) => {
+  return handleRequest(() => backendApi.get(`/device/${deviceId}/route`));
+};

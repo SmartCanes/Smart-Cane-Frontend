@@ -23,13 +23,12 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import {
-  useDeviceLogsStore,
   useDevicesStore,
   useRealtimeStore,
-  useRouteStore,
   useUserStore
 } from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import { useRouteStore } from "@/stores/useRouteStore";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -174,18 +173,15 @@ function LiveMap() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUserStore();
-  const { guardianPosition, gps, lastKnownCanePosition } = useRealtimeStore();
+  const { guardianPosition, gps } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
-  const { fetchDeviceLogs } = useDeviceLogsStore();
   const {
     destinationPos,
     routeCoords,
     completedRoute,
     remainingRoute,
     activeIndex,
-    setRoute,
-    updateProgress,
-    clearRoute
+    updateProgress
   } = useRouteStore();
 
   const mapContainerRef = useRef(null);
@@ -202,7 +198,6 @@ function LiveMap() {
   const [showLocationEnablePrompt, setShowLocationEnablePrompt] =
     useState(false);
   const [historyPin, setHistoryPin] = useState(null);
-  const routeRequestedRef = useRef(false);
   const routeCoordsRef = useRef([]);
   const activeIndexRef = useRef(0);
   const canePosition =
@@ -210,11 +205,9 @@ function LiveMap() {
   const showCaneMarker = Boolean(canePosition && !historyPin);
 
   useEffect(() => {
-    if (routeCoords?.length) {
-      routeCoordsRef.current = routeCoords;
-      activeIndexRef.current = activeIndex || 0;
-    }
-  }, []);
+    routeCoordsRef.current = routeCoords || [];
+    activeIndexRef.current = activeIndex || 0;
+  }, [routeCoords, activeIndex]);
 
   useEffect(() => {
     const incoming = location.state?.historyLocation;
@@ -247,93 +240,6 @@ function LiveMap() {
       navigate(location.pathname, { replace: true });
     }
   }, [location.pathname, location.state?.historyLocation, navigate]);
-
-  useEffect(() => {
-    const refreshDeviceLogs = () => {
-      if (!selectedDevice?.deviceId) return;
-
-      fetchDeviceLogs(selectedDevice.deviceId);
-    };
-
-    const handleDestinationReached = () => {
-      const { clearRoute } = useRouteStore.getState();
-
-      clearRoute();
-
-      routeCoordsRef.current = [];
-      activeIndexRef.current = 0;
-
-      routeRequestedRef.current = false;
-
-      setPreviewPos(null);
-      setIsUserFollowingCane(false);
-      setIsFreeMode(false);
-      refreshDeviceLogs();
-    };
-
-    const handleDestinationCleared = () => {
-      clearRoute();
-
-      setPreviewPos(null);
-      setIsUserFollowingCane(false);
-      setIsFreeMode(false);
-
-      routeCoordsRef.current = [];
-      activeIndexRef.current = 0;
-      routeRequestedRef.current = false;
-      refreshDeviceLogs();
-    };
-
-    wsApi.on("destinationReached", handleDestinationReached);
-    wsApi.on("destinationCleared", handleDestinationCleared);
-
-    return () => {
-      wsApi.off("destinationReached", handleDestinationReached);
-      wsApi.off("destinationCleared", handleDestinationCleared);
-    };
-  }, [clearRoute, fetchDeviceLogs, selectedDevice]);
-
-  useEffect(() => {
-    if (!destinationPos || !selectedDevice) return;
-    if (routeRequestedRef.current) return;
-
-    routeRequestedRef.current = true;
-
-    wsApi.emit("requestRoute", {
-      to: destinationPos
-    });
-
-    const handleRoute = (data) => {
-      const coords = data?.route.paths?.[0]?.points?.coordinates;
-      if (!Array.isArray(coords) || coords.length < 2) return;
-
-      const leafletCoords = coords.map(([lon, lat]) => [lat, lon]);
-
-      routeCoordsRef.current = leafletCoords;
-      activeIndexRef.current = 0;
-      setRoute({
-        destinationPos,
-        routeCoords: leafletCoords
-      });
-
-      if (selectedDevice?.deviceId) {
-        fetchDeviceLogs(selectedDevice.deviceId);
-      }
-    };
-
-    const handleError = () => {
-      routeRequestedRef.current = false;
-      clearRoute();
-    };
-
-    wsApi.on("routeResponse", handleRoute);
-    wsApi.on("routeError", handleError);
-
-    return () => {
-      wsApi.off("routeResponse", handleRoute);
-      wsApi.off("routeError", handleError);
-    };
-  }, [destinationPos, fetchDeviceLogs, selectedDevice, setRoute, clearRoute]);
 
   const advanceRoute = (currentPos) => {
     const coords = routeCoordsRef.current;
@@ -958,12 +864,14 @@ function LiveMap() {
           <ClickMenu
             previewPos={previewPos}
             onSetDestination={() => {
-              setRoute({
-                destinationPos: previewPos,
-                routeCoords: []
+              if (!selectedDevice?.deviceSerialNumber) return;
+
+              wsApi.emit("requestRoute", {
+                to: previewPos
               });
+
               setPreviewPos(null);
-              setIsFreeMode(false); // Exit free mode when setting destination
+              setIsFreeMode(false);
             }}
             onClose={() => setPreviewPos(null)}
           />

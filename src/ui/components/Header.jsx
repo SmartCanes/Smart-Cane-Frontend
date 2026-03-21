@@ -12,7 +12,6 @@ import {
   useGuardiansStore,
   useNotificationsStore, // added van
   useRealtimeStore,
-  useRouteStore,
   useUIStore,
   useUserStore
 } from "@/stores/useStore";
@@ -21,6 +20,7 @@ import DefaultProfile from "./DefaultProfile";
 import { capitalizeWords } from "@/utils/Capitalize";
 import { openNotificationTarget } from "@/utils/importantNotifications";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import { useRouteStore } from "@/stores/useRouteStore";
 
 function showLogoutModal(message = "Logging out...") {
   if (document.getElementById("logout-modal-overlay")) return;

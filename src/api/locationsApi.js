@@ -86,6 +86,5 @@ export const getLocationByCoords = (lat, lon) =>
     );
     // const label = res?.data?.features[0]?.properties?.geocoding?.label;
     // console.log(label);
-    console.log(res);
     return res;
   });
