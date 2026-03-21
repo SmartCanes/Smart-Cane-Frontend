@@ -1,0 +1,226 @@
+{
+  "nav": {
+    "home": "Home",
+    "icane": "iCane",
+    "about": "About Us",
+    "faqs": "FAQs",
+    "contact": "Contact Us",
+    "login": "Log In"
+  },
+  "mobileMenu": {
+    "open": "Open menu",
+    "close": "Close menu"
+  },
+  "hero": {
+    "title": "The iCane That Sees Ahead.",
+    "subtitle": "SmartCane: Redefining Mobility with AI-Powered Safety.",
+    "description": "iCane uses advanced sensor technology and AI to detect obstacles, analyze terrain, and guide you with real-time feedback. Gain confidence and independence with a device built for your journey.",
+    "cta": "Get Started",
+    "imageAlt": "Group of people walking with canes"
+  },
+  "sections": {
+    "icane": "iCane",
+    "about": "ABOUT US",
+    "faq": "FAQ",
+    "contact": "CONTACT US"
+  },
+  "about": {
+    "imageAlt": "Team Photo",
+    "paragraph1": "At iCane, we believe technology should make life easier for everyone. Our smart cane is designed to help people with visual impairments move safely and confidently every day.",
+    "paragraph2": "The iCane uses smart sensors and simple feedback to guide users and prevent obstacles. It is built to be reliable, easy to use, and supportive of greater independence.",
+    "paragraph3": "Our team is passionate about creating tools that truly make a difference. We listen to our users, learn from their experiences, and keep improving to make iCane even better."
+  },
+  "faq": {
+    "heading": "Frequently Asked Questions",
+    "items": [
+      {
+        "question": "What is SmartCane?",
+        "answer": "SmartCane (iCane) is an intelligent walking cane for visually impaired individuals. It combines IoT technology, AI-based object detection, and navigation tools to support safer and more independent travel."
+      },
+      {
+        "question": "How do I create an account and log in?",
+        "answer": "Visit the SmartCane website and click Sign Up. Enter your details, create your account, then log in using your email and password to access your dashboard."
+      },
+      {
+        "question": "How do I use the SmartCane website?",
+        "answer": "After logging in, you can manage your profile, monitor device status, review notifications, use navigation tools, and manage guardians and VIP connections."
+      },
+      {
+        "question": "How do guardians and VIP users work?",
+        "answer": "Guardians are trusted contacts who can monitor and assist VIP users. Once connected, guardians can receive alerts, monitor location, and provide help when needed."
+      },
+      {
+        "question": "What safety features does SmartCane provide?",
+        "answer": "SmartCane provides obstacle detection, voice or vibration alerts, GPS tracking, and emergency SOS notifications to improve safety during movement."
+      },
+      {
+        "question": "How do I charge and maintain SmartCane?",
+        "answer": "Use a USB cable to charge the cane. A full charge usually takes around 2 to 3 hours. The device is water-resistant for light rain but should not be submerged."
+      }
+    ]
+  },
+  "contact": {
+    "introTitle": "Welcome to iCane",
+    "intro": "We are here to help.",
+    "description": "Whether you have questions, need support, or want to share your experience, our team is ready to assist.",
+    "callTitle": "Call Us",
+    "callDescription": "We are just a call away for any questions or support you need.",
+    "emailTitle": "Email Us",
+    "emailDescription": "Send us an email and we will get back to you as soon as possible.",
+    "callIconAlt": "Call",
+    "emailIconAlt": "Email"
+  },
+  "footer": {
+    "description": "A smart mobility cane empowering the visually impaired with safety, guidance, and connectivity.",
+    "category": "Category",
+    "contactInfo": "Contact Info",
+    "socialMedia": "Social Media",
+    "facebookAria": "Visit the iCane Facebook page",
+    "instagramAria": "Visit the iCane Instagram page",
+    "facebookIconAlt": "Facebook icon",
+    "instagramIconAlt": "Instagram icon",
+    "copyright": "© 2026 iCane · All Rights Reserved"
+  },
+  "features": {
+    "Visual-Recognition": {
+      "title": "AI-Based Visual Recognition",
+      "description": "Through AI-powered visual recognition, the Smart Cane identifies objects and surroundings, giving users instant audio descriptions that enhance awareness and support safer decision-making during travel."
+    },
+    "route-navigation": {
+      "title": "Route Navigation",
+      "description": "The Smart Cane's route navigation feature provides guided directions through real-time voice prompts, helping users move confidently and safely toward their destination without relying solely on tactile cues."
+    },
+    "gps": {
+      "title": "GPS",
+      "description": "With real-time GPS tracking, guardians can easily monitor the user's location through the connected web app, ensuring safety and peace of mind wherever they go."
+    },
+    "emergency-sos": {
+      "title": "SOS",
+      "description": "During emergencies, iCane automatically sends an SOS alert with the user's exact location to registered guardians, enabling quick response and immediate assistance."
+    },
+    "iot-connectivity": {
+      "title": "IOT Connectivity",
+      "description": "iCane's IoT integration links the device to a companion web application that provides connectivity, fall detection, emergency alerts, and user location for continuous monitoring."
+    },
+    "weather": {
+      "title": "Weather Notifications",
+      "description": "Stay one step ahead of the weather. iCane delivers instant weather alerts to help users prepare for outdoor conditions and ensure safer navigation."
+    },
+    "document": {
+      "title": "Shared Notes & Reminders",
+      "description": "Through the shared notes feature, guardians can send text messages that iCane reads aloud via its AI assistant, keeping users informed, reminded, and connected anytime."
+    }
+  },
+  "caneViewer": {
+    "logoAlt": "iCane logo",
+    "brandLine": "iCane - Smart Cane",
+    "controls": {
+      "resetAria": "Reset 3D view",
+      "resetTitle": "Reset view",
+      "explore3d": "Explore 3D",
+      "exit3d": "Exit 3D"
+    },
+    "mobile": {
+      "dragHint": "Drag, zoom, and pan",
+      "tapHint": "Tap Explore 3D"
+    },
+    "ads": {
+      "voiceGuidedNavigation": {
+        "label": "Voice-Guided Navigation",
+        "headline": "Navigate with Confidence",
+        "sub": "Real-time obstacle detection keeps every step safe."
+      },
+      "alwaysConnected": {
+        "label": "Always Connected",
+        "headline": "Peace of Mind, Everywhere",
+        "sub": "Live GPS tracking so guardians are never out of the loop."
+      },
+      "emergencyReady": {
+        "label": "Emergency Ready",
+        "headline": "SOS at Your Fingertips",
+        "sub": "Instant alerts sent to your guardians when it matters most."
+      },
+      "smartAssistiveTech": {
+        "label": "Smart Assistive Tech",
+        "headline": "Smart. Safe. Independent.",
+        "sub": "The future of assistive mobility is finally here."
+      }
+    }
+  },
+  "team": {
+    "heading": {
+      "prefix": "Meet the",
+      "highlight": "Team"
+    },
+    "subtitle": "Passionate experts dedicated to redefining mobility through innovative technology and inclusive design.",
+    "filters": {
+      "all": "All",
+      "developers": "Developers",
+      "designers": "Designers",
+      "documentation": "Documentation"
+    },
+    "empty": {
+      "message": "No team members found in this category.",
+      "showAll": "Show All"
+    },
+    "members": {
+      "1": {
+        "role": "Lead Product Designer & UI/UX Specialist",
+        "bio": "Leads iCane's product experience from concept to prototype, translating user needs into accessible, intuitive interfaces and consistent design systems."
+      },
+      "2": {
+        "role": "Head Documentation & Research Specialist",
+        "bio": "Leads research and documentation for iCane, consolidating technical findings into clear reports, diagrams, and annotated visuals to support development and evaluation."
+      },
+      "3": {
+        "role": "Web & UI Engineer",
+        "bio": "Builds iCane's web UI with a focus on clean components, responsive layouts, and smooth user interactions for both users and guardians."
+      },
+      "4": {
+        "role": "Assistant Documentation & Product Manager",
+        "bio": "Supports product planning and documentation by coordinating requirements, keeping progress aligned, and ensuring deliverables are clearly written and well-structured."
+      },
+      "5": {
+        "role": "Web Developer & Hardware Engineer",
+        "bio": "Bridges software and hardware by developing web features while helping integrate sensors and device components for reliable end-to-end functionality."
+      },
+      "6": {
+        "role": "Full Stack Web Developer & Visually Impaired User",
+        "bio": "Develops full-stack features while providing direct user perspective, helping validate flows, feedback, and accessibility decisions from real-world usage."
+      },
+      "7": {
+        "role": "UI/UX Designer & Layout Specialist",
+        "bio": "Designs layouts and presentation materials for iCane, ensuring screens, reports, and visuals communicate information clearly and consistently."
+      },
+      "8": {
+        "role": "Researcher & Documentation Specialist",
+        "bio": "Supports iCane research and testing, documenting experiments, results, and implementation notes to keep the team aligned and the project reproducible."
+      },
+      "9": {
+        "role": "Project Manager & Quality Assurance",
+        "bio": "Leads planning and quality assurance for iCane, organizing tasks, tracking progress, and verifying features through structured testing and validation."
+      },
+      "10": {
+        "role": "Graphic Designer & UI/UX Designer",
+        "bio": "Creates iCane's visual assets and UI polish, combining branding, graphic design, and interface design to produce a cohesive look and feel."
+      },
+      "11": {
+        "role": "Researcher & Documentation Specialist",
+        "bio": "Coordinates documentation and research tasks, keeping project notes organized and ensuring outputs are clear, consistent, and ready for submission."
+      },
+      "12": {
+        "role": "Researcher & Documentation Specialist",
+        "bio": "Assists in research and documentation, translating technical work into understandable write-ups and maintaining clear records of implementation decisions."
+      },
+      "13": {
+        "role": "Researcher & Technical Writer",
+        "bio": "Writes and edits iCane's technical content, ensuring the paper, captions, and documentation are readable, consistent, and properly structured."
+      },
+      "14": {
+        "role": "Lead Developer",
+        "bio": "Leads system architecture and implementation, bringing components together into a reliable, secure, and scalable real-time solution."
+      }
+    }
+  },
+  "backToTop": "Back to top"
+}

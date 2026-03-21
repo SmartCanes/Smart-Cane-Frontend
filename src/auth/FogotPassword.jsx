@@ -6,6 +6,7 @@ import Modal from "@/ui/components/Modal";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
+import { useTranslation } from "react-i18next";
 import {
   forgotPasswordApi,
   forgotPasswordResetApi,
@@ -13,6 +14,7 @@ import {
 } from "@/api/authService";
 
 const ForgotPassword = () => {
+  const { t } = useTranslation("pages");
   const navigate = useNavigate();
   const { isAnimationDone } = useUIStore();
 
@@ -40,7 +42,7 @@ const ForgotPassword = () => {
     if (step === 2 && otpExpiryTime) {
       const timer = setInterval(() => {
         if (new Date() > otpExpiryTime) {
-          setOtpError("OTP has expired. Please request a new one.");
+          setOtpError(t("auth.forgotPassword.errors.otpExpired"));
           clearInterval(timer);
         }
       }, 1000);
@@ -163,7 +165,7 @@ const ForgotPassword = () => {
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(userEmail)) {
-          setEmailError("Please enter a valid email address");
+          setEmailError(t("auth.forgotPassword.errors.validEmail"));
           setIsLoading(false);
           return;
         }
@@ -176,8 +178,8 @@ const ForgotPassword = () => {
         // Check if the response indicates success
         if (response.status || response.message) {
           showModalWithTimeout(
-            "Password Reset",
-            `We've sent a verification code to your email: ${userEmail}`,
+            t("auth.forgotPassword.modal.passwordResetTitle"),
+            t("auth.forgotPassword.modal.codeSent", { email: userEmail }),
             3000
           );
 
@@ -217,7 +219,7 @@ const ForgotPassword = () => {
         if (response.success || response.message === "OTP verified") {
           setStep(3);
         } else {
-          setOtpError(response.message || "Invalid OTP");
+          setOtpError(response.message || t("auth.forgotPassword.errors.invalidOtp"));
         }
       }
 
@@ -232,11 +234,11 @@ const ForgotPassword = () => {
           stepErrors.confirmPassword = REQUIRED_MSG;
 
         if (formData.newPassword !== formData.confirmPassword) {
-          stepErrors.confirmPassword = "Password doesn't match!";
+          stepErrors.confirmPassword = t("auth.forgotPassword.errors.passwordMismatch");
         }
 
         if (formData.newPassword.length < 6) {
-          stepErrors.newPassword = "Password must be at least 6 characters";
+          stepErrors.newPassword = t("auth.forgotPassword.errors.passwordMin");
         }
 
         if (Object.keys(stepErrors).length) {
@@ -253,8 +255,8 @@ const ForgotPassword = () => {
 
         if (response.status || response.message) {
           showModalWithTimeout(
-            "Success",
-            "Password successfully updated!",
+            t("auth.forgotPassword.modal.successTitle"),
+            t("auth.forgotPassword.modal.passwordUpdated"),
             2000
           );
 
@@ -270,7 +272,7 @@ const ForgotPassword = () => {
         setEmailError(
           error.response?.data?.message ||
             error.message ||
-            "Failed to send OTP. Please try again."
+            t("auth.forgotPassword.errors.otpSendFailed")
         );
       }
 
@@ -282,14 +284,14 @@ const ForgotPassword = () => {
           setOtpError(
             error.response?.data?.message ||
               error.message ||
-              "Invalid OTP. Please try again."
+              t("auth.forgotPassword.errors.invalidOtp")
           );
         } else if (error.request) {
           // The request was made but no response was received
-          setOtpError("Network error. Please check your connection.");
+          setOtpError(t("auth.forgotPassword.errors.network"));
         } else {
           // Something happened in setting up the request
-          setOtpError("Something went wrong. Please try again.");
+          setOtpError(t("auth.forgotPassword.errors.generic"));
         }
       }
 
@@ -297,12 +299,12 @@ const ForgotPassword = () => {
         const msg =
           error.response?.data?.message ||
           error.message ||
-          "Failed to reset password";
+          t("auth.forgotPassword.errors.resetFailed");
 
         if (msg.includes("session expired")) {
           showModalWithTimeout(
-            "Session Expired",
-            "Session expired. Please start the reset process again.",
+            t("auth.forgotPassword.modal.sessionExpiredTitle"),
+            t("auth.forgotPassword.modal.sessionExpiredBody"),
             3000
           );
 
@@ -337,13 +339,13 @@ const ForgotPassword = () => {
         setOtpExpiryTime(expiry);
 
         showModalWithTimeout(
-          "Verification",
-          "New OTP sent to your email!",
+          t("auth.forgotPassword.modal.verificationTitle"),
+          t("auth.forgotPassword.modal.newOtpSent"),
           3000
         );
       }
     } catch (error) {
-      setOtpError("Failed to resend OTP. Please try again.");
+      setOtpError(t("auth.forgotPassword.errors.resendFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -363,54 +365,54 @@ const ForgotPassword = () => {
           {/* Header (outside form, like Login/Register) */}
           <div className="text-center space-y-2">
             <h1 className="hidden sm:block text-5xl sm:text-4xl lg:text-5xl font-bold text-[#1C253C]">
-              {step === 1 && "Forgot Password"}
-              {step === 2 && "Verification Code"}
-              {step === 3 && "Change Password"}
+              {step === 1 && t("auth.forgotPassword.heading")}
+              {step === 2 && t("auth.forgotPassword.verificationCode")}
+              {step === 3 && t("auth.forgotPassword.changePassword")}
             </h1>
 
             <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
               {step === 1 &&
-                "Enter your email address and we'll send you a code."}
+                t("auth.forgotPassword.step1Description")}
 
               {step === 2 && (
                 <>
-                  We've sent a verification code to:{" "}
+                  {t("auth.forgotPassword.codeSentPrefix")} {" "}
                   <span className="font-semibold">{userEmail}</span>.{" "}
                   <span className="text-sm text-gray-600">
-                    (Expires in 5 minutes)
+                    {t("auth.forgotPassword.expiresIn")}
                   </span>
                 </>
               )}
 
               {step === 3 &&
-                "Your code has been verified. Enter your new password."}
+                t("auth.forgotPassword.step3Description")}
             </p>
 
             {/* Mobile header */}
             <p className="sm:hidden text-[#1C253C] text-paragraph text-lg">
-              {step === 1 && "Forgot Password"}
-              {step === 2 && "Verification Code"}
-              {step === 3 && "Change Password"}
+              {step === 1 && t("auth.forgotPassword.heading")}
+              {step === 2 && t("auth.forgotPassword.verificationCode")}
+              {step === 3 && t("auth.forgotPassword.changePassword")}
             </p>
 
             {/* Mobile description */}
             <p className="sm:hidden font-poppins text-[#1C253C] text-sm">
               {step === 1 &&
-                "Enter your email address and we'll send you a code."}
+                t("auth.forgotPassword.step1Description")}
 
               {step === 2 && (
                 <>
-                  We've sent a verification code to:{" "}
+                  {t("auth.forgotPassword.codeSentPrefix")} {" "}
                   <span className="font-semibold">{userEmail}</span>
                   <br />
                   <span className="text-xs text-gray-600">
-                    (Expires in 5 minutes)
+                    {t("auth.forgotPassword.expiresIn")}
                   </span>
                 </>
               )}
 
               {step === 3 &&
-                "Your code has been verified. Enter your new password."}
+                t("auth.forgotPassword.step3Description")}
             </p>
           </div>
 
@@ -428,7 +430,7 @@ const ForgotPassword = () => {
             {step === 1 && (
               <div className="space-y-4">
                 <TextField
-                  label="Email Address"
+                  label={t("auth.forgotPassword.email")}
                   placeholder="sample.email@gmail.com"
                   type="email"
                   value={userEmail}
@@ -440,14 +442,18 @@ const ForgotPassword = () => {
                 <PrimaryButton
                   className="w-full py-4 text-[18px]"
                   bgColor="bg-primary-100"
-                  text={isLoading ? "Sending..." : "Send Code"}
+                  text={
+                    isLoading
+                      ? t("auth.forgotPassword.sending")
+                      : t("auth.forgotPassword.sendCode")
+                  }
                   type="submit"
                   disabled={isLoading}
                 />
 
                 <PrimaryButton
                   className="w-full py-3 mt-2"
-                  text="Back"
+                  text={t("auth.forgotPassword.back")}
                   variant="outline"
                   type="button"
                   onClick={() => navigate("/login")}
@@ -480,28 +486,32 @@ const ForgotPassword = () => {
                 )}
 
                 <div className="text-center text-sm text-gray-600">
-                  Didn't receive code?{" "}
+                  {t("auth.forgotPassword.noCode")} {" "}
                   <button
                     type="button"
                     onClick={resendOtp}
                     className="text-primary-100 hover:underline font-medium"
                     disabled={isLoading}
                   >
-                    Resend OTP
+                    {t("auth.forgotPassword.resendOtp")}
                   </button>
                 </div>
 
                 <PrimaryButton
                   className="w-full py-4 text-[18px]"
                   bgColor="bg-primary-100"
-                  text={isLoading ? "Verifying..." : "Verify Code"}
+                  text={
+                    isLoading
+                      ? t("auth.forgotPassword.verifying")
+                      : t("auth.forgotPassword.verifyCode")
+                  }
                   type="submit"
                   disabled={isLoading}
                 />
 
                 <PrimaryButton
                   className="w-full py-3 mt-2"
-                  text="Back"
+                  text={t("auth.forgotPassword.back")}
                   variant="outline"
                   type="button"
                   onClick={() => setStep(1)}
@@ -514,19 +524,19 @@ const ForgotPassword = () => {
             {step === 3 && (
               <div className="space-y-4">
                 <PasswordField
-                  label="New Password"
+                  label={t("auth.forgotPassword.newPassword")}
                   name="newPassword"
                   value={formData.newPassword}
                   onChange={handleChange}
                   error={errors.newPassword}
-                  hint="Must be at least 6 characters"
+                  hint={t("auth.forgotPassword.passwordHint")}
                   required
                   showValidationRules
                   disabled={isLoading}
                 />
 
                 <PasswordField
-                  label="Re-enter Password"
+                  label={t("auth.forgotPassword.confirmPassword")}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -538,14 +548,18 @@ const ForgotPassword = () => {
                 <PrimaryButton
                   className="w-full py-4 text-[18px]"
                   bgColor="bg-primary-100"
-                  text={isLoading ? "Updating..." : "Submit"}
+                  text={
+                    isLoading
+                      ? t("auth.forgotPassword.updating")
+                      : t("auth.forgotPassword.submit")
+                  }
                   type="submit"
                   disabled={isLoading}
                 />
 
                 <PrimaryButton
                   className="w-full py-3 mt-2"
-                  text="Back"
+                  text={t("auth.forgotPassword.back")}
                   variant="outline"
                   type="button"
                   onClick={() => navigate("/login")}

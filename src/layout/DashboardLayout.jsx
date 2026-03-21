@@ -8,18 +8,90 @@ import Header from "@/ui/components/Header";
 import ImportantNotificationsBridge from "@/ui/components/ImportantNotificationsBridge";
 import PushNotificationsBridge from "@/ui/components/PushNotificationsBridge";
 import TourGuide from "@/ui/components/TourGuide";
+import { TOUR_STEPS } from "@/data/tourConfig";
+import { useTourStore } from "@/stores/useTourStore";
 import { createContext, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const ScrollContext = createContext();
+const LOGIN_TOAST_DURATION_MS = 3000;
+const TOUR_STABILIZE_MS = 450;
+
+function normalizeTourFlag(value) {
+  if (typeof value === "boolean") return value;
+  if (value === 1 || value === "1") return true;
+  if (value === 0 || value === "0") return false;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+  }
+  return null;
+}
 
 const DashboardLayoutContent = () => {
-  const { setUser } = useUserStore();
+  const { t, i18n } = useTranslation("pages");
+  const { user, setUser } = useUserStore();
+  const { hasVisited } = useTourStore();
   const { emergency, fall, connectWs, disconnectWs } = useRealtimeStore();
   const location = useLocation();
   const { showToast, clearToast } = useToast();
   const [showNav, setShowNav] = useState(true);
+  const [canAutoStartTour, setCanAutoStartTour] = useState(false);
   const lastScrollY = useRef(0);
+  const tRef = useRef(t);
+  const toastShownRef = useRef(false);
+  const pendingLoginToastRef = useRef(false);
+  const tourReadyTimerRef = useRef(null);
+
+  const hasSeenTourBackend =
+    normalizeTourFlag(user?.has_seen_tour) ??
+    normalizeTourFlag(user?.hasSeenTour) ??
+    null;
+
+  const showLoginSuccessToast = () => {
+    if (toastShownRef.current) return;
+
+    toastShownRef.current = true;
+    pendingLoginToastRef.current = false;
+
+    showToast({
+      message: tRef.current("dashboardLayout.toast.loginSuccess"),
+      type: "success",
+      position: "top-right",
+      duration: LOGIN_TOAST_DURATION_MS
+    });
+
+    window.history.replaceState({}, document.title);
+  };
+
+  const scheduleTourAutostart = (delayMs) => {
+    setCanAutoStartTour(false);
+    if (tourReadyTimerRef.current) {
+      clearTimeout(tourReadyTimerRef.current);
+    }
+
+    tourReadyTimerRef.current = setTimeout(() => {
+      setCanAutoStartTour(true);
+    }, delayMs);
+  };
+
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
+
+  useEffect(() => {
+    scheduleTourAutostart(TOUR_STABILIZE_MS);
+  }, [i18n.resolvedLanguage]);
+
+  useEffect(() => {
+    return () => {
+      if (tourReadyTimerRef.current) {
+        clearTimeout(tourReadyTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     connectWs();
@@ -46,7 +118,7 @@ const DashboardLayoutContent = () => {
   useEffect(() => {
     if (emergency) {
       showToast({
-        message: "Emergency Alert! Please check the live location immediately.",
+        message: tRef.current("dashboardLayout.toast.emergency"),
         type: "error",
         position: "bottom-right",
         duration: 500000
@@ -56,7 +128,7 @@ const DashboardLayoutContent = () => {
 
     if (fall) {
       showToast({
-        message: "Fall detected! Please check the user's status immediately.",
+        message: tRef.current("dashboardLayout.toast.fall"),
         type: "warning",
         position: "bottom-right",
         duration: 10000
@@ -68,18 +140,43 @@ const DashboardLayoutContent = () => {
   }, [emergency, fall, showToast, clearToast]);
 
   useEffect(() => {
-    const showModal = location.state?.showModal;
-    if (showModal && !emergency) {
-      showToast({
-        message: "You have successfully logged into your account.",
-        type: "success",
-        position: "top-right",
-        duration: 3000
-      });
+    const justLoggedIn = Boolean(location.state?.justLoggedIn);
+    if (!justLoggedIn || toastShownRef.current || emergency) return;
 
-      window.history.replaceState({}, document.title);
+    pendingLoginToastRef.current = true;
+
+    if (hasSeenTourBackend === null) {
+      return;
     }
-  }, [location, emergency, showToast]);
+
+    const isFirstTimeUser = hasSeenTourBackend === false;
+    const hasTourSteps = (TOUR_STEPS[location.pathname] ?? []).length > 0;
+    const isPageVisited = hasVisited(location.pathname);
+    const shouldWaitForTour = isFirstTimeUser && hasTourSteps && !isPageVisited;
+
+    if (shouldWaitForTour) {
+      return;
+    }
+
+    showLoginSuccessToast();
+  }, [
+    emergency,
+    location.pathname,
+    location.state,
+    hasSeenTourBackend,
+    hasVisited,
+    showToast
+  ]);
+
+  const handleTourComplete = () => {
+    if (!pendingLoginToastRef.current || toastShownRef.current) return;
+    showLoginSuccessToast();
+  };
+
+  const handleTourClose = () => {
+    if (!pendingLoginToastRef.current || toastShownRef.current) return;
+    showLoginSuccessToast();
+  };
 
   const handleScroll = (currentScrollY) => {
     if (window.innerWidth >= 768) {
@@ -105,7 +202,11 @@ const DashboardLayoutContent = () => {
       <div className="min-h-screen flex flex-col overflow-y-hidden bg-primary-100">
         {activeAlert === "fall" && <FallOverlay fall={true} />}
         {activeAlert === "emergency" && <EmergencyOverlay emergency={true} />}
-        <TourGuide />
+        <TourGuide
+          canAutoStart={canAutoStartTour}
+          onComplete={handleTourComplete}
+          onClose={handleTourClose}
+        />
         <ImportantNotificationsBridge />
         <PushNotificationsBridge />
 

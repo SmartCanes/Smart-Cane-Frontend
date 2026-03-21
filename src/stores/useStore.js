@@ -4,6 +4,7 @@ import {
   getDevices,
   getPendingInvites
 } from "@/api/backendService";
+import i18n from "@/i18n";
 import { wsApi } from "@/api/ws-api";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -1251,6 +1252,33 @@ const trimEventCooldowns = (cooldowns) =>
       .slice(0, MAX_EVENT_COOLDOWN_KEYS)
   );
 
+const translateNotificationTitle = (action, fallback = "System Alert") => {
+  if (!action) return fallback;
+  return i18n.t(`pages:notifications.meta.actions.${action}`, {
+    defaultValue: fallback
+  });
+};
+
+const translateNotificationDescription = (description) => {
+  if (!description) return "\u2014";
+
+  const setEmergencyMatch = description.match(
+    /^(.+?) set guardian (.+?) as emergency contact for device (.+)$/i
+  );
+
+  if (setEmergencyMatch) {
+    const [, actor, guardian, device] = setEmergencyMatch;
+    return i18n.t("pages:notifications.dynamicMessages.setEmergencyContact", {
+      actor: actor?.trim(),
+      guardian: guardian?.trim(),
+      device: device?.trim(),
+      defaultValue: description
+    });
+  }
+
+  return description;
+};
+
 export const NOTIFICATION_META = {
   CREATE: {
     label: "Device Created",
@@ -1359,10 +1387,14 @@ export const useNotificationsStore = create(
           id: historyId,
           historyId,
           action,
-          title: notification?.title || meta.label || "System Alert",
+          title:
+            notification?.title ||
+            translateNotificationTitle(action, meta.label || "System Alert"),
           message:
             notification?.message ||
-            "Important activity was detected on iCane.",
+            i18n.t("pages:notifications.messages.importantActivity", {
+              defaultValue: "Important activity was detected on iCane."
+            }),
           guardianName: notification?.guardianName || "iCane System",
           color: notification?.color || meta.color || "gray",
           icon: notification?.icon || meta.icon || "ph:bell",
@@ -1410,8 +1442,11 @@ export const useNotificationsStore = create(
             id: h.historyId,
             historyId: h.historyId,
             action: h.action,
-            title: NOTIFICATION_META[h.action]?.label || h.action,
-            message: h.description || "—",
+            title: translateNotificationTitle(
+              h.action,
+              NOTIFICATION_META[h.action]?.label || h.action
+            ),
+            message: translateNotificationDescription(h.description),
             guardianName: h.guardianName || "Unknown",
             color: NOTIFICATION_META[h.action]?.color || "gray",
             icon: NOTIFICATION_META[h.action]?.icon || "ph:bell",

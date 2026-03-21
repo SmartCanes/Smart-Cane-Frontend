@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { verifyGuardianInvite } from "@/api/backendService";
 import { useUserStore } from "@/stores/useStore";
+import { useTranslation } from "react-i18next";
 
 const STATUS_ICON_MAP = {
   processing: { icon: "svg-spinners:90-ring-with-bg", color: "text-blue-500" },
@@ -29,17 +30,8 @@ const STATUS_ICON_MAP = {
   error: { icon: "material-symbols:error-rounded", color: "text-red-500" }
 };
 
-const STATUS_TITLE_MAP = {
-  processing: "Processing Invitation",
-  auto_accepted_login: "Invitation Accepted!",
-  auto_accepted_dashboard: "Invitation Accepted!",
-  register_required: "Become a Guardian",
-  expired: "Invitation Expired",
-  invalid_token: "Invalid Invitation",
-  error: "Processing Failed"
-};
-
 const GuardianInvite = () => {
+  const { t } = useTranslation("pages");
   const navigate = useNavigate();
   const { token } = useParams();
   const [status, setStatus] = useState("processing");
@@ -66,7 +58,9 @@ const GuardianInvite = () => {
     setShowCountdown(true);
 
     if (countdownElementRef.current) {
-      countdownElementRef.current.textContent = `Redirecting in ${countdownRef.current} seconds...`;
+      countdownElementRef.current.textContent = t("guardianInvite.redirectingIn", {
+        count: countdownRef.current
+      });
     }
 
     redirectTimerRef.current = setInterval(() => {
@@ -74,7 +68,9 @@ const GuardianInvite = () => {
 
       if (countdownElementRef.current) {
         const seconds = countdownRef.current;
-        countdownElementRef.current.textContent = `Redirecting in ${seconds} second${seconds !== 1 ? "s" : ""}...`;
+        countdownElementRef.current.textContent = t("guardianInvite.redirectingIn", {
+          count: seconds
+        });
       }
 
       if (countdownRef.current <= 0) {
@@ -97,7 +93,7 @@ const GuardianInvite = () => {
   useEffect(() => {
     if (!token) {
       setStatus("invalid_token");
-      setMessage("Invalid invitation link - token missing");
+      setMessage(t("guardianInvite.messages.invalidTokenMissing"));
       return;
     }
 
@@ -118,9 +114,7 @@ const GuardianInvite = () => {
 
         if (userExists && user) {
           setStatus("auto_accepted_dashboard");
-          setMessage(
-            `You're all set! Your guardian invitation has been accepted. Redirecting to dashboard...`
-          );
+          setMessage(t("guardianInvite.messages.acceptedDashboard"));
           startRedirectTimer(() => navigate("/dashboard"));
           return;
         }
@@ -128,7 +122,9 @@ const GuardianInvite = () => {
         if (userExists && !user) {
           setStatus("auto_accepted_login");
           setMessage(
-            `Congratulations, ${email}! Your invitation has been accepted. Redirecting to login...`
+            t("guardianInvite.messages.acceptedLogin", {
+              email
+            })
           );
 
           startRedirectTimer(() => {
@@ -139,7 +135,7 @@ const GuardianInvite = () => {
         }
 
         setStatus("register_required");
-        setMessage(`Welcome! You've been invited to become a guardian.`);
+        setMessage(t("guardianInvite.messages.registerRequired"));
         startRedirectTimer(() =>
           navigate(`/register?invite_token=${encodeURIComponent(token)}`)
         );
@@ -150,7 +146,7 @@ const GuardianInvite = () => {
 
     const timer = setTimeout(processInvite, 300);
     return () => clearTimeout(timer);
-  }, [token, navigate, user]);
+  }, [token, navigate, user, t]);
 
   const handleError = (err) => {
     console.error("Invitation processing error:", err);
@@ -158,7 +154,7 @@ const GuardianInvite = () => {
     if (!errResponse) {
       setStatus("error");
       setMessage(
-        "Could not reach the server. Please check your connection and try again."
+        t("guardianInvite.messages.serverUnavailable")
       );
       return;
     }
@@ -168,8 +164,18 @@ const GuardianInvite = () => {
 
     setMessage(
       errResponse?.data?.message ||
-        "An unexpected error occurred while processing your invitation."
+        t("guardianInvite.messages.unexpectedError")
     );
+  };
+
+  const statusTitleMap = {
+    processing: t("guardianInvite.title.processing"),
+    auto_accepted_login: t("guardianInvite.title.accepted"),
+    auto_accepted_dashboard: t("guardianInvite.title.accepted"),
+    register_required: t("guardianInvite.title.registerRequired"),
+    expired: t("guardianInvite.title.expired"),
+    invalid_token: t("guardianInvite.title.invalid"),
+    error: t("guardianInvite.title.error")
   };
 
   const StatusIcon = ({ status }) => {
@@ -187,7 +193,7 @@ const GuardianInvite = () => {
               onClick={() => navigate("/dashboard")}
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium cursor-pointer"
             >
-              Go to Dashboard Now
+              {t("guardianInvite.actions.goToDashboard")}
             </button>
             <button
               onClick={() => navigate("/")}
@@ -204,7 +210,7 @@ const GuardianInvite = () => {
               onClick={() =>
                 navigate("/login", {
                   state: {
-                    message: "Invitation accepted!",
+                    message: t("guardianInvite.messages.invitationAccepted"),
                     email: userData?.email,
                     autoInviteAccepted: true
                   }
@@ -212,13 +218,13 @@ const GuardianInvite = () => {
               }
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium cursor-pointer"
             >
-              Go to Login Now
+              {t("guardianInvite.actions.goToLogin")}
             </button>
             <button
               onClick={() => navigate("/")}
               className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm cursor-pointer"
             >
-              Return to Homepage
+              {t("guardianInvite.actions.returnHomePage")}
             </button>
           </div>
         );
@@ -231,13 +237,13 @@ const GuardianInvite = () => {
               }
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
             >
-              Register Now
+              {t("guardianInvite.actions.registerNow")}
             </button>
             <button
               onClick={() => navigate("/login")}
               className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm cursor-pointer"
             >
-              Already have an account? Login
+              {t("guardianInvite.actions.alreadyHaveAccount")}
             </button>
           </div>
         );
@@ -249,13 +255,13 @@ const GuardianInvite = () => {
               onClick={() => navigate("/")}
               className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
-              Return to Home
+              {t("guardianInvite.actions.returnHome")}
             </button>
             <button
               onClick={() => navigate("/contact")}
               className="px-6 py-2 text-blue-600 hover:text-blue-800 hover:underline text-sm cursor-pointer"
             >
-              Contact Support
+              {t("guardianInvite.actions.contactSupport")}
             </button>
           </div>
         );
@@ -266,13 +272,13 @@ const GuardianInvite = () => {
               onClick={() => window.location.reload()}
               className="px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors cursor-pointer"
             >
-              Try Again
+              {t("guardianInvite.actions.tryAgain")}
             </button>
             <button
               onClick={() => navigate("/")}
               className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:underline text-sm cursor-pointer"
             >
-              Go to Homepage
+              {t("guardianInvite.actions.goToHomePage")}
             </button>
           </div>
         );
@@ -289,7 +295,7 @@ const GuardianInvite = () => {
         </div>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-3">
-          {STATUS_TITLE_MAP[status]}
+          {statusTitleMap[status]}
         </h1>
 
         <div className="mb-6">
@@ -298,7 +304,7 @@ const GuardianInvite = () => {
           {userData?.email && (
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
-                <span className="font-medium">Invitation for:</span>{" "}
+                <span className="font-medium">{t("guardianInvite.invitationFor")}</span>{" "}
                 {userData.email}
               </p>
             </div>
@@ -308,7 +314,7 @@ const GuardianInvite = () => {
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <p ref={countdownElementRef} className="text-sm text-gray-600">
                 {/* Initial text will be set by startRedirectTimer */}
-                Redirecting in {countdownRef.current} seconds...
+                {t("guardianInvite.redirectingIn", { count: countdownRef.current })}
               </p>
             </div>
           )}

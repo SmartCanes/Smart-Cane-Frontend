@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import icaneLogo from "@/assets/images/smartcane-logo-blue.png";
@@ -30,6 +30,8 @@ import {
 } from "@/wrapper/MotionWrapper";
 import TeamSection from "@/ui/components/TeamSection";
 import FeatureCarousel from "@/ui/components/FeatureCarousel";
+import LanguageSwitcher from "@/ui/components/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 const FEATURE_CARD_ACTIVE_CLASS = "opacity-100 scale-100 sm:scale-[1.02]";
 const FEATURE_CARD_INACTIVE_CLASS = "opacity-40 sm:opacity-60 scale-[0.92]";
@@ -226,56 +228,24 @@ const MemoFeatureCarousel = memo(FeatureCarousel);
 const MemoCaneViewer = memo(CaneViewer);
 const MemoTeamSection = memo(TeamSection);
 
-const faqs = [
-  {
-    question: "What is SmartCane?",
-    answer:
-      "SmartCane (iCane) is an intelligent walking cane designed for visually impaired individuals. It combines IoT technology, AI-based object detection, and navigation tools to help users travel safely and independently. The cane can detect obstacles, provide route guidance, and send alerts to guardians during emergencies."
-  },
-
-  {
-    question: "How do I create an account and log in?",
-    answer:
-      "To get started, visit www.smartcane.com and click “Sign Up”. Enter the required information such as your name, email, and password. After registering, you can log in using your email and password. Once logged in, you will be able to access your dashboard and manage your SmartCane features."
-  },
-
-  {
-    question: "How do I use the SmartCane website?",
-    answer: `After logging in, you can access several features such as:
-      <ul style="margin-top: 10px; margin-bottom: 10px; padding-left: 20px;">
-        <li><strong>User Profile</strong> – update personal details</li>
-        <li><strong>SmartCane Status</strong> – view devices, location, and alerts</li>
-        <li><strong>Navigation Tools</strong> – set destinations and routes</li>
-        <li><strong>Notifications</strong> – receive warnings or updates</li>
-        <li><strong>Guardian & VIP Management</strong> – manage connected users</li>
-      </ul>
-      The interface is designed to be simple and easy to navigate for all users.`
-  },
-
-  {
-    question: "How do guardians and VIP users work?",
-    answer:
-      "Guardians are trusted contacts who can monitor and assist visually impaired persons (VIPs). Through the website, you can add guardians or VIP users by entering their details. Once connected, guardians can receive alerts, monitor the SmartCane’s location, and assist when necessary."
-  },
-
-  {
-    question: "What features does the SmartCane provide for safety?",
-    answer:
-      "The SmartCane provides several safety features such as obstacle detection, vibration or voice alerts, real-time GPS tracking, and emergency SOS notifications. When the cane detects obstacles or hazards, it notifies the user through vibration, sound, or voice feedback."
-  },
-
-  {
-    question: "How do I charge and maintain the SmartCane?",
-    answer:
-      "The SmartCane can be charged using a USB charging cable connected to the cane’s charging port. A full charge usually takes about 2–3 hours and can last around 1-2 hours depending on usage. The cane is also water-resistant, meaning it can handle light rain but should not be submerged in water."
-  }
-];
-
 const GuestPage = () => {
+  const { t } = useTranslation("guestPage");
   const navigate = useNavigate();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  const faqs = t("faq.items", { returnObjects: true }) || [];
+  const translatedFeatureCards = useMemo(
+    () =>
+      featureCards.map((card) => ({
+        ...card,
+        title: t(`features.${card.id}.title`, { defaultValue: card.title }),
+        description: t(`features.${card.id}.description`, {
+          defaultValue: card.description
+        })
+      })),
+    [t]
+  );
 
   useEffect(() => {
     const onScroll = () => {
@@ -339,9 +309,9 @@ const GuestPage = () => {
         className="w-full bg-white/95 md:backdrop-blur shadow-sm fixed top-0 z-20"
       >
         <div className="max-w-6xl mx-auto px-4 py-3 sm:px-6 sm:py-4 relative">
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
             {/* LEFT: Logo (fixed width) */}
-            <div className="flex items-center gap-3 w-[220px]">
+            <div className="flex shrink-0 items-center gap-3">
               <ScrollLink
                 targetId="home"
                 className="inline-flex items-center  cursor-pointer"
@@ -356,49 +326,50 @@ const GuestPage = () => {
             </div>
 
             {/* CENTER: Desktop nav (true centered) */}
-            <nav className="hidden md:flex flex-1 justify-center items-center gap-10 font-montserrat text-sm tracking-wide">
+            <nav className="hidden md:flex min-w-0 flex-1 items-center justify-center gap-4 lg:gap-6 xl:gap-10 font-montserrat text-sm tracking-wide">
               <ScrollLink
                 targetId="home"
-                className="hover:text-[#11285A] transition-colors duration-200"
+                className="whitespace-nowrap hover:text-[#11285A] transition-colors duration-200"
               >
-                <HoverNavEffect>Home</HoverNavEffect>
+                <HoverNavEffect>{t("nav.home")}</HoverNavEffect>
               </ScrollLink>
 
               <ScrollLink
                 targetId="iCane"
-                className="hover:text-[#11285A] transition-colors duration-200"
+                className="whitespace-nowrap hover:text-[#11285A] transition-colors duration-200"
               >
-                <HoverNavEffect>iCane</HoverNavEffect>
+                <HoverNavEffect>{t("nav.icane")}</HoverNavEffect>
               </ScrollLink>
 
               <ScrollLink
                 targetId="about"
-                className="hover:text-[#11285A] transition-colors duration-200 text-nowrap"
+                className="whitespace-nowrap hover:text-[#11285A] transition-colors duration-200"
               >
-                <HoverNavEffect>About Us</HoverNavEffect>
+                <HoverNavEffect>{t("nav.about")}</HoverNavEffect>
               </ScrollLink>
               <ScrollLink
                 targetId="faq"
-                className="hover:text-[#11285A] transition-colors duration-200 text-nowrap"
+                className="whitespace-nowrap hover:text-[#11285A] transition-colors duration-200"
               >
-                <HoverNavEffect>FAQs</HoverNavEffect>
+                <HoverNavEffect>{t("nav.faqs")}</HoverNavEffect>
               </ScrollLink>
 
               <ScrollLink
                 targetId="contact"
-                className="hover:text-[#11285A] transition-colors duration-200 text-nowrap"
+                className="whitespace-nowrap hover:text-[#11285A] transition-colors duration-200"
               >
-                <HoverNavEffect>Contact Us</HoverNavEffect>
+                <HoverNavEffect>{t("nav.contact")}</HoverNavEffect>
               </ScrollLink>
             </nav>
 
             {/* RIGHT: Desktop CTA (fixed width) */}
-            <div className="hidden md:flex justify-end w-[220px]">
+            <div className="hidden md:flex shrink-0 items-center justify-end gap-3 pl-2">
+              <LanguageSwitcher variant="light" />
               <button
                 onClick={() => navigate("/login")}
-                className="flex items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f] cursor-pointer"
+                className="flex whitespace-nowrap items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f] cursor-pointer"
               >
-                Log In
+                {t("nav.login")}
               </button>
             </div>
 
@@ -406,7 +377,9 @@ const GuestPage = () => {
             <div className="md:hidden ml-auto flex items-center">
               <button
                 type="button"
-                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                aria-label={
+                  isMobileMenuOpen ? t("mobileMenu.close") : t("mobileMenu.open")
+                }
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-menu"
                 onClick={() => setIsMobileMenuOpen((v) => !v)}
@@ -455,12 +428,16 @@ const GuestPage = () => {
                 className="md:hidden absolute left-0 right-0 top-full border-t border-black/10 bg-white px-4 sm:px-6 py-3 shadow-lg origin-top"
               >
                 <div className="flex flex-col gap-2 font-montserrat text-sm">
+                  <div className="px-3 py-2">
+                    <LanguageSwitcher variant="light" className="w-full justify-between" />
+                  </div>
+
                   <ScrollLink
                     targetId="home"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
                   >
-                    Home
+                    {t("nav.home")}
                   </ScrollLink>
 
                   <ScrollLink
@@ -468,7 +445,7 @@ const GuestPage = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
                   >
-                    iCane
+                    {t("nav.icane")}
                   </ScrollLink>
 
                   <ScrollLink
@@ -476,7 +453,7 @@ const GuestPage = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
                   >
-                    About Us
+                    {t("nav.about")}
                   </ScrollLink>
 
                   <ScrollLink
@@ -484,7 +461,7 @@ const GuestPage = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
                   >
-                    FAQs
+                    {t("nav.faqs")}
                   </ScrollLink>
 
                   <ScrollLink
@@ -492,7 +469,7 @@ const GuestPage = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="w-full rounded-xl px-3 py-2 text-left hover:bg-black/5 transition"
                   >
-                    Contact Us
+                    {t("nav.contact")}
                   </ScrollLink>
 
                   <div className="pt-2">
@@ -503,7 +480,7 @@ const GuestPage = () => {
                       }}
                       className="w-full rounded-xl bg-[#1C253C] px-4 py-3 text-white font-medium hover:bg-[#0d1c3f] transition cursor-pointer"
                     >
-                      Log In
+                      {t("nav.login")}
                     </button>
                   </div>
                 </div>
@@ -524,20 +501,20 @@ const GuestPage = () => {
           fetchPriority="high"
           decoding="async"
           src={heroBackground}
-          alt="Group of people walking with canes"
+          alt={t("hero.imageAlt")}
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
         <div className="relative mx-auto max-w-5xl px-4 text-center text-white space-y-6 sm:px-6 z-10">
           <TextFade delay={0.3} once={false}>
             <h1 className="font-poppins text-3xl md:text-5xl lg:text-6xl font-semibold leading-tight">
-              The iCane That Sees Ahead.
+              {t("hero.title")}
             </h1>
           </TextFade>
 
           <TextReveal delay={0.6} once={false}>
             <h2 className="font-poppins text-xl font-medium md:text-2xl lg:text-3xl text-white/90">
-              SmartCane: Redefining Mobility with AI-Powered Safety.
+              {t("hero.subtitle")}
             </h2>
           </TextReveal>
 
@@ -548,9 +525,7 @@ const GuestPage = () => {
             text-white/90 pr-2"
           >
             <p className="font-poppins text-[16px] md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto">
-              iCane uses advanced sensor technology and AI to detect obstacles,
-              analyze terrain, and guide you with real-time feedback. Gain
-              confidence and independence with a device built for your journey.
+              {t("hero.description")}
             </p>
           </TextFade>
 
@@ -560,7 +535,7 @@ const GuestPage = () => {
                 to="/get-started"
                 className="mx-auto w-full rounded-[10px] bg-white px-6 py-3 text-[#11285A] font-semibold shadow-[0_12px_25px_rgba(0,0,0,0.15)] hover:bg-[#F0F4FF] sm:w-[170px]"
               >
-                Get Started
+                {t("hero.cta")}
               </Link>
             </div>
           </ScaleIn>
@@ -568,7 +543,7 @@ const GuestPage = () => {
       </section>
       {/* Feature carousel */}
       <MemoFeatureCarousel
-        cards={featureCards}
+        cards={translatedFeatureCards}
         autoScroll
         autoScrollMs={5000}
       />
@@ -576,7 +551,7 @@ const GuestPage = () => {
       <div className="relative mx-auto flex w-full items-center justify-center py-12 md:py-16">
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
         <h3 className="absolute bg-[#FDFCF9] px-12 text-[14px] font-semibold tracking-[0.5em] text-[#11285A] sm:px-20">
-          iCane
+          {t("sections.icane")}
         </h3>
       </div>
 
@@ -592,7 +567,7 @@ const GuestPage = () => {
       >
         <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
         <h3 className="absolute bg-[#FDFCF9] px-12 text-[14px] font-semibold tracking-[0.5em] text-[#11285A] sm:px-20">
-          ABOUT US
+          {t("sections.about")}
         </h3>
       </div>
       {/* About placeholder */}
@@ -606,7 +581,7 @@ const GuestPage = () => {
               loading="lazy"
               decoding="async"
               src={teamPhoto}
-              alt="Team Photo"
+              alt={t("about.imageAlt")}
               className="w-full h-full object-contain object-center rounded-2xl"
             />
           </div>
@@ -614,21 +589,15 @@ const GuestPage = () => {
       </section>
       <SlideUp delay={0.4}>
         <p className="mx-auto mt-10 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
-          At iCane, we believe technology should make life easier for everyone.
-          Our smart cane is designed to help people with visual impairments move
-          safely and confidently every day.
+          {t("about.paragraph1")}
         </p>
 
         <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm">
-          The iCane uses smart sensors and simple feedback to guide users and
-          prevent obstacles. It’s built to be reliable, easy to use, and
-          supportive of greater independence.
+          {t("about.paragraph2")}
         </p>
 
         <p className="mx-auto mt-6 max-w-7xl px-4 text-center font-poppins text-xs leading-relaxed tracking-[0.12em] text-[#373F51] sm:px-6 sm:text-sm pb-16">
-          Our team is passionate about creating tools that truly make a
-          difference. We listen to our users, learn from their experiences, and
-          keep improving to make iCane even better.
+          {t("about.paragraph3")}
         </p>
       </SlideUp>
 
@@ -641,13 +610,13 @@ const GuestPage = () => {
         <div className="h-px  w-full bg-[#bfcef0]" aria-hidden="true" />
 
         <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[14px] font-semibold tracking-[0.5em] text-[#11285A]">
-          FAQ
+          {t("sections.faq")}
         </h3>
       </div>
 
       <FadeIn delay={0.2}>
         <p className="mx-auto px-4 max-w-7xl text-center font-poppins text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-card-100 font-bold">
-          Frequently Asked Question
+          {t("faq.heading")}
         </p>
       </FadeIn>
 
@@ -678,23 +647,19 @@ const GuestPage = () => {
         <div className="h-px  w-full bg-[#bfcef0]" aria-hidden="true" />
 
         <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[14px] font-semibold tracking-[0.5em] text-[#11285A]">
-          CONTACT US
+          {t("sections.contact")}
         </h3>
       </div>
 
       <FadeIn delay={0.2}>
         <p className="mx-auto mt-1 px-4 max-w-7xl text-center text-[12px] md:text-sm leading-relaxed tracking-[0.12em] text-[#373F51] font-poppins">
-          <strong className="text-card-100">Welcome to iCane</strong> — we’re
-          here to help.
+          <strong className="text-card-100">{t("contact.introTitle")}</strong> {t("contact.intro")}
         </p>
       </FadeIn>
 
       <FadeIn delay={0.4}>
         <p className="mx-auto max-w-7xl px-4 pb-8 text-center font-poppins text-[12px] leading-relaxed tracking-[0.12em] text-[#373F51] md:text-sm">
-          Whether you have questions, need support, or want to share your
-          experience, our team is ready to assist. Your feedback helps us
-          improve and deliver technology that enhances mobility, safety, and
-          independence.
+          {t("contact.description")}
         </p>
       </FadeIn>
 
@@ -707,10 +672,10 @@ const GuestPage = () => {
           >
             {/* top content */}
             <div className="flex flex-col items-center gap-3 sm:items-start">
-              <h3 className="text-lg font-semibold text-card-100">Call Us</h3>
+              <h3 className="text-lg font-semibold text-card-100">{t("contact.callTitle")}</h3>
 
               <p className="max-w-md text-sm">
-                We’re just a call away for any questions or support you need.
+                {t("contact.callDescription")}
               </p>
             </div>
 
@@ -720,7 +685,7 @@ const GuestPage = () => {
                 href="tel:09696273011"
                 className="flex h-10 w-10 items-center justify-center"
               >
-                <HoverIcon src={callIcon} alt="Call" size={40} />
+                <HoverIcon src={callIcon} alt={t("contact.callIconAlt")} size={40} />
               </a>
               <p className="leading-none text-sm">+63-969-627-3011</p>
             </div>
@@ -735,10 +700,10 @@ const GuestPage = () => {
           >
             {/* top content */}
             <div className="flex flex-col items-center gap-3 sm:items-start">
-              <h3 className="text-lg font-semibold text-card-100">Email Us</h3>
+              <h3 className="text-lg font-semibold text-card-100">{t("contact.emailTitle")}</h3>
 
               <p className="max-w-md text-sm">
-                Send us an email and we’ll get back to you as soon as possible.
+                {t("contact.emailDescription")}
               </p>
             </div>
 
@@ -750,7 +715,7 @@ const GuestPage = () => {
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center"
               >
-                <HoverIcon src={emailIcon} alt="Email" size={40} />
+                <HoverIcon src={emailIcon} alt={t("contact.emailIconAlt")} size={40} />
               </a>
               <p className="leading-none text-sm">iCane@gmail.com</p>
             </div>
@@ -773,50 +738,49 @@ const GuestPage = () => {
                 />
               </div>
               <p className="text-sm leading-relaxed text-white/70">
-                A smart mobility cane empowering the visually impaired with
-                safety, guidance, and connectivity.
+                {t("footer.description")}
               </p>
             </div>
             <div className="space-y-4">
               <h4 className="font-montserrat text-sm font-semibold tracking-[0.2em] text-white/80">
-                Category
+                {t("footer.category")}
               </h4>
               <nav className="space-y-3 text-sm text-white/70">
                 <ScrollLink
                   targetId="home"
                   className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  <HoverNavEffect direction="right">Home</HoverNavEffect>
+                  <HoverNavEffect direction="right">{t("nav.home")}</HoverNavEffect>
                 </ScrollLink>
                 <ScrollLink
                   targetId="features"
                   className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  <HoverNavEffect direction="right">iCane</HoverNavEffect>
+                  <HoverNavEffect direction="right">{t("nav.icane")}</HoverNavEffect>
                 </ScrollLink>
                 <ScrollLink
                   targetId="about"
                   className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  <HoverNavEffect direction="right">About Us</HoverNavEffect>
+                  <HoverNavEffect direction="right">{t("nav.about")}</HoverNavEffect>
                 </ScrollLink>
                 <ScrollLink
                   targetId="faq"
                   className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  <HoverNavEffect direction="right">FAQs</HoverNavEffect>
+                  <HoverNavEffect direction="right">{t("nav.faqs")}</HoverNavEffect>
                 </ScrollLink>
                 <ScrollLink
                   targetId="contact"
                   className="hover:text-white transition-colors duration-200 block cursor-pointer"
                 >
-                  <HoverNavEffect direction="right">Contact Us</HoverNavEffect>
+                  <HoverNavEffect direction="right">{t("nav.contact")}</HoverNavEffect>
                 </ScrollLink>
               </nav>
             </div>
             <div className="space-y-4">
               <h4 className="font-montserrat text-sm font-semibold tracking-[0.2em] text-white/80">
-                Contact Info
+                {t("footer.contactInfo")}
               </h4>
               <ul className="space-y-3 text-sm text-white/70">
                 <li>09696273011</li>
@@ -835,17 +799,17 @@ const GuestPage = () => {
             </div>
             <div className="space-y-4">
               <h4 className="font-montserrat text-sm font-semibold tracking-[0.2em] text-white/80">
-                Social Media
+                {t("footer.socialMedia")}
               </h4>
               <div className="flex flex-wrap gap-3">
                 <a
                   href="https://www.facebook.com/profile.php?id=61583597618139&rdid=FklUw1PMZ8WdboYJ&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1WUW3U1mRm%2F#"
-                  aria-label="Visit the iCane Facebook page"
+                  aria-label={t("footer.facebookAria")}
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
                   <HoverIcon
                     src={facebookIcon}
-                    alt="Facebook icon"
+                    alt={t("footer.facebookIconAlt")}
                     hoverRotate={-10}
                   />
                 </a>
@@ -862,12 +826,12 @@ const GuestPage = () => {
                 </a> */}
                 <a
                   href="#!"
-                  aria-label="Visit the iCane Instagram page"
+                  aria-label={t("footer.instagramAria")}
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
                   <HoverIcon
                     src={instagramIcon}
-                    alt="Instagram icon"
+                    alt={t("footer.instagramIconAlt")}
                     hoverRotate={10}
                   />
                 </a>
@@ -879,13 +843,13 @@ const GuestPage = () => {
         <div className=" w-full h-[0.5px] bg-[#dfdfdf]" />
 
         <div className="pt-6 text-center text-xs tracking-[0.3em] pb-6 text-white/60">
-          © 2026 iCane · All Rights Reserved
+          {t("footer.copyright")}
         </div>
       </footer>
 
       <button
         type="button"
-        aria-label="Back to top"
+        aria-label={t("backToTop")}
         onClick={() => {
           const el = document.getElementById("home");
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });

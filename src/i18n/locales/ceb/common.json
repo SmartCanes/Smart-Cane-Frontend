@@ -1,0 +1,17 @@
+{
+  "languages": {
+    "en": "Iningles",
+    "tl": "Tagalog",
+    "ceb": "Bisaya"
+  },
+  "languageSwitcher": {
+    "label": "Pinulongan",
+    "ariaLabel": "Usba ang pinulongan sa website",
+    "changed": "Nausab ang pinulongan ngadto sa {{language}}"
+  },
+  "common": {
+    "loading": "Naga-load...",
+    "save": "I-save",
+    "cancel": "Kansela"
+  }
+}

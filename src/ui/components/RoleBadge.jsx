@@ -1,5 +1,6 @@
 import { capitalizeWords } from "@/utils/Capitalize";
 import { Icon } from "@iconify/react";
+import { useTranslation } from "react-i18next";
 
 const roleStyles = {
   primary: {
@@ -23,7 +24,13 @@ const roleStyles = {
 };
 
 const RoleBadge = ({ role = "guardian", size = "sm", fixed = false }) => {
+  const { t } = useTranslation("pages");
   const style = roleStyles[role] || roleStyles.guardian;
+  const roleLabelMap = {
+    primary: t("commonEnums.roles.primary"),
+    secondary: t("commonEnums.roles.secondary"),
+    guardian: t("commonEnums.roles.guardian")
+  };
 
   return (
     <span
@@ -36,7 +43,7 @@ const RoleBadge = ({ role = "guardian", size = "sm", fixed = false }) => {
       `}
     >
       <Icon icon={style.icon} className="w-3.5 h-3.5" />
-      {capitalizeWords(role)}
+      {roleLabelMap[role] || capitalizeWords(role)}
     </span>
   );
 };

@@ -1,0 +1,226 @@
+{
+  "nav": {
+    "home": "Home",
+    "icane": "iCane",
+    "about": "Bahin Kanamo",
+    "faqs": "FAQs",
+    "contact": "Kontaka Kami",
+    "login": "Pag-log In"
+  },
+  "mobileMenu": {
+    "open": "Ablihi ang menu",
+    "close": "Isira ang menu"
+  },
+  "hero": {
+    "title": "Ang iCane nga Makakita sa Umaabot.",
+    "subtitle": "SmartCane: Bag-ong paagi sa paglihok pinaagi sa AI-Powered nga kaluwasan.",
+    "description": "Gigamit sa iCane ang advanced sensors ug AI aron makaila og babag ug mogiya sa tinuod-panahong feedback.",
+    "cta": "Sugdi",
+    "imageAlt": "Grupo sa mga tawo nga naglakaw gamit ang baston"
+  },
+  "sections": {
+    "icane": "iCane",
+    "about": "BAHIN KANAMO",
+    "faq": "FAQ",
+    "contact": "KONTAKA KAMI"
+  },
+  "about": {
+    "imageAlt": "Litrato sa Team",
+    "paragraph1": "Sa iCane, tuo kami nga ang teknolohiya kinahanglan makapasayon sa kinabuhi sa tanan.",
+    "paragraph2": "Ang iCane naggamit ug smart sensors ug yano nga feedback aron mogiya sa users ug malikayan ang babag.",
+    "paragraph3": "Masaligon ang among team sa paghimo og mga gamit nga tinuod nga makatabang."
+  },
+  "faq": {
+    "heading": "Kanunayng Pangutana",
+    "items": [
+      {
+        "question": "Unsa ang SmartCane?",
+        "answer": "Ang SmartCane (iCane) usa ka maalamong baston para sa mga adunay visual impairment."
+      },
+      {
+        "question": "Unsaon paghimo og account ug pag-log in?",
+        "answer": "Adto sa SmartCane website, i-click ang Sign Up, ug pag-log in gamit ang email ug password."
+      },
+      {
+        "question": "Unsaon paggamit sa SmartCane website?",
+        "answer": "Human sa pag-log in, mahimo nimong dumalahan ang profile, tan-awon ang device status, ug notifications."
+      },
+      {
+        "question": "Unsaon pagtrabaho sa guardians ug VIP users?",
+        "answer": "Ang guardians maoy kasaligan nga contacts nga makadawat og alerts ug makatabang sa VIP users."
+      },
+      {
+        "question": "Unsa nga safety features ang naa sa SmartCane?",
+        "answer": "Naa kini obstacle detection, vibration o voice alerts, GPS tracking, ug emergency SOS notifications."
+      },
+      {
+        "question": "Unsaon pag-charge ug pag-maintain sa SmartCane?",
+        "answer": "Gamita ang USB cable sa pag-charge. Water-resistant kini sa gamay nga ulan apan dili ilubong sa tubig."
+      }
+    ]
+  },
+  "contact": {
+    "introTitle": "Welcome sa iCane",
+    "intro": "Naa mi aron motabang.",
+    "description": "Kung naa kay pangutana o kinahanglan og suporta, andam among team motabang.",
+    "callTitle": "Tawagi Kami",
+    "callDescription": "Usa ra ka tawag para sa bisan unsang pangutana o suporta.",
+    "emailTitle": "I-email Kami",
+    "emailDescription": "Pagpadala ug email ug motubag mi sa labing dali nga panahon.",
+    "callIconAlt": "Tawag",
+    "emailIconAlt": "Email"
+  },
+  "footer": {
+    "description": "Usa ka smart mobility cane nga nagpalig-on sa mga adunay visual impairment pinaagi sa kaluwasan ug koneksyon.",
+    "category": "Kategorya",
+    "contactInfo": "Impormasyon sa Kontak",
+    "socialMedia": "Social Media",
+    "facebookAria": "Bisitaha ang iCane Facebook page",
+    "instagramAria": "Bisitaha ang iCane Instagram page",
+    "facebookIconAlt": "Facebook icon",
+    "instagramIconAlt": "Instagram icon",
+    "copyright": "© 2026 iCane · Tanang Katungod Gireserbar"
+  },
+  "features": {
+    "Visual-Recognition": {
+      "title": "AI-Based nga Visual Recognition",
+      "description": "Pinaagi sa AI-powered visual recognition, mailhan sa Smart Cane ang mga butang ug palibot ug mohatag dayon og audio descriptions para sa mas luwas nga paglihok."
+    },
+    "route-navigation": {
+      "title": "Route Navigation",
+      "description": "Ang route navigation sa Smart Cane naghatag og giya pinaagi sa real-time voice prompts aron makalihok ang user nga masaligon ug luwas paingon sa destinasyon."
+    },
+    "gps": {
+      "title": "GPS",
+      "description": "Pinaagi sa real-time GPS tracking, dali ra ma-monitor sa guardians ang lokasyon sa user pinaagi sa connected web app para sa kaluwasan ug kalinaw sa hunahuna."
+    },
+    "emergency-sos": {
+      "title": "SOS",
+      "description": "Kung naay emerhensya, awtomatikong mopadala ang iCane og SOS alert uban sa eksaktong lokasyon sa user ngadto sa rehistradong guardians aron dali ang tabang."
+    },
+    "iot-connectivity": {
+      "title": "IOT Connectivity",
+      "description": "Ang IoT integration sa iCane nagdugtong sa device ngadto sa companion web app para sa padayon nga monitoring, fall detection, emergency alerts, ug lokasyon sa user."
+    },
+    "weather": {
+      "title": "Mga Pahimangno sa Panahon",
+      "description": "Magpabiling andam sa panahon. Ang iCane mohatag dayon og weather alerts aron mas luwas ang paglihok sa gawas."
+    },
+    "document": {
+      "title": "Shared Notes ug Reminders",
+      "description": "Pinaagi sa shared notes feature, makapadala ang guardians og mensahe nga basahon og kusog sa AI assistant sa iCane aron pirming naay pahinumdom ug koneksyon ang user."
+    }
+  },
+  "caneViewer": {
+    "logoAlt": "Logo sa iCane",
+    "brandLine": "iCane - Smart Cane",
+    "controls": {
+      "resetAria": "I-reset ang 3D view",
+      "resetTitle": "I-reset ang view",
+      "explore3d": "I-explore ang 3D",
+      "exit3d": "Mugawas sa 3D"
+    },
+    "mobile": {
+      "dragHint": "I-drag, i-zoom, ug i-pan",
+      "tapHint": "I-tap ang I-explore ang 3D"
+    },
+    "ads": {
+      "voiceGuidedNavigation": {
+        "label": "Voice-Guided Navigation",
+        "headline": "Navigate nga Masaligon",
+        "sub": "Ang real-time obstacle detection motabang nga luwas ang matag lakang."
+      },
+      "alwaysConnected": {
+        "label": "Kanunay Konektado",
+        "headline": "Kalinaw sa Hunahuna, Bisan Asa",
+        "sub": "Adunay live GPS tracking aron pirming updated ang guardians."
+      },
+      "emergencyReady": {
+        "label": "Andam sa Emergency",
+        "headline": "SOS Sa Imong Tudlo",
+        "sub": "Dayon nga maipadala ang alerts sa imong guardians kung kinahanglan kaayo."
+      },
+      "smartAssistiveTech": {
+        "label": "Smart Assistive Tech",
+        "headline": "Smart. Luwas. Independent.",
+        "sub": "Ania na ang kaugmaon sa assistive mobility."
+      }
+    }
+  },
+  "team": {
+    "heading": {
+      "prefix": "Ila-ila ang",
+      "highlight": "Team"
+    },
+    "subtitle": "Mga eksperto nga dedikado sa pagbag-o sa mobility pinaagi sa bag-ong teknolohiya ug inclusive nga disenyo.",
+    "filters": {
+      "all": "Tanan",
+      "developers": "Developers",
+      "designers": "Designers",
+      "documentation": "Documentation"
+    },
+    "empty": {
+      "message": "Walay team members nga nakit-an sa maong kategorya.",
+      "showAll": "Ipakita Tanan"
+    },
+    "members": {
+      "1": {
+        "role": "Lead Product Designer ug UI/UX Specialist",
+        "bio": "Nangulo sa product experience sa iCane gikan sa konsepto hangtod prototype, ug naghubad sa panginahanglan sa users ngadto sa accessible ug intuitive nga interfaces."
+      },
+      "2": {
+        "role": "Head Documentation ug Research Specialist",
+        "bio": "Nangulo sa research ug documentation sa iCane, ug nag-organisa sa technical findings ngadto sa klaro nga reports, diagrams, ug visuals para sa development ug evaluation."
+      },
+      "3": {
+        "role": "Web ug UI Engineer",
+        "bio": "Naghimo sa web UI sa iCane nga naka-focus sa limpyo nga components, responsive layouts, ug hapsay nga interactions para sa users ug guardians."
+      },
+      "4": {
+        "role": "Assistant Documentation ug Product Manager",
+        "bio": "Nisuporta sa product planning ug documentation pinaagi sa pag-coordinate sa requirements ug pagsiguro nga klaro ug organisado ang deliverables."
+      },
+      "5": {
+        "role": "Web Developer ug Hardware Engineer",
+        "bio": "Nagdugtong sa software ug hardware pinaagi sa pag-develop sa web features ug pag-integrate sa sensors para sa kasaligan nga end-to-end functionality."
+      },
+      "6": {
+        "role": "Full Stack Web Developer ug Visually Impaired User",
+        "bio": "Naghimo og full-stack features samtang naghatag og tinuod nga user perspective aron masuta ang flows, feedback, ug accessibility decisions."
+      },
+      "7": {
+        "role": "UI/UX Designer ug Layout Specialist",
+        "bio": "Nagdisenyo og layouts ug presentation materials sa iCane aron klaro ug consistent ang pagpresentar sa impormasyon."
+      },
+      "8": {
+        "role": "Researcher ug Documentation Specialist",
+        "bio": "Nisuporta sa research ug testing sa iCane, ug nagdokumento sa experiments ug results aron magpabiling aligned ang team."
+      },
+      "9": {
+        "role": "Project Manager ug Quality Assurance",
+        "bio": "Nangulo sa planning ug quality assurance sa iCane, lakip ang task organization, progress tracking, ug structured testing."
+      },
+      "10": {
+        "role": "Graphic Designer ug UI/UX Designer",
+        "bio": "Naghimo sa visual assets ug UI polish sa iCane, nga naghiusa sa branding ug interface design para sa usa ka cohesive nga look and feel."
+      },
+      "11": {
+        "role": "Researcher ug Documentation Specialist",
+        "bio": "Nag-coordinate sa documentation ug research tasks aron organisado ug andam para submission ang project outputs."
+      },
+      "12": {
+        "role": "Researcher ug Documentation Specialist",
+        "bio": "Nitabang sa research ug documentation pinaagi sa klaro nga write-ups ug maayong records sa implementation decisions."
+      },
+      "13": {
+        "role": "Researcher ug Technical Writer",
+        "bio": "Nagsulat ug nag-edit sa technical content sa iCane aron klaro, consistent, ug maayong pagkahimo ang dokumentasyon."
+      },
+      "14": {
+        "role": "Lead Developer",
+        "bio": "Nangulo sa system architecture ug implementation, ug naghiusa sa components para sa kasaligan ug scalable nga real-time solution."
+      }
+    }
+  },
+  "backToTop": "Balik sa taas"
+}

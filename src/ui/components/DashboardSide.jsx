@@ -4,6 +4,7 @@ import { HoverNavEffect } from "@/wrapper/MotionWrapper";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
+import { useTranslation } from "react-i18next";
 
 const MenuButton = memo(({ item, isActive, onNavigate }) => (
   <HoverNavEffect
@@ -50,6 +51,7 @@ const MenuButton = memo(({ item, isActive, onNavigate }) => (
 ));
 
 const DashboardSide = ({ className = "" }) => {
+  const { t } = useTranslation("pages");
   const { setMobileMenuOpen } = useUIStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,31 +61,31 @@ const DashboardSide = ({ className = "" }) => {
   const desktopMenuItems = [
     {
       id: "dashboard",
-      label: "Dashboard",
+      label: t("dashboardSide.menu.dashboard"),
       icon: "solar:widget-linear",
       path: "/dashboard"
     },
     {
       id: "device-logs",
-      label: "Device Logs",
+      label: t("dashboardSide.menu.deviceLogs"),
       icon: "solar:history-linear",
       path: "/device-logs"
     },
     {
       id: "weather-board",
-      label: "Weather Board",
+      label: t("dashboardSide.menu.weatherBoard"),
       icon: "solar:cloud-rain-outline",
       path: "/weather-board"
     },
     {
       id: "devices",
-      label: "Devices",
+      label: t("dashboardSide.menu.devices"),
       icon: "mdi:devices",
       path: "/devices"
     },
     {
       id: "advanced",
-      label: "Advanced",
+      label: t("dashboardSide.menu.advanced"),
       icon: "fa6-brands:unity",
       path: "/advanced"
     }
@@ -99,31 +101,31 @@ const DashboardSide = ({ className = "" }) => {
   const mobileMenuItems = [
     {
       id: "mobile-weather",
-      label: "Weather",
+      label: t("dashboardSide.mobile.weather"),
       icon: "material-symbols-light:weather-hail",
       path: "/weather-board"
     },
     {
       id: "device-logs",
-      label: "Logs",
+      label: t("dashboardSide.mobile.logs"),
       icon: "solar:history-linear",
       path: "/device-logs"
     },
     {
       id: "mobile-home",
-      label: "Home",
+      label: t("dashboardSide.mobile.home"),
       icon: "material-symbols:home-rounded",
       path: "/dashboard"
     },
     {
       id: "mobile-devices",
-      label: "Devices",
+      label: t("dashboardSide.mobile.devices"),
       icon: "mdi:devices",
       path: "/devices"
     },
     {
       id: "mobile-advanced",
-      label: "Advanced",
+      label: t("dashboardSide.mobile.advanced"),
       icon: "fa6-brands:unity",
       path: "/advanced"
     }

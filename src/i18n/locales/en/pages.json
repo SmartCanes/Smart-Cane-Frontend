@@ -1,0 +1,677 @@
+{
+  "guestPage": {
+    "title": "Welcome"
+  },
+  "login": {
+    "title": "Log In"
+  },
+  "register": {
+    "title": "Create Account"
+  },
+  "forgotPassword": {
+    "title": "Forgot Password"
+  },
+  "getStarted": {
+    "title": "Get Started"
+  },
+  "emergencyDetails": {
+    "title": "Emergency Details"
+  },
+  "dashboard": {
+    "title": "Dashboard"
+  },
+  "dashboardPage": {
+    "title": "Live Location",
+    "subtitle": "Real-time monitoring and safety features for your iCane device",
+    "liveLocationTracking": "Live Location Tracking",
+    "trackLive": "Track Live",
+    "satellites": "Satellites",
+    "lastLocation": "Last Location",
+    "gpsBadge": {
+      "noSignal": "No Signal",
+      "ready": "Ready",
+      "lowSignal": "Low Signal"
+    },
+    "location": {
+      "resolving": "Resolving...",
+      "none": "No location available",
+      "unableToResolve": "Unable to resolve location",
+      "unknownArea": "Unknown area",
+      "updating": "Updating..."
+    }
+  },
+  "devices": {
+    "title": "Devices",
+    "header": {
+      "title": "Manage Devices",
+      "subtitle": "View and manage your paired canes, assign VIP profiles, and more.",
+      "countSummary": "{{total}} cane • {{active}} active",
+      "countSummary_other": "{{total}} canes • {{active}} active"
+    },
+    "view": {
+      "tiles": "Tiles",
+      "list": "List"
+    },
+    "actions": {
+      "addCane": "Add Cane",
+      "view": "View",
+      "edit": "Edit",
+      "remove": "Remove",
+      "assignVip": "Assign VIP",
+      "manage": "Manage",
+      "editNickname": "Edit Nickname",
+      "manageGuardians": "Manage Guardians",
+      "unpair": "Unpair",
+      "unpairDevice": "Unpair Device",
+      "manageCaneOptions": "Manage Cane Options",
+      "viewVip": "View VIP",
+      "editVip": "Edit VIP",
+      "removeVip": "Remove VIP"
+    },
+    "card": {
+      "unnamedCane": "Unnamed Cane",
+      "editNicknameTitle": "Edit cane nickname",
+      "activeNow": "Active Now",
+      "lastActive": "Last active: {{lastActive}}",
+      "paired": "Paired",
+      "assignedVip": "Assigned VIP",
+      "added": "Added: {{date}}"
+    },
+    "vip": {
+      "vipId": "VIP ID",
+      "noVipAssigned": "No VIP Assigned",
+      "noVipAvailable": "No VIP Available",
+      "modal": {
+        "viewTitle": "Cane VIP Profile",
+        "createTitle": "Add VIP to Cane",
+        "editTitle": "Edit Cane VIP",
+        "creating": "Creating...",
+        "create": "Create",
+        "updating": "Updating...",
+        "update": "Update"
+      }
+    },
+    "modal": {
+      "unpair": {
+        "title": "Unpair Cane?",
+        "message": "This will unpair and remove the cane from your account.",
+        "confirmLoading": "Unpairing...",
+        "confirm": "Unpair"
+      },
+      "removeVip": {
+        "title": "Remove VIP Profile?",
+        "message": "This will remove the VIP profile assigned to this cane.",
+        "confirmLoading": "Removing...",
+        "confirm": "Remove"
+      },
+      "editNickname": {
+        "title": "Edit Nickname",
+        "label": "Cane Nickname *",
+        "placeholder": "Enter nickname",
+        "resetting": "Resetting...",
+        "resetToDefault": "Reset to Default",
+        "reset": "Reset",
+        "saving": "Saving...",
+        "saveChanges": "Save Changes",
+        "save": "Save"
+      }
+    },
+    "scanner": {
+      "modalTitle": "Scan iCane Device",
+      "or": "or",
+      "enterSerialCode": "Enter Serial Code",
+      "pairing": "Pairing...",
+      "pair": "Pair",
+      "errors": {
+        "httpsRequired": "Camera requires HTTPS (or localhost). If you opened this from a phone over local IP, use HTTPS.",
+        "invalidQrFormat": "Invalid QR code format",
+        "noSerialInQr": "No device serial found in QR code",
+        "unableToAccessCamera": "Unable to access camera.",
+        "noCameraDetected": "No camera detected. Please use a device with a camera."
+      }
+    },
+    "empty": {
+      "title": "No canes added yet.",
+      "subtitle": "Click 'Add Cane' to get started"
+    },
+    "toast": {
+      "nicknameUpdated": "Cane nickname updated",
+      "nicknameUpdateFailed": "Failed to update cane nickname",
+      "unpairedSuccess": "Cane unpaired and removed from your account",
+      "unpairFailed": "Failed to unpair cane",
+      "pairedSuccess": "Cane successfully paired to your account",
+      "pairFailed": "Failed to pair devices",
+      "vipCreated": "VIP profile created for cane",
+      "vipUpdated": "VIP profile updated for cane",
+      "vipRemoved": "VIP profile removed from cane",
+      "vipRemoveFailed": "Failed to remove VIP"
+    }
+  },
+  "weatherBoard": {
+    "title": "Weather Board",
+    "forecastTitle": "Weather Forecast",
+    "searchPlaceholder": "Search a city or place in the Philippines...",
+    "defaultLocation": "Default location: {{location}}",
+    "useDefaultLocation": "Use Novaliches, Quezon City",
+    "tomorrow": {
+      "label": "Tomorrow",
+      "safeToWalk": "Safe to Walk",
+      "stayIndoors": "Stay Indoors"
+    },
+    "today": {
+      "title": "Today's Weather",
+      "subtitle": "Here are the other information you might need on our weather"
+    },
+    "metrics": {
+      "sunrise": "Sunrise:",
+      "sunset": "Sunset:",
+      "humidity": "Humidity:",
+      "wind": "Wind:",
+      "feelsLike": "Feels Like:",
+      "pressure": "Pressure:",
+      "visibility": "Visibility:",
+      "uvIndex": "UV Index:"
+    },
+    "twoWeek": {
+      "title": "2-Week Forecast",
+      "subtitle": "Here is the weather outlook for the next 14 days"
+    },
+    "errors": {
+      "failedLoad": "Failed to load weather data."
+    },
+    "modal": {
+      "closeAria": "Close forecast details",
+      "high": "High",
+      "low": "Low",
+      "average": "Average",
+      "rainChance": "Rain Chance"
+    }
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "guardianProfile": {
+    "title": "Guardian Profile"
+  },
+  "notes": {
+    "title": "Notes"
+  },
+  "advanced": {
+    "title": "Advanced"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "loading": "Loading...",
+    "summary": "{{total}} total • {{unread}} unread",
+    "markAllAsRead": "Mark all as read",
+    "markAsRead": "Mark as read",
+    "viewLog": "View log",
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "group": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisWeek": "This Week",
+      "older": "Older"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
+    },
+    "empty": {
+      "allCaughtUp": "All caught up!",
+      "noNotifications": "No notifications",
+      "noUnread": "No unread notifications right now.",
+      "description": "Critical live alerts and device activity will appear here."
+    },
+    "stats": {
+      "total": "Total",
+      "unread": "Unread",
+      "actionTypes": "Action Types"
+    },
+    "meta": {
+      "weather": "Weather Alert",
+      "emergency": "Emergency Alert",
+      "arrival": "Destination Reached",
+      "fall": "Fall Detected",
+      "default": "Smart Cane Alert",
+      "actions": {
+        "CREATE": "Device Created",
+        "UPDATE": "Device Updated",
+        "DELETE": "Device Deleted",
+        "PAIR": "Device Paired",
+        "UNPAIR": "Device Unpaired",
+        "INVITE": "Guardian Invited",
+        "REMOVE_GUARDIAN": "Guardian Removed",
+        "UPDATE_ROLE": "Role Updated",
+        "ACCEPT_INVITE": "Invite Accepted",
+        "SET_EMERGENCY": "Emergency Contact Set",
+        "UPDATE_RELATIONSHIP": "Relationship Updated",
+        "LIVE_WEATHER": "Weather Alert",
+        "LIVE_EMERGENCY": "Emergency Alert",
+        "LIVE_FALL": "Fall Detected",
+        "ROUTE_ARRIVAL": "Destination Reached"
+      }
+    },
+    "messages": {
+      "importantActivity": "Important activity was detected on iCane."
+    },
+    "dynamicMessages": {
+      "setEmergencyContact": "{{actor}} set guardian {{guardian}} as emergency contact for device {{device}}"
+    }
+  },
+  "commonEnums": {
+    "roles": {
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "guardian": "Guardian"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    }
+  },
+  "manageGuardians": {
+    "emergency": {
+      "removeAsEmergency": "Remove as emergency contact",
+      "setAsEmergency": "Set as emergency contact",
+      "emergencyContact": "Emergency Contact",
+      "setAsEmergencyShort": "Set as Emergency"
+    }
+  },
+  "toast": {
+    "closeAria": "Close toast",
+    "close": "Close",
+    "typeIconAlt": "{{type}} icon"
+  },
+  "emergencyToast": {
+    "title": "Emergency Alert",
+    "subtitle": "SOS signal activated",
+    "defaultMessage": "Juan Dela Cruz seems like in danger."
+  },
+  "dashboardLayout": {
+    "toast": {
+      "emergency": "Emergency Alert! Please check the live location immediately.",
+      "fall": "Fall detected! Please check the user's status immediately.",
+      "loginSuccess": "You have successfully logged into your account."
+    }
+  },
+  "dashboardSide": {
+    "menu": {
+      "dashboard": "Dashboard",
+      "deviceLogs": "Device Logs",
+      "weatherBoard": "Weather Board",
+      "devices": "Devices",
+      "advanced": "Advanced"
+    },
+    "mobile": {
+      "weather": "Weather",
+      "logs": "Logs",
+      "home": "Home",
+      "devices": "Devices",
+      "advanced": "Advanced"
+    },
+    "signOut": "Sign Out"
+  },
+  "sendNote": {
+    "title": "Send Note",
+    "description": "Compose and send a message to {{name}}",
+    "defaultRecipient": "your device",
+    "messageLabel": "Message",
+    "placeholder": "Type your message here...",
+    "charactersCount": "{{count}} / {{max}} characters",
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "send": "Send",
+    "sendNote": "Send Note",
+    "toast": {
+      "errorTitle": "Error!",
+      "errorMessage": "There was an error sending your message. Please try again later.",
+      "sentTitle": "Sent!",
+      "sentMessage": "Your message has been sent successfully."
+    }
+  },
+  "guardianInvite": {
+    "title": {
+      "processing": "Processing Invitation",
+      "accepted": "Invitation Accepted!",
+      "registerRequired": "Become a Guardian",
+      "expired": "Invitation Expired",
+      "invalid": "Invalid Invitation",
+      "error": "Processing Failed"
+    },
+    "messages": {
+      "invalidTokenMissing": "Invalid invitation link - token missing",
+      "acceptedDashboard": "You're all set! Your guardian invitation has been accepted. Redirecting to dashboard...",
+      "acceptedLogin": "Congratulations, {{email}}! Your invitation has been accepted. Redirecting to login...",
+      "registerRequired": "Welcome! You've been invited to become a guardian.",
+      "serverUnavailable": "Could not reach the server. Please check your connection and try again.",
+      "unexpectedError": "An unexpected error occurred while processing your invitation.",
+      "invitationAccepted": "Invitation accepted!"
+    },
+    "actions": {
+      "goToDashboard": "Go to Dashboard Now",
+      "goToLogin": "Go to Login Now",
+      "returnHomePage": "Return to Homepage",
+      "registerNow": "Register Now",
+      "alreadyHaveAccount": "Already have an account? Login",
+      "returnHome": "Return to Home",
+      "contactSupport": "Contact Support",
+      "tryAgain": "Try Again",
+      "goToHomePage": "Go to Homepage"
+    },
+    "invitationFor": "Invitation for:",
+    "redirectingIn": "Redirecting in {{count}} second",
+    "redirectingIn_other": "Redirecting in {{count}} seconds"
+  },
+  "recentAlerts": {
+    "title": "Recent Alerts",
+    "checkingWeather": "Checking Novaliches weather...",
+    "noAlerts": "No recent alerts"
+  },
+  "liveMap": {
+    "searchPlaceholder": "Search location...",
+    "defaultCountry": "Philippines",
+    "clearDestinationAria": "Clear destination",
+    "clearDestination": "Clear Destination",
+    "openFullscreenAria": "Open fullscreen map",
+    "exitFullscreenAria": "Exit fullscreen map",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "popups": {
+      "currentLocation": "Your current location.",
+      "vipLocation": "VIP current location.",
+      "destination": "Destination",
+      "adjustLocation": "Adjust location"
+    },
+    "locationPrompt": {
+      "title": "Location Access Needed",
+      "body": "Your current location is turned off. Enable location in Settings so we can center the map on you.",
+      "notNow": "Not now",
+      "openSettings": "Open Settings"
+    },
+    "clickMenu": {
+      "chooseAction": "Choose Action",
+      "setAsDestination": "Set as Destination"
+    }
+  },
+  "activityLogs": {
+    "title": "Activity Logs",
+    "subtitle": "Monitor and track all guardian activities in your system",
+    "tryAgain": "Try again",
+    "searchPlaceholder": "Search by name, action, or description...",
+    "clearAll": "Clear all",
+    "clearFilters": "Clear filters",
+    "empty": {
+      "nothingToSee": "Nothing to see here",
+      "noActivity": "No activity yet",
+      "adjustFilters": "Try adjusting your search or filters.",
+      "actionsAppear": "Actions you perform will appear here."
+    },
+    "table": {
+      "guardian": "Guardian",
+      "action": "Action",
+      "description": "Description",
+      "dateCreated": "Date Created"
+    },
+    "pagination": {
+      "showing": "Showing {{from}}-{{to}} of {{total}} activities",
+      "showingShort": "Showing {{from}}-{{to}} of {{total}}"
+    },
+    "actions": {
+      "login": "Login",
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "pair": "Pair",
+      "unpair": "Unpair",
+      "invite": "Invite",
+      "removeGuardian": "Remove Guardian",
+      "updateRole": "Update Role",
+      "acceptInvite": "Accept Invite",
+      "setEmergency": "Set Emergency",
+      "relationship": "Relationship"
+    }
+  },
+  "deviceLogs": {
+    "title": "Device Logs",
+    "subtitle": "Monitor and track detailed VIP movement and activity history.",
+    "searchPlaceholder": "Search by guardian, VIP, activity, or device...",
+    "clearAll": "Clear all",
+    "clearFilters": "Clear filters",
+    "noDevice": "No Device",
+    "origin": "Origin",
+    "destination": "Destination",
+    "empty": {
+      "nothingToSee": "Nothing to see here",
+      "adjustFilters": "Try adjusting your search or filters.",
+      "noActivities": "We couldn't find any activities matching \"{{searchTerm}}\"."
+    },
+    "table": {
+      "vip": "VIP",
+      "vipName": "VIP Name",
+      "activity": "Activity",
+      "locations": "Locations",
+      "dateTime": "Date & Time",
+      "status": "Status"
+    },
+    "pagination": {
+      "showing": "Showing {{from}}-{{to}} of {{total}}"
+    },
+    "status": {
+      "completed": "Completed",
+      "ongoing": "Ongoing",
+      "emergency": "Emergency",
+      "fallDetected": "Fall Detected",
+      "cancelled": "Cancelled"
+    }
+  },
+  "weatherService": {
+    "alertTitle": "Weather alert",
+    "updateTitle": "Weather update",
+    "rainInLocation": "Rain expected / Raining in {{location}}.",
+    "clearSkies": "Clear skies in {{location}} ({{temp}}°C)",
+    "labels": {
+      "clearSky": "Clear Sky",
+      "mainlyClear": "Mainly Clear",
+      "partlyCloudy": "Partly Cloudy",
+      "overcast": "Overcast",
+      "foggy": "Foggy",
+      "drizzle": "Drizzle",
+      "rain": "Rain",
+      "snowfall": "Snowfall",
+      "rainShowers": "Rain Showers",
+      "thunderstorm": "Thunderstorm",
+      "rainyShowers": "Rainy / Showers"
+    },
+    "recommendation": {
+      "heavyRain": "Heavy rain or showers expected tomorrow. Better to stay indoors.",
+      "sunny": "It will be sunny tomorrow. Don't forget to bring an umbrella and stay hydrated.",
+      "cloudy": "It will be cloudy tomorrow. A good day for a walk.",
+      "safeWalk": "Tomorrow looks safe for a walk. Use your iCane as usual."
+    }
+  },
+  "importantNotifications": {
+    "theVip": "the VIP",
+    "deviceLabel": " on device {{serial}}",
+    "guardians": {
+      "safetyMonitor": "iCane Safety Monitor",
+      "navigationAssistant": "Navigation Assistant",
+      "weatherService": "Weather Service"
+    },
+    "emergency": {
+      "title": "Emergency Alert",
+      "message": "{{vipName}} triggered an emergency alert{{deviceLabel}}. Open Live Location now and contact the assigned emergency guardians immediately."
+    },
+    "fall": {
+      "title": "Possible Fall Detected",
+      "message": "A possible fall was detected for {{vipName}}{{deviceLabel}}. Check the live map and confirm their condition as soon as possible."
+    },
+    "arrival": {
+      "title": "Destination Reached",
+      "message": "{{vipName}} has arrived at the selected destination{{deviceLabel}}. Route tracking has been cleared successfully."
+    },
+    "weather": {
+      "storm": {
+        "title": "Severe Weather Warning",
+        "message": "Thunderstorm conditions were detected near {{location}}. Outdoor travel may be unsafe right now. Review the Weather Board before heading out."
+      },
+      "wind": {
+        "title": "Strong Wind Advisory",
+        "message": "Strong winds of around {{windSpeed}} km/h were detected near {{location}}. Outdoor navigation may be unstable, so extra caution is advised."
+      },
+      "rain": {
+        "title": "Rain Alert",
+        "message": "Rain is affecting {{location}} right now{{temperature}}. Roads may be slippery, so please monitor outdoor travel carefully."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "heading": "Welcome",
+      "subheading": "Ready to go? Log in and jump straight into your dashboard.",
+      "mobileHeading": "Login to your account",
+      "identifierLabel": "Email or Username",
+      "identifierPlaceholder": "Enter your email or username...",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password...",
+      "forgotPassword": "Forgot password?",
+      "captchaLoading": "Loading CAPTCHA...",
+      "signingIn": "Signing in...",
+      "signIn": "Sign In",
+      "noAccount": "Didn't have an account?",
+      "signUp": "Sign Up",
+      "scanTitle": "Scan your iCane Device",
+      "scanDescription": "Point your camera at the QR code on your iCane device to pair it automatically.",
+      "errors": {
+        "identifierRequired": "Email or Username is required",
+        "passwordRequired": "Password is required",
+        "captchaRequired": "Please complete the CAPTCHA",
+        "loginFailed": "Login failed",
+        "twoFactorEmailRequired": "Two-factor authentication requires a valid email address.",
+        "otpSendFailed": "Failed to send OTP. Please try again.",
+        "otpIncomplete": "Please enter the complete 6-digit code.",
+        "invalidCode": "Invalid code. Please try again.",
+        "retryAfter": "Too many failed login attempts. Try again in {{seconds}} seconds."
+      },
+      "twoFactor": {
+        "title": "Email Verification",
+        "promptPrefix": "Enter the",
+        "codeLabel": "6-digit verification code",
+        "promptSuffix": "we sent to your email address.",
+        "noCode": "Didn't receive the code?",
+        "sending": "Sending...",
+        "resendIn": "Resend in {{seconds}}s",
+        "resend": "Resend Verification Code",
+        "verifying": "Verifying...",
+        "verify": "Verify",
+        "cancel": "Cancel"
+      },
+      "modal": {
+        "proceedToDashboard": "Proceed to Dashboard",
+        "continueToDashboard": "You can now continue to dashboard and start using your account.",
+        "redirecting": "Redirecting in {{seconds}}s..."
+      }
+    },
+    "register": {
+      "heading": "Welcome",
+      "verifyHeading": "Email Verification",
+      "mobileHeading": "Create your account",
+      "step1Description": "Create your account to get started with iCane.",
+      "step2Description": "Start your journey to safer and smarter mobility by signing up.",
+      "verifyPrefix": "Enter the",
+      "verifyCodeLabel": "6-digit verification code",
+      "verifySuffix": "we have sent to your email address.",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "First Name...",
+      "middleName": "Middle Name",
+      "middleNamePlaceholder": "Middle Name...",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Last Name...",
+      "username": "Username",
+      "usernamePlaceholder": "Enter your username...",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password...",
+      "confirmPassword": "Re-enter Password",
+      "confirmPasswordPlaceholder": "Re-enter your password...",
+      "streetAddress": "Lot No./Bldg./Street",
+      "streetAddressPlaceholder": "Enter your Lot No...",
+      "province": "Province",
+      "city": "City",
+      "barangay": "Barangay",
+      "village": "Village",
+      "contactNumber": "Contact Number",
+      "email": "Email Address",
+      "noCode": "Didn't receive the code?",
+      "sending": "Sending...",
+      "resendIn": "Resend in {{seconds}}s",
+      "resend": "Resend Verification Code",
+      "creating": "Creating Account...",
+      "checking": "Checking...",
+      "createAccount": "Create Account",
+      "next": "Next",
+      "back": "Back",
+      "haveAccount": "Already have an Account?",
+      "signIn": "Sign In",
+      "termsPrefix": "By signing up I agree to the",
+      "terms": "Terms and Conditions",
+      "and": "and",
+      "privacy": "Privacy Policy.",
+      "scanTitle": "Scan your iCane Device",
+      "scanDescription": "Point your camera at the QR code on your iCane device to pair it automatically.",
+      "modal": {
+        "continueToLogin": "You can now continue to login and start using your account.",
+        "redirecting": "Redirecting in {{seconds}}s..."
+      }
+    },
+    "forgotPassword": {
+      "heading": "Forgot Password",
+      "verificationCode": "Verification Code",
+      "changePassword": "Change Password",
+      "step1Description": "Enter your email address and we'll send you a code.",
+      "step3Description": "Your code has been verified. Enter your new password.",
+      "codeSentPrefix": "We've sent a verification code to:",
+      "expiresIn": "(Expires in 5 minutes)",
+      "email": "Email Address",
+      "sending": "Sending...",
+      "sendCode": "Send Code",
+      "back": "Back",
+      "noCode": "Didn't receive code?",
+      "resendOtp": "Resend OTP",
+      "verifying": "Verifying...",
+      "verifyCode": "Verify Code",
+      "newPassword": "New Password",
+      "confirmPassword": "Re-enter Password",
+      "passwordHint": "Must be at least 6 characters",
+      "updating": "Updating...",
+      "submit": "Submit",
+      "errors": {
+        "otpExpired": "OTP has expired. Please request a new one.",
+        "validEmail": "Please enter a valid email address",
+        "invalidOtp": "Invalid OTP. Please try again.",
+        "passwordMismatch": "Password doesn't match!",
+        "passwordMin": "Password must be at least 6 characters",
+        "otpSendFailed": "Failed to send OTP. Please try again.",
+        "network": "Network error. Please check your connection.",
+        "generic": "Something went wrong. Please try again.",
+        "resetFailed": "Failed to reset password",
+        "resendFailed": "Failed to resend OTP. Please try again."
+      },
+      "modal": {
+        "passwordResetTitle": "Password Reset",
+        "codeSent": "We've sent a verification code to your email: {{email}}",
+        "successTitle": "Success",
+        "passwordUpdated": "Password successfully updated!",
+        "sessionExpiredTitle": "Session Expired",
+        "sessionExpiredBody": "Session expired. Please start the reset process again.",
+        "verificationTitle": "Verification",
+        "newOtpSent": "New OTP sent to your email!"
+      }
+    }
+  }
+}

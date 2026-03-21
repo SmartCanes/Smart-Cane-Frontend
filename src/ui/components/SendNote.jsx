@@ -4,8 +4,10 @@ import Toast from "./Toast";
 import { validateField } from "@/utils/ValidationHelper";
 import { wsApi } from "@/api/ws-api";
 import { useDevicesStore, useRealtimeStore } from "@/stores/useStore";
+import { useTranslation } from "react-i18next";
 
 const SendNote = () => {
+  const { t } = useTranslation("pages");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { selectedDevice } = useDevicesStore();
@@ -33,7 +35,7 @@ const SendNote = () => {
     if (error && error.trim() !== "") {
       setModalConfig({
         isOpen: true,
-        title: "Error!",
+        title: t("sendNote.toast.errorTitle"),
         message: error,
         variant: "error"
       });
@@ -53,8 +55,8 @@ const SendNote = () => {
 
       setModalConfig({
         isOpen: true,
-        title: "Sent!",
-        message: "Your message has been sent successfully.",
+        title: t("sendNote.toast.sentTitle"),
+        message: t("sendNote.toast.sentMessage"),
         variant: "success"
       });
       setMessage("");
@@ -62,9 +64,8 @@ const SendNote = () => {
       console.error("Error sending message:", error);
       setModalConfig({
         isOpen: true,
-        title: "Error!",
-        message:
-          "There was an error sending your message. Please try again later.",
+        title: t("sendNote.toast.errorTitle"),
+        message: t("sendNote.toast.errorMessage"),
         variant: "error"
       });
     } finally {
@@ -75,23 +76,21 @@ const SendNote = () => {
   return (
     <>
       <div className="bg-white rounded-2xl shadow-sm p-6 w-full font-poppins">
-        <h3 className="text-xl font-semibold text-gray-900 mb-1">Send Note</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-1">{t("sendNote.title")}</h3>
         <p className="text-sm text-gray-500 mb-6">
-          Compose and send a message to{" "}
-          {selectedDevice?.vip?.firstName
-            ? selectedDevice?.vip?.firstName
-            : "your device"}
+          {t("sendNote.description", {
+            name: selectedDevice?.vip?.firstName || t("sendNote.defaultRecipient")
+          })}
         </p>
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Message
+            {t("sendNote.messageLabel")}
           </label>
           <textarea
             className="w-full h-48 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent text-sm text-gray-700 placeholder-gray-400"
-            placeholder="Type your message here..."
+            placeholder={t("sendNote.placeholder")}
             value={message}
-            on
             onChange={(e) => {
               const value = e.target.value;
               setMessage(value);
@@ -111,7 +110,7 @@ const SendNote = () => {
 
         <div className="flex justify-between items-center mb-6">
           <span className="text-xs text-gray-400">
-            {message.length} / {maxLength} characters
+            {t("sendNote.charactersCount", { count: message.length, max: maxLength })}
           </span>
         </div>
 
@@ -121,7 +120,7 @@ const SendNote = () => {
             onClick={() => setMessage("")}
             className={`flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-sm sm:text-base text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            Cancel
+            {t("sendNote.cancel")}
           </button>
           <button
             disabled={
@@ -132,11 +131,11 @@ const SendNote = () => {
           >
             <Icon icon="solar:plain-bold" className="text-lg rotate-45" />
             {isSubmitting ? (
-              "Sending..."
+              t("sendNote.sending")
             ) : (
               <>
-                <span className="sm:hidden">Send</span>
-                <span className="hidden sm:inline">Send Note</span>
+                <span className="sm:hidden">{t("sendNote.send")}</span>
+                <span className="hidden sm:inline">{t("sendNote.sendNote")}</span>
               </>
             )}
           </button>

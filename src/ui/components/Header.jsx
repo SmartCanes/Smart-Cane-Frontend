@@ -20,6 +20,8 @@ import DefaultProfile from "./DefaultProfile";
 import { capitalizeWords } from "@/utils/Capitalize";
 import { openNotificationTarget } from "@/utils/importantNotifications";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 function showLogoutModal(message = "Logging out...") {
   if (document.getElementById("logout-modal-overlay")) return;
@@ -221,6 +223,7 @@ const NotificationDropdown = ({
   onSeeAll, // added van
   onMarkAllRead // added van
 }) => {
+  const { t } = useTranslation();
   const dropdownRef = useRef(null);
   const { markAsRead } = useNotificationsStore(); // added van
 
@@ -243,7 +246,7 @@ const NotificationDropdown = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-gray-900 text-lg">
-              Notifications
+              {t("header.notifications")}
             </h3>
             {/* unread badge van */}
             {unreadCount > 0 && (
@@ -254,7 +257,7 @@ const NotificationDropdown = ({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500">
-              {notifications.length} total
+              {t("header.total", { count: notifications.length })}
             </span>
             <button
               onClick={onClose}
@@ -273,7 +276,7 @@ const NotificationDropdown = ({
               icon="ph:bell-slash"
               className="w-12 h-12 mx-auto mb-3 text-gray-300"
             />
-            <p className="text-gray-500 text-sm">No notifications yet</p>
+            <p className="text-gray-500 text-sm">{t("header.noNotificationsYet")}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -343,7 +346,7 @@ const NotificationDropdown = ({
             }}
             className="text-[#11285A] hover:text-[#11285A]/80 font-medium text-sm flex items-center gap-1 cursor-pointer"
           >
-            See all notifications
+            {t("header.seeAllNotifications")}
             <Icon icon="ph:arrow-right" className="w-4 h-4" />
           </button>
           {/* mark all read button van */}
@@ -352,7 +355,7 @@ const NotificationDropdown = ({
               onClick={onMarkAllRead}
               className="text-gray-600 hover:text-gray-800 text-sm font-medium cursor-pointer transition-colors"
             >
-              Mark all as read
+              {t("header.markAllAsRead")}
             </button>
           )}
         </div>
@@ -362,6 +365,7 @@ const NotificationDropdown = ({
 };
 
 const Header = () => {
+  const { t } = useTranslation();
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const { user, clearUser } = useUserStore();
   const { setMobileMenuOpen, isMobileMenuOpen } = useUIStore();
@@ -517,7 +521,9 @@ const Header = () => {
           data-tour="tour-mobile-menu"
           onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
           className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
-          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-label={
+            isMobileMenuOpen ? t("header.closeMenu") : t("header.openMenu")
+          }
         >
           <motion.div
             initial={false}
@@ -535,7 +541,9 @@ const Header = () => {
         </button>
 
         {/* Desktop center placeholder */}
-        <div className="hidden md:flex items-center flex-1 justify-center gap-4 lg:gap-6" />
+        <div className="hidden md:flex items-center flex-1 justify-center gap-4 lg:gap-6">
+          <LanguageSwitcher variant="dark" />
+        </div>
 
         {/* Desktop right */}
         <div className="hidden md:flex items-center gap-3 lg:gap-4">
@@ -564,7 +572,7 @@ const Header = () => {
               <span className="text-sm font-medium text-white truncate flex-1 text-left">
                 {selectedDevice?.vip?.firstName
                   ? capitalizeWords(selectedDevice.vip.firstName)
-                  : selectedDevice?.deviceSerialNumber || "No VIP"}
+                  : selectedDevice?.deviceSerialNumber || t("header.noVip")}
               </span>
               <Icon
                 icon="ph:caret-down-bold"
@@ -618,7 +626,7 @@ const Header = () => {
                   })}
                   {devices.length === 0 && (
                     <div className="py-8 text-center text-sm text-gray-400">
-                      No VIP available
+                      {t("header.noVipAvailable")}
                     </div>
                   )}
                 </div>
@@ -635,10 +643,14 @@ const Header = () => {
           >
             <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
             <span className="hidden lg:inline">
-              {componentHealth.raspberryPiStatus ? "Connected" : "Disconnected"}
+              {componentHealth.raspberryPiStatus
+                ? t("header.connected")
+                : t("header.disconnected")}
             </span>
             <span className="lg:hidden">
-              {componentHealth.raspberryPiStatus ? "Connected" : "Disconnected"}
+              {componentHealth.raspberryPiStatus
+                ? t("header.connected")
+                : t("header.disconnected")}
             </span>
           </div>
 
@@ -648,7 +660,7 @@ const Header = () => {
               data-tour="tour-notifications"
               onClick={handleNotificationClick}
               className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors notification-button cursor-pointer"
-              aria-label="Notifications"
+              aria-label={t("header.notifications")}
             >
               <Icon icon="ph:bell" className="w-6 h-6" />
               {/* unread count van */}
@@ -708,7 +720,7 @@ const Header = () => {
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="ph:user" className="w-4 h-4" />
-                      Profile
+                      {t("header.profile")}
                     </button>
                     <button
                       onClick={() => {
@@ -718,7 +730,7 @@ const Header = () => {
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="oui:nav-reports" className="w-4 h-4" />
-                      History
+                      {t("header.history")}
                     </button>
                     <button
                       onClick={() => {
@@ -728,14 +740,14 @@ const Header = () => {
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="ph:gear" className="w-4 h-4" />
-                      Settings
+                      {t("header.settings")}
                     </button>
                     <button
                       onClick={handleLogoutClick}
                       className="w-full px-6 py-3 text-left font-poppins text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-3"
                     >
                       <Icon icon="ph:sign-out" className="w-4 h-4" />
-                      Logout
+                      {t("header.logout")}
                     </button>
                   </div>
                 </div>
@@ -767,7 +779,7 @@ const Header = () => {
                 >
                   <div data-tour="tour-mobile-vip" className="mb-6">
                     <div className="text-white/80 text-sm font-medium mb-2 px-2">
-                      Select Device
+                      {t("header.selectDevice")}
                     </div>
                     <div className="space-y-2 max-h-[20vh] overflow-y-auto pr-1">
                       {devices.map((device) => {
@@ -821,25 +833,31 @@ const Header = () => {
                       })}
                       {devices.length === 0 && (
                         <div className="text-center text-white/60 py-4">
-                          No VIP devices
+                          {t("header.noVipDevices")}
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  <div className="px-2">
+                    <LanguageSwitcher variant="dark" className="w-full" />
                   </div>
 
                   <div
                     data-tour="tour-mobile-connection"
                     className="flex items-center justify-between p-3 bg-white/5 rounded-xl"
                   >
-                    <span className="text-white font-medium">Connection</span>
+                    <span className="text-white font-medium">
+                      {t("header.connection")}
+                    </span>
                     <div className="flex items-center gap-2">
                       <div
                         className={`w-2 h-2 rounded-full ${componentHealth.raspberryPiStatus ? "bg-green-400" : "bg-red-400"}`}
                       />
                       <span className="text-white/80 text-sm">
                         {componentHealth.raspberryPiStatus
-                          ? "Connected"
-                          : "Disconnected"}
+                          ? t("header.connected")
+                          : t("header.disconnected")}
                       </span>
                     </div>
                   </div>
@@ -854,7 +872,7 @@ const Header = () => {
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="ph:user" className="w-5 h-5" />
-                      <span className="font-medium">Profile</span>
+                      <span className="font-medium">{t("header.profile")}</span>
                     </button>
                     <button
                       onClick={() => {
@@ -864,7 +882,7 @@ const Header = () => {
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="oui:nav-reports" className="w-5 h-5" />
-                      <span className="font-medium">History</span>
+                      <span className="font-medium">{t("header.history")}</span>
                     </button>
                     <button
                       onClick={() => {
@@ -874,7 +892,7 @@ const Header = () => {
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="ph:gear" className="w-5 h-5" />
-                      <span className="font-medium">Settings</span>
+                      <span className="font-medium">{t("header.settings")}</span>
                     </button>
 
                     {/* mobile bell van */}
@@ -887,7 +905,9 @@ const Header = () => {
                       className="w-full flex items-center gap-3 p-3 text-white hover:bg-white/10 rounded-xl transition-colors relative"
                     >
                       <Icon icon="ph:bell" className="w-5 h-5" />
-                      <span className="font-medium">Notifications</span>
+                      <span className="font-medium">
+                        {t("header.notifications")}
+                      </span>
                       {/* unread count van */}
                       {unreadCount > 0 && (
                         <span className="absolute right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
@@ -901,7 +921,7 @@ const Header = () => {
                       className="w-full flex items-center gap-3 p-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <Icon icon="ph:sign-out" className="w-5 h-5" />
-                      <span className="font-medium">Logout</span>
+                      <span className="font-medium">{t("header.logout")}</span>
                     </button>
                   </div>
                 </motion.div>

@@ -145,7 +145,7 @@ const MOBILE_HEADER_STEP_MAP = {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-const TourGuide = () => {
+const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
   const location = useLocation();
   const {
     hasVisited,
@@ -270,6 +270,8 @@ const TourGuide = () => {
   // Backend `has_seen_tour` is the source of truth so the tour never replays
   // across browsers/devices after completion.
   useEffect(() => {
+    if (!canAutoStart) return;
+
     // Reset evaluation gate when navigating to a different page
     if (evaluatedForPathRef.current !== location.pathname) {
       hasEvaluatedAutoStartRef.current = false;
@@ -335,6 +337,7 @@ const TourGuide = () => {
     };
   }, [
     location.pathname,
+    canAutoStart,
     steps,
     firstStepTarget,
     guardianId,
@@ -492,6 +495,12 @@ const TourGuide = () => {
       setMobileMenuOpen(false); // close drawer if it was opened by the tour
       endTour();
 
+      if (mode === "skip") {
+        onClose?.();
+      } else {
+        onComplete?.();
+      }
+
       const lastTourPath = allTourPaths[allTourPaths.length - 1];
       const isLastPageInSequence = location.pathname === lastTourPath;
       const shouldMarkComplete =
@@ -512,6 +521,8 @@ const TourGuide = () => {
       location.pathname,
       hasSeenTourBackend,
       endTour,
+      onClose,
+      onComplete,
       setMobileMenuOpen,
       updateUser
     ]

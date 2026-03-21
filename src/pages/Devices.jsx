@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
+import { useTranslation } from "react-i18next";
 import Modal from "../ui/components/Modal";
 import VipProfileModal from "@/ui/components/VipProfileModal";
 import ScannerCamera from "@/ui/components/Scanner";
@@ -24,6 +25,7 @@ import {
 import ManageGuardiansModal from "@/ui/components/ManageGuardians";
 
 const Devices = () => {
+  const { t } = useTranslation("pages");
   const { devices, upsertDevice, removeDevice, hasFetchedOnce } =
     useDevicesStore();
   const { fetchGuardiansAndInvites, currentGuardianRole } = useGuardiansStore();
@@ -113,7 +115,7 @@ const Devices = () => {
       const response = await updateDeviceName(deviceId, payload);
 
       if (!response.success) {
-        throw new Error(response.message || "Failed to update cane nickname");
+        throw new Error(response.message || t("devices.toast.nicknameUpdateFailed"));
       }
 
       upsertDevice({
@@ -128,7 +130,7 @@ const Devices = () => {
 
       showToast({
         type: "success",
-        message: "Cane nickname updated"
+        message: t("devices.toast.nicknameUpdated")
       });
     } catch (error) {
       showToast({
@@ -136,7 +138,7 @@ const Devices = () => {
         message:
           error.response?.data?.message ||
           error.message ||
-          "Failed to update cane nickname"
+          t("devices.toast.nicknameUpdateFailed")
       });
     } finally {
       setSubmitting(false);
@@ -149,14 +151,14 @@ const Devices = () => {
       const response = await unpairDevice(deviceId);
 
       if (!response.success) {
-        throw new Error(response.message || "Failed to unpair cane");
+        throw new Error(response.message || t("devices.toast.unpairFailed"));
       }
 
       removeDevice(deviceId);
       setUnpairConfirm({ show: false, deviceId: null });
       showToast({
         type: "success",
-        message: "Cane unpaired and removed from your account"
+        message: t("devices.toast.unpairedSuccess")
       });
     } catch (error) {
       showToast({
@@ -164,7 +166,7 @@ const Devices = () => {
         message:
           error.response?.data?.message ||
           error.message ||
-          "Failed to unpair cane"
+          t("devices.toast.unpairFailed")
       });
     } finally {
       setIsSubmitting(false);
@@ -207,7 +209,7 @@ const Devices = () => {
       deviceId: device.deviceId,
       vipName: device.vip
         ? `${device.vip.firstName} ${device.vip.lastName}`
-        : "No VIP assigned",
+        : t("devices.vip.noVipAssigned"),
       vipId: device.vip ? device.vip.vipId : null
     });
   };
@@ -287,7 +289,7 @@ const Devices = () => {
 
       showToast({
         type: "success",
-        message: "VIP profile created for cane"
+        message: t("devices.toast.vipCreated")
       });
       return true;
     } catch (error) {
@@ -343,7 +345,7 @@ const Devices = () => {
 
       showToast({
         type: "success",
-        message: "VIP profile updated for cane"
+        message: t("devices.toast.vipUpdated")
       });
       return true;
     } catch (error) {
@@ -363,7 +365,7 @@ const Devices = () => {
 
       const response = await deleteVIP(deviceId);
       if (!response.success) {
-        throw new Error(response.message || "Failed to remove VIP from cane");
+        throw new Error(response.message || t("devices.toast.vipRemoveFailed"));
       }
 
       upsertDevice({
@@ -374,7 +376,7 @@ const Devices = () => {
       setDeleteVIPConfirm({ show: false, deviceId: null });
       showToast({
         type: "success",
-        message: "VIP profile removed from cane"
+        message: t("devices.toast.vipRemoved")
       });
     } catch (error) {
       showToast({
@@ -382,7 +384,7 @@ const Devices = () => {
         message:
           error.response?.data?.message ||
           error.message ||
-          "Failed to remove VIP"
+          t("devices.toast.vipRemoveFailed")
       });
     } finally {
       setIsSubmitting(false);
@@ -402,14 +404,16 @@ const Devices = () => {
         >
           <div className="w-full">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
-              Manage Devices
+              {t("devices.header.title")}
             </h2>
             <p className="text-gray-500 text-xs md:text-sm">
-              View and manage your paired canes, assign VIP profiles, and more.
+              {t("devices.header.subtitle")}
             </p>
             <p className="text-gray-500 text-sm mt-1">
-              {devices.length} cane{devices.length !== 1 ? "s" : ""} •{" "}
-              {devices.filter((d) => d.isPaired).length} active
+              {t("devices.header.countSummary", {
+                total: devices.length,
+                active: devices.filter((d) => d.isPaired).length
+              })}
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full">
@@ -422,7 +426,7 @@ const Devices = () => {
                 className="w-full sm:w-auto text-white font-bold py-3 px-6 rounded-lg transition-all hover:shadow-lg flex items-center gap-2 justify-center"
               >
                 <Icon icon="ph:plus-bold" className="w-5 h-5" />
-                Add Cane
+                {t("devices.actions.addCane")}
               </Button>
             </div>
 
@@ -438,7 +442,7 @@ const Devices = () => {
                 >
                   <Icon icon="ph:squares-four-bold" className="w-4 h-4" />
                   <span className="text-sm font-medium hidden sm:inline">
-                    Tiles
+                    {t("devices.view.tiles")}
                   </span>
                 </button>
                 <button
@@ -451,7 +455,7 @@ const Devices = () => {
                 >
                   <Icon icon="ph:list-bullets-bold" className="w-4 h-4" />
                   <span className="text-sm font-medium hidden sm:inline">
-                    List
+                    {t("devices.view.list")}
                   </span>
                 </button>
               </div>
@@ -464,28 +468,36 @@ const Devices = () => {
           isOpen={unpairConfirm.show}
           closeTimer={null}
           onClose={() => setUnpairConfirm({ show: false, deviceId: null })}
-          title="Unpair Cane?"
+          title={t("devices.modal.unpair.title")}
           modalType="error"
-          message="This will unpair and remove the cane from your account."
+          message={t("devices.modal.unpair.message")}
           handleCancel={() => setUnpairConfirm({ show: false, deviceId: null })}
           handleConfirm={() => handleUnpairDevice(unpairConfirm.deviceId)}
           isSubmitting={isSubmitting}
-          confirmText={isSubmitting ? "Unpairing..." : "Unpair"}
+          confirmText={
+            isSubmitting
+              ? t("devices.modal.unpair.confirmLoading")
+              : t("devices.modal.unpair.confirm")
+          }
         />
 
         <Modal
           isOpen={deleteVIPConfirm.show}
           closeTimer={null}
           onClose={() => setDeleteVIPConfirm({ show: false, deviceId: null })}
-          title="Remove VIP Profile?"
+          title={t("devices.modal.removeVip.title")}
           modalType="error"
-          message="This will remove the VIP profile assigned to this cane."
+          message={t("devices.modal.removeVip.message")}
           handleCancel={() =>
             setDeleteVIPConfirm({ show: false, deviceId: null })
           }
           handleConfirm={() => handleRemoveVIP(deleteVIPConfirm.deviceId)}
           isSubmitting={isSubmitting}
-          confirmText={isSubmitting ? "Removing..." : "Remove"}
+          confirmText={
+            isSubmitting
+              ? t("devices.modal.removeVip.confirmLoading")
+              : t("devices.modal.removeVip.confirm")
+          }
         />
 
         {/* EDIT CANE NAME MODAL */}
@@ -499,7 +511,7 @@ const Devices = () => {
             })
           }
           closeTimer={null}
-          title="Edit Nickname"
+          title={t("devices.modal.editNickname.title")}
           modalType="info"
           footer={null}
           isSubmitting={nicknameSubmitting || resetNicknameSubmitting}
@@ -517,7 +529,7 @@ const Devices = () => {
           >
             <div className="space-y-3">
               <label className="text-sm font-medium text-gray-700">
-                Cane Nickname *
+                {t("devices.modal.editNickname.label")}
               </label>
               <input
                 type="text"
@@ -530,7 +542,7 @@ const Devices = () => {
                     deviceName: e.target.value
                   }))
                 }
-                placeholder="Enter nickname"
+                placeholder={t("devices.modal.editNickname.placeholder")}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all h-10 sm:h-12"
                 autoFocus
               />
@@ -556,11 +568,11 @@ const Devices = () => {
                   />
                 )}
                 {resetNicknameSubmitting ? (
-                  "Resetting..."
+                  t("devices.modal.editNickname.resetting")
                 ) : (
                   <>
-                    <span className="hidden sm:inline">Reset to Default</span>
-                    <span className="sm:hidden">Reset</span>
+                    <span className="hidden sm:inline">{t("devices.modal.editNickname.resetToDefault")}</span>
+                    <span className="sm:hidden">{t("devices.modal.editNickname.reset")}</span>
                   </>
                 )}
               </button>
@@ -586,11 +598,11 @@ const Devices = () => {
                   />
                 )}
                 {nicknameSubmitting ? (
-                  "Saving..."
+                  t("devices.modal.editNickname.saving")
                 ) : (
                   <>
-                    <span className="hidden sm:inline">Save Changes</span>
-                    <span className="sm:hidden">Save</span>
+                    <span className="hidden sm:inline">{t("devices.modal.editNickname.saveChanges")}</span>
+                    <span className="sm:hidden">{t("devices.modal.editNickname.save")}</span>
                   </>
                 )}
               </button>
@@ -617,19 +629,19 @@ const Devices = () => {
           isUploadingImage={false}
           title={
             vipModal.mode === "view"
-              ? "Cane VIP Profile"
+              ? t("devices.vip.modal.viewTitle")
               : vipModal.mode === "create"
-                ? "Add VIP to Cane"
-                : "Edit Cane VIP"
+                ? t("devices.vip.modal.createTitle")
+                : t("devices.vip.modal.editTitle")
           }
           submitText={
             vipModal.mode === "create"
               ? isSubmitting
-                ? "Creating..."
-                : "Create"
+                ? t("devices.vip.modal.creating")
+                : t("devices.vip.modal.create")
               : isSubmitting
-                ? "Updating..."
-                : "Update"
+                ? t("devices.vip.modal.updating")
+                : t("devices.vip.modal.update")
           }
           mode={vipModal.mode}
         />
@@ -652,7 +664,7 @@ const Devices = () => {
         <Modal
           isOpen={showScanner}
           onClose={() => setShowScanner(false)}
-          title="Scan iCane Device"
+          title={t("devices.scanner.modalTitle")}
           closeTimer={null}
           // handleConfirm={handleConfirmUnpair}
           footer={<></>}
@@ -663,7 +675,7 @@ const Devices = () => {
                 setShowScanner(false);
                 showToast({
                   type: "success",
-                  message: "Cane successfully paired to your account"
+                  message: t("devices.toast.pairedSuccess")
                 });
               }}
               response={(res) => {
@@ -740,9 +752,9 @@ const Devices = () => {
               icon="ph:walking-stick"
               className="w-16 h-16 text-gray-300 mx-auto mb-4"
             />
-            <p className="text-gray-500 text-lg">No canes added yet.</p>
+            <p className="text-gray-500 text-lg">{t("devices.empty.title")}</p>
             <p className="text-gray-400 text-sm mt-2">
-              Click 'Add Cane' to get started
+              {t("devices.empty.subtitle")}
             </p>
           </div>
         )}
@@ -761,6 +773,7 @@ const DeviceCard = ({
   onManageGuardians,
   canManageGuardian
 }) => {
+  const { t } = useTranslation("pages");
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsMenuRef = useRef(null);
 
@@ -810,7 +823,7 @@ const DeviceCard = ({
                 <h3 className="font-bold text-gray-900 font-poppins text-base sm:text-lg truncate">
                   {device?.deviceName
                     ? device.deviceName
-                    : device.deviceSerialNumber || "Unnamed Cane"}
+                    : device.deviceSerialNumber || t("devices.card.unnamedCane")}
                 </h3>
                 <button
                   onClick={(e) => {
@@ -818,7 +831,7 @@ const DeviceCard = ({
                     onEditDevice(device);
                   }}
                   className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
-                  title="Edit cane nickname"
+                  title={t("devices.card.editNicknameTitle")}
                 >
                   <Icon
                     icon="ph:pencil-simple-bold"
@@ -828,8 +841,8 @@ const DeviceCard = ({
               </div>
               <p className="text-xs sm:text-sm text-gray-500 truncate">
                 {!device.lastActive
-                  ? "Active Now"
-                  : `Last active: ${device.lastActive}`}
+                  ? t("devices.card.activeNow")
+                  : t("devices.card.lastActive", { lastActive: device.lastActive })}
               </p>
             </div>
           </div>
@@ -840,7 +853,7 @@ const DeviceCard = ({
               "px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 "
             }
           >
-            Paired
+            {t("devices.card.paired")}
           </div>
         </div>
       </div>
@@ -854,7 +867,7 @@ const DeviceCard = ({
                 icon="ph:user-circle-bold"
                 className="w-4 h-4 text-blue-600"
               />
-              Assigned VIP
+              {t("devices.card.assignedVip")}
             </h4>
             <div className="flex flex-wrap gap-2">
               {device?.vip ? (
@@ -867,7 +880,7 @@ const DeviceCard = ({
                     className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Icon icon="ph:eye-bold" className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">View</span>
+                    <span className="hidden sm:inline">{t("devices.actions.view")}</span>
                   </button>
                   {canManageGuardian && (
                     <>
@@ -882,7 +895,7 @@ const DeviceCard = ({
                           icon="ph:pencil-simple-bold"
                           className="w-3.5 h-3.5"
                         />
-                        <span className="hidden sm:inline">Edit</span>
+                        <span className="hidden sm:inline">{t("devices.actions.edit")}</span>
                       </button>
                       <button
                         onClick={(e) => {
@@ -892,7 +905,7 @@ const DeviceCard = ({
                         className="px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                       >
                         <Icon icon="ph:trash-bold" className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Remove</span>
+                        <span className="hidden sm:inline">{t("devices.actions.remove")}</span>
                       </button>
                     </>
                   )}
@@ -903,7 +916,7 @@ const DeviceCard = ({
                   className="px-4 py-2 text-sm font-medium text-white bg-[#11285A] hover:bg-[#0d1b3d] rounded-lg cursor-pointer transition-all hover:shadow-md flex items-center gap-2"
                 >
                   <Icon icon="ph:user-plus-bold" className="w-4 h-4" />
-                  <span>Assign VIP</span>
+                  <span>{t("devices.actions.assignVip")}</span>
                 </button>
               )}
             </div>
@@ -939,10 +952,10 @@ const DeviceCard = ({
               <h5 className="font-semibold text-gray-900 text-base sm:text-lg truncate">
                 {device?.vip
                   ? `${device.vip.firstName} ${device.vip.lastName}`
-                  : "No VIP Assigned"}
+                  : t("devices.vip.noVipAssigned")}
               </h5>
               <p className="text-sm text-gray-500 mt-1">
-                VIP ID: {device?.vip ? device.vip.vipId : "No Vip Available"}
+                {t("devices.vip.vipId")}: {device?.vip ? device.vip.vipId : t("devices.vip.noVipAvailable")}
               </p>
             </div>
           </div>
@@ -962,7 +975,7 @@ const DeviceCard = ({
               className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Icon icon="ph:gear-six-bold" className="w-4 h-4" />
-              <span className="hidden sm:inline">Manage</span>
+              <span className="hidden sm:inline">{t("devices.actions.manage")}</span>
             </button>
 
             {/* Dropdown Menu - Positioned absolutely and stays on top */}
@@ -978,7 +991,7 @@ const DeviceCard = ({
                     className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
                   >
                     <Icon icon="ph:pencil-simple-bold" className="w-4 h-4" />
-                    Edit Nickname
+                    {t("devices.actions.editNickname")}
                   </button>
 
                   <button
@@ -990,7 +1003,7 @@ const DeviceCard = ({
                     className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100 cursor-pointer"
                   >
                     <Icon icon="ph:users-bold" className="w-4 h-4" />
-                    Manage Guardians
+                    {t("devices.actions.manageGuardians")}
                   </button>
 
                   <button
@@ -1002,7 +1015,7 @@ const DeviceCard = ({
                     className="w-full px-4 py-2.5 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2 border-t border-gray-100 cursor-pointer"
                   >
                     <Icon icon="ph:link-break-bold" className="w-4 h-4" />
-                    Unpair
+                    {t("devices.actions.unpair")}
                   </button>
                 </div>
               </div>
@@ -1023,6 +1036,7 @@ const DevicesListView = ({
   onEditDevice,
   onManageGuardians
 }) => {
+  const { t } = useTranslation("pages");
   const [openMenuId, setOpenMenuId] = useState(null);
 
   return (
@@ -1062,7 +1076,7 @@ const DevicesListView = ({
                       <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate">
                         {device.deviceName ||
                           device.deviceSerialNumber ||
-                          "Unnamed Cane"}
+                          t("devices.card.unnamedCane")}
                       </h3>
                       <button
                         onClick={(e) => {
@@ -1070,7 +1084,7 @@ const DevicesListView = ({
                           onEditDevice(device);
                         }}
                         className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
-                        title="Edit cane nickname"
+                        title={t("devices.card.editNicknameTitle")}
                       >
                         <Icon
                           icon="ph:pencil-simple-bold"
@@ -1080,7 +1094,7 @@ const DevicesListView = ({
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full whitespace-nowrap">
-                        Paired
+                        {t("devices.card.paired")}
                       </span>
                       <span
                         className={`text-xs font-medium px-2 py-1 rounded-full ${
@@ -1089,7 +1103,9 @@ const DevicesListView = ({
                             : "bg-red-50 text-red-700"
                         }`}
                       >
-                        {device.status === "online" ? "Online" : "Offline"}
+                        {device.status === "online"
+                          ? t("commonEnums.status.online")
+                          : t("commonEnums.status.offline")}
                       </span>
                     </div>
                   </div>
@@ -1103,8 +1119,10 @@ const DevicesListView = ({
                       />
                       <span className="truncate">
                         {!device.lastActive
-                          ? "Active Now"
-                          : `Last active: ${device.lastActive}`}
+                          ? t("devices.card.activeNow")
+                          : t("devices.card.lastActive", {
+                              lastActive: device.lastActive
+                            })}
                       </span>
                     </div>
                     <div className="hidden sm:block text-gray-300">•</div>
@@ -1154,10 +1172,10 @@ const DevicesListView = ({
                           <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                             {device.vip
                               ? `${device.vip.firstName} ${device.vip.lastName}`
-                              : "No VIP Assigned"}
+                              : t("devices.vip.noVipAssigned")}
                           </h4>
                           <p className="text-xs text-gray-500 mt-0.5">
-                            VIP ID: {device.vip ? device.vip.vipId : "—"}
+                            {t("devices.vip.vipId")}: {device.vip ? device.vip.vipId : "—"}
                           </p>
                         </div>
                       </div>
@@ -1169,35 +1187,35 @@ const DevicesListView = ({
                             <button
                               onClick={() => onViewVIP(device)}
                               className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
-                              title="View VIP"
+                              title={t("devices.actions.viewVip")}
                             >
                               <Icon
                                 icon="ph:eye-bold"
                                 className="w-3.5 h-3.5"
                               />
-                              <span className="hidden sm:inline">View</span>
+                              <span className="hidden sm:inline">{t("devices.actions.view")}</span>
                             </button>
                             <button
                               onClick={() => onEditVIP(device)}
                               className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
-                              title="Edit VIP"
+                              title={t("devices.actions.editVip")}
                             >
                               <Icon
                                 icon="ph:pencil-simple-bold"
                                 className="w-3.5 h-3.5"
                               />
-                              <span className="hidden sm:inline">Edit</span>
+                              <span className="hidden sm:inline">{t("devices.actions.edit")}</span>
                             </button>
                             <button
                               onClick={() => onRemoveVIP(device.deviceId)}
                               className="px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
-                              title="Remove VIP"
+                              title={t("devices.actions.removeVip")}
                             >
                               <Icon
                                 icon="ph:trash-bold"
                                 className="w-3.5 h-3.5"
                               />
-                              <span className="hidden sm:inline">Remove</span>
+                              <span className="hidden sm:inline">{t("devices.actions.remove")}</span>
                             </button>
                           </div>
                         ) : (
@@ -1209,7 +1227,7 @@ const DevicesListView = ({
                               icon="ph:user-plus-bold"
                               className="w-4 h-4"
                             />
-                            <span>Assign VIP</span>
+                            <span>{t("devices.actions.assignVip")}</span>
                           </button>
                         )}
                       </div>
@@ -1231,7 +1249,7 @@ const DevicesListView = ({
                     className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Icon icon="ph:gear-six-bold" className="w-4 h-4" />
-                    <span>Manage</span>
+                    <span>{t("devices.actions.manage")}</span>
                   </button>
 
                   {openMenuId === device.deviceId && (
@@ -1256,7 +1274,7 @@ const DevicesListView = ({
                               icon="ph:pencil-simple-bold"
                               className="w-4 h-4"
                             />
-                            Edit Nickname
+                            {t("devices.actions.editNickname")}
                           </button>
 
                           <button
@@ -1267,7 +1285,7 @@ const DevicesListView = ({
                             className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100 cursor-pointer"
                           >
                             <Icon icon="ph:users-bold" className="w-4 h-4" />
-                            Manage Guardians
+                            {t("devices.actions.manageGuardians")}
                           </button>
 
                           <button
@@ -1281,7 +1299,7 @@ const DevicesListView = ({
                               icon="ph:link-break-bold"
                               className="w-4 h-4"
                             />
-                            Unpair
+                            {t("devices.actions.unpair")}
                           </button>
                         </div>
                       </div>
@@ -1295,7 +1313,9 @@ const DevicesListView = ({
                     <div className="flex items-center gap-1.5">
                       <Icon icon="ph:calendar-blank-bold" className="w-3 h-3" />
                       <span>
-                        Added: {new Date(device.createdAt).toLocaleDateString()}
+                        {t("devices.card.added", {
+                          date: new Date(device.createdAt).toLocaleDateString()
+                        })}
                       </span>
                     </div>
                   </div>
@@ -1318,7 +1338,7 @@ const DevicesListView = ({
                       className="w-full px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center gap-2"
                     >
                       <Icon icon="ph:gear-six-bold" className="w-4 h-4" />
-                      Manage Cane Options
+                      {t("devices.actions.manageCaneOptions")}
                     </button>
 
                     {openMenuId === device.deviceId && (
@@ -1335,7 +1355,7 @@ const DevicesListView = ({
                               icon="ph:pencil-simple-bold"
                               className="w-4 h-4"
                             />
-                            Edit Nickname
+                            {t("devices.actions.editNickname")}
                           </button>
 
                           <button
@@ -1346,7 +1366,7 @@ const DevicesListView = ({
                             className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100"
                           >
                             <Icon icon="ph:users-bold" className="w-4 h-4" />
-                            Manage Guardians
+                            {t("devices.actions.manageGuardians")}
                           </button>
 
                           <button
@@ -1360,7 +1380,7 @@ const DevicesListView = ({
                               icon="ph:link-break-bold"
                               className="w-4 h-4"
                             />
-                            Unpair Device
+                            {t("devices.actions.unpairDevice")}
                           </button>
                         </div>
                       </div>
@@ -1376,8 +1396,9 @@ const DevicesListView = ({
                           className="w-3 h-3"
                         />
                         <span>
-                          Added:{" "}
-                          {new Date(device.createdAt).toLocaleDateString()}
+                          {t("devices.card.added", {
+                            date: new Date(device.createdAt).toLocaleDateString()
+                          })}
                         </span>
                       </div>
                     </div>

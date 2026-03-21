@@ -1,0 +1,20 @@
+{
+  "openMenu": "Buksan ang menu",
+  "closeMenu": "Isara ang menu",
+  "selectDevice": "Pumili ng device",
+  "noVip": "Walang VIP",
+  "noVipAvailable": "Walang available na VIP",
+  "noVipDevices": "Walang VIP devices",
+  "connection": "Koneksyon",
+  "connected": "Nakakonekta",
+  "disconnected": "Hindi nakakonekta",
+  "notifications": "Mga Notipikasyon",
+  "noNotificationsYet": "Wala pang notipikasyon",
+  "total": "{{count}} kabuuan",
+  "seeAllNotifications": "Tingnan lahat ng notipikasyon",
+  "markAllAsRead": "Markahan lahat bilang nabasa",
+  "profile": "Profile",
+  "history": "Kasaysayan",
+  "settings": "Mga Setting",
+  "logout": "Mag-logout"
+}

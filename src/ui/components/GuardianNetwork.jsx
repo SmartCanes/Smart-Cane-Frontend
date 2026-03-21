@@ -8,6 +8,7 @@ import {
   useUserStore
 } from "@/stores/useStore";
 import { inviteGuardianLink } from "@/api/backendService";
+import { useTranslation } from "react-i18next";
 
 const GuardianSkeleton = () => (
   <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4 animate-pulse">
@@ -21,6 +22,7 @@ const GuardianSkeleton = () => (
 );
 
 const GuardianNetwork = () => {
+  const { t } = useTranslation("pages");
   const { selectedDevice, hasFetchedOnce } = useDevicesStore();
   const { guardians } = useGuardiansStore();
   const { user } = useUserStore();
@@ -120,7 +122,9 @@ const GuardianNetwork = () => {
                     {guardian.firstName} {guardian.lastName || ""}
                   </p>
                   <p className="text-gray-500 text-sm capitalize">
-                    {guardian.role || "guardian"}
+                    {t(`commonEnums.roles.${guardian.role || "guardian"}`, {
+                      defaultValue: guardian.role || "guardian"
+                    })}
                   </p>
                   <div className="flex items-center gap-1.5 mt-1">
                     <span
@@ -129,7 +133,9 @@ const GuardianNetwork = () => {
                     <p
                       className={`text-xs font-medium ${guardian.isOnline ? "text-green-600" : "text-gray-500"}`}
                     >
-                      {guardian.isOnline ? "Online" : "Offline"}
+                      {guardian.isOnline
+                        ? t("commonEnums.status.online")
+                        : t("commonEnums.status.offline")}
                     </p>
                   </div>
                 </div>

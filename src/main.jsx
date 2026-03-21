@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 import "leaflet/dist/leaflet.css";
+import "./i18n";
 
 import GuestPage from "./pages/GuestPage.jsx";
 import Login from "./auth/Login.jsx";

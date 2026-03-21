@@ -1,0 +1,20 @@
+{
+  "openMenu": "Ablihi ang menu",
+  "closeMenu": "Isira ang menu",
+  "selectDevice": "Pilia ang device",
+  "noVip": "Walay VIP",
+  "noVipAvailable": "Walay VIP nga magamit",
+  "noVipDevices": "Walay VIP devices",
+  "connection": "Koneksyon",
+  "connected": "Nakakonek",
+  "disconnected": "Naputol",
+  "notifications": "Mga Pahibalo",
+  "noNotificationsYet": "Wala pay pahibalo",
+  "total": "{{count}} total",
+  "seeAllNotifications": "Tan-awa tanan nga pahibalo",
+  "markAllAsRead": "Markahi tanan nga nabasa",
+  "profile": "Profile",
+  "history": "Kasaysayan",
+  "settings": "Mga Setting",
+  "logout": "Pag-logout"
+}

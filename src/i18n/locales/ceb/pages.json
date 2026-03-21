@@ -1,0 +1,676 @@
+{
+  "guestPage": {
+    "title": "Maayong Pag-abot"
+  },
+  "login": {
+    "title": "Pag-log In"
+  },
+  "register": {
+    "title": "Paghimo og Account"
+  },
+  "forgotPassword": {
+    "title": "Nakalimot sa Password"
+  },
+  "getStarted": {
+    "title": "Sugdi"
+  },
+  "emergencyDetails": {
+    "title": "Detalye sa Emergency"
+  },
+  "dashboard": {
+    "title": "Dashboard"
+  },
+  "dashboardPage": {
+    "title": "Live Location",
+    "subtitle": "Real-time monitoring ug safety features para sa imong iCane device",
+    "liveLocationTracking": "Live Location Tracking",
+    "trackLive": "Track Live",
+    "satellites": "Satellites",
+    "lastLocation": "Katapusang Lokasyon",
+    "gpsBadge": {
+      "noSignal": "Walay Signal",
+      "ready": "Andam",
+      "lowSignal": "Hinay nga Signal"
+    },
+    "location": {
+      "resolving": "Gi-resolve...",
+      "none": "Walay available nga lokasyon",
+      "unableToResolve": "Dili ma-resolve ang lokasyon",
+      "unknownArea": "Wala mailhing area",
+      "updating": "Gi-update..."
+    }
+  },
+  "devices": {
+    "title": "Mga Device",
+    "header": {
+      "title": "Dumala sa Mga Device",
+      "subtitle": "Tan-awa ug dumala ang imong paired nga mga cane, i-assign ang VIP profiles, ug uban pa.",
+      "countSummary": "{{total}} cane • {{active}} active",
+      "countSummary_other": "{{total}} mga cane • {{active}} active"
+    },
+    "view": {
+      "tiles": "Tiles",
+      "list": "Lista"
+    },
+    "actions": {
+      "addCane": "Idugang ang Cane",
+      "view": "Tan-awa",
+      "edit": "I-edit",
+      "remove": "Kuhaa",
+      "assignVip": "I-assign ang VIP",
+      "manage": "Dumala",
+      "editNickname": "I-edit ang Angga",
+      "manageGuardians": "Dumala sa Guardians",
+      "unpair": "I-unpair",
+      "unpairDevice": "I-unpair ang Device",
+      "manageCaneOptions": "Dumala sa Mga Opsyon sa Cane",
+      "viewVip": "Tan-awa ang VIP",
+      "editVip": "I-edit ang VIP",
+      "removeVip": "Kuhaa ang VIP"
+    },
+    "card": {
+      "unnamedCane": "Walay Ngalan nga Cane",
+      "editNicknameTitle": "I-edit ang angga sa cane",
+      "activeNow": "Active Karon",
+      "lastActive": "Last active: {{lastActive}}",
+      "paired": "Naka-pair",
+      "assignedVip": "Na-assign nga VIP",
+      "added": "Gidugang: {{date}}"
+    },
+    "vip": {
+      "vipId": "VIP ID",
+      "noVipAssigned": "Walay Na-assign nga VIP",
+      "noVipAvailable": "Walay Available nga VIP",
+      "modal": {
+        "viewTitle": "VIP Profile sa Cane",
+        "createTitle": "Idugang ang VIP sa Cane",
+        "editTitle": "I-edit ang VIP sa Cane",
+        "creating": "Naghimo...",
+        "create": "Paghimo",
+        "updating": "Gi-update...",
+        "update": "I-update"
+      }
+    },
+    "modal": {
+      "unpair": {
+        "title": "I-unpair ang Cane?",
+        "message": "I-unpair ug tangtangon niini ang cane gikan sa imong account.",
+        "confirmLoading": "Gi-unpair...",
+        "confirm": "I-unpair"
+      },
+      "removeVip": {
+        "title": "Tangtangon ang VIP Profile?",
+        "message": "Tangtangon niini ang VIP profile nga naka-assign niining cane.",
+        "confirmLoading": "Gitangtang...",
+        "confirm": "Tangtanga"
+      },
+      "editNickname": {
+        "title": "I-edit ang Angga",
+        "label": "Angga sa Cane *",
+        "placeholder": "Ibutang ang angga",
+        "resetting": "Gi-reset...",
+        "resetToDefault": "Ibalik sa Default",
+        "reset": "Reset",
+        "saving": "Gina-save...",
+        "saveChanges": "I-save ang mga Kausaban",
+        "save": "Save"
+      }
+    },
+    "scanner": {
+      "modalTitle": "I-scan ang iCane Device",
+      "or": "o",
+      "enterSerialCode": "Ibutang ang Serial Code",
+      "pairing": "Gi-pair...",
+      "pair": "Pair",
+      "errors": {
+        "httpsRequired": "Ang camera nagkinahanglan og HTTPS (o localhost). Kung gikan ka sa phone sa local IP, gamita ang HTTPS.",
+        "invalidQrFormat": "Dili sakto ang format sa QR code",
+        "noSerialInQr": "Walay device serial sa QR code",
+        "unableToAccessCamera": "Dili ma-access ang camera.",
+        "noCameraDetected": "Walay na-detect nga camera. Palihug gamita ang device nga naay camera."
+      }
+    },
+    "empty": {
+      "title": "Wala pay cane nga nadugang.",
+      "subtitle": "I-click ang 'Add Cane' aron magsugod"
+    },
+    "toast": {
+      "nicknameUpdated": "Na-update ang angga sa cane",
+      "nicknameUpdateFailed": "Napakyas ang pag-update sa angga sa cane",
+      "unpairedSuccess": "Na-unpair ug natangtang ang cane gikan sa imong account",
+      "unpairFailed": "Napakyas ang pag-unpair sa cane",
+      "pairedSuccess": "Malampusong na-pair ang cane sa imong account",
+      "pairFailed": "Napakyas ang pag-pair sa mga device",
+      "vipCreated": "Nahimo ang VIP profile para sa cane",
+      "vipUpdated": "Na-update ang VIP profile para sa cane",
+      "vipRemoved": "Natangtang ang VIP profile gikan sa cane",
+      "vipRemoveFailed": "Napakyas ang pagtangtang sa VIP"
+    }
+  },
+  "weatherBoard": {
+    "title": "Weather Board",
+    "forecastTitle": "Panagna sa Panahon",
+    "searchPlaceholder": "Pangita og syudad o lugar sa Pilipinas...",
+    "defaultLocation": "Default nga lokasyon: {{location}}",
+    "useDefaultLocation": "Gamita ang Novaliches, Quezon City",
+    "tomorrow": {
+      "label": "Ugma",
+      "safeToWalk": "Luwas Molakaw",
+      "stayIndoors": "Pabilin Sulod"
+    },
+    "today": {
+      "title": "Panahon Karon",
+      "subtitle": "Ania ang uban pang impormasyon nga mahimo nimong kinahanglanon sa atong panahon"
+    },
+    "metrics": {
+      "sunrise": "Pagsubang sa Adlaw:",
+      "sunset": "Pagsalop sa Adlaw:",
+      "humidity": "Humidity:",
+      "wind": "Hangin:",
+      "feelsLike": "Murag Gibati:",
+      "pressure": "Presyon:",
+      "visibility": "Visibility:",
+      "uvIndex": "UV Index:"
+    },
+    "twoWeek": {
+      "title": "2-Ka-Semana nga Forecast",
+      "subtitle": "Mao ni ang weather outlook para sa sunod 14 ka adlaw"
+    },
+    "errors": {
+      "failedLoad": "Napakyas ang pag-load sa weather data."
+    },
+    "modal": {
+      "closeAria": "Isira ang detalye sa forecast",
+      "high": "Pinakataas",
+      "low": "Pinakaugos",
+      "average": "Average",
+      "rainChance": "Tsansa sa Ulan"
+    }
+  },
+  "settings": {
+    "title": "Mga Setting"
+  },
+  "guardianProfile": {
+    "title": "Guardian Profile"
+  },
+  "notes": {
+    "title": "Mga Notes"
+  },
+  "advanced": {
+    "title": "Advanced"
+  },
+  "notifications": {
+    "title": "Mga Pahibalo",
+    "loading": "Nag-load...",
+    "summary": "{{total}} ka total • {{unread}} wa pa mabasa",
+    "markAllAsRead": "Markahi tanan nga nabasa",
+    "markAsRead": "Markahi nga nabasa",
+    "viewLog": "Tan-awa ang log",
+    "filters": {
+      "all": "Tanan",
+      "unread": "Wa pa mabasa",
+      "read": "Nabasa"
+    },
+    "group": {
+      "today": "Karon",
+      "yesterday": "Kagahapon",
+      "thisWeek": "Karong Semanaha",
+      "older": "Mas Karaan"
+    },
+    "time": {
+      "justNow": "Karon lang",
+      "minutesAgo": "{{count}}m ang milabay",
+      "hoursAgo": "{{count}}h ang milabay",
+      "daysAgo": "{{count}}d ang milabay"
+    },
+    "empty": {
+      "allCaughtUp": "Wala nay pending!",
+      "noNotifications": "Walay pahibalo",
+      "noUnread": "Walay unread notifications karon.",
+      "description": "Dinhi mogawas ang critical live alerts ug activity sa device."
+    },
+    "stats": {
+      "total": "Total",
+      "unread": "Wa pa mabasa",
+      "actionTypes": "Mga Tipo sa Action"
+    },
+    "meta": {
+      "weather": "Weather Alert",
+      "emergency": "Emergency Alert",
+      "arrival": "Niabot sa Destinasyon",
+      "fall": "Na-detect ang Pagkahulog",
+      "default": "Smart Cane Alert",
+      "actions": {
+        "CREATE": "Nahimo ang Device",
+        "UPDATE": "Na-update ang Device",
+        "DELETE": "Natangtang ang Device",
+        "PAIR": "Na-pair ang Device",
+        "UNPAIR": "Na-unpair ang Device",
+        "INVITE": "Naimbitahan ang Guardian",
+        "REMOVE_GUARDIAN": "Natangtang ang Guardian",
+        "UPDATE_ROLE": "Na-update ang Role",
+        "ACCEPT_INVITE": "Gidawat ang Imbitasyon",
+        "SET_EMERGENCY": "Naset ang Emergency Contact",
+        "UPDATE_RELATIONSHIP": "Na-update ang Relasyon",
+        "LIVE_WEATHER": "Weather Alert",
+        "LIVE_EMERGENCY": "Emergency Alert",
+        "LIVE_FALL": "Na-detect ang Pagkahulog",
+        "ROUTE_ARRIVAL": "Niabot sa Destinasyon"
+      }
+    },
+    "messages": {
+      "importantActivity": "Adunay importanteng kalihokan nga nadetect sa iCane."
+    },
+    "dynamicMessages": {
+      "setEmergencyContact": "Si {{actor}} nag-set kang guardian {{guardian}} isip emergency contact para sa device {{device}}"
+    }
+  },
+  "commonEnums": {
+    "roles": {
+      "primary": "Panguna",
+      "secondary": "Ikaduha",
+      "guardian": "Guardian"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    }
+  },
+  "manageGuardians": {
+    "emergency": {
+      "removeAsEmergency": "Tangtanga isip emergency contact",
+      "setAsEmergency": "Ibutang isip emergency contact",
+      "emergencyContact": "Emergency Contact",
+      "setAsEmergencyShort": "I-set isip Emergency"
+    }
+  },
+  "toast": {
+    "closeAria": "Sirhaan ang toast",
+    "close": "Sirado",
+    "typeIconAlt": "{{type}} nga icon"
+  },
+  "emergencyToast": {
+    "title": "Emergency Alert",
+    "subtitle": "Na-activate ang SOS signal",
+    "defaultMessage": "Murag naa sa peligro si Juan Dela Cruz."
+  },
+  "dashboardLayout": {
+    "toast": {
+      "emergency": "Emergency Alert! Palihug tan-awa dayon ang live location.",
+      "fall": "Naay nadetect nga pagkahulog! Palihug tan-awa dayon ang kahimtang sa user.",
+      "loginSuccess": "Malampuson kang naka-login sa imong account."
+    }
+  },
+  "dashboardSide": {
+    "menu": {
+      "dashboard": "Dashboard",
+      "deviceLogs": "Mga Device Log",
+      "weatherBoard": "Weather Board",
+      "devices": "Mga Device",
+      "advanced": "Advanced"
+    },
+    "mobile": {
+      "weather": "Panahon",
+      "logs": "Mga Log",
+      "home": "Home",
+      "devices": "Mga Device",
+      "advanced": "Advanced"
+    },
+    "signOut": "Sign Out"
+  },
+  "sendNote": {
+    "title": "Padala og Note",
+    "description": "Paghimo ug padala og mensahe para kang {{name}}",
+    "defaultRecipient": "imong device",
+    "messageLabel": "Mensahe",
+    "placeholder": "I-type ang imong mensahe diri...",
+    "charactersCount": "{{count}} / {{max}} ka karakter",
+    "cancel": "Cancel",
+    "sending": "Nagpadala...",
+    "send": "Padala",
+    "sendNote": "Padala Note",
+    "toast": {
+      "errorTitle": "Error!",
+      "errorMessage": "Naay error sa pagpadala sa mensahe. Palihug sulayi pag-usab unya.",
+      "sentTitle": "Napadala na!",
+      "sentMessage": "Malampuson nga napadala ang imong mensahe."
+    }
+  },
+  "guardianInvite": {
+    "title": {
+      "processing": "Giproseso ang Imbitasyon",
+      "accepted": "Dawaton ang Imbitasyon!",
+      "registerRequired": "Mahimong Guardian",
+      "expired": "Expired ang Imbitasyon",
+      "invalid": "Invalid nga Imbitasyon",
+      "error": "Napakyas ang Proseso"
+    },
+    "messages": {
+      "invalidTokenMissing": "Invalid invitation link - kulang ang token",
+      "acceptedDashboard": "Andam na ka! Nadawat na ang imong guardian invitation. I-redirect ka sa dashboard...",
+      "acceptedLogin": "Congrats, {{email}}! Nadawat na ang imong invitation. I-redirect ka sa login...",
+      "registerRequired": "Welcome! Giimbitahan ka nga mahimong guardian.",
+      "serverUnavailable": "Dili ma-reach ang server. Palihug check sa koneksyon ug sulayi pag-usab.",
+      "unexpectedError": "Naay wala damha nga error samtang giproseso ang invitation.",
+      "invitationAccepted": "Nadawat ang invitation!"
+    },
+    "actions": {
+      "goToDashboard": "Adto sa Dashboard Karon",
+      "goToLogin": "Adto sa Login Karon",
+      "returnHomePage": "Balik sa Homepage",
+      "registerNow": "Register Karon",
+      "alreadyHaveAccount": "Naa nay account? Login",
+      "returnHome": "Balik sa Home",
+      "contactSupport": "Kontaka ang Support",
+      "tryAgain": "Sulayi Pag-usab",
+      "goToHomePage": "Adto sa Homepage"
+    },
+    "invitationFor": "Imbitasyon para kang:",
+    "redirectingIn": "I-redirect sulod sa {{count}} ka segundo"
+  },
+  "recentAlerts": {
+    "title": "Bag-ong mga Alert",
+    "checkingWeather": "Gitan-aw ang panahon sa Novaliches...",
+    "noAlerts": "Walay bag-ong alert"
+  },
+  "liveMap": {
+    "searchPlaceholder": "Pangita og lokasyon...",
+    "defaultCountry": "Pilipinas",
+    "clearDestinationAria": "I-clear ang destinasyon",
+    "clearDestination": "I-clear ang Destinasyon",
+    "openFullscreenAria": "Ablihi ang fullscreen nga mapa",
+    "exitFullscreenAria": "Gawas sa fullscreen nga mapa",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Gawas sa Fullscreen",
+    "popups": {
+      "currentLocation": "Imong kasamtangang lokasyon.",
+      "vipLocation": "Kasamtangang lokasyon sa VIP.",
+      "destination": "Destinasyon",
+      "adjustLocation": "I-adjust ang lokasyon"
+    },
+    "locationPrompt": {
+      "title": "Kinahanglan ang Access sa Lokasyon",
+      "body": "Naka-off ang imong kasamtangang lokasyon. I-enable kini sa Settings aron ma-center namo ang mapa sa imo.",
+      "notNow": "Dili sa karon",
+      "openSettings": "Ablihi ang Settings"
+    },
+    "clickMenu": {
+      "chooseAction": "Pilia ang Aksyon",
+      "setAsDestination": "Ibutang isip Destinasyon"
+    }
+  },
+  "activityLogs": {
+    "title": "Mga Activity Log",
+    "subtitle": "Subaya ang tanang kalihokan sa guardian sa imong system.",
+    "tryAgain": "Sulayi pag-usab",
+    "searchPlaceholder": "Pangitaa pinaagi sa ngalan, action, o description...",
+    "clearAll": "I-clear tanan",
+    "clearFilters": "I-clear ang filters",
+    "empty": {
+      "nothingToSee": "Walay makita dinhi",
+      "noActivity": "Wala pay activity",
+      "adjustFilters": "Sulayi ug adjust ang search o filters.",
+      "actionsAppear": "Ang imong mga aksyon mogawas dinhi."
+    },
+    "table": {
+      "guardian": "Guardian",
+      "action": "Aksyon",
+      "description": "Deskripsyon",
+      "dateCreated": "Petsa sa Paghimo"
+    },
+    "pagination": {
+      "showing": "Nagpakita og {{from}}-{{to}} sa {{total}} ka activities",
+      "showingShort": "Nagpakita og {{from}}-{{to}} sa {{total}}"
+    },
+    "actions": {
+      "login": "Login",
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "pair": "Pair",
+      "unpair": "Unpair",
+      "invite": "Invite",
+      "removeGuardian": "Remove Guardian",
+      "updateRole": "Update Role",
+      "acceptInvite": "Accept Invite",
+      "setEmergency": "Set Emergency",
+      "relationship": "Relationship"
+    }
+  },
+  "deviceLogs": {
+    "title": "Mga Device Log",
+    "subtitle": "Subaya ang detalyadong lihok ug activity history sa VIP.",
+    "searchPlaceholder": "Pangitaa pinaagi sa guardian, VIP, activity, o device...",
+    "clearAll": "I-clear tanan",
+    "clearFilters": "I-clear ang filters",
+    "noDevice": "Walay Device",
+    "origin": "Sinugdanan",
+    "destination": "Destinasyon",
+    "empty": {
+      "nothingToSee": "Walay makita dinhi",
+      "adjustFilters": "Sulayi ug adjust ang search o filters.",
+      "noActivities": "Wala mi nakitang activity nga mo-match sa \"{{searchTerm}}\"."
+    },
+    "table": {
+      "vip": "VIP",
+      "vipName": "Ngalan sa VIP",
+      "activity": "Kalihokan",
+      "locations": "Mga Lokasyon",
+      "dateTime": "Petsa ug Oras",
+      "status": "Status"
+    },
+    "pagination": {
+      "showing": "Nagpakita og {{from}}-{{to}} sa {{total}}"
+    },
+    "status": {
+      "completed": "Nahuman",
+      "ongoing": "Nagpadayon",
+      "emergency": "Emergency",
+      "fallDetected": "Na-detect ang Pagkahulog",
+      "cancelled": "Nakansela"
+    }
+  },
+  "weatherService": {
+    "alertTitle": "Weather alert",
+    "updateTitle": "Weather update",
+    "rainInLocation": "Inaasahang ulan / Nag-ulan sa {{location}}.",
+    "clearSkies": "Hayag ang langit sa {{location}} ({{temp}}°C)",
+    "labels": {
+      "clearSky": "Hayag nga Langit",
+      "mainlyClear": "Kasagaran Hayag",
+      "partlyCloudy": "Bahin nga Madag-um",
+      "overcast": "Madag-um",
+      "foggy": "Naay Gabon",
+      "drizzle": "Ambon",
+      "rain": "Ulan",
+      "snowfall": "Niyebe",
+      "rainShowers": "Rain Showers",
+      "thunderstorm": "Thunderstorm",
+      "rainyShowers": "Ulan / Showers"
+    },
+    "recommendation": {
+      "heavyRain": "Gilauman ang kusog nga ulan ugma. Mas maayo magpabilin sa sulod.",
+      "sunny": "Adlawon ugma. Ayaw kalimot pagdala og payong ug inom og tubig.",
+      "cloudy": "Madag-um ugma. Maayo nga adlaw sa paglakaw.",
+      "safeWalk": "Murag luwas ang paglakaw ugma. Gamita ang iCane sama sa naandan."
+    }
+  },
+  "importantNotifications": {
+    "theVip": "ang VIP",
+    "deviceLabel": " sa device {{serial}}",
+    "guardians": {
+      "safetyMonitor": "iCane Safety Monitor",
+      "navigationAssistant": "Navigation Assistant",
+      "weatherService": "Weather Service"
+    },
+    "emergency": {
+      "title": "Emergency Alert",
+      "message": "Naka-trigger og emergency alert si {{vipName}}{{deviceLabel}}. Ablihi dayon ang Live Location ug kontaka ang assigned emergency guardians."
+    },
+    "fall": {
+      "title": "Posibleng Pagkahulog",
+      "message": "Naay posibleng pagkahulog nga nadetect para kang {{vipName}}{{deviceLabel}}. Tan-awa ang live map ug kumpirmaha dayon ang kahimtang."
+    },
+    "arrival": {
+      "title": "Niabot sa Destinasyon",
+      "message": "Niabot na si {{vipName}} sa napiling destinasyon{{deviceLabel}}. Na-clear na ang route tracking."
+    },
+    "weather": {
+      "storm": {
+        "title": "Kusog nga Panahon nga Pasidaan",
+        "message": "Naay thunderstorm duol sa {{location}}. Basin dili luwas ang pagbiyahe sa gawas karon. Tan-awa ang Weather Board una mogawas."
+      },
+      "wind": {
+        "title": "Pasidaan sa Kusog nga Hangin",
+        "message": "Kusog nga hangin nga mga {{windSpeed}} km/h ang nadetect duol sa {{location}}. Mag-amping sa outdoor navigation."
+      },
+      "rain": {
+        "title": "Rain Alert",
+        "message": "Naay ulan sa {{location}} karon{{temperature}}. Basin madulas ang dalan, busa mag-amping sa gawas."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "heading": "Maayong Pag-abot",
+      "subheading": "Andam na? Pag-login ug dayon sa imong dashboard.",
+      "mobileHeading": "Pag-login sa imong account",
+      "identifierLabel": "Email o Username",
+      "identifierPlaceholder": "Ibutang ang imong email o username...",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Ibutang ang imong password...",
+      "forgotPassword": "Nakalimot sa password?",
+      "captchaLoading": "Nag-load ang CAPTCHA...",
+      "signingIn": "Nag-sign in...",
+      "signIn": "Sign In",
+      "noAccount": "Wala pa kay account?",
+      "signUp": "Sign Up",
+      "scanTitle": "I-scan ang imong iCane Device",
+      "scanDescription": "Itudlo ang camera sa QR code sa imong iCane device aron ma-pair kini.",
+      "errors": {
+        "identifierRequired": "Kinahanglan ang Email o Username",
+        "passwordRequired": "Kinahanglan ang Password",
+        "captchaRequired": "Palihug kompletoha ang CAPTCHA",
+        "loginFailed": "Napakyas ang pag-login",
+        "twoFactorEmailRequired": "Kinahanglan og valid email para sa two-factor authentication.",
+        "otpSendFailed": "Napakyas ang pagpadala sa OTP. Sulayi pag-usab.",
+        "otpIncomplete": "Palihug kompletoha ang 6-digit code.",
+        "invalidCode": "Dili sakto ang code. Sulayi pag-usab.",
+        "retryAfter": "Daghan kaayo ug failed login. Sulayi pag-usab sulod sa {{seconds}} segundos."
+      },
+      "twoFactor": {
+        "title": "Email Verification",
+        "promptPrefix": "Ibutang ang",
+        "codeLabel": "6-digit verification code",
+        "promptSuffix": "nga among gipadala sa imong email.",
+        "noCode": "Wala nadawat ang code?",
+        "sending": "Nagpadala...",
+        "resendIn": "I-resend sa {{seconds}}s",
+        "resend": "I-resend ang Verification Code",
+        "verifying": "Gi-verify...",
+        "verify": "Verify",
+        "cancel": "Cancel"
+      },
+      "modal": {
+        "proceedToDashboard": "Padayon sa Dashboard",
+        "continueToDashboard": "Makapadayon ka na sa dashboard ug magamit ang imong account.",
+        "redirecting": "Gi-redirect sa {{seconds}}s..."
+      }
+    },
+    "register": {
+      "heading": "Maayong Pag-abot",
+      "verifyHeading": "Email Verification",
+      "mobileHeading": "Paghimo og account",
+      "step1Description": "Paghimo og account aron makasugod sa iCane.",
+      "step2Description": "Sugdi ang mas luwas ug mas maalamon nga mobility pinaagi sa sign up.",
+      "verifyPrefix": "Ibutang ang",
+      "verifyCodeLabel": "6-digit verification code",
+      "verifySuffix": "nga among gipadala sa imong email.",
+      "firstName": "Ngalan",
+      "firstNamePlaceholder": "Ngalan...",
+      "middleName": "Middle Name",
+      "middleNamePlaceholder": "Middle Name...",
+      "lastName": "Apelyido",
+      "lastNamePlaceholder": "Apelyido...",
+      "username": "Username",
+      "usernamePlaceholder": "Ibutang ang username...",
+      "password": "Password",
+      "passwordPlaceholder": "Ibutang ang password...",
+      "confirmPassword": "Ibalik ang Password",
+      "confirmPasswordPlaceholder": "Ibalik ang imong password...",
+      "streetAddress": "Lot No./Bldg./Street",
+      "streetAddressPlaceholder": "Ibutang ang Lot No...",
+      "province": "Probinsya",
+      "city": "Syudad",
+      "barangay": "Barangay",
+      "village": "Village",
+      "contactNumber": "Contact Number",
+      "email": "Email Address",
+      "noCode": "Wala nadawat ang code?",
+      "sending": "Nagpadala...",
+      "resendIn": "I-resend sa {{seconds}}s",
+      "resend": "I-resend ang Verification Code",
+      "creating": "Naghimo og Account...",
+      "checking": "Gina-check...",
+      "createAccount": "Create Account",
+      "next": "Sunod",
+      "back": "Balik",
+      "haveAccount": "Naa na kay Account?",
+      "signIn": "Sign In",
+      "termsPrefix": "Pinaagi sa pag-sign up uyon ko sa",
+      "terms": "Terms and Conditions",
+      "and": "ug",
+      "privacy": "Privacy Policy.",
+      "scanTitle": "I-scan ang imong iCane Device",
+      "scanDescription": "Itudlo ang camera sa QR code sa imong iCane device aron ma-pair kini.",
+      "modal": {
+        "continueToLogin": "Makapadayon ka na sa login ug magamit ang imong account.",
+        "redirecting": "Gi-redirect sa {{seconds}}s..."
+      }
+    },
+    "forgotPassword": {
+      "heading": "Nakalimot sa Password",
+      "verificationCode": "Verification Code",
+      "changePassword": "Usba ang Password",
+      "step1Description": "Ibutang ang imong email ug padalhan ka namo og code.",
+      "step3Description": "Na-verify na ang code. Ibutang ang bag-ong password.",
+      "codeSentPrefix": "Nagpadala mi og verification code sa:",
+      "expiresIn": "(Mag-expire sulod sa 5 minutos)",
+      "email": "Email Address",
+      "sending": "Nagpadala...",
+      "sendCode": "Ipadala ang Code",
+      "back": "Balik",
+      "noCode": "Wala nadawat ang code?",
+      "resendOtp": "I-resend ang OTP",
+      "verifying": "Gi-verify...",
+      "verifyCode": "Verify Code",
+      "newPassword": "Bag-ong Password",
+      "confirmPassword": "Ibalik ang Password",
+      "passwordHint": "Kinahanglan minimum 6 ka karakter",
+      "updating": "Gi-update...",
+      "submit": "Submit",
+      "errors": {
+        "otpExpired": "Expired na ang OTP. Palihug request ug bag-o.",
+        "validEmail": "Palihug butangi ug valid nga email",
+        "invalidOtp": "Dili sakto ang OTP. Sulayi pag-usab.",
+        "passwordMismatch": "Dili pareho ang password!",
+        "passwordMin": "Kinahanglan minimum 6 ka karakter ang password",
+        "otpSendFailed": "Napakyas ang pagpadala sa OTP. Sulayi pag-usab.",
+        "network": "Naay network error. Susiha imong koneksyon.",
+        "generic": "Naay sayop nga nahitabo. Sulayi pag-usab.",
+        "resetFailed": "Napakyas ang pag-reset sa password",
+        "resendFailed": "Napakyas ang pag-resend sa OTP. Sulayi pag-usab."
+      },
+      "modal": {
+        "passwordResetTitle": "Password Reset",
+        "codeSent": "Nagpadala mi og verification code sa imong email: {{email}}",
+        "successTitle": "Malampuson",
+        "passwordUpdated": "Malampuson nga na-update ang password!",
+        "sessionExpiredTitle": "Expired ang Session",
+        "sessionExpiredBody": "Expired na ang session. Sugdi pag-usab ang reset process.",
+        "verificationTitle": "Verification",
+        "newOtpSent": "Bag-ong OTP naipadala sa imong email!"
+      }
+    }
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "nav": {
+    "home": "Home",
+    "icane": "iCane",
+    "about": "Tungkol Sa Amin",
+    "faqs": "FAQs",
+    "contact": "Makipag-ugnayan",
+    "login": "Mag-log In"
+  },
+  "mobileMenu": {
+    "open": "Buksan ang menu",
+    "close": "Isara ang menu"
+  },
+  "hero": {
+    "title": "Ang iCane na Nakakakita sa Hinaharap.",
+    "subtitle": "SmartCane: Binabago ang Mobilidad gamit ang AI-Powered na Kaligtasan.",
+    "description": "Ginagamit ng iCane ang advanced sensors at AI para matukoy ang mga hadlang, suriin ang daan, at gabayan ka gamit ang real-time feedback.",
+    "cta": "Magsimula",
+    "imageAlt": "Grupo ng mga taong naglalakad gamit ang tungkod"
+  },
+  "sections": {
+    "icane": "iCane",
+    "about": "TUNGKOL SA AMIN",
+    "faq": "FAQ",
+    "contact": "MAKIPAG-UGNAYAN"
+  },
+  "about": {
+    "imageAlt": "Larawan ng Team",
+    "paragraph1": "Sa iCane, naniniwala kami na ang teknolohiya ay dapat nagpapadali ng buhay para sa lahat.",
+    "paragraph2": "Gumagamit ang iCane ng smart sensors at simpleng feedback para gabayan ang mga user at maiwasan ang mga hadlang.",
+    "paragraph3": "Masigasig ang aming team sa paglikha ng mga kasangkapang tunay na nakakatulong."
+  },
+  "faq": {
+    "heading": "Madalas Itanong",
+    "items": [
+      {
+        "question": "Ano ang SmartCane?",
+        "answer": "Ang SmartCane (iCane) ay isang matalinong tungkod para sa mga may kapansanan sa paningin."
+      },
+      {
+        "question": "Paano gumawa ng account at mag-log in?",
+        "answer": "Bisitahin ang SmartCane website, i-click ang Sign Up, at mag-log in gamit ang iyong email at password."
+      },
+      {
+        "question": "Paano gamitin ang SmartCane website?",
+        "answer": "Pagkatapos mag-log in, maaari mong pamahalaan ang profile, tingnan ang device status, at notifications."
+      },
+      {
+        "question": "Paano gumagana ang guardians at VIP users?",
+        "answer": "Ang guardians ay mga pinagkakatiwalaang contact na maaaring tumulong at tumanggap ng alerts."
+      },
+      {
+        "question": "Anong safety features ang meron sa SmartCane?",
+        "answer": "May obstacle detection, vibration/voice alerts, GPS tracking, at emergency SOS notifications."
+      },
+      {
+        "question": "Paano i-charge at i-maintain ang SmartCane?",
+        "answer": "Gumamit ng USB cable para i-charge. Water-resistant ito para sa mahinang ulan ngunit hindi dapat ilubog sa tubig."
+      }
+    ]
+  },
+  "contact": {
+    "introTitle": "Welcome sa iCane",
+    "intro": "Nandito kami para tumulong.",
+    "description": "Kung may tanong ka o kailangan ng suporta, handa ang aming team na tumulong.",
+    "callTitle": "Tawagan Kami",
+    "callDescription": "Isang tawag lang kami para sa anumang tanong o suporta.",
+    "emailTitle": "I-email Kami",
+    "emailDescription": "Mag-email sa amin at babalikan ka namin sa lalong madaling panahon.",
+    "callIconAlt": "Tawag",
+    "emailIconAlt": "Email"
+  },
+  "footer": {
+    "description": "Isang smart mobility cane na nagbibigay-lakas sa mga may kapansanan sa paningin.",
+    "category": "Kategorya",
+    "contactInfo": "Impormasyon sa Kontak",
+    "socialMedia": "Social Media",
+    "facebookAria": "Bisitahin ang iCane Facebook page",
+    "instagramAria": "Bisitahin ang iCane Instagram page",
+    "facebookIconAlt": "Facebook icon",
+    "instagramIconAlt": "Instagram icon",
+    "copyright": "© 2026 iCane · Lahat ng Karapatan ay Nakalaan"
+  },
+  "features": {
+    "Visual-Recognition": {
+      "title": "AI-Based na Visual Recognition",
+      "description": "Sa tulong ng AI-powered visual recognition, natutukoy ng Smart Cane ang mga bagay at paligid at nagbibigay ng agarang audio descriptions para sa mas ligtas na paglalakbay."
+    },
+    "route-navigation": {
+      "title": "Nabigasyon ng Ruta",
+      "description": "Nagbibigay ang route navigation ng Smart Cane ng gabay gamit ang real-time na voice prompts para makagalaw nang may kumpiyansa at mas ligtas papunta sa destinasyon."
+    },
+    "gps": {
+      "title": "GPS",
+      "description": "Sa real-time GPS tracking, madaling mamomonitor ng guardians ang lokasyon ng user sa connected web app para sa dagdag na kaligtasan at kapanatagan."
+    },
+    "emergency-sos": {
+      "title": "SOS",
+      "description": "Kapag may emergency, awtomatikong nagpapadala ang iCane ng SOS alert kasama ang eksaktong lokasyon ng user sa mga rehistradong guardian para sa agarang tulong."
+    },
+    "iot-connectivity": {
+      "title": "IOT Connectivity",
+      "description": "Ikinokonekta ng IoT integration ng iCane ang device sa companion web app para sa tuloy-tuloy na monitoring, fall detection, emergency alerts, at lokasyon ng user."
+    },
+    "weather": {
+      "title": "Mga Paalala sa Panahon",
+      "description": "Laging handa sa pagbabago ng panahon. Nagpapadala ang iCane ng agarang weather alerts para sa mas ligtas na paglalakad sa labas."
+    },
+    "document": {
+      "title": "Shared Notes at Reminders",
+      "description": "Sa shared notes feature, maaaring magpadala ang guardians ng mensahe na babasahin nang malakas ng AI assistant ng iCane para manatiling updated at konektado ang user."
+    }
+  },
+  "caneViewer": {
+    "logoAlt": "Logo ng iCane",
+    "brandLine": "iCane - Smart Cane",
+    "controls": {
+      "resetAria": "I-reset ang 3D view",
+      "resetTitle": "I-reset ang view",
+      "explore3d": "I-explore ang 3D",
+      "exit3d": "Lumabas sa 3D"
+    },
+    "mobile": {
+      "dragHint": "I-drag, i-zoom, at i-pan",
+      "tapHint": "Pindutin ang I-explore ang 3D"
+    },
+    "ads": {
+      "voiceGuidedNavigation": {
+        "label": "Voice-Guided Navigation",
+        "headline": "Mag-Navigate nang May Kumpiyansa",
+        "sub": "Tinutulungan ng real-time obstacle detection ang bawat hakbang na manatiling ligtas."
+      },
+      "alwaysConnected": {
+        "label": "Laging Konektado",
+        "headline": "Kapanatagan, Saanman",
+        "sub": "May live GPS tracking para laging updated ang mga guardian."
+      },
+      "emergencyReady": {
+        "label": "Handa sa Emergency",
+        "headline": "SOS sa Isang Pindot",
+        "sub": "Agad na naipapadala ang alerts sa iyong guardians kapag mahalaga."
+      },
+      "smartAssistiveTech": {
+        "label": "Matalinong Assistive Tech",
+        "headline": "Matalino. Ligtas. Malaya.",
+        "sub": "Narito na ang kinabukasan ng assistive mobility."
+      }
+    }
+  },
+  "team": {
+    "heading": {
+      "prefix": "Kilalanin ang",
+      "highlight": "Team"
+    },
+    "subtitle": "Mga eksperto na may malasakit sa pagbibigay ng mas ligtas na mobility sa pamamagitan ng makabagong teknolohiya at inclusive na disenyo.",
+    "filters": {
+      "all": "Lahat",
+      "developers": "Developers",
+      "designers": "Designers",
+      "documentation": "Documentation"
+    },
+    "empty": {
+      "message": "Walang nahanap na team members sa kategoryang ito.",
+      "showAll": "Ipakita Lahat"
+    },
+    "members": {
+      "1": {
+        "role": "Lead Product Designer at UI/UX Specialist",
+        "bio": "Pinamumunuan ang product experience ng iCane mula konsepto hanggang prototype, at isinasalin ang pangangailangan ng users sa accessible at intuitive na interfaces."
+      },
+      "2": {
+        "role": "Head Documentation at Research Specialist",
+        "bio": "Pinamumunuan ang research at documentation ng iCane, at inaayos ang technical findings sa malinaw na reports, diagrams, at visuals para sa development at evaluation."
+      },
+      "3": {
+        "role": "Web at UI Engineer",
+        "bio": "Bumubuo ng web UI ng iCane na nakatuon sa malinis na components, responsive layouts, at maayos na interactions para sa users at guardians."
+      },
+      "4": {
+        "role": "Assistant Documentation at Product Manager",
+        "bio": "Sumusuporta sa product planning at documentation sa pamamagitan ng pag-coordinate ng requirements at pagtiyak na malinaw at maayos ang deliverables."
+      },
+      "5": {
+        "role": "Web Developer at Hardware Engineer",
+        "bio": "Pinagdurugtong ang software at hardware sa pag-develop ng web features at pag-integrate ng sensors para sa maaasahang end-to-end functionality."
+      },
+      "6": {
+        "role": "Full Stack Web Developer at Visually Impaired User",
+        "bio": "Nagde-develop ng full-stack features habang nagbibigay ng tunay na user perspective upang masuri ang flows, feedback, at accessibility decisions."
+      },
+      "7": {
+        "role": "UI/UX Designer at Layout Specialist",
+        "bio": "Nagdidisenyo ng layouts at presentation materials ng iCane para malinaw at consistent ang pagpapakita ng impormasyon."
+      },
+      "8": {
+        "role": "Researcher at Documentation Specialist",
+        "bio": "Sumusuporta sa research at testing ng iCane, at nagdodokumento ng experiments at results para manatiling aligned ang team."
+      },
+      "9": {
+        "role": "Project Manager at Quality Assurance",
+        "bio": "Namumuno sa planning at quality assurance ng iCane, kabilang ang task organization, progress tracking, at structured testing."
+      },
+      "10": {
+        "role": "Graphic Designer at UI/UX Designer",
+        "bio": "Lumilikha ng visual assets at UI polish ng iCane, pinagsasama ang branding at interface design para sa cohesive na look and feel."
+      },
+      "11": {
+        "role": "Researcher at Documentation Specialist",
+        "bio": "Nagko-coordinate ng documentation at research tasks para manatiling organisado at handa para sa submission ang project outputs."
+      },
+      "12": {
+        "role": "Researcher at Documentation Specialist",
+        "bio": "Tumutulong sa research at documentation sa pamamagitan ng malinaw na write-ups at maayos na records ng implementation decisions."
+      },
+      "13": {
+        "role": "Researcher at Technical Writer",
+        "bio": "Nagsusulat at nag-eedit ng technical content ng iCane upang maging malinaw, consistent, at maayos ang pagkakabuo."
+      },
+      "14": {
+        "role": "Lead Developer",
+        "bio": "Pinamumunuan ang system architecture at implementation, at pinagbubuklod ang components para sa maaasahan at scalable na real-time solution."
+      }
+    }
+  },
+  "backToTop": "Bumalik sa itaas"
+}

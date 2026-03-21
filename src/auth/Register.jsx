@@ -23,8 +23,10 @@ import {
 } from "@/api/backendService";
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/useStore";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
+  const { t } = useTranslation("pages");
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const CONTACT_NUMBER_LENGTH = 11;
   const navigate = useNavigate();
@@ -745,20 +747,22 @@ const Register = () => {
             >
               <div className="text-center space-y-2 ">
                 <h1 className="hidden sm:block text-3xl md:text-4xl lg:text-5xl font-bold text-[#1C253C]">
-                  {step === 3 ? "Email Verification" : "Welcome"}
+                  {step === 3
+                    ? t("auth.register.verifyHeading")
+                    : t("auth.register.heading")}
                 </h1>
                 <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
                   {step === 1 ? (
-                    "Create your account to get started with iCane."
+                    t("auth.register.step1Description")
                   ) : step === 2 ? (
-                    "Start your journey to safer and smarter mobility by signing up."
+                    t("auth.register.step2Description")
                   ) : (
                     <>
-                      Enter the{" "}
+                      {t("auth.register.verifyPrefix")} {" "}
                       <span className="font-bold">
-                        6-digit verification code
+                        {t("auth.register.verifyCodeLabel")}
                       </span>{" "}
-                      we have sent to your email address.
+                      {t("auth.register.verifySuffix")}
                       <br />
                       <span className="text-sm text-gray-600">
                         {formData.email}
@@ -767,13 +771,15 @@ const Register = () => {
                   )}
                 </p>
                 <p className="sm:hidden text-[#1C253C] text-base">
-                  Create your account
+                  {t("auth.register.mobileHeading")}
                 </p>
                 {step === 3 && (
                   <p className="sm:hidden font-poppins text-[#1C253C] text-paragraph text-sm">
-                    Enter the{" "}
-                    <span className="font-bold">6-digit verification code</span>{" "}
-                    code we have sent to your email address.
+                    {t("auth.register.verifyPrefix")} {" "}
+                    <span className="font-bold">
+                      {t("auth.register.verifyCodeLabel")}
+                    </span>{" "}
+                    {t("auth.register.verifySuffix")}
                   </p>
                 )}
               </div>
@@ -798,8 +804,8 @@ const Register = () => {
                       <TextField
                         ref={firstNameRef}
                         className="font-poppins"
-                        label={"First Name"}
-                        placeholder="First Name..."
+                        label={t("auth.register.firstName")}
+                        placeholder={t("auth.register.firstNamePlaceholder")}
                         name="firstName"
                         value={formData.firstName}
                         onChange={(e) =>
@@ -816,8 +822,8 @@ const Register = () => {
                       <TextField
                         ref={firstNameRef}
                         className="font-poppins"
-                        label={"Middle Name"}
-                        placeholder="Middle Name..."
+                        label={t("auth.register.middleName")}
+                        placeholder={t("auth.register.middleNamePlaceholder")}
                         name="middleName"
                         value={formData.middleName}
                         onChange={(e) =>
@@ -833,8 +839,8 @@ const Register = () => {
 
                     <TextField
                       className="font-poppins"
-                      label={"Last Name"}
-                      placeholder="Last Name..."
+                      label={t("auth.register.lastName")}
+                      placeholder={t("auth.register.lastNamePlaceholder")}
                       name="lastName"
                       value={formData.lastName}
                       onChange={(e) => handleChange("lastName", e.target.value)}
@@ -848,8 +854,8 @@ const Register = () => {
 
                     <TextField
                       className="font-poppins"
-                      label={"Username"}
-                      placeholder="Enter your username..."
+                      label={t("auth.register.username")}
+                      placeholder={t("auth.register.usernamePlaceholder")}
                       name="username"
                       value={formData.username}
                       onChange={(e) => handleChange("username", e.target.value)}
@@ -863,8 +869,8 @@ const Register = () => {
 
                     <PasswordField
                       className="font-poppins"
-                      label={"Password"}
-                      placeholder="Enter your password..."
+                      label={t("auth.register.password")}
+                      placeholder={t("auth.register.passwordPlaceholder")}
                       name="password"
                       value={formData.password}
                       onChange={(e) => handleChange("password", e.target.value)}
@@ -883,8 +889,8 @@ const Register = () => {
 
                     <PasswordField
                       className="font-poppins"
-                      label={"Re-enter Password"}
-                      placeholder="Re-enter your password..."
+                      label={t("auth.register.confirmPassword")}
+                      placeholder={t("auth.register.confirmPasswordPlaceholder")}
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={(e) =>
@@ -912,8 +918,8 @@ const Register = () => {
                       <TextField
                         ref={streetAddressRef}
                         className="whitespace-nowrap "
-                        label={"Lot No./Bldg./Street"}
-                        placeholder="Enter your Lot No..."
+                        label={t("auth.register.streetAddress")}
+                        placeholder={t("auth.register.streetAddressPlaceholder")}
                         name="streetAddress"
                         value={formData.streetAddress}
                         onChange={(e) =>
@@ -927,7 +933,7 @@ const Register = () => {
                       />
 
                       <SelectField
-                        label={"Province"}
+                        label={t("auth.register.province")}
                         labelClassName={registerSelectLabelClassName}
                         inputClassName={registerSelectInputClassName}
                         placeholder="Province..."
@@ -947,7 +953,7 @@ const Register = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <SelectField
                         className="font-poppins "
-                        label={"City"}
+                        label={t("auth.register.city")}
                         labelClassName={registerSelectLabelClassName}
                         inputClassName={registerSelectInputClassName}
                         placeholder="City..."
@@ -963,7 +969,7 @@ const Register = () => {
                       />
                       <SelectField
                         className="font-poppins"
-                        label={"Barangay"}
+                        label={t("auth.register.barangay")}
                         labelClassName={registerSelectLabelClassName}
                         inputClassName={registerSelectInputClassName}
                         placeholder="Barangay..."
@@ -980,7 +986,7 @@ const Register = () => {
                     </div>
 
                     <SelectField
-                      label={"Village"}
+                      label={t("auth.register.village")}
                       labelClassName={registerSelectLabelClassName}
                       inputClassName={registerSelectInputClassName}
                       placeholder="Village..."
@@ -1001,7 +1007,7 @@ const Register = () => {
                     {/* Contact Number - Full width */}
                     <TextField
                       className="font-poppins"
-                      label={"Contact Number"}
+                      label={t("auth.register.contactNumber")}
                       placeholder="09XX XXX XXXX"
                       type="tel"
                       name="contactNumber"
@@ -1021,7 +1027,7 @@ const Register = () => {
                     {/* Email Address - Full width */}
                     <TextField
                       className="font-poppins"
-                      label={"Email Address"}
+                      label={t("auth.register.email")}
                       placeholder="sample.email@gmail.com"
                       type="email"
                       name="email"
@@ -1070,7 +1076,7 @@ const Register = () => {
                     {/* Resend OTP Link */}
                     <div className="text-center">
                       <p className="font-poppins text-[#1C253C] text-sm mb-2">
-                        Didn't receive the code?
+                        {t("auth.register.noCode")}
                       </p>
                       <button
                         type="button"
@@ -1083,10 +1089,10 @@ const Register = () => {
                         }`}
                       >
                         {isSendingOtp
-                          ? "Sending..."
+                          ? t("auth.register.sending")
                           : countdown > 0
-                            ? `Resend in ${countdown}s`
-                            : "Resend Verification Code"}
+                            ? t("auth.register.resendIn", { seconds: countdown })
+                            : t("auth.register.resend")}
                       </button>
                     </div>
                   </div>
@@ -1099,9 +1105,13 @@ const Register = () => {
                       text={
                         isSubmitting
                           ? step === 3 || (step === 2 && inviteMode)
-                            ? "Creating Account..."
-                            : "Checking..."
-                          : `${step === 3 || (step === 2 && inviteMode) ? "Create Account" : "Next"}`
+                            ? t("auth.register.creating")
+                            : t("auth.register.checking")
+                          : `${
+                              step === 3 || (step === 2 && inviteMode)
+                                ? t("auth.register.createAccount")
+                                : t("auth.register.next")
+                            }`
                       }
                       type="submit"
                       disabled={isSubmitting || hasStepErrors()}
@@ -1110,7 +1120,7 @@ const Register = () => {
                       <PrimaryButton
                         className="w-full py-3 sm:py-4 text-md sm:text-[18px]"
                         textColor="text-black"
-                        text="Back"
+                        text={t("auth.register.back")}
                         variant="outline"
                         type="button"
                         onClick={() => {
@@ -1124,18 +1134,18 @@ const Register = () => {
               </motion.form>
 
               <p className="text-center text-base sm:text-[18px]">
-                Already have an Account?{" "}
+                {t("auth.register.haveAccount")} {" "}
                 <Link
                   to="/login"
                   className="font-poppins text-blue-500 hover:underline text-base sm:text-[18px]"
                 >
-                  Sign In
+                  {t("auth.register.signIn")}
                 </Link>
               </p>
 
               {step <= 2 && (
                 <p className="text-center text-sm sm:text-md">
-                  By signing up I agree to the{" "}
+                  {t("auth.register.termsPrefix")} {" "}
                   <button
                     onClick={() => {
                       setShowTermsModal(true);
@@ -1143,9 +1153,9 @@ const Register = () => {
                     }}
                     className="text-blue-500 hover:underline"
                   >
-                    Terms and Conditions
+                    {t("auth.register.terms")}
                   </button>{" "}
-                  and{" "}
+                  {t("auth.register.and")} {" "}
                   <button
                     onClick={() => {
                       setShowTermsModal(true);
@@ -1153,7 +1163,7 @@ const Register = () => {
                     }}
                     className="text-blue-500 hover:underline"
                   >
-                    Privacy Policy.
+                    {t("auth.register.privacy")}
                   </button>
                 </p>
               )}
@@ -1164,11 +1174,10 @@ const Register = () => {
             <div className="flex flex-col gap-6 sm:gap-7 sm:justify-center items-center pt-4 sm:pt-5 pb-6 sm:pb-5 px-4 sm:px-6">
               <div className="space-y-2">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1C253C] text-center">
-                  Scan your iCane Device
+                  {t("auth.register.scanTitle")}
                 </h1>
                 <p className="text-[#1C253C] text-sm sm:text-base text-center">
-                  Point your camera at the QR code on your iCane device to pair
-                  it automatically.
+                  {t("auth.register.scanDescription")}
                 </p>
               </div>
 
@@ -1195,10 +1204,10 @@ const Register = () => {
           modalConfig.autoRedirect ? (
             <div className="space-y-2">
               <p className="text-sm text-gray-700 mt-1">
-                You can now continue to login and start using your account.
+                {t("auth.register.modal.continueToLogin")}
               </p>
               <p className="text-sm opacity-70">
-                Redirecting in {redirectSeconds}s…
+                {t("auth.register.modal.redirecting", { seconds: redirectSeconds })}
               </p>
             </div>
           ) : (

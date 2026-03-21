@@ -1,32 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { useTranslation } from "react-i18next";
 import icaneData from "../../assets/project.json";
 
 const AD_TEXTS = [
   {
-    label: "Voice-Guided Navigation",
-    headline: "Navigate with Confidence",
-    sub: "Real-time obstacle detection keeps every step safe.",
+    key: "voiceGuidedNavigation",
     position: { bottom: "10%", left: "auto", right: "5%", top: "auto" }
   },
   {
-    label: "Always Connected",
-    headline: "Peace of Mind, Everywhere",
-    sub: "Live GPS tracking so guardians are never out of the loop.",
+    key: "alwaysConnected",
     position: { top: "10%", right: "auto", bottom: "auto", left: "5%" }
   },
   {
-    label: "Emergency Ready",
-    headline: "SOS at Your Fingertips",
-    sub: "Instant alerts sent to your guardians when it matters most.",
+    key: "emergencyReady",
     position: { bottom: "10%", right: "5%", top: "auto", left: "auto" }
   },
   {
-    label: "Smart Assistive Tech",
-    headline: "Smart. Safe. Independent.",
-    sub: "The future of assistive mobility is finally here.",
+    key: "smartAssistiveTech",
     position: { top: "10%", left: "5%", bottom: "auto", right: "auto" }
   }
 ];
@@ -54,6 +47,7 @@ const useMediaQuery = (query) => {
 };
 
 const CaneViewer = () => {
+  const { t } = useTranslation("guestPage");
   const containerRef = useRef(null);
   const mountRef = useRef(null);
 
@@ -72,6 +66,16 @@ const CaneViewer = () => {
   const [isInteractMode, setIsInteractMode] = useState(false);
   const [isInViewport, setIsInViewport] = useState(false);
   const isMobile = useMediaQuery("(max-width: 767px)");
+  const localizedAds = useMemo(
+    () =>
+      AD_TEXTS.map((ad) => ({
+        ...ad,
+        label: t(`caneViewer.ads.${ad.key}.label`),
+        headline: t(`caneViewer.ads.${ad.key}.headline`),
+        sub: t(`caneViewer.ads.${ad.key}.sub`)
+      })),
+    [t]
+  );
 
   useEffect(() => {
     const target = containerRef.current;
@@ -308,7 +312,7 @@ const CaneViewer = () => {
     fitModelToViewRef.current?.();
   };
 
-  const ad = AD_TEXTS[adIndex];
+  const ad = localizedAds[adIndex];
 
   return (
     <div
@@ -331,11 +335,11 @@ const CaneViewer = () => {
       <div className="absolute top-4 left-4 pointer-events-none flex items-center gap-2 z-10 max-w-[calc(100%-2rem)] sm:max-w-none">
         <img
           src="/icane.svg"
-          alt="iCane Logo"
+          alt={t("caneViewer.logoAlt")}
           className="h-6 w-auto shrink-0"
         />
         <span className="text-black/70 text-[9px] tracking-[0.22em] uppercase font-medium leading-none">
-          iCane — Smart Cane
+          {t("caneViewer.brandLine")}
         </span>
       </div>
 
@@ -349,8 +353,8 @@ const CaneViewer = () => {
               borderColor: "rgba(255,255,255,0.4)",
               boxShadow: "0 10px 24px rgba(91,141,239,0.16)"
             }}
-            aria-label="Reset 3D view"
-            title="Reset view"
+            aria-label={t("caneViewer.controls.resetAria")}
+            title={t("caneViewer.controls.resetTitle")}
           >
             <Icon icon="mdi:restore" className="text-[18px]" />
           </button>
@@ -377,7 +381,9 @@ const CaneViewer = () => {
                 isInteractMode ? "bg-green-400" : "bg-[#5B8DEF]"
               }`}
             />
-            {isInteractMode ? "Exit 3D" : "Explore 3D"}
+            {isInteractMode
+              ? t("caneViewer.controls.exit3d")
+              : t("caneViewer.controls.explore3d")}
           </button>
         </div>
       ) : (
@@ -390,8 +396,8 @@ const CaneViewer = () => {
               borderColor: "rgba(255,255,255,0.4)",
               boxShadow: "0 10px 24px rgba(91,141,239,0.16)"
             }}
-            aria-label="Reset 3D view"
-            title="Reset view"
+            aria-label={t("caneViewer.controls.resetAria")}
+            title={t("caneViewer.controls.resetTitle")}
           >
             <Icon icon="mdi:restore" className="text-[20px]" />
           </button>
@@ -418,7 +424,9 @@ const CaneViewer = () => {
                 isInteractMode ? "bg-green-400" : "bg-[#5B8DEF]"
               }`}
             />
-            {isInteractMode ? "Exit 3D" : "Explore 3D"}
+            {isInteractMode
+              ? t("caneViewer.controls.exit3d")
+              : t("caneViewer.controls.explore3d")}
           </button>
         </div>
       )}
@@ -464,7 +472,9 @@ const CaneViewer = () => {
                 {ad.label}
               </span>
               <span className="text-white/70 text-[11px]">
-                {isInteractMode ? "Drag, zoom, and pan" : "Tap Explore 3D"}
+                {isInteractMode
+                  ? t("caneViewer.mobile.dragHint")
+                  : t("caneViewer.mobile.tapHint")}
               </span>
             </div>
 
@@ -476,7 +486,7 @@ const CaneViewer = () => {
             </p>
 
             <div className="mt-3 flex justify-center gap-2">
-              {AD_TEXTS.map((_, i) => (
+              {localizedAds.map((_, i) => (
                 <span
                   key={i}
                   className="block rounded-full transition-all duration-500"
@@ -495,7 +505,7 @@ const CaneViewer = () => {
 
       {!isMobile && (
         <div className="absolute bottom-14 right-10 flex gap-2 pointer-events-none z-10">
-          {AD_TEXTS.map((_, i) => (
+          {localizedAds.map((_, i) => (
             <span
               key={i}
               className="block rounded-full transition-all duration-500"

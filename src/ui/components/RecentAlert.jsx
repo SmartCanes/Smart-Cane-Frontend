@@ -6,6 +6,7 @@ import {
   useNotificationsStore,
   useUserStore
 } from "@/stores/useStore";
+import { useTranslation } from "react-i18next";
 
 const toValidDate = (raw) => {
   if (!raw) return null;
@@ -89,6 +90,7 @@ const getNotificationStyle = (color) => {
 };
 
 const RecentAlerts = () => {
+  const { t, i18n } = useTranslation("pages");
   const [weather, setWeather] = useState(null);
 
   const { history, fetchHistory } = useActivityReportsStore();
@@ -110,7 +112,7 @@ const RecentAlerts = () => {
     };
 
     loadWeather();
-  }, [fetchHistory]);
+  }, [fetchHistory, i18n.resolvedLanguage]);
 
   const notifications = getNotifications(history, currentGuardianId);
 
@@ -154,7 +156,7 @@ const RecentAlerts = () => {
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 w-full font-poppins">
       <h3 className="text-xl font-semibold text-gray-800 mb-4">
-        Recent Alerts
+        {t("recentAlerts.title")}
       </h3>
 
       <div className="space-y-4">
@@ -231,12 +233,12 @@ const RecentAlerts = () => {
         ) : isWeatherLoading ? (
           <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-center justify-center gap-2 text-gray-400 text-xs">
             <Icon icon="eos-icons:loading" className="animate-spin" />
-            <span>Checking Novaliches weather...</span>
+            <span>{t("recentAlerts.checkingWeather")}</span>
           </div>
         ) : (
           <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-center justify-center gap-2 text-gray-400 text-xs">
             <Icon icon="ph:bell-slash" />
-            <span>No recent alerts</span>
+            <span>{t("recentAlerts.noAlerts")}</span>
           </div>
         )}
       </div>

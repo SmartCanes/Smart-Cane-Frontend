@@ -2,14 +2,17 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState
 } from "react";
+import i18n from "@/i18n";
 import Toast from "@/ui/components/Toast";
 
 const ToastContext = createContext({
   showToast: () => {},
-  clearToast: () => {}
+  clearToast: () => {},
+  hasActiveToast: false
 });
 
 ToastContext.displayName = "ToastContext";
@@ -43,9 +46,21 @@ export const ToastProvider = ({ children }) => {
 
   const handleClose = useCallback(() => setToast(null), []);
 
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setToast(null);
+    };
+
+    i18n.on("languageChanged", handleLanguageChange);
+
+    return () => {
+      i18n.off("languageChanged", handleLanguageChange);
+    };
+  }, []);
+
   const value = useMemo(
-    () => ({ showToast, clearToast }),
-    [showToast, clearToast]
+    () => ({ showToast, clearToast, hasActiveToast: !!toast }),
+    [showToast, clearToast, toast]
   );
 
   return (

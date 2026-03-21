@@ -29,6 +29,7 @@ import {
   useUserStore
 } from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
+import { useTranslation } from "react-i18next";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -150,6 +151,7 @@ const haversine = (a, b) => {
 };
 
 function LiveMap() {
+  const { t } = useTranslation("pages");
   const navigate = useNavigate();
   const { user } = useUserStore();
   const { guardianPosition, gps } = useRealtimeStore();
@@ -580,7 +582,7 @@ function LiveMap() {
         <div className="flex-1 sm:max-w-sm relative">
           <input
             type="text"
-            placeholder="Search location..."
+            placeholder={t("liveMap.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full h-12 pl-12 pr-12 font-poppins text-sm text-gray-800 placeholder-gray-400 border-0
@@ -647,7 +649,7 @@ function LiveMap() {
                           <p className="font-poppins text-xs text-gray-500">
                             {result.properties.city ||
                               result.properties.state ||
-                              "Philippines"}
+                              t("liveMap.defaultCountry")}
                           </p>
                         </div>
                       </div>
@@ -664,13 +666,13 @@ function LiveMap() {
               wsApi.emit("clearDestination");
             }}
             className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 hover:text-red-600 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 hover:border-red-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
-            aria-label="Clear destination"
+            aria-label={t("liveMap.clearDestinationAria")}
           >
             <Icon
               icon="mdi:close"
               className="w-5 h-5 group-hover:scale-110 transition-transform"
             />
-            <span className="hidden sm:inline ml-2">Clear Destination</span>
+            <span className="hidden sm:inline ml-2">{t("liveMap.clearDestination")}</span>
           </button>
         )}
         <button
@@ -678,8 +680,8 @@ function LiveMap() {
           className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 sm:justify-start bg-white/95 hover:bg-white text-gray-800 rounded-full sm:rounded-xl shadow-lg hover:shadow-xl border border-gray-300 text-sm font-medium transition-all duration-200 cursor-pointer group active:scale-[0.98] backdrop-blur-sm shrink-0"
           aria-label={
             isFullscreen || isPseudoFullscreen
-              ? "Exit fullscreen map"
-              : "Open fullscreen map"
+              ? t("liveMap.exitFullscreenAria")
+              : t("liveMap.openFullscreenAria")
           }
         >
           <Icon
@@ -692,8 +694,8 @@ function LiveMap() {
           />
           <span className="hidden sm:inline ml-2">
             {isFullscreen || isPseudoFullscreen
-              ? "Exit Fullscreen"
-              : "Fullscreen"}
+              ? t("liveMap.exitFullscreen")
+              : t("liveMap.fullscreen")}
           </span>
         </button>
       </div>
@@ -724,7 +726,7 @@ function LiveMap() {
           <SmoothMarker
             position={guardianPosition}
             icon={circleAvatarIcon(user.guardianImageUrl)}
-            popupText="Your current location."
+            popupText={t("liveMap.popups.currentLocation")}
           />
         )}
 
@@ -732,7 +734,7 @@ function LiveMap() {
           <SmoothMarker
             position={canePosition}
             icon={circleAvatarIcon(selectedDevice?.vip?.vipImageUrl)}
-            popupText="VIP current location."
+            popupText={t("liveMap.popups.vipLocation")}
           />
         )}
 
@@ -763,7 +765,7 @@ function LiveMap() {
 
         {destinationPos && (
           <Marker position={destinationPos}>
-            <Popup>Destination</Popup>
+            <Popup>{t("liveMap.popups.destination")}</Popup>
           </Marker>
         )}
 
@@ -786,12 +788,13 @@ function LiveMap() {
               }
             }}
           >
-            <Popup>Adjust location</Popup>
+            <Popup>{t("liveMap.popups.adjustLocation")}</Popup>
           </Marker>
         )}
         {previewPos && (
           <ClickMenu
             previewPos={previewPos}
+            t={t}
             onSetDestination={() => {
               setRoute({
                 destinationPos: previewPos,
@@ -854,11 +857,10 @@ function LiveMap() {
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-base font-semibold text-gray-900">
-                      Location Access Needed
+                      {t("liveMap.locationPrompt.title")}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1 leading-relaxed">
-                      Your current location is turned off. Enable location in
-                      Settings so we can center the map on you.
+                      {t("liveMap.locationPrompt.body")}
                     </p>
                   </div>
                 </div>
@@ -869,7 +871,7 @@ function LiveMap() {
                     onClick={() => setShowLocationEnablePrompt(false)}
                     className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
-                    Not now
+                    {t("liveMap.locationPrompt.notNow")}
                   </button>
                   <button
                     type="button"
@@ -881,7 +883,7 @@ function LiveMap() {
                     }}
                     className="flex-1 rounded-xl bg-[#11285A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0d1f4a] transition-colors cursor-pointer"
                   >
-                    Open Settings
+                    {t("liveMap.locationPrompt.openSettings")}
                   </button>
                 </div>
               </div>
@@ -895,7 +897,7 @@ function LiveMap() {
 
 export default LiveMap;
 
-const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
+const ClickMenu = ({ previewPos, onSetDestination, onClose, t }) => {
   const map = useMap();
 
   if (!previewPos) return null;
@@ -946,7 +948,7 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-3">
-        <p className="font-medium text-sm text-gray-800">Choose Action</p>
+        <p className="font-medium text-sm text-gray-800">{t("liveMap.clickMenu.chooseAction")}</p>
         <button
           onClick={onClose}
           className="text-gray-400 hover:text-gray-600 transition p-1"
@@ -963,7 +965,7 @@ const ClickMenu = ({ previewPos, onSetDestination, onClose }) => {
         className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-600 hover:bg-green-100 p-3 text-sm rounded-lg font-medium transition"
       >
         <Icon icon="mdi:flag" className="text-base" />
-        <span>Set as Destination</span>
+        <span>{t("liveMap.clickMenu.setAsDestination")}</span>
       </button>
     </div>
   );

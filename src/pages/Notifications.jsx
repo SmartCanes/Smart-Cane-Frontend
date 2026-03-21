@@ -9,6 +9,7 @@ import {
   useUserStore
 } from "@/stores/useStore";
 import { openNotificationTarget } from "@/utils/importantNotifications";
+import { useTranslation } from "react-i18next";
 
 // ── color ng notification types van
 const COLOR = {
@@ -66,17 +67,17 @@ const toManilaDate = (raw) => {
 };
 
 // kasama sa convertion ng time van
-const formatTime = (raw) => {
+const formatTime = (raw, t) => {
   const date = toManilaDate(raw);
   if (!date) return "—";
   const diff = Date.now() - date.getTime();
   const mins = Math.floor(diff / 60_000);
   const hours = Math.floor(diff / 3_600_000);
   const days = Math.floor(diff / 86_400_000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
+  if (mins < 1) return t("notifications.time.justNow");
+  if (mins < 60) return t("notifications.time.minutesAgo", { count: mins });
+  if (hours < 24) return t("notifications.time.hoursAgo", { count: hours });
+  if (days < 7) return t("notifications.time.daysAgo", { count: days });
   return date.toLocaleDateString("en-PH", {
     timeZone: "Asia/Manila",
     month: "short",
@@ -86,27 +87,32 @@ const formatTime = (raw) => {
 };
 
 // group notif van
-const groupByDate = (notifs) => {
+const groupByDate = (notifs, t) => {
   const groups = {};
   const nowManila = new Date(
     new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" })
   );
   notifs.forEach((n) => {
     const d = toManilaDate(n.timestamp);
-    let label = "Older";
+    let label = t("notifications.group.older");
     if (d) {
       const dManila = new Date(
         d.toLocaleString("en-US", { timeZone: "Asia/Manila" })
       );
       const days = Math.floor((nowManila - dManila) / 86_400_000);
-      if (days === 0) label = "Today";
-      else if (days === 1) label = "Yesterday";
-      else if (days < 7) label = "This Week";
+      if (days === 0) label = t("notifications.group.today");
+      else if (days === 1) label = t("notifications.group.yesterday");
+      else if (days < 7) label = t("notifications.group.thisWeek");
     }
     if (!groups[label]) groups[label] = [];
     groups[label].push(n);
   });
-  const order = ["Today", "Yesterday", "This Week", "Older"];
+  const order = [
+    t("notifications.group.today"),
+    t("notifications.group.yesterday"),
+    t("notifications.group.thisWeek"),
+    t("notifications.group.older")
+  ];
   return order
     .filter((k) => groups[k])
     .map((k) => ({ label: k, items: groups[k] }));
@@ -122,7 +128,7 @@ const DateDivider = ({ label }) => (
 );
 
 // single notif van
-const NotifCard = ({ notif, onRead, onNavigate, index }) => {
+const NotifCard = ({ notif, onRead, onNavigate, index, t }) => {
   const c = COLOR[notif.color] || COLOR.gray;
 
   const handleClick = () => {
@@ -174,7 +180,7 @@ const NotifCard = ({ notif, onRead, onNavigate, index }) => {
             )}
           </div>
           <span className="text-xs text-gray-400 shrink-0 mt-0.5 whitespace-nowrap">
-            {formatTime(notif.timestamp)}
+            {formatTime(notif.timestamp, t)}
           </span>
         </div>
 
@@ -198,12 +204,12 @@ const NotifCard = ({ notif, onRead, onNavigate, index }) => {
                 }}
                 className="text-xs text-blue-500 font-medium hover:text-blue-700 transition-colors cursor-pointer"
               >
-                Mark as read
+                {t("notifications.markAsRead")}
               </button>
             )}
             {/* view log hover van */}
             <span className="text-xs text-blue-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-              View log <Icon icon="ph:arrow-right" className="w-3 h-3" />
+              {t("notifications.viewLog")} <Icon icon="ph:arrow-right" className="w-3 h-3" />
             </span>
           </div>
         </div>
@@ -229,12 +235,13 @@ const Skeleton = () => (
 );
 
 // Filter options van
-const FILTERS = ["All", "Unread", "Read"];
+const FILTERS = ["all", "unread", "read"];
 
 // Main Notifications van
 const Notifications = () => {
+  const { t } = useTranslation("pages");
   const navigate = useNavigate();
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("all");
 
   // real data van
   const { history, isLoading, fetchHistory } = useActivityReportsStore();
@@ -269,12 +276,12 @@ const Notifications = () => {
 
   //  read/unread filter van
   const filtered = useMemo(() => {
-    if (filter === "Unread") return allNotifications.filter((n) => !n.read);
-    if (filter === "Read") return allNotifications.filter((n) => n.read);
+    if (filter === "unread") return allNotifications.filter((n) => !n.read);
+    if (filter === "read") return allNotifications.filter((n) => n.read);
     return allNotifications;
   }, [allNotifications, filter]);
 
-  const grouped = useMemo(() => groupByDate(filtered), [filtered]);
+  const grouped = useMemo(() => groupByDate(filtered, t), [filtered, t]);
   const unreadCount = allNotifications.filter((n) => !n.read).length;
   const allIds = allNotifications.map((n) => n.historyId);
 
@@ -293,12 +300,15 @@ const Notifications = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 sm:mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 font-poppins">
-              Notifications
+              {t("notifications.title")}
             </h2>
             <p className="text-gray-500 text-sm mt-1">
               {isLoading
-                ? "Loading…"
-                : `${allNotifications.length} total • ${unreadCount} unread`}
+                ? t("notifications.loading")
+                : t("notifications.summary", {
+                    total: allNotifications.length,
+                    unread: unreadCount
+                  })}
             </p>
           </div>
 
@@ -310,7 +320,7 @@ const Notifications = () => {
                 className="flex items-center gap-1.5 px-4 py-2 bg-white rounded-lg shadow-sm hover:bg-gray-100 transition text-sm font-medium cursor-pointer"
               >
                 <Icon icon="ph:checks" className="w-4 h-4 text-blue-500" />
-                Mark all as read
+                {t("notifications.markAllAsRead")}
               </button>
             </div>
           )}
@@ -332,12 +342,12 @@ const Notifications = () => {
                 }
               `}
             >
-              {f}
+              {t(`notifications.filters.${f}`)}
               {/* badge count van */}
-              {f === "Unread" && unreadCount > 0 && (
+              {f === "unread" && unreadCount > 0 && (
                 <span
                   className={`text-xs px-1.5 py-0.5 rounded-full font-semibold
-                  ${filter === "Unread" ? "bg-white/20 text-white" : "bg-red-500 text-white"}`}
+                  ${filter === "unread" ? "bg-white/20 text-white" : "bg-red-500 text-white"}`}
                 >
                   {unreadCount}
                 </span>
@@ -359,12 +369,14 @@ const Notifications = () => {
                 className="w-16 h-16 mx-auto mb-4 text-gray-300"
               />
               <h3 className="text-lg font-semibold mb-2">
-                {filter === "Unread" ? "All caught up!" : "No notifications"}
+                {filter === "unread"
+                  ? t("notifications.empty.allCaughtUp")
+                  : t("notifications.empty.noNotifications")}
               </h3>
               <p className="text-gray-400">
-                {filter === "Unread"
-                  ? "No unread notifications right now."
-                  : "Critical live alerts and device activity will appear here."}
+                {filter === "unread"
+                  ? t("notifications.empty.noUnread")
+                  : t("notifications.empty.description")}
               </p>
             </div>
           ) : (
@@ -380,6 +392,7 @@ const Notifications = () => {
                       index={gi * 10 + i}
                       onRead={markAsRead}
                       onNavigate={handleNavigate}
+                      t={t}
                     />
                   ))}
                 </div>
@@ -393,7 +406,7 @@ const Notifications = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* total count van */}
             <div className="bg-white p-4 rounded-xl shadow-sm">
-              <div className="text-sm text-gray-500">Total</div>
+              <div className="text-sm text-gray-500">{t("notifications.stats.total")}</div>
               <div className="text-2xl font-bold text-gray-800">
                 {allNotifications.length}
               </div>
@@ -401,7 +414,7 @@ const Notifications = () => {
 
             {/* unread count van */}
             <div className="bg-white p-4 rounded-xl shadow-sm">
-              <div className="text-sm text-gray-500">Unread</div>
+              <div className="text-sm text-gray-500">{t("notifications.stats.unread")}</div>
               <div className="text-2xl font-bold text-blue-600">
                 {unreadCount}
               </div>
@@ -409,7 +422,7 @@ const Notifications = () => {
 
             {/* action types van */}
             <div className="bg-white p-4 rounded-xl shadow-sm">
-              <div className="text-sm text-gray-500">Action Types</div>
+              <div className="text-sm text-gray-500">{t("notifications.stats.actionTypes")}</div>
               <div className="text-2xl font-bold text-[#11285A]">
                 {new Set(allNotifications.map((n) => n.action)).size}
               </div>

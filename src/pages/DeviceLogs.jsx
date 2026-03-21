@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import DefaultProfile from "@/ui/components/DefaultProfile";
 import FilterDropdown from "@/ui/components/FilterDropdown"; // ← NEW
+import { useTranslation } from "react-i18next";
 
 const activityLogs = [
   {
@@ -92,15 +93,6 @@ const activityLogs = [
   }
 ];
 
-// filter config to van
-const STATUS_OPTIONS = [
-  { value: "Completed", label: "Completed", dotColor: "bg-green-500" },
-  { value: "Ongoing", label: "Ongoing", dotColor: "bg-blue-500" },
-  { value: "Emergency", label: "Emergency", dotColor: "bg-red-500" },
-  { value: "Fall Detected", label: "Fall Detected", dotColor: "bg-orange-500" },
-  { value: "Cancelled", label: "Cancelled", dotColor: "bg-gray-400" }
-];
-
 const getStatusColor = (status) => {
   switch (status.toLowerCase()) {
     case "completed":
@@ -124,6 +116,7 @@ const isSameDay = (a, b) =>
   a.getDate() === b.getDate();
 
 const DeviceLogs = () => {
+  const { t } = useTranslation("pages");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -132,6 +125,29 @@ const DeviceLogs = () => {
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  const statusOptions = [
+    { value: "Completed", label: t("deviceLogs.status.completed"), dotColor: "bg-green-500" },
+    { value: "Ongoing", label: t("deviceLogs.status.ongoing"), dotColor: "bg-blue-500" },
+    { value: "Emergency", label: t("deviceLogs.status.emergency"), dotColor: "bg-red-500" },
+    {
+      value: "Fall Detected",
+      label: t("deviceLogs.status.fallDetected"),
+      dotColor: "bg-orange-500"
+    },
+    { value: "Cancelled", label: t("deviceLogs.status.cancelled"), dotColor: "bg-gray-400" }
+  ];
+
+  const translateStatus = (status) => {
+    const map = {
+      Completed: t("deviceLogs.status.completed"),
+      Ongoing: t("deviceLogs.status.ongoing"),
+      Emergency: t("deviceLogs.status.emergency"),
+      "Fall Detected": t("deviceLogs.status.fallDetected"),
+      Cancelled: t("deviceLogs.status.cancelled")
+    };
+    return map[status] || status;
+  };
 
   const handleStatusChange = (value) => {
     setSelectedStatuses((prev) =>
@@ -234,10 +250,10 @@ const DeviceLogs = () => {
       <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
         <div className="mb-4 md:mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
-            Device Logs
+            {t("deviceLogs.title")}
           </h2>
           <p className="text-gray-500 text-xs md:text-sm">
-            Monitor and track detailed VIP movement and activity history.
+            {t("deviceLogs.subtitle")}
           </p>
         </div>
 
@@ -252,7 +268,7 @@ const DeviceLogs = () => {
               />
               <input
                 type="text"
-                placeholder="Search by guardian, VIP, activity, or device..."
+                placeholder={t("deviceLogs.searchPlaceholder")}
                 className="w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-gray-600 placeholder-gray-400"
                 value={searchTerm}
                 onChange={(e) => {
@@ -264,7 +280,7 @@ const DeviceLogs = () => {
 
             {/* Filter button to van*/}
             <FilterDropdown
-              statusOptions={STATUS_OPTIONS}
+              statusOptions={statusOptions}
               selectedStatuses={selectedStatuses}
               onStatusChange={handleStatusChange}
               showDateFilter
@@ -280,7 +296,7 @@ const DeviceLogs = () => {
           {(selectedStatuses.length > 0 || startDate) && (
             <div className="flex flex-wrap gap-2 mt-3">
               {selectedStatuses.map((val) => {
-                const opt = STATUS_OPTIONS.find((o) => o.value === val);
+                const opt = statusOptions.find((o) => o.value === val);
                 return (
                   <span
                     key={val}
@@ -321,7 +337,7 @@ const DeviceLogs = () => {
                 onClick={handleClearAll}
                 className="text-xs text-red-500 hover:underline font-medium cursor-pointer"
               >
-                Clear all
+                {t("deviceLogs.clearAll")}
               </button>
             </div>
           )}
@@ -333,12 +349,12 @@ const DeviceLogs = () => {
               <Icon icon="ph:files" className="text-3xl text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-[#11285A] mb-1">
-              Nothing to see here
+              {t("deviceLogs.empty.nothingToSee")}
             </h3>
             <p className="text-sm text-gray-500 max-w-xs mx-auto">
               {searchTerm || activeFilterCount > 0
-                ? "Try adjusting your search or filters."
-                : `We couldn't find any activities matching "${searchTerm}".`}
+                ? t("deviceLogs.empty.adjustFilters")
+                : t("deviceLogs.empty.noActivities", { searchTerm })}
             </p>
             <button
               onClick={() => {
@@ -347,7 +363,7 @@ const DeviceLogs = () => {
               }}
               className="mt-6 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
             >
-              Clear filters
+              {t("deviceLogs.clearFilters")}
             </button>
           </div>
         ) : (
@@ -359,22 +375,22 @@ const DeviceLogs = () => {
                   <thead>
                     <tr className="border-b border-gray-100">
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        VIP
+                        {t("deviceLogs.table.vip")}
                       </th>
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        VIP Name
+                        {t("deviceLogs.table.vipName")}
                       </th>
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Activity
+                        {t("deviceLogs.table.activity")}
                       </th>
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Locations
+                        {t("deviceLogs.table.locations")}
                       </th>
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Date & Time
+                        {t("deviceLogs.table.dateTime")}
                       </th>
                       <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Status
+                        {t("deviceLogs.table.status")}
                       </th>
                     </tr>
                   </thead>
@@ -450,7 +466,7 @@ const DeviceLogs = () => {
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(log.status)}`}
                           >
-                            {log.status}
+                            {translateStatus(log.status)}
                           </span>
                         </td>
                       </tr>
@@ -490,14 +506,14 @@ const DeviceLogs = () => {
                             {log.vipName}
                           </p>
                           <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] font-medium text-purple-700 bg-purple-100 rounded-lg">
-                            {log.device || "No Device"}
+                            {log.device || t("deviceLogs.noDevice")}
                           </span>
                         </div>
                       </div>
                       <span
                         className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${getStatusColor(log.status)}`}
                       >
-                        {log.status}
+                        {translateStatus(log.status)}
                       </span>
                     </div>
                     <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4">
@@ -513,7 +529,7 @@ const DeviceLogs = () => {
                           </div>
                           <div className="flex-1 min-w-0">
                             <span className="text-gray-500 block text-[10px] uppercase font-semibold">
-                              Origin
+                              {t("deviceLogs.origin")}
                             </span>
                             <span className="text-gray-700 truncate block">
                               {log.location}
@@ -526,7 +542,7 @@ const DeviceLogs = () => {
                           </div>
                           <div className="flex-1 min-w-0">
                             <span className="text-gray-500 block text-[10px] uppercase font-semibold">
-                              Destination
+                              {t("deviceLogs.destination")}
                             </span>
                             <span className="text-gray-700 truncate block">
                               {log.destination}
@@ -551,10 +567,11 @@ const DeviceLogs = () => {
             {/* Pagination */}
             <div className="bg-white px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-100 rounded-b-2xl">
               <p className="text-xs sm:text-sm text-gray-500">
-                Showing{" "}
-                {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}-
-                {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
-                {totalItems.toLocaleString()}
+                {t("deviceLogs.pagination.showing", {
+                  from: Math.min((currentPage - 1) * itemsPerPage + 1, totalItems),
+                  to: Math.min(currentPage * itemsPerPage, totalItems),
+                  total: totalItems.toLocaleString()
+                })}
               </p>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <button

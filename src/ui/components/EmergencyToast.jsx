@@ -1,12 +1,15 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function EmergencyToast({
-  message = "Juan Dela Cruz seems like in danger.", // Default message from image
+  message,
   duration = 5000,
   onClose
 }) {
+  const { t } = useTranslation("pages");
   const [visible, setVisible] = useState(true);
+  const finalMessage = message || t("emergencyToast.defaultMessage");
 
   // The design doesn't show a close button, but we keep the logic
   // for the timer and for a potential manual close if `onClose` is provided.
@@ -77,7 +80,7 @@ export default function EmergencyToast({
                 marginBottom: "5px"
               }}
             >
-              Emergency Alert
+              {t("emergencyToast.title")}
             </h2>
             {/* SOS Signal Text */}
             <p
@@ -87,7 +90,7 @@ export default function EmergencyToast({
                 opacity: 0.8
               }}
             >
-              SOS signal activated
+              {t("emergencyToast.subtitle")}
             </p>
 
             {/* Icon Container (Overlaps the red/white sections) */}
@@ -157,7 +160,7 @@ export default function EmergencyToast({
                 fontWeight: "600"
               }}
             >
-              {message}
+              {finalMessage}
             </p>
           </div>
 

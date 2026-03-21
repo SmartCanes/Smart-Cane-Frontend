@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
+import { useTranslation } from "react-i18next";
 import Modal from "@/ui/components/Modal";
 import { useToast } from "@/context/ToastContext";
 import { AnimatePresence, motion } from "framer-motion";
@@ -39,6 +40,7 @@ const EmergencyContactBadge = ({
   onToggle,
   disabled = false
 }) => {
+  const { t } = useTranslation("pages");
   return (
     <button
       onClick={onToggle}
@@ -54,8 +56,8 @@ const EmergencyContactBadge = ({
       `}
       title={
         isEmergencyContact
-          ? "Remove as emergency contact"
-          : "Set as emergency contact"
+          ? t("manageGuardians.emergency.removeAsEmergency")
+          : t("manageGuardians.emergency.setAsEmergency")
       }
     >
       <Icon
@@ -63,7 +65,9 @@ const EmergencyContactBadge = ({
         className={`w-4 h-4 ${isEmergencyContact ? "text-red-500" : "text-gray-400"}`}
       />
       <span>
-        {isEmergencyContact ? "Emergency Contact" : "Set as Emergency"}
+        {isEmergencyContact
+          ? t("manageGuardians.emergency.emergencyContact")
+          : t("manageGuardians.emergency.setAsEmergencyShort")}
       </span>
     </button>
   );
@@ -371,6 +375,7 @@ const GuardianTile = ({
   onToggleEmergency,
   isSubmitting
 }) => {
+  const { t } = useTranslation("pages");
   function canEditGuardianRelationship(currentRole, guardian, isCurrentUser) {
     if (currentRole === "primary") return true;
 
@@ -474,7 +479,9 @@ const GuardianTile = ({
                     : "bg-gray-100 text-gray-600"
                 }`}
               >
-                {guardian.isOnline ? "Online" : "Offline"}
+                {guardian.isOnline
+                  ? t("commonEnums.status.online")
+                  : t("commonEnums.status.offline")}
               </span>
 
               {/* Role Badge */}
@@ -604,6 +611,7 @@ const GuardianListItem = ({
   onToggleEmergency,
   isSubmitting
 }) => {
+  const { t } = useTranslation("pages");
   function canEditGuardianRelationship(currentRole, guardian, isCurrentUser) {
     if (currentRole === "primary") return true;
 
@@ -676,7 +684,7 @@ const GuardianListItem = ({
                 {guardian.isEmergencyContact && (
                   <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full font-medium flex items-center gap-1">
                     <Icon icon="ph:heart-bold" className="w-3 h-3" />
-                    Emergency Contact
+                    {t("manageGuardians.emergency.emergencyContact")}
                   </span>
                 )}
 
@@ -687,7 +695,9 @@ const GuardianListItem = ({
                       : "bg-gray-100 text-gray-700"
                   }`}
                 >
-                  {guardian.isOnline ? "Online" : "Offline"}
+                  {guardian.isOnline
+                    ? t("commonEnums.status.online")
+                    : t("commonEnums.status.offline")}
                 </span>
               </div>
 

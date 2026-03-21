@@ -2,22 +2,23 @@ import {
   ensureBrowserPushSubscription,
   showForegroundNotification
 } from "@/utils/pushNotifications";
+import i18n from "@/i18n";
 
 const NOTIFICATION_META = {
   WEATHER: {
-    title: "Weather Alert",
+    title: "notifications.meta.weather",
     icon: "/icane.svg"
   },
   SOS: {
-    title: "Emergency Alert",
+    title: "notifications.meta.emergency",
     icon: "/icane.svg"
   },
   ARRIVAL: {
-    title: "Destination Reached",
+    title: "notifications.meta.arrival",
     icon: "/icane.svg"
   },
   FALL: {
-    title: "Fall Detected",
+    title: "notifications.meta.fall",
     icon: "/icane.svg"
   }
 };
@@ -63,7 +64,10 @@ export const triggerSmartCaneNotification = async (
   }
 
   const meta = NOTIFICATION_META[payload.type] || {};
-  const title = payload.title || meta.title || "Smart Cane Alert";
+  const title =
+    payload.title ||
+    (meta.title ? i18n.t(meta.title, { ns: "pages" }) : "") ||
+    i18n.t("notifications.meta.default", { ns: "pages" });
   const icon = payload.icon || meta.icon || "/icane.svg";
 
   const show = async () => {

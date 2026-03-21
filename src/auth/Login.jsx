@@ -9,8 +9,10 @@ import { useSettingsStore, useUIStore, useUserStore } from "@/stores/useStore";
 import Modal from "@/ui/components/Modal";
 import ScannerCamera from "@/ui/components/Scanner";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
+  const { t } = useTranslation("pages");
   const isBackendEnabled = import.meta.env.VITE_BACKEND_ENABLED === "true";
   const navigate = useNavigate();
   const { setUser } = useUserStore();
@@ -70,7 +72,10 @@ const Login = () => {
   const completeLogin = async (userData) => {
     setUser(userData);
     await new Promise((resolve) => setTimeout(resolve, 300));
-    navigate("/dashboard", { state: { showModal: true }, replace: true });
+    navigate("/dashboard", {
+      replace: true,
+      state: { justLoggedIn: true }
+    });
   };
 
   const closeTwoFAModal = () => {
@@ -94,10 +99,11 @@ const Login = () => {
 
     const newErrors = {};
     if (!credentials.identifier.trim())
-      newErrors.identifier = "Email or Username is required";
-    if (!credentials.password) newErrors.password = "Password is required";
+      newErrors.identifier = t("auth.login.errors.identifierRequired");
+    if (!credentials.password)
+      newErrors.password = t("auth.login.errors.passwordRequired");
     if (shouldShowCaptcha && !captchaValue)
-      newErrors.captcha = "Please complete the CAPTCHA";
+      newErrors.captcha = t("auth.login.errors.captchaRequired");
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -106,7 +112,10 @@ const Login = () => {
     try {
       await handleLogin();
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || "Login failed";
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        t("auth.login.errors.loginFailed");
       const retrySeconds = parseInt(msg.match(/(\d+)(?:s| seconds)/)?.[1]);
       if (!isNaN(retrySeconds)) startCountdown(retrySeconds);
       setErrors({ general: msg, identifier: " ", password: " " });
@@ -151,7 +160,7 @@ const Login = () => {
       if (!email) {
         setLoading(false);
         setErrors({
-          general: "Two-factor authentication requires a valid email address."
+          general: t("auth.login.errors.twoFactorEmailRequired")
         });
         return;
       }
@@ -190,7 +199,7 @@ const Login = () => {
       }, 1000);
     } catch (err) {
       setOtpError(
-        err.response?.data?.message || "Failed to send OTP. Please try again."
+        err.response?.data?.message || t("auth.login.errors.otpSendFailed")
       );
     } finally {
       setIsSendingOtp(false);
@@ -233,7 +242,7 @@ const Login = () => {
   const handle2FAVerify = async () => {
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
-      setOtpError("Please enter the complete 6-digit code.");
+      setOtpError(t("auth.login.errors.otpIncomplete"));
       return;
     }
     setOtpLoading(true);
@@ -244,7 +253,7 @@ const Login = () => {
       await completeLogin(twoFAUserData);
     } catch (err) {
       setOtpError(
-        err.response?.data?.message || "Invalid code. Please try again."
+        err.response?.data?.message || t("auth.login.errors.invalidCode")
       );
     } finally {
       setOtpLoading(false);
@@ -285,7 +294,7 @@ const Login = () => {
       isOpen: true,
       variant: "banner",
       title: "Paired Successfully",
-      actionText: "Proceed to Dashboard",
+      actionText: t("auth.login.modal.proceedToDashboard"),
       onAction: handleLogin,
       onClose: () => {},
       autoRedirect: true
@@ -354,13 +363,13 @@ const Login = () => {
           >
             <div className="text-center space-y-2">
               <h1 className="hidden sm:block text-3xl md:text-4xl lg:text-5xl font-bold text-[#1C253C]">
-                Welcome
+                {t("auth.login.heading")}
               </h1>
               <p className="hidden sm:block font-poppins text-[#1C253C] text-paragraph text-1xl">
-                Ready to go? Log in and jump straight into your dashboard.
+                {t("auth.login.subheading")}
               </p>
               <p className="sm:hidden text-[#1C253C] text-base">
-                Login to your account
+                {t("auth.login.mobileHeading")}
               </p>
             </div>
 
@@ -381,7 +390,9 @@ const Login = () => {
               {errors.general && (
                 <p className="font-poppins text-center text-[#CE4B34] mb-4 text-sm">
                   {retryAfter > 0
-                    ? `Too many failed login attempts. Try again in ${retryAfter} seconds.`
+                    ? t("auth.login.errors.retryAfter", {
+                        seconds: retryAfter
+                      })
                     : errors.general}
                 </p>
               )}
@@ -389,8 +400,8 @@ const Login = () => {
               <div className="space-y-4">
                 <TextField
                   className="font-poppins"
-                  label="Email or Username"
-                  placeholder="Enter your email or username..."
+                  label={t("auth.login.identifierLabel")}
+                  placeholder={t("auth.login.identifierPlaceholder")}
                   name="identifier"
                   value={credentials.identifier}
                   onChange={handleChange}
@@ -401,8 +412,8 @@ const Login = () => {
                 />
                 <PasswordField
                   className="font-poppins relative"
-                  label="Password"
-                  placeholder="Enter your password..."
+                  label={t("auth.login.passwordLabel")}
+                  placeholder={t("auth.login.passwordPlaceholder")}
                   name="password"
                   type="password"
                   value={credentials.password}
@@ -421,14 +432,14 @@ const Login = () => {
                   to="/forgot-password"
                   className="font-poppins block text-left hover:underline text-[16px] underline mt-2 w-fit"
                 >
-                  Forgot password?
+                  {t("auth.login.forgotPassword")}
                 </Link>
 
                 {shouldShowCaptcha && (
                   <div className="captcha-container">
                     {captchaLoading && (
                       <p className="text-center text-gray-500 mb-2">
-                        Loading CAPTCHA...
+                        {t("auth.login.captchaLoading")}
                       </p>
                     )}
                     <ReCAPTCHA
@@ -451,7 +462,9 @@ const Login = () => {
                 <PrimaryButton
                   className="font-poppins w-full py-3 sm:py-4 text-base sm:text-[18px] font-medium mt-5 sm:mt-6"
                   bgColor="bg-primary-100"
-                  text={loading ? "Signing in..." : "Sign In"}
+                  text={
+                    loading ? t("auth.login.signingIn") : t("auth.login.signIn")
+                  }
                   type="submit"
                   disabled={retryAfter > 0 || loading || captchaLoading}
                 />
@@ -459,12 +472,12 @@ const Login = () => {
             </motion.form>
 
             <p className="text-center text-base sm:text-[18px]">
-              Didn't have an account?{" "}
+              {t("auth.login.noAccount")} {" "}
               <Link
                 to="/register"
                 className="font-poppins text-blue-500 hover:underline text-base sm:text-[18px]"
               >
-                Sign Up
+                {t("auth.login.signUp")}
               </Link>
             </p>
           </motion.div>
@@ -474,11 +487,10 @@ const Login = () => {
           <div className="flex flex-col gap-6 sm:gap-7 sm:justify-center items-center pt-4 sm:pt-5 pb-6 sm:pb-5 px-4 sm:px-6">
             <div className="space-y-2">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1C253C] text-center">
-                Scan your iCane Device
+                {t("auth.login.scanTitle")}
               </h1>
               <p className="text-[#1C253C] text-sm sm:text-base text-center">
-                Point your camera at the QR code on your iCane device to pair it
-                automatically.
+                {t("auth.login.scanDescription")}
               </p>
             </div>
             <ScannerCamera onSuccess={handleOnScan} guardianId={guardianId} />
@@ -502,12 +514,14 @@ const Login = () => {
             {/* Header */}
             <div className="text-center space-y-1 mb-6">
               <h2 className="text-2xl font-bold text-[#1C253C]">
-                Email Verification
+                {t("auth.login.twoFactor.title")}
               </h2>
               <p className="font-poppins text-[#1C253C] text-sm">
-                Enter the{" "}
-                <span className="font-bold">6-digit verification code</span> we
-                sent to your email address.
+                {t("auth.login.twoFactor.promptPrefix")} {" "}
+                <span className="font-bold">
+                  {t("auth.login.twoFactor.codeLabel")}
+                </span>{" "}
+                {t("auth.login.twoFactor.promptSuffix")}
               </p>
               <p className="text-sm text-gray-500">{twoFAEmail}</p>
             </div>
@@ -540,7 +554,7 @@ const Login = () => {
             {/* Resend */}
             <div className="text-center mb-6">
               <p className="font-poppins text-[#1C253C] text-sm mb-1">
-                Didn't receive the code?
+                {t("auth.login.twoFactor.noCode")}
               </p>
               <button
                 type="button"
@@ -553,10 +567,10 @@ const Login = () => {
                 }`}
               >
                 {isSendingOtp
-                  ? "Sending..."
+                  ? t("auth.login.twoFactor.sending")
                   : countdown > 0
-                    ? `Resend in ${countdown}s`
-                    : "Resend Verification Code"}
+                    ? t("auth.login.twoFactor.resendIn", { seconds: countdown })
+                    : t("auth.login.twoFactor.resend")}
               </button>
             </div>
 
@@ -565,7 +579,11 @@ const Login = () => {
               <PrimaryButton
                 className="w-full py-3 text-base font-medium"
                 bgColor="bg-primary-100"
-                text={otpLoading ? "Verifying..." : "Verify"}
+                text={
+                  otpLoading
+                    ? t("auth.login.twoFactor.verifying")
+                    : t("auth.login.twoFactor.verify")
+                }
                 type="button"
                 onClick={handle2FAVerify}
                 disabled={otpLoading || otp.join("").length !== 6}
@@ -573,7 +591,7 @@ const Login = () => {
               <PrimaryButton
                 className="w-full py-3 text-base"
                 textColor="text-black"
-                text="Cancel"
+                text={t("auth.login.twoFactor.cancel")}
                 variant="outline"
                 type="button"
                 onClick={closeTwoFAModal}
@@ -596,10 +614,10 @@ const Login = () => {
           modalConfig.autoRedirect ? (
             <div className="space-y-2">
               <p className="text-sm text-gray-700 mt-1">
-                You can now continue to dashboard and start using your account.
+                {t("auth.login.modal.continueToDashboard")}
               </p>
               <p className="text-sm opacity-70">
-                Redirecting in {redirectSeconds}s…
+                {t("auth.login.modal.redirecting", { seconds: redirectSeconds })}
               </p>
             </div>
           ) : (

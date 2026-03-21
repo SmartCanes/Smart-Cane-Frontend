@@ -1,0 +1,17 @@
+{
+  "languages": {
+    "en": "Ingles",
+    "tl": "Tagalog",
+    "ceb": "Bisaya"
+  },
+  "languageSwitcher": {
+    "label": "Wika",
+    "ariaLabel": "Palitan ang wika ng website",
+    "changed": "Napalitan ang wika sa {{language}}"
+  },
+  "common": {
+    "loading": "Naglo-load...",
+    "save": "I-save",
+    "cancel": "Kanselahin"
+  }
+}

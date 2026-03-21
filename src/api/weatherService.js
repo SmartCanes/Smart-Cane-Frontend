@@ -1,4 +1,5 @@
 // src/api/WeatherService.js
+import i18n from "@/i18n";
 
 export const DEFAULT_LOCATION = {
   lat: 14.7218,
@@ -15,13 +16,23 @@ const RAIN_CODES = [
 ];
 const STORM_CODES = [95, 96, 99];
 const STRONG_WIND_THRESHOLD = 35;
+const t = (key, options) => i18n.t(key, { ns: "pages", ...options });
+
+const resolveWeatherLocale = (language) => {
+  const lang = language || i18n.resolvedLanguage || i18n.language || "en";
+  if (lang.startsWith("tl")) return "tl-PH";
+  if (lang.startsWith("ceb")) return "en-PH";
+  return "en-US";
+};
 
 // 0. Search locations via Open-Meteo Geocoding API
 export const searchLocations = async (query) => {
   if (!query || query.trim().length < 2) return [];
   try {
+    const locale = resolveWeatherLocale();
+    const geocodingLang = locale.startsWith("tl") ? "tl" : "en";
     const res = await fetch(
-      `${GEO_URL}?name=${encodeURIComponent(query.trim())}&count=12&language=en&format=json&countryCode=PH`
+      `${GEO_URL}?name=${encodeURIComponent(query.trim())}&count=12&language=${geocodingLang}&format=json&countryCode=PH`
     );
     if (!res.ok) throw new Error("Geocoding failed");
     const data = await res.json();
@@ -57,10 +68,15 @@ export const fetchWeatherAlert = async () => {
     return {
       isRaining,
       temp,
-      title: isRaining ? "Weather alert" : "Weather update",
+      title: isRaining
+        ? t("weatherService.alertTitle")
+        : t("weatherService.updateTitle"),
       message: isRaining
-        ? "Rain expected / Raining in Novaliches."
-        : `Clear skies in Novaliches (${temp}°C)`
+        ? t("weatherService.rainInLocation", { location: DEFAULT_LOCATION.name })
+        : t("weatherService.clearSkies", {
+            location: DEFAULT_LOCATION.name,
+            temp
+          })
     };
   } catch (error) {
     console.error(error);
@@ -132,17 +148,17 @@ export const fetchImportantWeatherAlert = async (
 
 // Helper: describe a weather code as short text
 export const getWeatherLabel = (code) => {
-  if (code === 0) return "Clear Sky";
-  if (code === 1) return "Mainly Clear";
-  if (code === 2) return "Partly Cloudy";
-  if (code === 3) return "Overcast";
-  if ([45, 48].includes(code)) return "Foggy";
-  if ([51, 53, 55].includes(code)) return "Drizzle";
-  if ([61, 63, 65].includes(code)) return "Rain";
-  if ([71, 73, 75].includes(code)) return "Snowfall";
-  if ([80, 81, 82].includes(code)) return "Rain Showers";
-  if ([95, 96, 99].includes(code)) return "Thunderstorm";
-  return "Overcast";
+  if (code === 0) return t("weatherService.labels.clearSky");
+  if (code === 1) return t("weatherService.labels.mainlyClear");
+  if (code === 2) return t("weatherService.labels.partlyCloudy");
+  if (code === 3) return t("weatherService.labels.overcast");
+  if ([45, 48].includes(code)) return t("weatherService.labels.foggy");
+  if ([51, 53, 55].includes(code)) return t("weatherService.labels.drizzle");
+  if ([61, 63, 65].includes(code)) return t("weatherService.labels.rain");
+  if ([71, 73, 75].includes(code)) return t("weatherService.labels.snowfall");
+  if ([80, 81, 82].includes(code)) return t("weatherService.labels.rainShowers");
+  if ([95, 96, 99].includes(code)) return t("weatherService.labels.thunderstorm");
+  return t("weatherService.labels.overcast");
 };
 
 // Helper: icon + color for a weather code
@@ -207,9 +223,11 @@ export const fetchWeatherForDate = async (
 
 export const fetchFullWeatherForecast = async (
   lat = DEFAULT_LOCATION.lat,
-  lon = DEFAULT_LOCATION.lon
+  lon = DEFAULT_LOCATION.lon,
+  language
 ) => {
   try {
+    const locale = resolveWeatherLocale(language);
     // Request daily forecast: code, max temp, min temp, rain chance, sunrise, sunset, uv_index
     // Request current weather: temp, humidity, apparent_temp, pressure, wind_speed, visibility
     const response = await fetch(
@@ -235,28 +253,25 @@ export const fetchFullWeatherForecast = async (
 
     // Weather Description Helper
     const getWeatherDesc = (c) => {
-      if (c === 0) return "Clear Sky";
-      if (c <= 3) return "Partly Cloudy";
-      if (RAIN_CODES.includes(c)) return "Rainy / Showers";
-      return "Overcast";
+      if (c === 0) return t("weatherService.labels.clearSky");
+      if (c <= 3) return t("weatherService.labels.partlyCloudy");
+      if (RAIN_CODES.includes(c)) return t("weatherService.labels.rainyShowers");
+      return t("weatherService.labels.overcast");
     };
 
     let recommendation = "";
     if (!canGoOutside) {
-      recommendation =
-        "Heavy rain or showers expected tomorrow. Better to stay indoors.";
+      recommendation = t("weatherService.recommendation.heavyRain");
     } else {
       // 0 = Clear sky, 1 = Mainly clear
       if (tomCode === 0 || tomCode === 1) {
-        recommendation =
-          "It will be sunny tomorrow. Don't forget to bring an umbrella and stay hydrated.";
+        recommendation = t("weatherService.recommendation.sunny");
       }
       // 2 = Partly cloudy, 3 = Overcast
       else if (tomCode === 2 || tomCode === 3) {
-        recommendation = "It will be cloudy tomorrow. A good day for a walk.";
+        recommendation = t("weatherService.recommendation.cloudy");
       } else {
-        recommendation =
-          "Tomorrow looks safe for a walk. Use your iCane as usual.";
+        recommendation = t("weatherService.recommendation.safeWalk");
       }
     }
 
@@ -305,8 +320,8 @@ export const fetchFullWeatherForecast = async (
       const max = Math.round(data.daily.temperature_2m_max[index]);
       const min = Math.round(data.daily.temperature_2m_min[index]);
       const date = new Date(time);
-      const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
-      const dateLabel = date.toLocaleDateString("en-US", {
+      const dayName = date.toLocaleDateString(locale, { weekday: "short" });
+      const dateLabel = date.toLocaleDateString(locale, {
         month: "short",
         day: "numeric"
       });

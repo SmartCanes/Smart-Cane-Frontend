@@ -7,24 +7,25 @@ import SendNote from "@/ui/components/SendNote";
 import { motion, useAnimation } from "framer-motion";
 import { useRealtimeStore } from "@/stores/useStore";
 import { getLocationByCoords } from "@/api/locationsApi";
+import { useTranslation } from "react-i18next";
 
-const getGpsBadge = (gps) => {
+const getGpsBadge = (gps, t) => {
   if (!gps || Number(gps.status) === 0) {
     return {
-      label: "No Signal",
+      label: t("dashboardPage.gpsBadge.noSignal"),
       className: "bg-red-100 text-red-700 border-red-200"
     };
   }
 
   if (gps.ready) {
     return {
-      label: "Ready",
+      label: t("dashboardPage.gpsBadge.ready"),
       className: "bg-green-100 text-green-700 border-green-200"
     };
   }
 
   return {
-    label: "Low Signal",
+    label: t("dashboardPage.gpsBadge.lowSignal"),
     className: "bg-yellow-100 text-yellow-700 border-yellow-200"
   };
 };
@@ -51,11 +52,14 @@ const getDistanceMeters = (lat1, lon1, lat2, lon2) => {
 };
 
 const Dashboard = () => {
+  const { t } = useTranslation("pages");
   const [activeTab, setActiveTab] = useState("track");
   const controls = useAnimation();
   const { gps, lastKnownCanePosition } = useRealtimeStore();
 
-  const [lastLocationLabel, setLastLocationLabel] = useState("Resolving...");
+  const [lastLocationLabel, setLastLocationLabel] = useState(
+    t("dashboardPage.location.resolving")
+  );
   const [isResolvingLastLocation, setIsResolvingLastLocation] = useState(false);
 
   const lastResolvedPointRef = useRef(null);
@@ -63,7 +67,7 @@ const Dashboard = () => {
   const locationCacheRef = useRef(new Map());
   const isFetchingLocationRef = useRef(false);
 
-  const badge = getGpsBadge(gps);
+  const badge = getGpsBadge(gps, t);
 
   const canePosition =
     gps?.lat != null && gps?.lng != null ? [gps.lat, gps.lng] : null;
@@ -92,12 +96,12 @@ const Dashboard = () => {
       (part, index, array) => part && array.indexOf(part) === index
     );
 
-    return parts.length > 0 ? parts.join(", ") : "Unknown area";
+    return parts.length > 0 ? parts.join(", ") : t("dashboardPage.location.unknownArea");
   };
 
   useEffect(() => {
     if (lat == null || lon == null) {
-      setLastLocationLabel("No location available");
+      setLastLocationLabel(t("dashboardPage.location.none"));
       return;
     }
 
@@ -157,13 +161,13 @@ const Dashboard = () => {
         lastResolvedTimeRef.current = Date.now();
       } catch (error) {
         console.error("Failed to resolve location:", error);
-        setLastLocationLabel("Unable to resolve location");
+        setLastLocationLabel(t("dashboardPage.location.unableToResolve"));
       } finally {
         isFetchingLocationRef.current = false;
         setIsResolvingLastLocation(false);
       }
     }
-  }, [lat, lon, gps?.ready]);
+  }, [lat, lon, gps?.ready, t]);
 
   return (
     <motion.main
@@ -174,10 +178,10 @@ const Dashboard = () => {
       <div className="w-full space-y-6 sm:space-y-8 max-w-5xl mx-auto md:max-w-none md:mx-0 md:pr-6">
         <div className="mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800 text-nowrap">
-            Live Location
+            {t("dashboardPage.title")}
           </h1>
           <p className="text-gray-600 font-poppins text-xs sm:text-sm hidden sm:block">
-            Real-time monitoring and safety features for your iCane device
+            {t("dashboardPage.subtitle")}
           </p>
         </div>
 
@@ -190,7 +194,7 @@ const Dashboard = () => {
               <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <h3 className="text-base sm:text-xl font-semibold text-gray-800 font-poppins">
-                    Live Location Tracking
+                    {t("dashboardPage.liveLocationTracking")}
                   </h3>
 
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -210,7 +214,7 @@ const Dashboard = () => {
                       }`}
                     >
                       <Icon icon="ph:map-pin-fill" className="text-lg" />
-                      Track Live
+                      {t("dashboardPage.trackLive")}
                     </button>
                   </div>
                 </div>
@@ -234,7 +238,7 @@ const Dashboard = () => {
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs text-gray-500 font-medium">
-                        Satellites
+                        {t("dashboardPage.satellites")}
                       </p>
                       <p className="text-base sm:text-lg font-semibold text-gray-800">
                         {gps?.sats ?? 0}
@@ -251,7 +255,7 @@ const Dashboard = () => {
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs text-gray-500 font-medium">
-                        Last Location
+                        {t("dashboardPage.lastLocation")}
                       </p>
                       <div className="flex items-center gap-2">
                         <p className="text-sm sm:text-base font-medium text-gray-800 break-all">
@@ -259,7 +263,7 @@ const Dashboard = () => {
                         </p>
                         {isResolvingLastLocation && (
                           <span className="text-xs text-gray-400">
-                            Updating...
+                            {t("dashboardPage.location.updating")}
                           </span>
                         )}
                       </div>

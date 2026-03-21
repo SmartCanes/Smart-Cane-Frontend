@@ -1,0 +1,17 @@
+{
+  "languages": {
+    "en": "English",
+    "tl": "Tagalog",
+    "ceb": "Bisaya"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "ariaLabel": "Change website language",
+    "changed": "Language changed to {{language}}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}

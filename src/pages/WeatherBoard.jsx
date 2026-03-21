@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
+import { useTranslation } from "react-i18next";
 
 import {
   DEFAULT_LOCATION,
@@ -8,6 +9,7 @@ import {
 } from "@/api/weatherService";
 
 const WeatherBoard = () => {
+  const { t, i18n } = useTranslation("pages");
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedForecastDay, setSelectedForecastDay] = useState(null);
@@ -66,12 +68,23 @@ const WeatherBoard = () => {
 
   const closeForecastModal = () => setSelectedForecastDay(null);
 
+  const activeLocale = useMemo(() => {
+    const lang = i18n.resolvedLanguage || i18n.language || "en";
+    if (lang.startsWith("tl")) return "tl-PH";
+    if (lang.startsWith("ceb")) return "en-PH";
+    return "en-US";
+  }, [i18n.language, i18n.resolvedLanguage]);
+
   useEffect(() => {
     let isMounted = true;
     const loadForecast = async () => {
       setLoading(true);
 
-      const data = await fetchFullWeatherForecast(location.lat, location.lon);
+      const data = await fetchFullWeatherForecast(
+        location.lat,
+        location.lon,
+        i18n.resolvedLanguage
+      );
 
       if (isMounted && data) {
         setForecast(data);
@@ -89,28 +102,28 @@ const WeatherBoard = () => {
     return () => {
       isMounted = false;
     };
-  }, [location]);
+  }, [location, i18n.resolvedLanguage]);
 
   // Format Date Logic
   const formattedDate = useMemo(() => {
     if (!forecast?.tomorrow?.date) return "";
     const dateValue = new Date(forecast.tomorrow.date);
-    return dateValue.toLocaleDateString("en-US", {
+    return dateValue.toLocaleDateString(activeLocale, {
       weekday: "long",
       month: "long",
       day: "numeric"
     });
-  }, [forecast]);
+  }, [activeLocale, forecast]);
 
   // Visuals Logic
   const visuals = useMemo(() => {
     if (!forecast?.tomorrow) return {};
 
     let mainIcon = "solar:sun-fog-bold-duotone";
-    let buttonLabel = "Safe to Walk";
+    let buttonLabel = t("weatherBoard.tomorrow.safeToWalk");
     if (!forecast.tomorrow.canGoOutside) {
       mainIcon = "solar:cloud-rain-bold-duotone";
-      buttonLabel = "Stay Indoors";
+      buttonLabel = t("weatherBoard.tomorrow.stayIndoors");
     } else {
       // 0, 1: Sunny
       if (
@@ -132,14 +145,14 @@ const WeatherBoard = () => {
       mainIcon,
       buttonLabel
     };
-  }, [forecast]);
+  }, [forecast, t]);
 
   return (
     <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-visible md:overflow-y-auto p-6 pb-[calc(var(--mobile-nav-height)+1.5rem)] md:pb-6">
       <div className="mx-auto space-y-6 min-h-full">
         <div data-tour="tour-weather-main">
           <h1 className="text-2xl font-bold text-[#11285A] mb-1">
-            Weather Forecast
+            {t("weatherBoard.forecastTitle")}
           </h1>
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <Icon icon="carbon:location-filled" />
@@ -165,7 +178,7 @@ const WeatherBoard = () => {
               onFocus={() =>
                 searchResults.length > 0 && setIsDropdownOpen(true)
               }
-              placeholder="Search a city or place in the Philippines..."
+              placeholder={t("weatherBoard.searchPlaceholder")}
               className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
             />
             {isSearching && (
@@ -189,14 +202,16 @@ const WeatherBoard = () => {
 
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-500">
-              Default location: {DEFAULT_LOCATION.name}
+              {t("weatherBoard.defaultLocation", {
+                location: DEFAULT_LOCATION.name
+              })}
             </p>
             <button
               type="button"
               onClick={handleUseDefaultLocation}
               className="text-xs font-semibold text-[#11285A] hover:text-[#0b1c3f] hover:underline cursor-pointer transition-colors"
             >
-              Use Novaliches, Quezon City
+              {t("weatherBoard.useDefaultLocation")}
             </button>
           </div>
 
@@ -271,7 +286,7 @@ const WeatherBoard = () => {
               <div className="flex-1 z-10 min-w-0">
                 <div className="inline-block bg-white rounded-lg px-3 py-1 mb-2 max-w-full">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#11285A] whitespace-nowrap block overflow-hidden text-ellipsis">
-                    TOMORROW{" "}
+                    {t("weatherBoard.tomorrow.label")} 
                     {formattedDate ? `• ${formattedDate.toUpperCase()}` : ""}
                   </span>
                 </div>
@@ -287,10 +302,10 @@ const WeatherBoard = () => {
             {/* TODAY'S WEATHER HEADER */}
             <div>
               <h3 className="text-lg font-bold text-[#11285A]">
-                Today's Weather
+                {t("weatherBoard.today.title")}
               </h3>
               <p className="text-xs text-gray-500">
-                Here are the other information you might need on our weather
+                {t("weatherBoard.today.subtitle")}
               </p>
             </div>
 
@@ -304,7 +319,7 @@ const WeatherBoard = () => {
                   />
                 </div>
                 <span className="text-gray-800 text-xs font-bold">
-                  Sunrise:
+                  {t("weatherBoard.metrics.sunrise")}
                 </span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.sunrise}
@@ -317,7 +332,7 @@ const WeatherBoard = () => {
                     className="text-indigo-600 text-2xl"
                   />
                 </div>
-                <span className="text-gray-800 text-xs font-bold">Sunset:</span>
+                <span className="text-gray-800 text-xs font-bold">{t("weatherBoard.metrics.sunset")}</span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.sunset}
                 </span>
@@ -330,7 +345,7 @@ const WeatherBoard = () => {
                   />
                 </div>
                 <span className="text-gray-800 text-xs font-bold">
-                  Humidity:
+                  {t("weatherBoard.metrics.humidity")}
                 </span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.humidity}
@@ -343,7 +358,7 @@ const WeatherBoard = () => {
                     className="text-teal-600 text-2xl"
                   />
                 </div>
-                <span className="text-gray-800 text-xs font-bold">Wind:</span>
+                <span className="text-gray-800 text-xs font-bold">{t("weatherBoard.metrics.wind")}</span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.wind}
                 </span>
@@ -356,7 +371,7 @@ const WeatherBoard = () => {
                   />
                 </div>
                 <span className="text-gray-800 text-xs font-bold">
-                  Feels Like:
+                  {t("weatherBoard.metrics.feelsLike")}
                 </span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.feelsLike}
@@ -367,7 +382,7 @@ const WeatherBoard = () => {
                   <Icon icon="mdi:gauge" className="text-violet-600 text-2xl" />
                 </div>
                 <span className="text-gray-800 text-xs font-bold">
-                  Pressure:
+                  {t("weatherBoard.metrics.pressure")}
                 </span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.pressure}
@@ -381,7 +396,7 @@ const WeatherBoard = () => {
                   />
                 </div>
                 <span className="text-gray-800 text-xs font-bold">
-                  Visibility:
+                  {t("weatherBoard.metrics.visibility")}
                 </span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.visibility}
@@ -395,7 +410,7 @@ const WeatherBoard = () => {
                   />
                 </div>
                 <span className="text-gray-800 text-xs font-bold">
-                  UV Index:
+                  {t("weatherBoard.metrics.uvIndex")}
                 </span>
                 <span className="text-sm text-gray-500">
                   {forecast.today.uvIndex}
@@ -406,10 +421,10 @@ const WeatherBoard = () => {
             {/* 2-WEEK FORECAST HEADER */}
             <div>
               <h3 className="text-lg font-bold text-[#11285A]">
-                2-Week Forecast
+                {t("weatherBoard.twoWeek.title")}
               </h3>
               <p className="text-xs text-gray-500">
-                Here is the weather outlook for the next 14 days
+                {t("weatherBoard.twoWeek.subtitle")}
               </p>
             </div>
 
@@ -443,7 +458,7 @@ const WeatherBoard = () => {
           </div>
         ) : (
           <div className="p-8 bg-red-50 rounded-2xl border border-red-100 text-center">
-            <p className="text-red-500">Failed to load weather data.</p>
+            <p className="text-red-500">{t("weatherBoard.errors.failedLoad")}</p>
           </div>
         )}
         {/* SIMULATION PANEL */}
@@ -480,7 +495,7 @@ const WeatherBoard = () => {
                 type="button"
                 onClick={closeForecastModal}
                 className="text-gray-500 hover:text-gray-700 cursor-pointer"
-                aria-label="Close forecast details"
+                aria-label={t("weatherBoard.modal.closeAria")}
               >
                 <Icon icon="ph:x-bold" className="text-lg" />
               </button>
@@ -489,7 +504,7 @@ const WeatherBoard = () => {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                 <p className="text-[11px] text-gray-500 uppercase font-semibold">
-                  High
+                  {t("weatherBoard.modal.high")}
                 </p>
                 <p className="text-base font-bold text-[#11285A]">
                   {selectedForecastDay.tempMax}
@@ -497,7 +512,7 @@ const WeatherBoard = () => {
               </div>
               <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                 <p className="text-[11px] text-gray-500 uppercase font-semibold">
-                  Low
+                  {t("weatherBoard.modal.low")}
                 </p>
                 <p className="text-base font-bold text-[#11285A]">
                   {selectedForecastDay.tempMin}
@@ -505,7 +520,7 @@ const WeatherBoard = () => {
               </div>
               <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                 <p className="text-[11px] text-gray-500 uppercase font-semibold">
-                  Average
+                  {t("weatherBoard.modal.average")}
                 </p>
                 <p className="text-base font-bold text-[#11285A]">
                   {selectedForecastDay.temp}
@@ -513,7 +528,7 @@ const WeatherBoard = () => {
               </div>
               <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                 <p className="text-[11px] text-gray-500 uppercase font-semibold">
-                  Rain Chance
+                  {t("weatherBoard.modal.rainChance")}
                 </p>
                 <p className="text-base font-bold text-[#11285A]">
                   {selectedForecastDay.precipProbability}

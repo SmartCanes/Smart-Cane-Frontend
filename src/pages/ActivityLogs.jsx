@@ -5,6 +5,7 @@ import DefaultProfile from "@/ui/components/DefaultProfile";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import { useActivityReportsStore } from "@/stores/useStore";
 import FilterDropdown from "@/ui/components/FilterDropdown"; // ← NEW
+import { useTranslation } from "react-i18next";
 
 const ACTION_TYPE_MAP = {
   CREATE: "device",
@@ -21,27 +22,28 @@ const ACTION_TYPE_MAP = {
   UPDATE_RELATIONSHIP: "relationship"
 };
 
-// filter config van
-const ACTION_OPTIONS = [
-  { value: "LOGIN", label: "Login", icon: "ph:sign-in-bold" },
-  { value: "CREATE", label: "Create", icon: "ph:plus-bold" },
-  { value: "UPDATE", label: "Update", icon: "ph:pencil-bold" },
-  { value: "DELETE", label: "Delete", icon: "ph:trash-bold" },
-  { value: "PAIR", label: "Pair", icon: "ph:link-bold" },
-  { value: "UNPAIR", label: "Unpair", icon: "ph:link-break-bold" },
-  { value: "INVITE", label: "Invite", icon: "ph:envelope-bold" },
-  {
-    value: "REMOVE_GUARDIAN",
-    label: "Remove Guardian",
-    icon: "ph:user-minus-bold"
-  },
-  { value: "UPDATE_ROLE", label: "Update Role", icon: "ph:shield-bold" },
-  { value: "ACCEPT_INVITE", label: "Accept Invite", icon: "ph:check-bold" },
-  { value: "SET_EMERGENCY", label: "Set Emergency", icon: "ph:warning-bold" },
-  { value: "UPDATE_RELATIONSHIP", label: "Relationship", icon: "ph:users-bold" }
-];
+const translateActivityDescription = (description, t) => {
+  if (!description) return "\u2014";
+
+  const setEmergencyMatch = description.match(
+    /^(.+?) set guardian (.+?) as emergency contact for device (.+)$/i
+  );
+
+  if (setEmergencyMatch) {
+    const [, actor, guardian, device] = setEmergencyMatch;
+    return t("notifications.dynamicMessages.setEmergencyContact", {
+      actor: actor?.trim(),
+      guardian: guardian?.trim(),
+      device: device?.trim(),
+      defaultValue: description
+    });
+  }
+
+  return description;
+};
 
 const ActivityLogs = () => {
+  const { t } = useTranslation("pages");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -51,6 +53,25 @@ const ActivityLogs = () => {
 
   const { history, isLoading, isRefreshing, error, fetchHistory } =
     useActivityReportsStore();
+
+  const actionOptions = [
+    { value: "LOGIN", label: t("activityLogs.actions.login"), icon: "ph:sign-in-bold" },
+    { value: "CREATE", label: t("activityLogs.actions.create"), icon: "ph:plus-bold" },
+    { value: "UPDATE", label: t("activityLogs.actions.update"), icon: "ph:pencil-bold" },
+    { value: "DELETE", label: t("activityLogs.actions.delete"), icon: "ph:trash-bold" },
+    { value: "PAIR", label: t("activityLogs.actions.pair"), icon: "ph:link-bold" },
+    { value: "UNPAIR", label: t("activityLogs.actions.unpair"), icon: "ph:link-break-bold" },
+    { value: "INVITE", label: t("activityLogs.actions.invite"), icon: "ph:envelope-bold" },
+    {
+      value: "REMOVE_GUARDIAN",
+      label: t("activityLogs.actions.removeGuardian"),
+      icon: "ph:user-minus-bold"
+    },
+    { value: "UPDATE_ROLE", label: t("activityLogs.actions.updateRole"), icon: "ph:shield-bold" },
+    { value: "ACCEPT_INVITE", label: t("activityLogs.actions.acceptInvite"), icon: "ph:check-bold" },
+    { value: "SET_EMERGENCY", label: t("activityLogs.actions.setEmergency"), icon: "ph:warning-bold" },
+    { value: "UPDATE_RELATIONSHIP", label: t("activityLogs.actions.relationship"), icon: "ph:users-bold" }
+  ];
 
   useEffect(() => {
     fetchHistory();
@@ -73,11 +94,15 @@ const ActivityLogs = () => {
 
   // filtering van
   const filteredActivities = history.filter((activity) => {
+    const translatedDescription = translateActivityDescription(
+      activity.description,
+      t
+    );
     const matchesSearch =
       (activity.guardianName || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      (activity.description || "")
+      (translatedDescription || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       (activity.action || "").toLowerCase().includes(searchTerm.toLowerCase());
@@ -165,10 +190,10 @@ const ActivityLogs = () => {
         <div className="w-full font-poppins max-w-5xl mx-auto space-y-6">
           <div className="mb-4 md:mb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
-              Activity Logs
+              {t("activityLogs.title")}
             </h2>
             <p className="text-gray-500 text-xs md:text-sm">
-              Monitor and track all guardian activities in your system
+              {t("activityLogs.subtitle")}
             </p>
           </div>
           <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center justify-center gap-3">
@@ -181,7 +206,7 @@ const ActivityLogs = () => {
               onClick={() => window.location.reload()}
               className="text-sm text-blue-600 hover:underline"
             >
-              Try again
+              {t("activityLogs.tryAgain")}
             </button>
           </div>
         </div>
@@ -194,10 +219,10 @@ const ActivityLogs = () => {
       <div className="w-full font-poppins max-w-5xl mx-auto space-y-6 sm:space-y-8 md:max-w-none md:mx-0 md:pr-6">
         <div data-tour="tour-activity-header" className="mb-4 md:mb-8">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 break-words">
-            Activity Logs
+            {t("activityLogs.title")}
           </h2>
           <p className="text-gray-500 text-xs md:text-sm">
-            Monitor and track all guardian activities in your system
+            {t("activityLogs.subtitle")}
           </p>
         </div>
 
@@ -215,7 +240,7 @@ const ActivityLogs = () => {
               />
               <input
                 type="text"
-                placeholder="Search by name, action, or description..."
+                placeholder={t("activityLogs.searchPlaceholder")}
                 className="w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-gray-600 placeholder-gray-400"
                 value={searchTerm}
                 onChange={(e) => {
@@ -227,7 +252,7 @@ const ActivityLogs = () => {
 
             {/* filter btn van */}
             <FilterDropdown
-              actionOptions={ACTION_OPTIONS}
+              actionOptions={actionOptions}
               selectedActions={selectedActions}
               onActionChange={handleActionChange}
               onClearAll={handleClearAll}
@@ -239,7 +264,7 @@ const ActivityLogs = () => {
           {selectedActions.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {selectedActions.map((val) => {
-                const opt = ACTION_OPTIONS.find((o) => o.value === val);
+                const opt = actionOptions.find((o) => o.value === val);
                 return (
                   <span
                     key={val}
@@ -260,7 +285,7 @@ const ActivityLogs = () => {
                 onClick={handleClearAll}
                 className="text-xs text-red-500 hover:underline font-medium cursor-pointer"
               >
-                Clear all
+                {t("activityLogs.clearAll")}
               </button>
             </div>
           )}
@@ -273,13 +298,13 @@ const ActivityLogs = () => {
             </div>
             <h3 className="text-lg font-semibold text-[#11285A] mb-1">
               {searchTerm || selectedActions.length > 0
-                ? "Nothing to see here"
-                : "No activity yet"}
+                ? t("activityLogs.empty.nothingToSee")
+                : t("activityLogs.empty.noActivity")}
             </h3>
             <p className="text-sm text-gray-500 max-w-xs mx-auto">
               {searchTerm || selectedActions.length > 0
-                ? "Try adjusting your search or filters."
-                : "Actions you perform will appear here."}
+                ? t("activityLogs.empty.adjustFilters")
+                : t("activityLogs.empty.actionsAppear")}
             </p>
             {(searchTerm || selectedActions.length > 0) && (
               <button
@@ -289,7 +314,7 @@ const ActivityLogs = () => {
                 }}
                 className="mt-6 text-sm font-medium text-blue-600 hover:underline"
               >
-                Clear filters
+                {t("activityLogs.clearFilters")}
               </button>
             )}
           </div>
@@ -302,16 +327,16 @@ const ActivityLogs = () => {
                   <thead>
                     <tr className="border-b border-gray-100">
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[22%]">
-                        Guardian
+                        {t("activityLogs.table.guardian")}
                       </th>
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[18%]">
-                        Action
+                        {t("activityLogs.table.action")}
                       </th>
                       <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[40%]">
-                        Description
+                        {t("activityLogs.table.description")}
                       </th>
                       <th className="text-right py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[20%]">
-                        Date Created
+                        {t("activityLogs.table.dateCreated")}
                       </th>
                     </tr>
                   </thead>
@@ -364,7 +389,10 @@ const ActivityLogs = () => {
                             </td>
                             <td className="py-4 px-6">
                               <p className="text-sm text-gray-600">
-                                {activity.description || "—"}
+                                {translateActivityDescription(
+                                  activity.description,
+                                  t
+                                )}
                               </p>
                             </td>
                             <td className="py-4 px-6 text-right">
@@ -384,10 +412,11 @@ const ActivityLogs = () => {
               {/* Pagination */}
               <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
                 <p className="text-sm text-gray-500">
-                  Showing{" "}
-                  {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}–
-                  {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
-                  {totalItems.toLocaleString()} activities
+                  {t("activityLogs.pagination.showing", {
+                    from: Math.min((currentPage - 1) * itemsPerPage + 1, totalItems),
+                    to: Math.min(currentPage * itemsPerPage, totalItems),
+                    total: totalItems.toLocaleString()
+                  })}
                 </p>
                 <div className="flex items-center gap-2">
                   <button
@@ -450,17 +479,18 @@ const ActivityLogs = () => {
                       />
                     </div>
                     <p className="text-sm text-gray-600 mb-2 leading-relaxed">
-                      {activity.description || "—"}
+                      {translateActivityDescription(activity.description, t)}
                     </p>
                   </div>
                 ))}
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t border-gray-100 bg-gray-50">
                 <p className="text-xs text-gray-500">
-                  Showing{" "}
-                  {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}–
-                  {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
-                  {totalItems.toLocaleString()}
+                  {t("activityLogs.pagination.showingShort", {
+                    from: Math.min((currentPage - 1) * itemsPerPage + 1, totalItems),
+                    to: Math.min(currentPage * itemsPerPage, totalItems),
+                    total: totalItems.toLocaleString()
+                  })}
                 </p>
                 <div className="flex items-center gap-1.5">
                   <button

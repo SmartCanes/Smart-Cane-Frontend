@@ -1,0 +1,20 @@
+{
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
+  "selectDevice": "Select device",
+  "noVip": "No VIP",
+  "noVipAvailable": "No VIP available",
+  "noVipDevices": "No VIP devices",
+  "connection": "Connection",
+  "connected": "Connected",
+  "disconnected": "Disconnected",
+  "notifications": "Notifications",
+  "noNotificationsYet": "No notifications yet",
+  "total": "{{count}} total",
+  "seeAllNotifications": "See all notifications",
+  "markAllAsRead": "Mark all as read",
+  "profile": "Profile",
+  "history": "History",
+  "settings": "Settings",
+  "logout": "Logout"
+}

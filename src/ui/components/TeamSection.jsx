@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlideUp } from "@/wrapper/MotionWrapper";
+import { useTranslation } from "react-i18next";
 import africaImg from "@/assets/images/team/africa.jpg";
 import arrojoImg from "@/assets/images/team/arrojo.jpg";
 import barbaImg from "@/assets/images/team/barba.jpg";
@@ -268,10 +269,10 @@ const teamMembers = [
 ];
 
 const TEAM_FILTERS = [
-  { id: "all", label: "All" },
-  { id: "developers", label: "Developers" },
-  { id: "designers", label: "Designers" },
-  { id: "documentation", label: "Documentation" }
+  { id: "all" },
+  { id: "developers" },
+  { id: "designers" },
+  { id: "documentation" }
 ];
 
 const FILTER_KEYWORDS = {
@@ -567,12 +568,23 @@ const TeamMemberCard = ({ member, index }) => {
 
 // Main Team Grid Component
 const TeamSection = () => {
+  const { t } = useTranslation("guestPage");
   const [filter, setFilter] = useState("all");
   const teamGridRef = useRef(null);
 
   const filteredMembers = useMemo(() => {
     return teamMembers.filter((member) => memberMatchesFilter(member, filter));
   }, [filter]);
+
+  const localizedMembers = useMemo(
+    () =>
+      filteredMembers.map((member) => ({
+        ...member,
+        role: t(`team.members.${member.id}.role`, { defaultValue: member.role }),
+        bio: t(`team.members.${member.id}.bio`, { defaultValue: member.bio })
+      })),
+    [filteredMembers, t]
+  );
 
   const handleFilterChange = (selectedFilter) => {
     setFilter(selectedFilter);
@@ -585,14 +597,19 @@ const TeamSection = () => {
         <div className="text-center mb-12">
           <SlideUp delay={0.2}>
             <h2 className="text-3xl md:text-4xl font-bold text-[#1C253C] mb-4">
-              Meet the <span className="text-[#11285A]">Team</span>
+              {t("team.heading.prefix", { defaultValue: "Meet the" })}{" "}
+              <span className="text-[#11285A]">
+                {t("team.heading.highlight", { defaultValue: "Team" })}
+              </span>
             </h2>
           </SlideUp>
 
           <SlideUp delay={0.3}>
             <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
-              Passionate experts dedicated to redefining mobility through
-              innovative technology and inclusive design.
+              {t("team.subtitle", {
+                defaultValue:
+                  "Passionate experts dedicated to redefining mobility through innovative technology and inclusive design."
+              })}
             </p>
           </SlideUp>
         </div>
@@ -618,7 +635,10 @@ const TeamSection = () => {
                   }
                 `}
               >
-                {chip.label}
+                {t(`team.filters.${chip.id}`, {
+                  defaultValue:
+                    chip.id.charAt(0).toUpperCase() + chip.id.slice(1)
+                })}
               </motion.button>
             ))}
           </div>
@@ -631,7 +651,7 @@ const TeamSection = () => {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-stretch"
         >
           <AnimatePresence>
-            {filteredMembers.map((member, index) => (
+            {localizedMembers.map((member, index) => (
               <motion.div
                 key={member.id}
                 layout="position"
@@ -658,13 +678,15 @@ const TeamSection = () => {
               className="w-16 h-16 text-gray-300 mx-auto mb-4"
             />
             <p className="text-gray-500">
-              No team members found in this category.
+              {t("team.empty.message", {
+                defaultValue: "No team members found in this category."
+              })}
             </p>
             <button
               onClick={() => setFilter("all")}
               className="mt-4 px-6 py-2 bg-[#11285A] text-white rounded-lg hover:bg-[#0a1a38] transition-colors"
             >
-              Show All
+              {t("team.empty.showAll", { defaultValue: "Show All" })}
             </button>
           </motion.div>
         )}

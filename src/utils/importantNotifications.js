@@ -4,15 +4,18 @@ import {
 } from "@/api/weatherService";
 import { useNotificationsStore, useSettingsStore } from "@/stores/useStore";
 import { triggerSmartCaneNotification } from "@/utils/NotificationManager";
+import i18n from "@/i18n";
 
 const WEATHER_NOTIFICATION_COOLDOWN_MS = 60 * 60 * 1000;
 const SAFETY_NOTIFICATION_COOLDOWN_MS = 30 * 1000;
 const ARRIVAL_NOTIFICATION_COOLDOWN_MS = 60 * 1000;
 
-const formatVipName = (vipName) => vipName?.trim() || "the VIP";
+const t = (key, options) => i18n.t(key, { ns: "pages", ...options });
+
+const formatVipName = (vipName) => vipName?.trim() || t("importantNotifications.theVip");
 
 const formatDeviceLabel = (deviceSerial) =>
-  deviceSerial ? ` on device ${deviceSerial}` : "";
+  deviceSerial ? t("importantNotifications.deviceLabel", { serial: deviceSerial }) : "";
 
 const dispatchImportantNotification = (
   notification,
@@ -61,9 +64,12 @@ export const notifyEmergencyAlert = ({ vipName, deviceSerial } = {}) =>
   dispatchImportantNotification(
     {
       action: "LIVE_EMERGENCY",
-      title: "Emergency Alert",
-      message: `${formatVipName(vipName)} triggered an emergency alert${formatDeviceLabel(deviceSerial)}. Open Live Location now and contact the assigned emergency guardians immediately.`,
-      guardianName: "iCane Safety Monitor",
+      title: t("importantNotifications.emergency.title"),
+      message: t("importantNotifications.emergency.message", {
+        vipName: formatVipName(vipName),
+        deviceLabel: formatDeviceLabel(deviceSerial)
+      }),
+      guardianName: t("importantNotifications.guardians.safetyMonitor"),
       navigation: {
         path: "/dashboard"
       }
@@ -81,9 +87,12 @@ export const notifyFallAlert = ({ vipName, deviceSerial } = {}) =>
   dispatchImportantNotification(
     {
       action: "LIVE_FALL",
-      title: "Possible Fall Detected",
-      message: `A possible fall was detected for ${formatVipName(vipName)}${formatDeviceLabel(deviceSerial)}. Check the live map and confirm their condition as soon as possible.`,
-      guardianName: "iCane Safety Monitor",
+      title: t("importantNotifications.fall.title"),
+      message: t("importantNotifications.fall.message", {
+        vipName: formatVipName(vipName),
+        deviceLabel: formatDeviceLabel(deviceSerial)
+      }),
+      guardianName: t("importantNotifications.guardians.safetyMonitor"),
       navigation: {
         path: "/dashboard"
       }
@@ -101,9 +110,12 @@ export const notifyRouteArrival = ({ vipName, deviceSerial } = {}) =>
   dispatchImportantNotification(
     {
       action: "ROUTE_ARRIVAL",
-      title: "Destination Reached",
-      message: `${formatVipName(vipName)} has arrived at the selected destination${formatDeviceLabel(deviceSerial)}. Route tracking has been cleared successfully.`,
-      guardianName: "Navigation Assistant",
+      title: t("importantNotifications.arrival.title"),
+      message: t("importantNotifications.arrival.message", {
+        vipName: formatVipName(vipName),
+        deviceLabel: formatDeviceLabel(deviceSerial)
+      }),
+      guardianName: t("importantNotifications.guardians.navigationAssistant"),
       navigation: {
         path: "/dashboard"
       }
@@ -125,21 +137,29 @@ const buildWeatherNotificationCopy = ({
 
   if (type === "storm") {
     return {
-      title: "Severe Weather Warning",
-      message: `Thunderstorm conditions were detected near ${resolvedLocation}. Outdoor travel may be unsafe right now. Review the Weather Board before heading out.`
+      title: t("importantNotifications.weather.storm.title"),
+      message: t("importantNotifications.weather.storm.message", {
+        location: resolvedLocation
+      })
     };
   }
 
   if (type === "wind") {
     return {
-      title: "Strong Wind Advisory",
-      message: `Strong winds of around ${windSpeed} km/h were detected near ${resolvedLocation}. Outdoor navigation may be unstable, so extra caution is advised.`
+      title: t("importantNotifications.weather.wind.title"),
+      message: t("importantNotifications.weather.wind.message", {
+        windSpeed,
+        location: resolvedLocation
+      })
     };
   }
 
   return {
-    title: "Rain Alert",
-    message: `Rain is affecting ${resolvedLocation} right now${temp != null ? ` at about ${temp}°C` : ""}. Roads may be slippery, so please monitor outdoor travel carefully.`
+    title: t("importantNotifications.weather.rain.title"),
+    message: t("importantNotifications.weather.rain.message", {
+      location: resolvedLocation,
+      temperature: temp != null ? `${temp}°C` : ""
+    })
   };
 };
 
@@ -169,7 +189,7 @@ export const checkImportantWeatherUpdates = async ({
       action: "LIVE_WEATHER",
       title: copy.title,
       message: copy.message,
-      guardianName: "Weather Service",
+      guardianName: t("importantNotifications.guardians.weatherService"),
       navigation: {
         path: "/weather-board"
       }

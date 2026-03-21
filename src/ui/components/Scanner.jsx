@@ -1,6 +1,7 @@
 import { createRef, useEffect, useState, useRef } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { pairDevice } from "@/api/backendService";
+import { useTranslation } from "react-i18next";
 import PrimaryButton from "./PrimaryButton";
 import Toast from "./Toast";
 
@@ -8,6 +9,7 @@ const PREFIX = "SC-";
 const SERIAL_LENGTH = 6;
 
 const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
+  const { t } = useTranslation("pages");
   const [paused, setPaused] = useState(false);
   const [hasCamera, setHasCamera] = useState(true);
   const [serial, setSerial] = useState(Array(SERIAL_LENGTH).fill(""));
@@ -26,7 +28,7 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
   useEffect(() => {
     if (!window.isSecureContext) {
       setScannerError(
-        "Camera requires HTTPS (or localhost). If you opened this from a phone over local IP, use HTTPS."
+        t("devices.scanner.errors.httpsRequired")
       );
     }
 
@@ -92,10 +94,10 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
         console.error("Error parsing QR code as URL:", e);
         setToast({
           showToast: true,
-          message: "Invalid QR code format",
+          message: t("devices.scanner.errors.invalidQrFormat"),
           type: "error"
         });
-        setLastError({ code, message: "Invalid QR code format" });
+        setLastError({ code, message: t("devices.scanner.errors.invalidQrFormat") });
         setTimeout(() => {
           scanCooldownRef.current = false;
           setPaused(false);
@@ -107,10 +109,10 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
       if (!device_serial) {
         setToast({
           showToast: true,
-          message: "No device serial found in QR code",
+          message: t("devices.scanner.errors.noSerialInQr"),
           type: "error"
         });
-        setLastError({ code, message: "No device serial found" });
+        setLastError({ code, message: t("devices.scanner.errors.noSerialInQr") });
         setTimeout(() => {
           scanCooldownRef.current = false;
           setPaused(false);
@@ -128,7 +130,7 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
   };
 
   const handleError = (error) => {
-    const message = error?.message || "Unable to access camera.";
+    const message = error?.message || t("devices.scanner.errors.unableToAccessCamera");
 
     setScannerError(message);
     console.error("QR Scanner Error:", message);
@@ -201,7 +203,7 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
       if (showOnSuccessToast) {
         setToast({
           showToast: true,
-          message: "Device paired successfully!",
+          message: t("devices.toast.pairedSuccess"),
           type: "success"
         });
       }
@@ -210,7 +212,7 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
     } catch (err) {
       setToast({
         showToast: true,
-        message: err.response?.data?.message || "Failed to pair devices",
+        message: err.response?.data?.message || t("devices.toast.pairFailed"),
         type: "error"
       });
     } finally {
@@ -259,19 +261,19 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
           </div>
         ) : (
           <div className="text-gray-500 text-center h-full flex items-center justify-center">
-            No camera detected. Please use a device with a camera.
+            {t("devices.scanner.errors.noCameraDetected")}
           </div>
         )}
 
         <div className="flex items-center">
           <div className="flex-grow h-px bg-gray-300"></div>
-          <span className="mx-3 text-gray-500 font-medium">or</span>
+          <span className="mx-3 text-gray-500 font-medium">{t("devices.scanner.or")}</span>
           <div className="flex-grow h-px bg-gray-300"></div>
         </div>
 
         <div className="w-full max-w-sm mx-auto flex flex-col items-center gap-5">
           <span className="mb-2 text-gray-700 font-medium">
-            Enter Serial Code
+            {t("devices.scanner.enterSerialCode")}
           </span>
           <div className="grid grid-cols-7 gap-2 sm:gap-3 w-full items-center">
             <span className="text-gray-700 font-semibold sm:text-xl md:text-2xl w-full">
@@ -295,7 +297,11 @@ const ScannerCamera = ({ onSuccess, showOnSuccessToast = false, response }) => {
           </div>
           <PrimaryButton
             variant="primary"
-            text={loading ? "Pairing..." : "Pair"}
+            text={
+              loading
+                ? t("devices.scanner.pairing")
+                : t("devices.scanner.pair")
+            }
             onClick={handleManualPair}
             disabled={loading || toast.showToast || serial.includes("")}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"

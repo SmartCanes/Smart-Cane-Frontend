@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import SuccessIcon from "@/assets/images/check.svg";
 import ErrorIcon from "@/assets/images/warning.svg";
 import InfoIcon from "@/assets/images/information.svg";
@@ -13,6 +14,7 @@ export default function Toast({
   position = "bottom-right",
   onClose
 }) {
+  const { t } = useTranslation("pages");
   const [visible, setVisible] = useState(true);
   const exitTimerRef = useRef(null);
 
@@ -100,7 +102,7 @@ export default function Toast({
             <img
               loading="lazy"
               src={icons[type]}
-              alt={`${type} icon`}
+              alt={t("toast.typeIconAlt", { type })}
               className="w-5 h-5 sm:w-6 sm:h-6"
             />
           </div>
@@ -146,12 +148,12 @@ export default function Toast({
               active:opacity-60
               cursor-pointer
             "
-            aria-label="Close toast"
+            aria-label={t("toast.closeAria")}
           >
             <img
               loading="lazy"
               src={ExitIcon}
-              alt="Close"
+              alt={t("toast.close")}
               className="w-4 h-4 sm:w-5 sm:h-5"
             />
           </button>
