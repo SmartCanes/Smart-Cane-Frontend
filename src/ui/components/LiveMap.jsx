@@ -181,7 +181,8 @@ function LiveMap() {
     completedRoute,
     remainingRoute,
     activeIndex,
-    updateProgress
+    updateProgress,
+    status
   } = useRouteStore();
 
   const mapContainerRef = useRef(null);
@@ -344,9 +345,10 @@ function LiveMap() {
 
   useEffect(() => {
     if (!canePosition) return;
+    if (status !== "active" && status !== "pending") return;
 
     advanceRoute(canePosition);
-  }, [canePosition]);
+  }, [canePosition, status]);
 
   useEffect(() => {
     if (!searchQuery) {

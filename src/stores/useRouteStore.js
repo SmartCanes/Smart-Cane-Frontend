@@ -2,7 +2,33 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { getSharedDeviceRoute } from "@/api/backendService";
 
+const emptyRouteState = {
+  routeId: null,
+  status: null,
+  destinationPos: null,
+  routeCoords: [],
+  completedRoute: [],
+  remainingRoute: [],
+  activeIndex: 0,
+  updatedAt: null
+};
+
+const isTerminalRouteStatus = (status) =>
+  status === "completed" || status === "cleared";
+
 const mapRoutePayloadToStore = (route) => {
+  if (!route) return { ...emptyRouteState };
+
+  // keep status for UI/debugging, but remove visible route lines
+  if (isTerminalRouteStatus(route.status)) {
+    return {
+      ...emptyRouteState,
+      routeId: route.routeId ?? null,
+      status: route.status ?? null,
+      updatedAt: route.updatedAt ?? null
+    };
+  }
+
   if (!route?.routeGeoJson?.coordinates?.length) {
     return {
       routeId: route?.routeId ?? null,
@@ -38,15 +64,8 @@ const mapRoutePayloadToStore = (route) => {
 
 export const useRouteStore = create(
   persist(
-    (set, get) => ({
-      routeId: null,
-      status: null,
-      destinationPos: null,
-      routeCoords: [],
-      completedRoute: [],
-      remainingRoute: [],
-      activeIndex: 0,
-      updatedAt: null,
+    (set) => ({
+      ...emptyRouteState,
       isLoading: false,
 
       fetchSharedRoute: async (deviceId) => {
@@ -67,17 +86,9 @@ export const useRouteStore = create(
 
           if (!route) {
             set({
-              routeId: null,
-              status: null,
-              destinationPos: null,
-              routeCoords: [],
-              completedRoute: [],
-              remainingRoute: [],
-              activeIndex: 0,
-              updatedAt: null,
+              ...emptyRouteState,
               isLoading: false
             });
-
             return null;
           }
 
@@ -95,20 +106,6 @@ export const useRouteStore = create(
       },
 
       setRouteFromBackend: (route) => {
-        if (!route) {
-          set({
-            routeId: null,
-            status: null,
-            destinationPos: null,
-            routeCoords: [],
-            completedRoute: [],
-            remainingRoute: [],
-            activeIndex: 0,
-            updatedAt: null
-          });
-          return;
-        }
-
         set(mapRoutePayloadToStore(route));
       },
 
@@ -122,14 +119,7 @@ export const useRouteStore = create(
 
       clearRoute: () =>
         set({
-          routeId: null,
-          status: null,
-          destinationPos: null,
-          routeCoords: [],
-          completedRoute: [],
-          remainingRoute: [],
-          activeIndex: 0,
-          updatedAt: null
+          ...emptyRouteState
         })
     }),
     {
