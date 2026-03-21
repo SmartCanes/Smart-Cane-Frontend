@@ -62,7 +62,7 @@ export const notifyEmergencyAlert = ({ vipName, deviceSerial } = {}) =>
     {
       action: "LIVE_EMERGENCY",
       title: "Emergency Alert",
-      message: `${formatVipName(vipName)} triggered an emergency alert${formatDeviceLabel(deviceSerial)}. Open Live Location now and contact the assigned emergency guardians immediately.`,
+      message: `${vipName ? formatVipName(vipName) : "A VIP"} triggered an emergency alert${formatDeviceLabel(deviceSerial)}. Open Live Location now and contact the assigned emergency guardians immediately.`,
       guardianName: "iCane Safety Monitor",
       navigation: {
         path: "/dashboard"
@@ -82,12 +82,12 @@ export const notifyFallAlert = ({ vipName, deviceSerial } = {}) =>
     {
       action: "LIVE_FALL",
       title: "Possible Fall Detected",
-      message: `A possible fall was detected for ${formatVipName(vipName)}${formatDeviceLabel(deviceSerial)}. Check the live map and confirm their condition as soon as possible.`,
+      message: `A possible fall was detected for ${vipName ? formatVipName(vipName) : "a VIP"}${formatDeviceLabel(deviceSerial)}. Check the live map and confirm their condition as soon as possible.`,
       guardianName: "iCane Safety Monitor",
       navigation: {
         path: "/dashboard"
       }
-    },
+    }, 
     {
       dedupeKey: `fall:${deviceSerial || "unknown"}`,
       cooldownMs: SAFETY_NOTIFICATION_COOLDOWN_MS,
@@ -102,7 +102,7 @@ export const notifyRouteArrival = ({ vipName, deviceSerial } = {}) =>
     {
       action: "ROUTE_ARRIVAL",
       title: "Destination Reached",
-      message: `${formatVipName(vipName)} has arrived at the selected destination${formatDeviceLabel(deviceSerial)}. Route tracking has been cleared successfully.`,
+      message: `${vipName ? formatVipName(vipName) : "A VIP"} has arrived at the selected destination${formatDeviceLabel(deviceSerial)}. Route tracking has been cleared successfully.`,
       guardianName: "Navigation Assistant",
       navigation: {
         path: "/dashboard"
