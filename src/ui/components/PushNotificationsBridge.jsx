@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   ensureBrowserPushSubscription,
   registerPushServiceWorker,
@@ -10,10 +10,27 @@ const PushNotificationsBridge = () => {
   const pushEnabled = useSettingsStore(
     (state) => state.settings.notifications.push
   );
+  const updateNotifications = useSettingsStore(
+    (state) => state.updateNotifications
+  );
+  const hasSyncedPermission = useRef(false);
 
   useEffect(() => {
     const setup = async () => {
       try {
+        const permission =
+          typeof Notification !== "undefined"
+            ? Notification.permission
+            : "default";
+
+        if (!hasSyncedPermission.current && permission === "granted") {
+          hasSyncedPermission.current = true;
+          updateNotifications({ push: true });
+          await registerPushServiceWorker();
+          await ensureBrowserPushSubscription({ requestPermission: false });
+          return;
+        }
+
         if (!pushEnabled) {
           await removeBrowserPushSubscription();
           return;
@@ -27,7 +44,7 @@ const PushNotificationsBridge = () => {
     };
 
     setup();
-  }, [pushEnabled]);
+  }, [pushEnabled, updateNotifications]);
 
   return null;
 };

@@ -1,10 +1,8 @@
-import {
-  deletePushSubscription,
-  savePushSubscription
-} from "@/api/backendService";
+import { middlewareApi } from "@/api";
 import { useUserStore } from "@/stores/useStore";
 
 const SERVICE_WORKER_PATH = "/sw.js";
+let cachedVapidKey = null;
 
 const urlBase64ToUint8Array = (base64String) => {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -18,7 +16,31 @@ const getGuardianId = () => {
   const user = useUserStore.getState().user;
   return user?.guardian_id ?? user?.guardianId ?? null;
 };
-  
+
+const fetchVapidPublicKey = async () => {
+  if (cachedVapidKey) return cachedVapidKey;
+
+  const fallbackKey = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
+
+  try {
+    const { data } = await middlewareApi.get("/push/public-key");
+    const key = data?.publicKey || data?.vapidPublicKey;
+
+    if (key) {
+      cachedVapidKey = key;
+      return key;
+    }
+  } catch (error) {
+    console.warn("Failed to fetch VAPID public key from middleware:", error?.message || error);
+  }
+
+  if (fallbackKey) {
+    cachedVapidKey = fallbackKey;
+  }
+
+  return cachedVapidKey;
+};
+
 export const registerPushServiceWorker = async () => {
   if (!("serviceWorker" in navigator)) {
     return null;
@@ -40,10 +62,10 @@ export const ensureBrowserPushSubscription = async ({
     return null;
   }
 
-  const vapidPublicKey = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
+  const vapidPublicKey = await fetchVapidPublicKey();
 
   if (!vapidPublicKey) {
-    console.warn("Missing VITE_WEB_PUSH_PUBLIC_KEY.");
+    console.warn("Missing VAPID public key for push notifications.");
     return null;
   }
 
@@ -75,10 +97,9 @@ export const ensureBrowserPushSubscription = async ({
   }
 
   try {
-    await savePushSubscription({
+    await middlewareApi.post("/push/subscribe", {
       guardianId: getGuardianId(),
-      subscription: subscription.toJSON(),
-      userAgent: navigator.userAgent
+      subscription: subscription.toJSON()
     });
   } catch (error) {
     console.error("Failed to save push subscription:", error);
@@ -103,9 +124,9 @@ export const removeBrowserPushSubscription = async () => {
   }
 
   try {
-    await deletePushSubscription({
+    await middlewareApi.post("/push/unsubscribe", {
       guardianId: getGuardianId(),
-      subscription: subscription.toJSON()
+      endpoint: subscription.endpoint
     });
   } catch (error) {
     console.error("Failed to delete push subscription from backend:", error);
