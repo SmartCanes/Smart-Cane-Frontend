@@ -97,8 +97,15 @@ export const ensureBrowserPushSubscription = async ({
   }
 
   try {
+    const guardianId = getGuardianId();
+
+    if (!guardianId) {
+      console.warn("Skipping push subscription save: guardianId is missing.");
+      return subscription;
+    }
+
     await middlewareApi.post("/push/subscribe", {
-      guardianId: getGuardianId(),
+      guardianId,
       subscription: subscription.toJSON()
     });
   } catch (error) {

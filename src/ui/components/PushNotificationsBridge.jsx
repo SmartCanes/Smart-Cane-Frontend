@@ -4,7 +4,7 @@ import {
   registerPushServiceWorker,
   removeBrowserPushSubscription
 } from "@/utils/pushNotifications";
-import { useSettingsStore } from "@/stores/useStore";
+import { useSettingsStore, useUserStore } from "@/stores/useStore";
 
 const PushNotificationsBridge = () => {
   const pushEnabled = useSettingsStore(
@@ -12,6 +12,9 @@ const PushNotificationsBridge = () => {
   );
   const updateNotifications = useSettingsStore(
     (state) => state.updateNotifications
+  );
+  const guardianId = useUserStore(
+    (state) => state.user?.guardian_id ?? state.user?.guardianId
   );
   const hasSyncedPermission = useRef(false);
 
@@ -36,6 +39,11 @@ const PushNotificationsBridge = () => {
           return;
         }
 
+        if (!guardianId) {
+          // Wait until user info is hydrated before attempting to register the push subscription.
+          return;
+        }
+
         await registerPushServiceWorker();
         await ensureBrowserPushSubscription({ requestPermission: false });
       } catch (error) {
@@ -44,7 +52,7 @@ const PushNotificationsBridge = () => {
     };
 
     setup();
-  }, [pushEnabled, updateNotifications]);
+  }, [pushEnabled, updateNotifications, guardianId]);
 
   return null;
 };
