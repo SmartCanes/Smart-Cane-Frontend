@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
+import { Trans, useTranslation } from "react-i18next";
 
 const TermsAndPrivacyModal = ({
   isOpen,
@@ -10,8 +11,31 @@ const TermsAndPrivacyModal = ({
   isChecked,
   setIsChecked
 }) => {
+  const { t } = useTranslation("pages");
   const termsRef = useRef(null);
   const privacyRef = useRef(null);
+
+  const termsParagraphKeys = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+    "p6",
+    "p7",
+    "p8"
+  ];
+
+  const termsBulletKeys = ["b1", "b2", "b3"];
+
+  const privacyParagraphKeys = ["p1", "p2", "p3", "p4", "p5", "p6"];
+
+  const privacyBulletKeys = ["b1", "b2", "b3"];
+
+  const scrollToSection = (section) => {
+    const target = section === "privacy" ? privacyRef.current : termsRef.current;
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -43,8 +67,12 @@ const TermsAndPrivacyModal = ({
           >
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b">
-              <h2 className="text-2xl font-bold">Terms and Privacy Policy</h2>
-              <button onClick={onClose}>
+              <h2 className="text-2xl font-bold">{t("termsModal.title")}</h2>
+              <button
+                onClick={onClose}
+                aria-label={t("termsModal.actions.close")}
+                title={t("termsModal.actions.close")}
+              >
                 <Icon icon="ph:x-bold" className="w-6 h-6" />
               </button>
             </div>
@@ -54,116 +82,75 @@ const TermsAndPrivacyModal = ({
               {/* TERMS AND CONDITIONS */}
               <section ref={termsRef} id="terms">
                 <h3 className="text-lg font-semibold mb-3">
-                  Terms and Conditions
+                  {t("termsModal.terms.title")}
                 </h3>
 
-                <p className="mb-3">
-                  By using, testing, or participating in the IoT-Enabled Smart
-                  Cane with AI-Based Visual Recognition and Route Navigation
-                  (“the System”), the user and/or their authorized guardian
-                  agrees to be bound by these Terms and Conditions.
-                </p>
+                <div className="space-y-3">
+                  {termsParagraphKeys.map((key) => (
+                    <p key={key}>
+                      <Trans
+                        ns="pages"
+                        i18nKey={`termsModal.terms.paragraphs.${key}`}
+                        components={{
+                          strong: <strong className="font-semibold" />,
+                          link: (
+                            <a
+                              href="#privacy"
+                              className="text-blue-600 underline"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                scrollToSection("privacy");
+                              }}
+                            />
+                          )
+                        }}
+                      />
+                    </p>
+                  ))}
+                </div>
 
-                <p className="mb-3">
-                  The System is a research prototype designed to enhance the
-                  mobility, safety, and independence of visually impaired
-                  individuals. It is intended to assist navigation and hazard
-                  awareness but does not replace personal judgment, mobility
-                  training, or human assistance.
-                </p>
-
-                <p className="mb-3">
-                  The System utilizes short-range sensors, AI-based visual
-                  recognition, GPS tracking, route navigation, haptic feedback,
-                  and one-way voice alerts. Due to technical and environmental
-                  factors, the System may experience delays, inaccuracies, or
-                  service interruptions.
-                </p>
-
-                <p className="mb-3">
-                  Users acknowledge that obstacle detection is limited to sensor
-                  range, AI recognition may not be fully accurate, and GPS and
-                  navigation features depend on network availability and signal
-                  conditions. The System does not guarantee complete avoidance
-                  of hazards.
-                </p>
-
-                <p className="mb-3">
-                  Users must remain attentive at all times and are responsible
-                  for their own safety during navigation. Guardians or
-                  caregivers agree to use monitoring, messaging, and location
-                  features solely for safety and support purposes.
-                </p>
-
-                <p className="mb-3">
-                  The emergency SOS feature is intended to assist in emergency
-                  situations by sending alerts and location data to designated
-                  contacts. Successful delivery depends on mobile network
-                  coverage and sufficient SIM load. Immediate response is not
-                  guaranteed.
-                </p>
-
-                <p className="mb-3">
-                  Participation in system testing, surveys, and evaluations is
-                  voluntary. Participants may withdraw at any time without
-                  penalty. The system is not intended for commercial use.
-                </p>
-
-                <p>
-                  To the maximum extent permitted by law, the developers,
-                  researchers, and affiliated institutions shall not be held
-                  liable for injuries, losses, navigation errors, system
-                  failures, or damages arising from the use or misuse of the
-                  System.
-                </p>
+                <ul className="list-disc pl-5 space-y-2 mt-4">
+                  {termsBulletKeys.map((key) => (
+                    <li key={key}>
+                      <Trans
+                        ns="pages"
+                        i18nKey={`termsModal.terms.bullets.${key}`}
+                        components={{ strong: <strong className="font-semibold" /> }}
+                      />
+                    </li>
+                  ))}
+                </ul>
               </section>
 
               {/* PRIVACY POLICY */}
               <section ref={privacyRef} id="privacy">
-                <h3 className="text-lg font-semibold mb-3">Privacy Policy</h3>
+                <h3 className="text-lg font-semibold mb-3">
+                  {t("termsModal.privacy.title")}
+                </h3>
 
-                <p className="mb-3">
-                  The System collects and processes personal data necessary for
-                  system functionality, safety monitoring, emergency response,
-                  and academic research purposes. Collected data may include GPS
-                  location, system usage logs, device identifiers, and guardian
-                  contact information.
-                </p>
+                <div className="space-y-3">
+                  {privacyParagraphKeys.map((key) => (
+                    <p key={key}>
+                      <Trans
+                        ns="pages"
+                        i18nKey={`termsModal.privacy.paragraphs.${key}`}
+                        components={{ strong: <strong className="font-semibold" /> }}
+                      />
+                    </p>
+                  ))}
+                </div>
 
-                <p className="mb-3">
-                  All personal data is processed in compliance with the Data
-                  Privacy Act of 2012 (Republic Act No. 10173). Reasonable
-                  organizational, physical, and technical security measures are
-                  implemented to protect collected data against unauthorized
-                  access, loss, or misuse.
-                </p>
-
-                <p className="mb-3">
-                  Location data is used to support route navigation, guardian
-                  monitoring, and emergency SOS alerts. Real-time tracking
-                  features require an active internet connection and may be
-                  limited in areas with weak or no network coverage.
-                </p>
-
-                <p className="mb-3">
-                  Collected data shall be retained only for the duration
-                  necessary to fulfill research objectives and system
-                  evaluation. Data used for analysis will be anonymized and
-                  aggregated to protect participant identity.
-                </p>
-
-                <p className="mb-3">
-                  Data subjects have the right to be informed, access, correct,
-                  object to processing, and withdraw consent regarding their
-                  personal data at any time by coordinating with the project
-                  researchers or system administrators.
-                </p>
-
-                <p>
-                  While reasonable safeguards are applied, no system can
-                  guarantee absolute data security. By using the System, users
-                  acknowledge and accept these inherent risks.
-                </p>
+                <ul className="list-disc pl-5 space-y-2 mt-4">
+                  {privacyBulletKeys.map((key) => (
+                    <li key={key}>
+                      <Trans
+                        ns="pages"
+                        i18nKey={`termsModal.privacy.bullets.${key}`}
+                        components={{ strong: <strong className="font-semibold" /> }}
+                      />
+                    </li>
+                  ))}
+                </ul>
               </section>
 
               {/* CONSENT */}
@@ -174,10 +161,11 @@ const TermsAndPrivacyModal = ({
                   onChange={(e) => setIsChecked(e.target.checked)}
                 />
                 <span>
-                  I confirm that the Terms and Conditions and Privacy Policy
-                  have been read and explained to me. I voluntarily consent to
-                  the collection and processing of my personal data and assume
-                  the risks associated with using this research prototype.
+                  <Trans
+                    ns="pages"
+                    i18nKey="termsModal.consentLabel"
+                    components={{ strong: <strong className="font-semibold" /> }}
+                  />
                 </span>
               </label>
             </div>
@@ -188,7 +176,7 @@ const TermsAndPrivacyModal = ({
                 onClick={onClose}
                 className="flex-1 border px-4 py-2 rounded-lg cursor-pointer"
               >
-                Cancel
+                {t("termsModal.actions.cancel")}
               </button>
               <button
                 disabled={!isChecked}
@@ -199,7 +187,7 @@ const TermsAndPrivacyModal = ({
                     : "bg-gray-400 cursor-not-allowed"
                 }`}
               >
-                Accept
+                {t("termsModal.actions.accept")}
               </button>
             </div>
           </motion.div>

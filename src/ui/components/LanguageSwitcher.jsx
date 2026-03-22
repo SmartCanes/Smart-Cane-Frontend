@@ -4,7 +4,17 @@ import { useTranslation } from "react-i18next";
 const SUPPORTED_LANGUAGES = [
   { code: "en", labelKey: "languages.en" },
   { code: "tl", labelKey: "languages.tl" },
-  { code: "ceb", labelKey: "languages.ceb" }
+  { code: "ceb", labelKey: "languages.ceb" },
+  { code: "ko", labelKey: "languages.ko" },
+  { code: "zh", labelKey: "languages.zh" },
+  { code: "ja", labelKey: "languages.ja" },
+  { code: "it", labelKey: "languages.it" },
+  { code: "es", labelKey: "languages.es" },
+  { code: "pt", labelKey: "languages.pt" },
+  { code: "ru", labelKey: "languages.ru" },
+  { code: "fr", labelKey: "languages.fr" },
+  { code: "hi", labelKey: "languages.hi" },
+  { code: "ar", labelKey: "languages.ar" }
 ];
 
 const variantMap = {
@@ -61,7 +71,8 @@ const LanguageSwitcher = ({ className = "", variant = "dark" }) => {
   }, []);
 
   const handleLanguageChange = async (nextLanguage) => {
-    if (nextLanguage !== i18n.language) {
+    const activeLanguage = i18n.resolvedLanguage || i18n.language || "en";
+    if (nextLanguage !== activeLanguage) {
       await i18n.changeLanguage(nextLanguage);
     }
     setIsOpen(false);

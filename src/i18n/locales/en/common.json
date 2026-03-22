@@ -2,7 +2,17 @@
   "languages": {
     "en": "English",
     "tl": "Tagalog",
-    "ceb": "Bisaya"
+    "ceb": "Bisaya",
+    "ko": "Korean",
+    "zh": "Mandarin",
+    "ja": "Japanese",
+    "it": "Italian",
+    "es": "Spanish",
+    "pt": "Portuguese",
+    "ru": "Russian",
+    "fr": "French",
+    "hi": "Hindi",
+    "ar": "Arabic"
   },
   "languageSwitcher": {
     "label": "Language",
@@ -13,5 +23,16 @@
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "passwordField": {
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "validIconAlt": "Valid rule",
+    "rules": {
+      "lowerUpper": "Lowercase & Uppercase",
+      "number": "Number (0-9)",
+      "special": "Special Character (!@#$%^&*)",
+      "length": "At least 8 Characters"
+    }
   }
 }

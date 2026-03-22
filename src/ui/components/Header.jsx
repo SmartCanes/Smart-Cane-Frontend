@@ -542,7 +542,9 @@ const Header = () => {
 
         {/* Desktop center placeholder */}
         <div className="hidden md:flex items-center flex-1 justify-center gap-4 lg:gap-6">
-          <LanguageSwitcher variant="dark" />
+          <div data-tour="tour-language-switcher">
+            <LanguageSwitcher variant="dark" />
+          </div>
         </div>
 
         {/* Desktop right */}
@@ -839,7 +841,7 @@ const Header = () => {
                     </div>
                   </div>
 
-                  <div className="px-2">
+                  <div data-tour="tour-mobile-language" className="px-2">
                     <LanguageSwitcher variant="dark" className="w-full" />
                   </div>
 

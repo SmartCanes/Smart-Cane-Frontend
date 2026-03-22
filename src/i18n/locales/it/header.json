@@ -1,0 +1,20 @@
+{
+  "openMenu": "Apri il menu",
+  "closeMenu": "Chiudi menù",
+  "selectDevice": "Seleziona dispositivo",
+  "noVip": "Nessun VIP",
+  "noVipAvailable": "Nessun VIP disponibile",
+  "noVipDevices": "Nessun dispositivo VIP",
+  "connection": "Connessione",
+  "connected": "Collegato",
+  "disconnected": "Disconnesso",
+  "notifications": "Notifiche",
+  "noNotificationsYet": "Nessuna notifica ancora",
+  "total": "{{count}} totale",
+  "seeAllNotifications": "Vedi tutte le notifiche",
+  "markAllAsRead": "Segna tutto come letto",
+  "profile": "Profilo",
+  "history": "Storia",
+  "settings": "Impostazioni",
+  "logout": "Esci"
+}

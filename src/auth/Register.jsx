@@ -80,83 +80,175 @@ const Register = () => {
   const validateField = (name, value) => {
     switch (name) {
       case "firstName":
-        if (!value.trim()) return "First Name is required";
+        if (!value.trim())
+          return t("auth.register.validation.firstNameRequired", {
+            defaultValue: "First Name is required"
+          });
         if (!/^[a-zA-Z\s]+$/.test(value))
-          return "Should contain only letters and spaces";
-        if (value.length < 2) return "Should be at least 2 characters long";
-        if (value.length > 50) return "Should not exceed 50 characters";
+          return t("auth.register.validation.lettersAndSpacesOnly", {
+            defaultValue: "Should contain only letters and spaces"
+          });
+        if (value.length < 2)
+          return t("auth.register.validation.minTwoChars", {
+            defaultValue: "Should be at least 2 characters long"
+          });
+        if (value.length > 50)
+          return t("auth.register.validation.maxFiftyChars", {
+            defaultValue: "Should not exceed 50 characters"
+          });
         return "";
 
       case "middleName":
         if (!value) return "";
         if (!/^[a-zA-Z\s]+$/.test(value))
-          return "Should contain only letters and spaces";
-        if (value.length < 2) return "Should be at least 2 characters long";
-        if (value.length > 50) return "Should not exceed 50 characters";
+          return t("auth.register.validation.lettersAndSpacesOnly", {
+            defaultValue: "Should contain only letters and spaces"
+          });
+        if (value.length < 2)
+          return t("auth.register.validation.minTwoChars", {
+            defaultValue: "Should be at least 2 characters long"
+          });
+        if (value.length > 50)
+          return t("auth.register.validation.maxFiftyChars", {
+            defaultValue: "Should not exceed 50 characters"
+          });
         return "";
 
       case "lastName":
-        if (!value.trim()) return "Last Name is required";
+        if (!value.trim())
+          return t("auth.register.validation.lastNameRequired", {
+            defaultValue: "Last Name is required"
+          });
         if (!/^[a-zA-Z\s]+$/.test(value))
-          return "Should contain only letters and spaces";
-        if (value.length < 2) return "Should be at least 2 characters long";
-        if (value.length > 50) return "Should not exceed 50 characters";
+          return t("auth.register.validation.lettersAndSpacesOnly", {
+            defaultValue: "Should contain only letters and spaces"
+          });
+        if (value.length < 2)
+          return t("auth.register.validation.minTwoChars", {
+            defaultValue: "Should be at least 2 characters long"
+          });
+        if (value.length > 50)
+          return t("auth.register.validation.maxFiftyChars", {
+            defaultValue: "Should not exceed 50 characters"
+          });
         return "";
 
       case "username": {
-        if (!value.trim()) return "Username is required";
+        if (!value.trim())
+          return t("auth.register.validation.usernameRequired", {
+            defaultValue: "Username is required"
+          });
         if (value.length < 3)
-          return "Username must be at least 3 characters long";
-        if (value.length > 20) return "Username must not exceed 20 characters";
+          return t("auth.register.validation.usernameMinThree", {
+            defaultValue: "Username must be at least 3 characters long"
+          });
+        if (value.length > 20)
+          return t("auth.register.validation.usernameMaxTwenty", {
+            defaultValue: "Username must not exceed 20 characters"
+          });
         if (!/^[a-zA-Z0-9_]+$/.test(value))
-          return "Username can only contain letters, numbers, and underscores";
+          return t("auth.register.validation.usernameAllowedChars", {
+            defaultValue:
+              "Username can only contain letters, numbers, and underscores"
+          });
 
         const letterCount = (value.match(/[a-zA-Z]/g) || []).length;
-        if (letterCount < 3) return "Username must contain at least 3 letters";
+        if (letterCount < 3)
+          return t("auth.register.validation.usernameMinLetters", {
+            defaultValue: "Username must contain at least 3 letters"
+          });
 
         return "";
       }
 
       case "password":
-        if (!value) return "Password is required";
+        if (!value)
+          return t("auth.register.validation.passwordRequired", {
+            defaultValue: "Password is required"
+          });
         if (value.length < 8)
-          return "Password must be at least 8 characters long";
-        if (value.length > 64) return "Password must not exceed 64 characters";
+          return t("auth.register.validation.passwordMinEight", {
+            defaultValue: "Password must be at least 8 characters long"
+          });
+        if (value.length > 64)
+          return t("auth.register.validation.passwordMaxSixtyFour", {
+            defaultValue: "Password must not exceed 64 characters"
+          });
         if (!/(?=.*[a-z])/.test(value))
-          return "Password must contain at least one lowercase letter";
+          return t("auth.register.validation.passwordNeedsLowercase", {
+            defaultValue: "Password must contain at least one lowercase letter"
+          });
         if (!/(?=.*[A-Z])/.test(value))
-          return "Password must contain at least one uppercase letter";
+          return t("auth.register.validation.passwordNeedsUppercase", {
+            defaultValue: "Password must contain at least one uppercase letter"
+          });
         if (!/(?=.*\d)/.test(value))
-          return "Password must contain at least one number";
+          return t("auth.register.validation.passwordNeedsNumber", {
+            defaultValue: "Password must contain at least one number"
+          });
         if (!/(?=.*[@$!%*?&])/.test(value))
-          return "Password must contain at least one special character (@$!%*?&)";
+          return t("auth.register.validation.passwordNeedsSpecial", {
+            defaultValue:
+              "Password must contain at least one special character (@$!%*?&)"
+          });
         return "";
 
       case "confirmPassword":
-        if (!value) return "Confirm Password is required";
-        if (value !== formData.password) return "Passwords don't match!";
+        if (!value)
+          return t("auth.register.validation.confirmPasswordRequired", {
+            defaultValue: "Confirm Password is required"
+          });
+        if (value !== formData.password)
+          return t("auth.register.validation.passwordsDontMatch", {
+            defaultValue: "Passwords don't match!"
+          });
         return "";
 
       case "streetAddress":
-        if (!value.trim()) return "Street Address is required";
-        if (value.length < 5) return "Address should be more specific";
+        if (!value.trim())
+          return t("auth.register.validation.streetAddressRequired", {
+            defaultValue: "Street Address is required"
+          });
+        if (value.length < 5)
+          return t("auth.register.validation.addressMoreSpecific", {
+            defaultValue: "Address should be more specific"
+          });
         if (value.length > 100)
-          return "Address should not exceed 100 characters";
+          return t("auth.register.validation.addressMaxHundred", {
+            defaultValue: "Address should not exceed 100 characters"
+          });
         return "";
 
       case "email":
-        if (!value.trim()) return "Email is required";
-        if (value.length > 100) return "Email should not exceed 100 characters";
+        if (!value.trim())
+          return t("auth.register.validation.emailRequired", {
+            defaultValue: "Email is required"
+          });
+        if (value.length > 100)
+          return t("auth.register.validation.emailMaxHundred", {
+            defaultValue: "Email should not exceed 100 characters"
+          });
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-          return "Please enter a valid email address";
+          return t("auth.register.validation.validEmail", {
+            defaultValue: "Please enter a valid email address"
+          });
         return "";
 
       case "contactNumber":
-        if (!value) return "Contact Number is required";
+        if (!value)
+          return t("auth.register.validation.contactNumberRequired", {
+            defaultValue: "Contact Number is required"
+          });
         if (value.length !== CONTACT_NUMBER_LENGTH)
-          return `Contact number must be ${CONTACT_NUMBER_LENGTH} digits`;
+          return t("auth.register.validation.contactDigits", {
+            defaultValue: "Contact number must be {{count}} digits",
+            count: CONTACT_NUMBER_LENGTH
+          });
         if (!/^09\d{9}$/.test(value))
-          return "Contact number must start with 09 and contain 11 digits";
+          return t("auth.register.validation.contactStarts09", {
+            defaultValue:
+              "Contact number must start with 09 and contain 11 digits"
+          });
         return "";
 
       default:
@@ -343,10 +435,16 @@ const Register = () => {
               onClose: () =>
                 setModalConfig((prev) => ({ ...prev, isOpen: false })),
               variant: "banner",
-              title: "Account Created via Invite!",
-              message:
-                "Your account has been created successfully using the invite link.",
-              actionText: "Go to Login",
+              title: t("auth.register.modal.inviteCreatedTitle", {
+                defaultValue: "Account Created via Invite!"
+              }),
+              message: t("auth.register.modal.inviteCreatedMessage", {
+                defaultValue:
+                  "Your account has been created successfully using the invite link."
+              }),
+              actionText: t("auth.register.modal.goToLogin", {
+                defaultValue: "Go to Login"
+              }),
               onAction: () => navigate("/login")
             });
             clearDeviceValidated();
@@ -366,9 +464,13 @@ const Register = () => {
               onClose: () =>
                 setModalConfig((prev) => ({ ...prev, isOpen: false })),
               variant: "banner",
-              title: "Account Created!",
-              message:
-                "Account successfully created. Please pair your device to proceed."
+              title: t("auth.register.modal.accountCreatedTitle", {
+                defaultValue: "Account Created!"
+              }),
+              message: t("auth.register.modal.accountCreatedPairMessage", {
+                defaultValue:
+                  "Account successfully created. Please pair your device to proceed."
+              })
             });
             setShowScanner(true);
             break;
@@ -376,7 +478,11 @@ const Register = () => {
 
           const otpCode = otp.join("");
           if (otpCode.length !== 6) {
-            setOtpError("Please enter the complete 6-digit OTP");
+            setOtpError(
+              t("auth.register.validation.otpSixDigits", {
+                defaultValue: "Please enter the complete 6-digit OTP"
+              })
+            );
             break;
           }
 
@@ -411,10 +517,16 @@ const Register = () => {
                   onClose: () =>
                     setModalConfig((prev) => ({ ...prev, isOpen: false })),
                   variant: "banner",
-                  title: "Setup Complete!",
-                  message:
-                    "Your account has been created and device paired successfully.",
-                  actionText: "Go to Login",
+                  title: t("auth.register.modal.setupCompleteTitle", {
+                    defaultValue: "Setup Complete!"
+                  }),
+                  message: t("auth.register.modal.setupCompleteMessage", {
+                    defaultValue:
+                      "Your account has been created and device paired successfully."
+                  }),
+                  actionText: t("auth.register.modal.goToLogin", {
+                    defaultValue: "Go to Login"
+                  }),
                   onAction: () => navigate("/login")
                 });
                 clearDeviceValidated();
@@ -426,9 +538,13 @@ const Register = () => {
                 onClose: () =>
                   setModalConfig((prev) => ({ ...prev, isOpen: false })),
                 variant: "banner",
-                title: "Account Created!",
-                message:
-                  "Account created successfully. Please manually pair your device."
+                title: t("auth.register.modal.accountCreatedTitle", {
+                  defaultValue: "Account Created!"
+                }),
+                message: t("auth.register.modal.manualPairMessage", {
+                  defaultValue:
+                    "Account created successfully. Please manually pair your device."
+                })
               });
               setShowScanner(true);
             }
@@ -438,9 +554,13 @@ const Register = () => {
               onClose: () =>
                 setModalConfig((prev) => ({ ...prev, isOpen: false })),
               variant: "banner",
-              title: "Account Created!",
-              message:
-                "Account successfully created. Please pair your device to proceed."
+              title: t("auth.register.modal.accountCreatedTitle", {
+                defaultValue: "Account Created!"
+              }),
+              message: t("auth.register.modal.accountCreatedPairMessage", {
+                defaultValue:
+                  "Account successfully created. Please pair your device to proceed."
+              })
             });
             setShowScanner(true);
           }
@@ -453,18 +573,29 @@ const Register = () => {
       }
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || error.message || "Login failed";
+        error.response?.data?.message ||
+        error.message ||
+        t("auth.register.errors.generic", {
+          defaultValue: "Registration failed"
+        });
       if (errorMessage.includes("Username")) {
         setErrors((prev) => ({
           ...prev,
-          username: "Username already taken"
+          username: t("auth.register.errors.usernameTaken", {
+            defaultValue: "Username already taken"
+          })
         }));
         document
           .querySelector('[name="username"]')
           ?.scrollIntoView({ behavior: "smooth", block: "center" });
         document.querySelector('[name="username"]')?.focus();
       } else if (errorMessage.includes("Email")) {
-        setErrors((prev) => ({ ...prev, email: "Email already registered" }));
+        setErrors((prev) => ({
+          ...prev,
+          email: t("auth.register.errors.emailRegistered", {
+            defaultValue: "Email already registered"
+          })
+        }));
         document
           .querySelector('[name="email"]')
           ?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -472,7 +603,9 @@ const Register = () => {
       } else if (errorMessage.includes("Contact number")) {
         setErrors((prev) => ({
           ...prev,
-          contactNumber: "Contact number is already registered"
+          contactNumber: t("auth.register.errors.contactRegistered", {
+            defaultValue: "Contact number is already registered"
+          })
         }));
         document
           .querySelector('[name="contactNumber"]')
@@ -486,10 +619,14 @@ const Register = () => {
           type: "error",
           onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
           variant: "banner",
-          title: "Too Many Requests",
+          title: t("auth.register.modal.tooManyRequestsTitle", {
+            defaultValue: "Too Many Requests"
+          }),
           position: "center",
-          message:
-            "You have made too many requests in a short period. Please wait a while before trying again."
+          message: t("auth.register.modal.tooManyRequestsMessage", {
+            defaultValue:
+              "You have made too many requests in a short period. Please wait a while before trying again."
+          })
         });
       } else {
         console.log(error);
@@ -498,10 +635,14 @@ const Register = () => {
           type: "error",
           onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
           variant: "banner",
-          title: "Network Error",
+          title: t("auth.register.modal.networkErrorTitle", {
+            defaultValue: "Network Error"
+          }),
           position: "center",
-          message:
-            "We're having trouble connecting to the server. Please check your internet connection and try again. If the problem persists, try refreshing the page or contacting support."
+          message: t("auth.register.modal.networkErrorMessage", {
+            defaultValue:
+              "We're having trouble connecting to the server. Please check your internet connection and try again. If the problem persists, try refreshing the page or contacting support."
+          })
         });
       }
     } finally {
@@ -523,8 +664,12 @@ const Register = () => {
       //   setModalConfig((prev) => ({ ...prev, isOpen: false }));
       // },
       variant: "banner",
-      title: "Paired Successfully",
-      actionText: "Proceed to Login",
+      title: t("auth.register.modal.pairedSuccessfullyTitle", {
+        defaultValue: "Paired Successfully"
+      }),
+      actionText: t("auth.register.modal.proceedToLogin", {
+        defaultValue: "Proceed to Login"
+      }),
       onAction: () => {
         clearRegisterStore();
         navigate("/login");
@@ -578,7 +723,10 @@ const Register = () => {
     } catch (error) {
       console.error("Failed to send OTP:", error);
       setOtpError(
-        error.response?.data?.message || "Failed to send OTP. Please try again."
+        error.response?.data?.message ||
+          t("auth.register.errors.otpSendFailed", {
+            defaultValue: "Failed to send OTP. Please try again."
+          })
       );
     } finally {
       setIsSendingOtp(false);
@@ -661,16 +809,31 @@ const Register = () => {
           onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
           title:
             data.reason === "ok"
-              ? "Device Verified"
+              ? t("auth.register.modal.deviceVerifiedTitle", {
+                  defaultValue: "Device Verified"
+                })
               : data.reason === "already_paired"
-                ? "Device Already Paired"
-                : "Device Not Found",
+                ? t("auth.register.modal.deviceAlreadyPairedTitle", {
+                    defaultValue: "Device Already Paired"
+                  })
+                : t("auth.register.modal.deviceNotFoundTitle", {
+                    defaultValue: "Device Not Found"
+                  }),
           message:
             data.reason === "ok"
-              ? "Your device has been successfully verified and is ready to be paired. Register your account to continue."
+              ? t("auth.register.modal.deviceVerifiedMessage", {
+                  defaultValue:
+                    "Your device has been successfully verified and is ready to be paired. Register your account to continue."
+                })
               : data.reason === "already_paired"
-                ? "This device is already linked to another account. If you believe this is a mistake, please contact support."
-                : "We couldn't locate a device with this serial code. Please check and try again."
+                ? t("auth.register.modal.deviceAlreadyPairedMessage", {
+                    defaultValue:
+                      "This device is already linked to another account. If you believe this is a mistake, please contact support."
+                  })
+                : t("auth.register.modal.deviceNotFoundMessage", {
+                    defaultValue:
+                      "We couldn't locate a device with this serial code. Please check and try again."
+                  })
         });
         window.history.replaceState({}, "", window.location.pathname);
       } catch (error) {
@@ -678,8 +841,14 @@ const Register = () => {
           isOpen: true,
           variant: "banner",
           position: "center",
-          title: "Invalid Device",
-          message: error.message || "Invalid device. Please try again."
+          title: t("auth.register.modal.invalidDeviceTitle", {
+            defaultValue: "Invalid Device"
+          }),
+          message:
+            error.message ||
+            t("auth.register.modal.invalidDeviceMessage", {
+              defaultValue: "Invalid device. Please try again."
+            })
         });
       }
     };
@@ -936,7 +1105,9 @@ const Register = () => {
                         label={t("auth.register.province")}
                         labelClassName={registerSelectLabelClassName}
                         inputClassName={registerSelectInputClassName}
-                        placeholder="Province..."
+                        placeholder={t("auth.register.placeholders.province", {
+                          defaultValue: "Province..."
+                        })}
                         onChange={(e) => {
                           handleSelectChange("province", e.target.value);
                         }}
@@ -956,7 +1127,9 @@ const Register = () => {
                         label={t("auth.register.city")}
                         labelClassName={registerSelectLabelClassName}
                         inputClassName={registerSelectInputClassName}
-                        placeholder="City..."
+                        placeholder={t("auth.register.placeholders.city", {
+                          defaultValue: "City..."
+                        })}
                         onChange={(e) => {
                           handleSelectChange("barangay", e.target.value);
                         }}
@@ -972,7 +1145,9 @@ const Register = () => {
                         label={t("auth.register.barangay")}
                         labelClassName={registerSelectLabelClassName}
                         inputClassName={registerSelectInputClassName}
-                        placeholder="Barangay..."
+                        placeholder={t("auth.register.placeholders.barangay", {
+                          defaultValue: "Barangay..."
+                        })}
                         disabled
                         onChange={(e) => {
                           handleSelectChange("barangay", e.target.value);
@@ -989,7 +1164,9 @@ const Register = () => {
                       label={t("auth.register.village")}
                       labelClassName={registerSelectLabelClassName}
                       inputClassName={registerSelectInputClassName}
-                      placeholder="Village..."
+                      placeholder={t("auth.register.placeholders.village", {
+                        defaultValue: "Village..."
+                      })}
                       onChange={(e) => {
                         handleSelectChange("barangay", e.target.value);
                       }}
@@ -1008,7 +1185,9 @@ const Register = () => {
                     <TextField
                       className="font-poppins"
                       label={t("auth.register.contactNumber")}
-                      placeholder="09XX XXX XXXX"
+                      placeholder={t("auth.register.placeholders.contactNumber", {
+                        defaultValue: "09XX XXX XXXX"
+                      })}
                       type="tel"
                       name="contactNumber"
                       value={formData.contactNumber}
@@ -1028,7 +1207,9 @@ const Register = () => {
                     <TextField
                       className="font-poppins"
                       label={t("auth.register.email")}
-                      placeholder="sample.email@gmail.com"
+                      placeholder={t("auth.register.placeholders.email", {
+                        defaultValue: "sample.email@gmail.com"
+                      })}
                       type="email"
                       name="email"
                       value={formData.email}

@@ -20,6 +20,136 @@
   "dashboard": {
     "title": "Dashboard"
   },
+  "tour": {
+    "ui": {
+      "back": "Balik",
+      "next": "Sunod",
+      "done": "Nahuman na",
+      "skip": "Laktaw"
+    },
+    "steps": {
+      "dashboard": {
+        "switchVip": {
+          "title": "Pagbalhin sa imong VIP",
+          "description": "Gamita kini nga dropdown aron magbalhinbalhin tali sa imong gipares nga mga aparato sa iCane. Ang matag aparato gi-assign sa usa ka piho nga VIP."
+        },
+        "connectionStatus": {
+          "title": "Status sa Koneksyon",
+          "description": "Kini nga badge nagpakita kung ang imong iCane buhi ug nagpadala sa datos. Ang berde nagpasabut nga konektado - ang gray nagpasabut nga offline ang aparato."
+        },
+        "alerts": {
+          "title": "Mga Alerto ug Notipikasyon",
+          "description": "I-tap ang kampana aron makita ang umaabot nga mga alerto gikan sa imong iCane - pag-detect sa pagkahulog, ubos nga baterya, emergency trigger, ug uban pa."
+        },
+        "accountMenu": {
+          "title": "Imong Account Menu",
+          "description": "I-access ang imong profile, kasaysayan sa kalihokan, mga setting sa app, o pag-sign out gikan niini nga menu."
+        },
+        "liveMap": {
+          "title": "Live nga Pagsubay sa Lokasyon",
+          "description": "Tan-awa ang real-time nga posisyon sa imong iCane sa mapa. Pag-tap bisan asa sa mapa aron maablihan ang mga kapilian sa pag-ruta ug magtakda og destinasyon alang sa imong VIP."
+        },
+        "gpsInfo": {
+          "title": "Impormasyon sa GPS Signal",
+          "description": "Pag-monitor sa ihap sa satellite, kalidad sa signal, ug katapusan nga nahibal-an nga mga coordinate sa GPS sa imong iCane device."
+        },
+        "guardianNetwork": {
+          "title": "Tigbantay Network",
+          "description": "Tan-awa kung kinsa nga mga co-guardian ang karon online. Ang berde nagpasabut nga aktibo - nag-monitor sila kauban nimo karon."
+        },
+        "recentAlerts": {
+          "title": "Bag-ong mga Alerto",
+          "description": "Magpabilin nga updated sa pinakabag-o nga pag-ila sa pagkahulog ug mga alerto sa emerhensya nga na-trigger sa iCane device."
+        },
+        "sendNote": {
+          "title": "Pagpadala ug Quick Note",
+          "description": "Pagpadala ug mubo nga pahinumdom o mensahe direkta sa imong VIP pinaagi sa voice engine sa iCane."
+        },
+        "mapControls": {
+          "title": "Mga Kontrol sa Mapa",
+          "description": "I-lock ang mapa sa ruta sa imong VIP, sundan ang ilang paglihok sa tinuud nga oras, isentro sa imong kaugalingon nga lokasyon, o pag-zoom in ug out gamit kini nga mga kontrol."
+        }
+      },
+      "devices": {
+        "devicesHeader": {
+          "title": "Imong Gipares nga mga Device sa iCane",
+          "description": "Ang tanang iCane device nga nalambigit sa imong account gipakita dinhi. Mahimo nimong madumala, usbon ang ngalan, o i-unpair ang bisan unsang aparato."
+        },
+        "addDevice": {
+          "title": "Pagdugang og Bag-ong Device",
+          "description": "I-tap ang 'Add Cane' ug i-scan ang QR code sa imong iCane aron ipares kini sa imong account. Nagkinahanglan lang kini og pipila ka segundo."
+        },
+        "deviceActions": {
+          "title": "Ablihi ang Device Actions",
+          "description": "I-klik ang Manage sa usa ka device card aron maablihan ang dali nga mga aksyon alang sa angga, mga magbalantay, ug mga kontrol sa pagpares."
+        },
+        "deviceMenu": {
+          "title": "Menu sa Aksyon sa Device",
+          "description": "Kini nga mga opsyon motugot kanimo sa pag-edit sa nickname, pagdumala sa mga magbalantay, o pagtangtang sa pagpares sa device. I-klik ang Manage Guardians aron magpadayon."
+        },
+        "inviteGuardian": {
+          "title": "Pagdapit ug Laing Tigbantay",
+          "description": "Gamita kini nga buton sa pagdapit ug bag-ong tigbantay pinaagi sa email aron sila makatabang sa pagmonitor niini nga VIP."
+        },
+        "editGuardian": {
+          "title": "I-edit ang mga Detalye sa Tigbantay",
+          "description": "Gamita kini nga icon sa pag-edit sa usa ka guardian card aron ma-update ang mga detalye sa relasyon kung magbag-o ang mga tahas."
+        },
+        "guardianStats": {
+          "title": "Mga Estadistika sa Summary sa Tigbantay",
+          "description": "Pagsubay sa Total nga mga Tigbantay, Aktibo nga mga tigbantay, ug Naghulat nga mga Imbitasyon gikan niining mga kard sa katingbanan."
+        }
+      },
+      "activity_logs": {
+        "activityHeader": {
+          "title": "Mga Report sa Kalihokan",
+          "description": "Usa ka bug-os nga agianan sa pag-audit sa tanan nga mga aksyon sa account - pag-login, pagbag-o sa aparato, pagdapit sa magbalantay, ug uban pa."
+        },
+        "activitySearch": {
+          "title": "Pagpangita ug Pagsala",
+          "description": "Pangita dayon og piho nga mga kalihokan pinaagi sa pagpangita og ngalan sa magbalantay, matang sa aksyon, o deskripsyon."
+        }
+      },
+      "device_logs": {
+        "deviceLogsHeader": {
+          "title": "Mga Log sa Kalihokan sa Device",
+          "description": "Tan-awa ang mga kalihokan sa ruta, mga panghitabo sa kaluwasan, ug kasaysayan sa paglihok alang sa imong VIP nga iCane device."
+        },
+        "deviceLogsSearch": {
+          "title": "Pagpangita ug mga Filter",
+          "description": "Dali nga pig-ot ang mga rekord pinaagi sa keyword, status, o han-ay sa petsa aron makit-an ang mga panghitabo nga imong gikinahanglan."
+        }
+      },
+      "weather_board": {
+        "weatherMain": {
+          "title": "Panagna sa Panahon",
+          "description": "Susiha ang kasamtangan nga mga kondisyon ug daghang adlaw nga mga panagna aron makatabang sa pagplano sa luwas nga mga kalihokan sa gawas alang sa imong VIP."
+        },
+        "weatherSearch": {
+          "title": "Pangitaa Bisan unsang Lokasyon",
+          "description": "I-type ang bisan unsang lungsod o lugar sa Pilipinas aron makakuha usa ka lokal nga forecast alang sa kana nga lugar."
+        }
+      },
+      "advanced": {
+        "advancedHeader": {
+          "title": "Pagdumala sa Component",
+          "description": "Pag-monitor sa tinuod nga oras nga kahimsog sa matag sangkap sa hardware ug pag-tweak sa mga threshold sa sensor gikan dinhi."
+        },
+        "deviceStatus": {
+          "title": "Panan-aw sa Panglawas",
+          "description": "Kini nga panel nag-summarize kung pila ka mga component ang naa online ug naghatag ug kinatibuk-ang porsyento sa panglawas para sa imong iCane."
+        }
+      }
+    },
+    "mobile": {
+      "dashboard": {
+        "headerMenuIntro": {
+          "title": "Ablihi ang Header Menu",
+          "description": "Ablihi ang Header Menu aron ma-access ang imong status sa koneksyon, VIP dropdown, ug uban pang mga setting."
+        }
+      }
+    }
+  },
   "dashboardPage": {
     "title": "Live Location",
     "subtitle": "Real-time monitoring ug safety features para sa imong iCane device",
@@ -572,6 +702,9 @@
         "cancel": "Cancel"
       },
       "modal": {
+        "noValidDeviceTitle": "Walay Balid nga Device",
+        "noValidDeviceMessage": "Murag wala kay paired nga iCane device. Palihug i-pair ang imong device aron makapadayon.",
+        "pairedSuccessfullyTitle": "Malampuson ang Pag-pair",
         "proceedToDashboard": "Padayon sa Dashboard",
         "continueToDashboard": "Makapadayon ka na sa dashboard ug magamit ang imong account.",
         "redirecting": "Gi-redirect sa {{seconds}}s..."
@@ -623,7 +756,75 @@
       "privacy": "Privacy Policy.",
       "scanTitle": "I-scan ang imong iCane Device",
       "scanDescription": "Itudlo ang camera sa QR code sa imong iCane device aron ma-pair kini.",
+      "placeholders": {
+        "province": "Probinsya...",
+        "city": "Syudad...",
+        "barangay": "Barangay...",
+        "village": "Village...",
+        "contactNumber": "09XX XXX XXXX",
+        "email": "sample.email@gmail.com"
+      },
+      "validation": {
+        "firstNameRequired": "Kinahanglan ang Ngalan",
+        "lastNameRequired": "Kinahanglan ang Apelyido",
+        "lettersAndSpacesOnly": "Mga letra ug espasyo ra ang pwede",
+        "minTwoChars": "Kinahanglan dili moubos sa 2 ka karakter",
+        "maxFiftyChars": "Dili pwede mulapas sa 50 ka karakter",
+        "usernameRequired": "Kinahanglan ang Username",
+        "usernameMinThree": "Kinahanglan dili moubos sa 3 ka karakter ang username",
+        "usernameMaxTwenty": "Dili pwede mulapas sa 20 ka karakter ang username",
+        "usernameAllowedChars": "Ang username pwede ra letra, numero, ug underscore",
+        "usernameMinLetters": "Kinahanglan adunay labing menos 3 ka letra ang username",
+        "passwordRequired": "Kinahanglan ang Password",
+        "passwordMinEight": "Kinahanglan dili moubos sa 8 ka karakter ang password",
+        "passwordMaxSixtyFour": "Dili pwede mulapas sa 64 ka karakter ang password",
+        "passwordNeedsLowercase": "Kinahanglan adunay usa ka lowercase nga letra ang password",
+        "passwordNeedsUppercase": "Kinahanglan adunay usa ka uppercase nga letra ang password",
+        "passwordNeedsNumber": "Kinahanglan adunay usa ka numero ang password",
+        "passwordNeedsSpecial": "Kinahanglan adunay usa ka special character ang password (@$!%*?&)",
+        "confirmPasswordRequired": "Kinahanglan ang Confirm Password",
+        "passwordsDontMatch": "Dili magkapareho ang mga password!",
+        "streetAddressRequired": "Kinahanglan ang Street Address",
+        "addressMoreSpecific": "Kinahanglan mas detalyado ang address",
+        "addressMaxHundred": "Dili pwede mulapas sa 100 ka karakter ang address",
+        "emailRequired": "Kinahanglan ang Email",
+        "emailMaxHundred": "Dili pwede mulapas sa 100 ka karakter ang email",
+        "validEmail": "Palihug butangi ug sakto nga email address",
+        "contactNumberRequired": "Kinahanglan ang Contact Number",
+        "contactDigits": "Kinahanglan {{count}} ka digit ang contact number",
+        "contactStarts09": "Kinahanglan magsugod sa 09 ug adunay 11 ka digit ang contact number",
+        "otpSixDigits": "Palihug kompletoha ang 6-digit OTP"
+      },
+      "errors": {
+        "generic": "Napakyas ang registration",
+        "usernameTaken": "Gigamit na ang username",
+        "emailRegistered": "Naka-register na ang email",
+        "contactRegistered": "Naka-register na ang contact number",
+        "otpSendFailed": "Napakyas ang pagpadala sa OTP. Sulayi pag-usab."
+      },
       "modal": {
+        "inviteCreatedTitle": "Nahimo ang Account gamit ang Invite!",
+        "inviteCreatedMessage": "Malampusong nahimo ang imong account gamit ang invite link.",
+        "accountCreatedTitle": "Nahimo ang Account!",
+        "accountCreatedPairMessage": "Malampusong nahimo ang account. Palihug i-pair ang device aron makapadayon.",
+        "setupCompleteTitle": "Kompleto na ang Setup!",
+        "setupCompleteMessage": "Nahimo na ang imong account ug malampuson nga na-pair ang device.",
+        "manualPairMessage": "Nahimo na ang account. Palihug i-manual pair ang imong device.",
+        "goToLogin": "Adto sa Login",
+        "proceedToLogin": "Padayon sa Login",
+        "pairedSuccessfullyTitle": "Malampuson ang Pag-pair",
+        "tooManyRequestsTitle": "Daghang Kayo og Request",
+        "tooManyRequestsMessage": "Daghan kaayong requests sulod sa mubo nga oras. Palihug hulat una sa mosulay pag-usab.",
+        "networkErrorTitle": "Network Error",
+        "networkErrorMessage": "Naay problema sa koneksyon sa server. Palihug susiha imong internet ug sulayi pag-usab. Kung magpadayon ang problema, i-refresh ang page o kontaka ang support.",
+        "deviceVerifiedTitle": "Na-verify ang Device",
+        "deviceAlreadyPairedTitle": "Naka-pair na ang Device",
+        "deviceNotFoundTitle": "Wala Nakit-i ang Device",
+        "deviceVerifiedMessage": "Malampusong na-verify ang imong device ug andam na kini i-pair. Pag-register og account aron makapadayon.",
+        "deviceAlreadyPairedMessage": "Kining device naka-link na sa laing account. Kung sayop ni, palihug kontaka ang support.",
+        "deviceNotFoundMessage": "Wala namo makit-i ang device gamit kining serial code. Palihug i-check ug sulayi pag-usab.",
+        "invalidDeviceTitle": "Invalid Device",
+        "invalidDeviceMessage": "Invalid nga device. Palihug sulayi pag-usab.",
         "continueToLogin": "Makapadayon ka na sa login ug magamit ang imong account.",
         "redirecting": "Gi-redirect sa {{seconds}}s..."
       }
@@ -672,5 +873,48 @@
         "newOtpSent": "Bag-ong OTP naipadala sa imong email!"
       }
     }
+  },
+  "termsModal": {
+    "title": "Mga Termino ug Patakaran sa Pagkapribado",
+    "actions": {
+      "close": "Duol",
+      "cancel": "Pagkanselar",
+      "accept": "Dawata"
+    },
+    "terms": {
+      "title": "Mga Termino ug Kondisyon",
+      "paragraphs": {
+        "p1": "Pinaagi sa paggamit, pagsulay, o pag-apil sa <strong>IoT-Enabled Smart Cane nga adunay AI-Based Visual Recognition ug Route Navigation</strong>(\"ang Sistema\"), ang tiggamit ug/o ang ilang awtorisadong magbalantay miuyon nga masakop niini nga mga Termino ug Kondisyon.",
+        "p2": "Ang Sistema usa ka prototype sa panukiduki nga gilaraw aron mapauswag ang paglihok, kaluwasan, ug kagawasan sa mga tawo nga adunay diperensya sa panan-aw. Gituyo kini sa pagtabang sa nabigasyon ug kahibalo sa peligro apan dili mopuli sa personal nga paghukom, pagbansay sa paglihok, o tabang sa tawo.",
+        "p3": "Ang Sistema naggamit ug mga short-range nga sensor, AI-based visual recognition, GPS tracking, route navigation, haptic feedback, ug one-way voice alerts. Tungod sa teknikal ug kalikupan nga mga hinungdan, ang Sistema mahimong makasinati ug mga paglangay, dili tukma, o pagkabalda sa serbisyo.",
+        "p4": "Giila sa mga tiggamit nga ang pag-ila sa babag limitado sa sensor range, ang pag-ila sa AI mahimong dili hingpit nga tukma, ug ang mga bahin sa GPS ug nabigasyon nagdepende sa pagkaanaa sa network ug mga kondisyon sa signal. Ang Sistema dili garantiya sa hingpit nga paglikay sa mga peligro.",
+        "p5": "Ang mga tiggamit kinahanglan nga magpabilin nga matinagdanon sa tanan nga mga panahon ug responsable alang sa ilang kaugalingon nga kaluwasan sa panahon sa nabigasyon. Ang mga tigbantay o mga tig-atiman miuyon sa paggamit sa pagmonitor, pagmemensahe, ug mga bahin sa lokasyon alang lamang sa mga katuyoan sa kaluwasan ug suporta.",
+        "p6": "Ang emerhensya nga SOS nga bahin gituyo aron sa pagtabang sa mga sitwasyon sa emerhensya pinaagi sa pagpadala sa mga alerto ug data sa lokasyon ngadto sa gitudlo nga mga kontak. Ang malampuson nga paghatod nagdepende sa sakup sa mobile network ug igo nga load sa SIM. Dili garantiya ang dihadiha nga tubag.",
+        "p7": "Ang pag-apil sa pagsulay sa sistema, mga survey, ug mga ebalwasyon boluntaryo. Ang mga partisipante mahimong mo-withdraw bisan unsang orasa nga walay silot. Ang sistema wala gituyo alang sa komersyal nga paggamit.",
+        "p8": "Para sa mga katungod nga may kalabotan sa datos ug mga detalye sa pagproseso, palihog ribyuha ang <link>Seksyon sa Patakaran sa Pagkapribado</link>."
+      },
+      "bullets": {
+        "b1": "Kanunay nga unahon ang<strong>tinuod nga kalibutan nga kahibalo</strong>samtang naggamit sa Sistema.",
+        "b2": "Tagda ang tanang alerto isip <strong>tabang nga giya</strong>, dili hingpit nga garantiya.",
+        "b3": "Gamita lang ang device para sa iyang gituyo nga <strong>research ug safety support</strong> nga katuyoan."
+      }
+    },
+    "privacy": {
+      "title": "Patakaran sa Pagkapribado",
+      "paragraphs": {
+        "p1": "Ang Sistema nagkolekta ug nagproseso sa personal nga datos nga gikinahanglan alang sa pagpaandar sa sistema, pagmonitor sa kaluwasan, pagtubag sa emerhensya, ug mga katuyoan sa panukiduki sa akademiko. Ang mga nakolekta nga datos mahimong maglakip sa lokasyon sa GPS, mga log sa paggamit sa sistema, mga identifier sa aparato, ug impormasyon sa pagkontak sa magbalantay.",
+        "p2": "Ang tanang personal nga datos giproseso agig pagsunod sa Data Privacy Act of 2012 (Republic Act No. 10173). Ang makatarunganon nga organisasyonal, pisikal, ug teknikal nga mga lakang sa seguridad gipatuman aron mapanalipdan ang nakolekta nga datos batok sa dili awtorisado nga pag-access, pagkawala, o sayop nga paggamit.",
+        "p3": "Ang datos sa lokasyon gigamit aron suportahan ang pag-navigate sa ruta, pag-monitor sa tigbantay, ug mga alerto sa emerhensya sa SOS. Ang real-time nga mga feature sa pagsubay nagkinahanglan og aktibong koneksyon sa internet ug mahimong limitado sa mga lugar nga huyang o walay network coverage.",
+        "p4": "Ang mga nakolekta nga datos kinahanglan nga huptan lamang sa gidugayon nga gikinahanglan aron matuman ang mga katuyoan sa panukiduki ug pagtimbang-timbang sa sistema. Ang datos nga gigamit alang sa pagtuki himoong anonymize ug ig-aggregate aron mapanalipdan ang identidad sa partisipante.",
+        "p5": "Ang mga sakop sa datos adunay katungod nga mahibal-an, maka-access, magtul-id, mosupak sa pagproseso, ug mag-withdraw sa pagtugot mahitungod sa ilang personal nga datos sa bisan unsang oras pinaagi sa pagpakig-alayon sa mga tigdukiduki sa proyekto o mga tigdumala sa sistema.",
+        "p6": "Samtang gipadapat ang makatarunganon nga mga panalipod, walay sistema nga makagarantiya sa hingpit nga seguridad sa datos. Pinaagi sa paggamit sa Sistema, ang mga tiggamit moila ug modawat niining kinaiyanhong mga risgo."
+      },
+      "bullets": {
+        "b1": "Gikolekta lang namo ang datos nga<strong>kinahanglan</strong>para sa kaluwasan ug operasyon sa sistema.",
+        "b2": "Ang pagreport sa panukiduki naggamit ug <strong>anonymized o aggregate</strong> data kung mahimo.",
+        "b3": "Mahimo kang mohangyo nga <strong>pag-access o pagkorihir</strong> sa imong datos pinaagi sa mga tigdumala sa proyekto."
+      }
+    },
+    "consentLabel": "Gikumpirma nako nga ang <strong>Mga Termino ug Kondisyon</strong>ug <strong>Patakaran sa Pagkapribado</strong>gibasa na ug gipatin-aw kanako. Ako boluntaryo nga miuyon sa pagkolekta ug pagproseso sa akong personal nga datos ug giangkon ang mga risgo nga nalangkit sa paggamit niini nga research prototype."
   }
 }

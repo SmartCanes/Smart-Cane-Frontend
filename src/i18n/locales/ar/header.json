@@ -1,0 +1,20 @@
+  {
+  "openMenu": "فتح القائمة",
+  "closeMenu": "إغلاق القائمة",
+  "selectDevice": "حدد الجهاز",
+  "noVip": "لا VIP",
+  "noVipAvailable": "لا يوجد VIP متاح",
+  "noVipDevices": "لا توجد أجهزة VIP",
+  "connection": "اتصال",
+  "connected": "متصل",
+  "disconnected": "غير متصل",
+  "notifications": "إشعارات",
+  "noNotificationsYet": "لا توجد إخطارات حتى الآن",
+  "total": "{{count}} الإجمالي",
+  "seeAllNotifications": "رؤية جميع الإخطارات",
+  "markAllAsRead": "وضع علامة على الكل كمقروءة",
+  "profile": "حساب تعريفي",
+  "history": "تاريخ",
+  "settings": "إعدادات",
+  "logout": "تسجيل الخروج"
+}

@@ -1,0 +1,921 @@
+{
+  "tour": {
+    "ui": {
+      "back": "后退",
+      "next": "下一个",
+      "done": "完毕",
+      "skip": "跳过"
+    },
+    "steps": {
+      "dashboard": {
+        "switchVip": {
+          "title": "切换您的 VIP",
+          "description": "使用此下拉菜单可在配对的 iCane 设备之间切换。每个设备都分配给一个特定的 VIP。"
+        },
+        "connectionStatus": {
+          "title": "连接状态",
+          "description": "此徽章显示您的 iCane 是否处于活动状态并正在传输数据。绿色表示已连接 - 灰色表示设备离线。"
+        },
+        "alerts": {
+          "title": "警报和通知",
+          "description": "轻按铃即可查看来自 iCane 的传入警报 - 跌倒检测、电池电量不足、紧急触发等。"
+        },
+        "accountMenu": {
+          "title": "您的帐户菜单",
+          "description": "访问您的个人资料、活动历史记录、应用程序设置，或从此菜单退出。"
+        },
+        "liveMap": {
+          "title": "实时位置跟踪",
+          "description": "在地图上查看 iCane 的实时位置。点击地图上的任意位置即可打开路线选项并为您的 VIP 设置目的地。"
+        },
+        "gpsInfo": {
+          "title": "GPS 信号信息",
+          "description": "监控 iCane 设备的卫星数量、信号质量和最后已知的 GPS 坐标。"
+        },
+        "guardianNetwork": {
+          "title": "守护者网络",
+          "description": "查看哪些共同监护人当前在线。绿色意味着活跃 - 他们现在正在与您一起监控。"
+        },
+        "recentAlerts": {
+          "title": "最近的警报",
+          "description": "随时了解 iCane 设备触发的最新跌倒检测和紧急警报。"
+        },
+        "sendNote": {
+          "title": "发送快速注释",
+          "description": "通过 iCane 的语音引擎直接向您的 VIP 发送简短的提醒或消息。"
+        },
+        "mapControls": {
+          "title": "地图控制",
+          "description": "将地图锁定到 VIP 的路线，实时跟踪他们的移动，以您自己的位置为中心，或使用这些控件进行放大和缩小。"
+        }
+      },
+      "devices": {
+        "devicesHeader": {
+          "title": "您配对的 iCane 设备",
+          "description": "此处显示链接到您帐户的所有 iCane 设备。您可以管理、重命名或取消配对任何设备。"
+        },
+        "addDevice": {
+          "title": "添加新设备",
+          "description": "点击“添加 Cane”并扫描 iCane 上的二维码，将其与您的帐户配对。只需要几秒钟。"
+        },
+        "deviceActions": {
+          "title": "打开设备操作",
+          "description": "单击设备卡上的管理可打开昵称、监护人和配对控件的快速操作。"
+        },
+        "deviceMenu": {
+          "title": "设备操作菜单",
+          "description": "这些选项可让您编辑昵称、管理监护人或取消设备配对。单击管理监护人以继续。"
+        },
+        "inviteGuardian": {
+          "title": "邀请另一位监护人",
+          "description": "使用此按钮通过电子邮件邀请新监护人，以便他们帮助监控此 VIP。"
+        },
+        "editGuardian": {
+          "title": "编辑监护人详细信息",
+          "description": "当角色发生变化时，使用监护人卡上的此编辑图标可以更新关系详细信息。"
+        },
+        "guardianStats": {
+          "title": "卫报汇总统计数据",
+          "description": "从这些摘要卡中跟踪监护人总数、当前活跃监护人以及待处理邀请。"
+        }
+      },
+      "activity_logs": {
+        "activityHeader": {
+          "title": "活动报告",
+          "description": "所有帐户操作的完整审核跟踪 - 登录、设备更改、监护人邀请等。"
+        },
+        "activitySearch": {
+          "title": "搜索和过滤",
+          "description": "通过搜索监护人姓名、操作类型或描述来快速查找特定活动。"
+        }
+      },
+      "device_logs": {
+        "deviceLogsHeader": {
+          "title": "设备活动日志",
+          "description": "查看 VIP 的 iCane 设备的路线活动、安全事件和移动历史记录。"
+        },
+        "deviceLogsSearch": {
+          "title": "搜索和过滤器",
+          "description": "按关键字、状态或日期范围快速缩小记录范围，以查找您需要的事件。"
+        }
+      },
+      "weather_board": {
+        "weatherMain": {
+          "title": "天气预报",
+          "description": "查看当前状况和多日天气预报，帮助您的 VIP 计划安全的户外活动。"
+        },
+        "weatherSearch": {
+          "title": "搜索任何地点",
+          "description": "输入菲律宾的任何城市或地点即可获取该地区的本地化天气预报。"
+        }
+      },
+      "advanced": {
+        "advancedHeader": {
+          "title": "组件管理",
+          "description": "监控每个硬件组件的实时运行状况并从此处调整传感器阈值。"
+        },
+        "deviceStatus": {
+          "title": "健康一览",
+          "description": "该面板总结了在线组件的数量，并给出了 iCane 的整体运行状况百分比。"
+        }
+      }
+    },
+    "mobile": {
+      "dashboard": {
+        "headerMenuIntro": {
+          "title": "打开标题菜单",
+          "description": "打开标题菜单以访问您的连接状态、VIP 下拉列表和其他设置。"
+        }
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "modal": {
+        "noValidDeviceTitle": "无有效设备",
+        "noValidDeviceMessage": "您似乎没有配对的 iCane 设备。请配对您的设备以继续。",
+        "pairedSuccessfullyTitle": "配对成功",
+        "proceedToDashboard": "前往仪表板",
+        "continueToDashboard": "您现在可以继续使用仪表板并开始使用您的帐户。",
+        "redirecting": "{{seconds}} 秒内重定向..."
+      },
+      "heading": "欢迎",
+      "subheading": "准备好了吗？登录并直接跳转到您的仪表板。",
+      "mobileHeading": "登录您的帐户",
+      "identifierLabel": "电子邮件或用户名",
+      "identifierPlaceholder": "输入您的电子邮件或用户名...",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "输入您的密码...",
+      "forgotPassword": "忘记密码？",
+      "captchaLoading": "正在加载验证码...",
+      "signingIn": "正在登录...",
+      "signIn": "登入",
+      "noAccount": "没有帐户？",
+      "signUp": "报名",
+      "scanTitle": "扫描您的 iCane 设备",
+      "scanDescription": "将相机对准 iCane 设备上的二维码即可自动配对。",
+      "errors": {
+        "identifierRequired": "需要电子邮件或用户名",
+        "passwordRequired": "需要密码",
+        "captchaRequired": "请填写验证码",
+        "loginFailed": "登录失败",
+        "twoFactorEmailRequired": "双因素身份验证需要有效的电子邮件地址。",
+        "otpSendFailed": "发送 OTP 失败。请再试一次。",
+        "otpIncomplete": "请输入完整的 6 位数代码。",
+        "invalidCode": "代码无效。请再试一次。",
+        "retryAfter": "登录尝试失败次数过多。请在 {{seconds}} 秒后重试。"
+      },
+      "twoFactor": {
+        "title": "电子邮件验证",
+        "promptPrefix": "输入",
+        "codeLabel": "6位验证码",
+        "promptSuffix": "我们发送到您的电子邮件地址。",
+        "noCode": "没有收到代码？",
+        "sending": "正在发送...",
+        "resendIn": "在 {{seconds}} 秒后重新发送",
+        "resend": "重新发送验证码",
+        "verifying": "正在验证...",
+        "verify": "核实",
+        "cancel": "取消"
+      }
+    },
+    "register": {
+      "placeholders": {
+        "province": "省...",
+        "city": "城市...",
+        "barangay": "描笼涯...",
+        "village": "村庄...",
+        "contactNumber": "09XX XXX XXXX",
+        "email": "样本.email@gmail.com"
+      },
+      "validation": {
+        "firstNameRequired": "名字为必填项",
+        "lastNameRequired": "姓氏为必填项",
+        "lettersAndSpacesOnly": "应该只包含字母和空格",
+        "minTwoChars": "长度应至少为 2 个字符",
+        "maxFiftyChars": "不应超过 50 个字符",
+        "usernameRequired": "用户名是必需的",
+        "usernameMinThree": "用户名长度必须至少为 3 个字符",
+        "usernameMaxTwenty": "用户名不得超过 20 个字符",
+        "usernameAllowedChars": "用户名只能包含字母、数字和下划线",
+        "usernameMinLetters": "用户名必须包含至少3个字母",
+        "passwordRequired": "需要密码",
+        "passwordMinEight": "密码长度必须至少为 8 个字符",
+        "passwordMaxSixtyFour": "密码不得超过 64 个字符",
+        "passwordNeedsLowercase": "密码必须包含至少一个小写字母",
+        "passwordNeedsUppercase": "密码必须包含至少一个大写字母",
+        "passwordNeedsNumber": "密码必须包含至少一个数字",
+        "passwordNeedsSpecial": "密码必须至少包含一个特殊字符（@$!%*?&）",
+        "confirmPasswordRequired": "需要确认密码",
+        "passwordsDontMatch": "密码不匹配！",
+        "streetAddressRequired": "街道地址为必填项",
+        "addressMoreSpecific": "地址应该更具体",
+        "addressMaxHundred": "地址不得超过 100 个字符",
+        "emailRequired": "电子邮件为必填项",
+        "emailMaxHundred": "电子邮件不应超过 100 个字符",
+        "validEmail": "请输入有效的电子邮件地址",
+        "contactNumberRequired": "联系电话为必填项",
+        "contactDigits": "联系电话必须是 {{count}} 位",
+        "contactStarts09": "联系电话必须以 09 开头并包含 11 位数字",
+        "otpSixDigits": "请输入完整的 6 位 OTP"
+      },
+      "errors": {
+        "generic": "注册失败",
+        "usernameTaken": "用户名已被占用",
+        "emailRegistered": "邮箱已注册",
+        "contactRegistered": "联络号码已被登记",
+        "otpSendFailed": "发送 OTP 失败。请再试一次。"
+      },
+      "modal": {
+        "inviteCreatedTitle": "通过邀请创建帐户！",
+        "inviteCreatedMessage": "您的帐户已使用邀请链接成功创建。",
+        "accountCreatedTitle": "帐户已创建！",
+        "accountCreatedPairMessage": "帐户创建成功。请配对您的设备以继续。",
+        "setupCompleteTitle": "设置完成！",
+        "setupCompleteMessage": "您的帐户已创建并且设备配对成功。",
+        "manualPairMessage": "帐户创建成功。请手动配对您的设备。",
+        "goToLogin": "前往登录",
+        "proceedToLogin": "继续登录",
+        "pairedSuccessfullyTitle": "配对成功",
+        "tooManyRequestsTitle": "请求过多",
+        "tooManyRequestsMessage": "您在短时间内提出了太多请求。请稍等片刻后再重试。",
+        "networkErrorTitle": "网络错误",
+        "networkErrorMessage": "我们在连接到服务器时遇到问题。请检查您的互联网连接，然后重试。如果问题仍然存在，请尝试刷新页面或联系支持人员。",
+        "deviceVerifiedTitle": "设备已验证",
+        "deviceAlreadyPairedTitle": "设备已配对",
+        "deviceNotFoundTitle": "未找到设备",
+        "deviceVerifiedMessage": "您的设备已成功验证并准备好进行配对。注册您的帐户以继续。",
+        "deviceAlreadyPairedMessage": "该设备已链接到另一个帐户。如果您认为这是一个错误，请联系支持人员。",
+        "deviceNotFoundMessage": "我们无法找到具有此序列号的设备。请检查并重试。",
+        "invalidDeviceTitle": "无效设备",
+        "invalidDeviceMessage": "设备无效。请再试一次。",
+        "continueToLogin": "您现在可以继续登录并开始使用您的帐户。",
+        "redirecting": "{{seconds}} 秒内重定向..."
+      },
+      "heading": "欢迎",
+      "verifyHeading": "电子邮件验证",
+      "mobileHeading": "创建您的帐户",
+      "step1Description": "创建您的帐户以开始使用 iCane。",
+      "step2Description": "注册即可开始您的更安全、更智能的移动之旅。",
+      "verifyPrefix": "输入",
+      "verifyCodeLabel": "6位验证码",
+      "verifySuffix": "我们已发送至您的电子邮件地址。",
+      "firstName": "名",
+      "firstNamePlaceholder": "名...",
+      "middleName": "中间名字",
+      "middleNamePlaceholder": "中间名字...",
+      "lastName": "姓",
+      "lastNamePlaceholder": "姓...",
+      "username": "用户名",
+      "usernamePlaceholder": "输入您的用户名...",
+      "password": "密码",
+      "passwordPlaceholder": "输入您的密码...",
+      "confirmPassword": "重新输入密码",
+      "confirmPasswordPlaceholder": "重新输入您的密码...",
+      "streetAddress": "地段/建筑物/街道",
+      "streetAddressPlaceholder": "输入您的批号...",
+      "province": "省",
+      "city": "城市",
+      "barangay": "描笼涯",
+      "village": "村庄",
+      "contactNumber": "联系电话",
+      "email": "电子邮件",
+      "noCode": "没有收到代码？",
+      "sending": "正在发送...",
+      "resendIn": "在 {{seconds}} 秒后重新发送",
+      "resend": "重新发送验证码",
+      "creating": "创建帐户...",
+      "checking": "检查...",
+      "createAccount": "创建账户",
+      "next": "下一个",
+      "back": "后退",
+      "haveAccount": "已经有帐户？",
+      "signIn": "登入",
+      "termsPrefix": "注册即表示我同意",
+      "terms": "条款和条件",
+      "and": "和",
+      "privacy": "隐私政策。",
+      "scanTitle": "扫描您的 iCane 设备",
+      "scanDescription": "将相机对准 iCane 设备上的二维码即可自动配对。"
+    },
+    "forgotPassword": {
+      "heading": "忘记密码",
+      "verificationCode": "验证码",
+      "changePassword": "更改密码",
+      "step1Description": "输入您的电子邮件地址，我们将向您发送代码。",
+      "step3Description": "您的代码已经过验证。输入您的新密码。",
+      "codeSentPrefix": "我们已将验证码发送至：",
+      "expiresIn": "（5分钟后过期）",
+      "email": "电子邮件",
+      "sending": "正在发送...",
+      "sendCode": "发送代码",
+      "back": "后退",
+      "noCode": "没有收到代码？",
+      "resendOtp": "重新发送一次性密码",
+      "verifying": "正在验证...",
+      "verifyCode": "验证码",
+      "newPassword": "新密码",
+      "confirmPassword": "重新输入密码",
+      "passwordHint": "必须至少 6 个字符",
+      "updating": "更新中...",
+      "submit": "提交",
+      "errors": {
+        "otpExpired": "OTP 已过期。请索取一份新的。",
+        "validEmail": "请输入有效的电子邮件地址",
+        "invalidOtp": "一次性密码无效。请再试一次。",
+        "passwordMismatch": "密码不匹配！",
+        "passwordMin": "密码必须至少为 6 个字符",
+        "otpSendFailed": "发送 OTP 失败。请再试一次。",
+        "network": "网络错误。请检查您的连接。",
+        "generic": "出了点问题。请再试一次。",
+        "resetFailed": "重置密码失败",
+        "resendFailed": "重新发送 OTP 失败。请再试一次。"
+      },
+      "modal": {
+        "passwordResetTitle": "密码重置",
+        "codeSent": "我们已将验证码发送到您的电子邮件：{{email}}",
+        "successTitle": "成功",
+        "passwordUpdated": "密码更新成功！",
+        "sessionExpiredTitle": "会话已过期",
+        "sessionExpiredBody": "会话已过期。请重新开始重置过程。",
+        "verificationTitle": "确认",
+        "newOtpSent": "新 OTP 已发送至您的电子邮件！"
+      }
+    }
+  },
+  "guestPage": {
+    "title": "欢迎"
+  },
+  "login": {
+    "title": "登录"
+  },
+  "register": {
+    "title": "创建账户"
+  },
+  "forgotPassword": {
+    "title": "忘记密码"
+  },
+  "getStarted": {
+    "title": "开始使用"
+  },
+  "emergencyDetails": {
+    "title": "紧急情况详情"
+  },
+  "dashboard": {
+    "title": "仪表板"
+  },
+  "dashboardPage": {
+    "title": "居住地点",
+    "subtitle": "iCane 设备的实时监控和安全功能",
+    "liveLocationTracking": "实时位置跟踪",
+    "trackLive": "现场追踪",
+    "satellites": "卫星",
+    "lastLocation": "最后地点",
+    "gpsBadge": {
+      "noSignal": "无信号",
+      "ready": "准备好",
+      "lowSignal": "低信号"
+    },
+    "location": {
+      "resolving": "解决...",
+      "none": "没有可用的位置",
+      "unableToResolve": "无法解析位置",
+      "unknownArea": "未知区域",
+      "updating": "更新中..."
+    }
+  },
+  "devices": {
+    "title": "设备",
+    "header": {
+      "title": "管理设备",
+      "subtitle": "查看和管理您配对的手杖、分配 VIP 个人资料等等。",
+      "countSummary": "{{total}} 手杖 • {{active}} 活跃",
+      "countSummary_other": "{{total}} 手杖 • {{active}} 活跃"
+    },
+    "view": {
+      "tiles": "瓷砖",
+      "list": "列表"
+    },
+    "actions": {
+      "addCane": "添加手杖",
+      "view": "看法",
+      "edit": "编辑",
+      "remove": "消除",
+      "assignVip": "分配 VIP",
+      "manage": "管理",
+      "editNickname": "编辑昵称",
+      "manageGuardians": "管理监护人",
+      "unpair": "取消配对",
+      "unpairDevice": "取消设备配对",
+      "manageCaneOptions": "管理手杖选项",
+      "viewVip": "查看贵宾",
+      "editVip": "编辑贵宾",
+      "removeVip": "删除 VIP"
+    },
+    "card": {
+      "unnamedCane": "无名手杖",
+      "editNicknameTitle": "编辑手杖昵称",
+      "activeNow": "现在活跃",
+      "lastActive": "最后活跃时间：{{lastActive}}",
+      "paired": "配对",
+      "assignedVip": "指定 VIP",
+      "added": "添加：{{date}}"
+    },
+    "vip": {
+      "vipId": "贵宾ID",
+      "noVipAssigned": "未分配 VIP",
+      "noVipAvailable": "没有 VIP 可用",
+      "modal": {
+        "viewTitle": "甘蔗 VIP 简介",
+        "createTitle": "添加 VIP 到 Cane",
+        "editTitle": "编辑甘蔗VIP",
+        "creating": "创造...",
+        "create": "创造",
+        "updating": "更新中...",
+        "update": "更新"
+      }
+    },
+    "modal": {
+      "unpair": {
+        "title": "取消配对甘蔗？",
+        "message": "这将取消配对并将手杖从您的帐户中删除。",
+        "confirmLoading": "正在取消配对...",
+        "confirm": "取消配对"
+      },
+      "removeVip": {
+        "title": "删除 VIP 个人资料？",
+        "message": "这将删除分配给该手杖的 VIP 配置文件。",
+        "confirmLoading": "正在删除...",
+        "confirm": "消除"
+      },
+      "editNickname": {
+        "title": "编辑昵称",
+        "label": "甘蔗昵称 *",
+        "placeholder": "输入昵称",
+        "resetting": "正在重置...",
+        "resetToDefault": "重置为默认值",
+        "reset": "重置",
+        "saving": "保存...",
+        "saveChanges": "保存更改",
+        "save": "节省"
+      }
+    },
+    "scanner": {
+      "modalTitle": "扫描 iCane 设备",
+      "or": "或者",
+      "enterSerialCode": "输入序列号",
+      "pairing": "配对...",
+      "pair": "一对",
+      "errors": {
+        "httpsRequired": "相机需要 HTTPS（或本地主机）。如果您通过本地 IP 从电话打开此内容，请使用 HTTPS。",
+        "invalidQrFormat": "二维码格式无效",
+        "noSerialInQr": "二维码中未找到设备序列号",
+        "unableToAccessCamera": "无法访问相机。",
+        "noCameraDetected": "未检测到相机。请使用带摄像头的设备。"
+      }
+    },
+    "empty": {
+      "title": "尚未添加手杖。",
+      "subtitle": "单击“添加手杖”即可开始"
+    },
+    "toast": {
+      "nicknameUpdated": "甘蔗昵称已更新",
+      "nicknameUpdateFailed": "更新手杖昵称失败",
+      "unpairedSuccess": "Cane 已取消配对并从您的帐户中删除",
+      "unpairFailed": "无法取消手杖配对",
+      "pairedSuccess": "Cane 已成功与您的帐户配对",
+      "pairFailed": "无法配对设备",
+      "vipCreated": "为甘蔗创建的 VIP 个人资料",
+      "vipUpdated": "更新了甘蔗的 VIP 资料",
+      "vipRemoved": "VIP 资料已从手杖中删除",
+      "vipRemoveFailed": "删除VIP失败"
+    }
+  },
+  "weatherBoard": {
+    "title": "天气板",
+    "forecastTitle": "天气预报",
+    "searchPlaceholder": "搜索菲律宾的城市或地点...",
+    "defaultLocation": "默认位置：{{location}}",
+    "useDefaultLocation": "使用 Novaliches, 奎松市",
+    "tomorrow": {
+      "label": "明天",
+      "safeToWalk": "安全步行",
+      "stayIndoors": "呆在室内"
+    },
+    "today": {
+      "title": "今天的天气",
+      "subtitle": "以下是您可能需要的有关我们天气的其他信息"
+    },
+    "metrics": {
+      "sunrise": "日出：",
+      "sunset": "日落：",
+      "humidity": "湿度：",
+      "wind": "风：",
+      "feelsLike": "感觉就像：",
+      "pressure": "压力：",
+      "visibility": "能见度：",
+      "uvIndex": "紫外线指数："
+    },
+    "twoWeek": {
+      "title": "两周预测",
+      "subtitle": "这是未来 14 天的天气预报"
+    },
+    "errors": {
+      "failedLoad": "无法加载天气数据。"
+    },
+    "modal": {
+      "closeAria": "关闭预测详细信息",
+      "high": "高的",
+      "low": "低的",
+      "average": "平均的",
+      "rainChance": "下雨的机会"
+    }
+  },
+  "settings": {
+    "title": "设置"
+  },
+  "guardianProfile": {
+    "title": "卫报简介"
+  },
+  "notes": {
+    "title": "笔记"
+  },
+  "advanced": {
+    "title": "先进的"
+  },
+  "notifications": {
+    "title": "通知",
+    "loading": "加载中...",
+    "summary": "总计 {{total}} • {{unread}} 未读",
+    "markAllAsRead": "全部标记为已读",
+    "markAsRead": "标记为已读",
+    "viewLog": "查看日志",
+    "filters": {
+      "all": "全部",
+      "unread": "未读",
+      "read": "读"
+    },
+    "group": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "thisWeek": "本星期",
+      "older": "年长的"
+    },
+    "time": {
+      "justNow": "现在",
+      "minutesAgo": "{{count}} 分钟前",
+      "hoursAgo": "{{count}} 小时前",
+      "daysAgo": "{{count}} 天前"
+    },
+    "empty": {
+      "allCaughtUp": "都追上了！",
+      "noNotifications": "无通知",
+      "noUnread": "目前没有未读通知。",
+      "description": "重要的实时警报和设备活动将显示在此处。"
+    },
+    "stats": {
+      "total": "全部的",
+      "unread": "未读",
+      "actionTypes": "动作类型"
+    },
+    "meta": {
+      "weather": "天气警报",
+      "emergency": "紧急警报",
+      "arrival": "已到达目的地",
+      "fall": "检测到跌倒",
+      "default": "智能手杖警报",
+      "actions": {
+        "CREATE": "设备已创建",
+        "UPDATE": "设备更新",
+        "DELETE": "设备已删除",
+        "PAIR": "设备已配对",
+        "UNPAIR": "设备未配对",
+        "INVITE": "守护者邀请",
+        "REMOVE_GUARDIAN": "监护人被移除",
+        "UPDATE_ROLE": "角色更新",
+        "ACCEPT_INVITE": "已接受邀请",
+        "SET_EMERGENCY": "紧急联络组",
+        "UPDATE_RELATIONSHIP": "关系更新",
+        "LIVE_WEATHER": "天气警报",
+        "LIVE_EMERGENCY": "紧急警报",
+        "LIVE_FALL": "检测到跌倒",
+        "ROUTE_ARRIVAL": "已到达目的地"
+      }
+    },
+    "messages": {
+      "importantActivity": "在 iCane 上检测到重要活动。"
+    },
+    "dynamicMessages": {
+      "setEmergencyContact": "{{actor}} 将监护人 {{guardian}} 设置为设备 {{device}} 的紧急联系人"
+    }
+  },
+  "commonEnums": {
+    "roles": {
+      "primary": "基本的",
+      "secondary": "中学",
+      "guardian": "监护人"
+    },
+    "status": {
+      "online": "在线的",
+      "offline": "离线"
+    }
+  },
+  "manageGuardians": {
+    "emergency": {
+      "removeAsEmergency": "删除紧急联系人身份",
+      "setAsEmergency": "设置为紧急联系人",
+      "emergencyContact": "紧急联系方式",
+      "setAsEmergencyShort": "设置为紧急情况"
+    }
+  },
+  "toast": {
+    "closeAria": "关闭吐司",
+    "close": "关闭",
+    "typeIconAlt": "{{type}} 图标"
+  },
+  "emergencyToast": {
+    "title": "紧急警报",
+    "subtitle": "SOS 信号已激活",
+    "defaultMessage": "胡安·德拉·克鲁兹似乎处于危险之中。"
+  },
+  "dashboardLayout": {
+    "toast": {
+      "emergency": "紧急警报！请立即查看现场位置。",
+      "fall": "检测到跌倒！请立即检查用户的状态。",
+      "loginSuccess": "您已成功登录您的帐户。"
+    }
+  },
+  "dashboardSide": {
+    "menu": {
+      "dashboard": "仪表板",
+      "deviceLogs": "设备日志",
+      "weatherBoard": "天气板",
+      "devices": "设备",
+      "advanced": "先进的"
+    },
+    "mobile": {
+      "weather": "天气",
+      "logs": "日志",
+      "home": "家",
+      "devices": "设备",
+      "advanced": "先进的"
+    },
+    "signOut": "登出"
+  },
+  "sendNote": {
+    "title": "发送便条",
+    "description": "撰写消息并发送给 {{name}}",
+    "defaultRecipient": "你的设备",
+    "messageLabel": "信息",
+    "placeholder": "在此输入您的消息...",
+    "charactersCount": "{{count}} / {{max}} 个字符",
+    "cancel": "取消",
+    "sending": "正在发送...",
+    "send": "发送",
+    "sendNote": "发送便条",
+    "toast": {
+      "errorTitle": "错误！",
+      "errorMessage": "发送您的消息时出错。请稍后重试。",
+      "sentTitle": "发送！",
+      "sentMessage": "您的消息已成功发送。"
+    }
+  },
+  "guardianInvite": {
+    "title": {
+      "processing": "处理邀请",
+      "accepted": "邀请已接受！",
+      "registerRequired": "成为监护人",
+      "expired": "邀请已过期",
+      "invalid": "邀请无效",
+      "error": "处理失败"
+    },
+    "messages": {
+      "invalidTokenMissing": "邀请链接无效 - 令牌丢失",
+      "acceptedDashboard": "你都准备好了！您的监护人邀请已被接受。正在重定向至仪表板...",
+      "acceptedLogin": "恭喜，{{email}}！您的邀请已被接受。正在重定向至登录...",
+      "registerRequired": "欢迎！您已被邀请成为监护人。",
+      "serverUnavailable": "无法到达服务器。请检查您的连接并重试。",
+      "unexpectedError": "处理您的邀请时发生意外错误。",
+      "invitationAccepted": "邀请已接受！"
+    },
+    "actions": {
+      "goToDashboard": "立即前往仪表板",
+      "goToLogin": "立即登录",
+      "returnHomePage": "返回首页",
+      "registerNow": "立即注册",
+      "alreadyHaveAccount": "已经有帐户？登录",
+      "returnHome": "返回首页",
+      "contactSupport": "联系支持人员",
+      "tryAgain": "再试一次",
+      "goToHomePage": "前往主页"
+    },
+    "invitationFor": "邀请函：",
+    "redirectingIn": "{{count}} 秒后重定向",
+    "redirectingIn_other": "{{count}} 秒后重定向"
+  },
+  "recentAlerts": {
+    "title": "最近的警报",
+    "checkingWeather": "正在检查诺瓦利奇天气...",
+    "noAlerts": "最近没有警报"
+  },
+  "liveMap": {
+    "searchPlaceholder": "搜索位置...",
+    "defaultCountry": "菲律宾",
+    "clearDestinationAria": "明确目的地",
+    "clearDestination": "明确目的地",
+    "openFullscreenAria": "打开全屏地图",
+    "exitFullscreenAria": "退出全屏地图",
+    "fullscreen": "全屏",
+    "exitFullscreen": "退出全屏",
+    "popups": {
+      "currentLocation": "您当前的位置。",
+      "vipLocation": "VIP 当前位置。",
+      "destination": "目的地",
+      "adjustLocation": "调整位置"
+    },
+    "locationPrompt": {
+      "title": "需要访问位置",
+      "body": "您当前的位置已关闭。在“设置”中启用位置，以便我们可以将地图以您为中心。",
+      "notNow": "现在不要",
+      "openSettings": "打开设置"
+    },
+    "clickMenu": {
+      "chooseAction": "选择行动",
+      "setAsDestination": "设置为目的地"
+    }
+  },
+  "activityLogs": {
+    "title": "活动日志",
+    "subtitle": "监控和跟踪系统中的所有监护人活动",
+    "tryAgain": "再试一次",
+    "searchPlaceholder": "按名称、操作或描述搜索...",
+    "clearAll": "全部清除",
+    "clearFilters": "清除过滤器",
+    "empty": {
+      "nothingToSee": "这里没什么可看的",
+      "noActivity": "还没有活动",
+      "adjustFilters": "尝试调整您的搜索或过滤器。",
+      "actionsAppear": "您执行的操作将显示在此处。"
+    },
+    "table": {
+      "guardian": "监护人",
+      "action": "行动",
+      "description": "描述",
+      "dateCreated": "创建日期"
+    },
+    "pagination": {
+      "showing": "显示 {{from}}-{{to}} 项活动（共 {{total}} 项）",
+      "showingShort": "显示 {{from}}-{{to}}（共 {{total}}）"
+    },
+    "actions": {
+      "login": "登录",
+      "create": "创造",
+      "update": "更新",
+      "delete": "删除",
+      "pair": "一对",
+      "unpair": "取消配对",
+      "invite": "邀请",
+      "removeGuardian": "移除监护人",
+      "updateRole": "更新角色",
+      "acceptInvite": "接受邀请",
+      "setEmergency": "设置紧急情况",
+      "relationship": "关系"
+    }
+  },
+  "deviceLogs": {
+    "title": "设备日志",
+    "subtitle": "监控并跟踪详细的 VIP 活动和活动历史记录。",
+    "searchPlaceholder": "按监护人、VIP、活动或设备搜索...",
+    "clearAll": "全部清除",
+    "clearFilters": "清除过滤器",
+    "noDevice": "无设备",
+    "origin": "起源",
+    "destination": "目的地",
+    "empty": {
+      "nothingToSee": "这里没什么可看的",
+      "adjustFilters": "尝试调整您的搜索或过滤器。",
+      "noActivities": "我们找不到任何与“{{searchTerm}}”匹配的活动。"
+    },
+    "table": {
+      "vip": "贵宾",
+      "vipName": "贵宾姓名",
+      "activity": "活动",
+      "locations": "地点",
+      "dateTime": "日期和时间",
+      "status": "地位"
+    },
+    "pagination": {
+      "showing": "显示 {{from}}-{{to}}（共 {{total}}）"
+    },
+    "status": {
+      "completed": "完全的",
+      "ongoing": "进行中",
+      "emergency": "紧急情况",
+      "fallDetected": "检测到跌倒",
+      "cancelled": "取消"
+    }
+  },
+  "weatherService": {
+    "alertTitle": "天气警报",
+    "updateTitle": "天气更新",
+    "rainInLocation": "预计有雨/{{location}} 有雨。",
+    "clearSkies": "{{location}} ({{temp}}°C) 天空晴朗",
+    "labels": {
+      "clearSky": "晴空",
+      "mainlyClear": "主要是清晰",
+      "partlyCloudy": "多云",
+      "overcast": "灰蒙蒙",
+      "foggy": "有雾",
+      "drizzle": "细雨",
+      "rain": "雨",
+      "snowfall": "降雪",
+      "rainShowers": "阵雨",
+      "thunderstorm": "雷雨",
+      "rainyShowers": "多雨/阵雨"
+    },
+    "recommendation": {
+      "heavyRain": "预计明天有大雨或阵雨。最好呆在室内。",
+      "sunny": "明天将会是晴朗的一天。不要忘记带伞并保持水分。",
+      "cloudy": "明天将是多云。适合散步的一天。",
+      "safeWalk": "明天散步看起来很安全。照常使用您的 iCane。"
+    }
+  },
+  "importantNotifications": {
+    "theVip": "贵宾",
+    "deviceLabel": "在设备 {{serial}} 上",
+    "guardians": {
+      "safetyMonitor": "iCane 安全监视器",
+      "navigationAssistant": "导航助手",
+      "weatherService": "气象服务"
+    },
+    "emergency": {
+      "title": "紧急警报",
+      "message": "{{vipName}} 触发了紧急警报 {{deviceLabel}}。立即打开实时位置并立即联系指定的紧急监护人。"
+    },
+    "fall": {
+      "title": "检测到可能跌倒",
+      "message": "检测到 {{vipName}}{{deviceLabel}} 可能跌倒。检查实时地图并尽快确认他们的状况。"
+    },
+    "arrival": {
+      "title": "已到达目的地",
+      "message": "{{vipName}} 已到达所选目的地 {{deviceLabel}}。路线跟踪已成功清除。"
+    },
+    "weather": {
+      "storm": {
+        "title": "恶劣天气警告",
+        "message": "在 {{location}} 附近检测到雷暴天气。目前户外旅行可能不安全。出发前查看天气板。"
+      },
+      "wind": {
+        "title": "强风警告",
+        "message": "在 {{location}} 附近检测到约 {{windSpeed}} 公里/小时的强风。室外导航可能不稳定，因此建议格外小心。"
+      },
+      "rain": {
+        "title": "降雨警报",
+        "message": "目前{{location}} 正在下雨{{temperature}}。道路可能湿滑，因此户外出行请小心留意。"
+      }
+    }
+  },
+  "termsModal": {
+    "title": "条款和隐私政策",
+    "actions": {
+      "close": "关闭",
+      "cancel": "取消",
+      "accept": "接受"
+    },
+    "terms": {
+      "title": "条款和条件",
+      "paragraphs": {
+        "p1": "通过使用、测试或参与<strong>基于人工智能的视觉识别和路线导航的物联网智能手杖</strong>（“系统”），用户和/或其授权监护人同意受这些条款和条件的约束。",
+        "p2": "该系统是一个研究原型，旨在增强视障人士的行动能力、安全性和独立性。它旨在协助导航和危险意识，但不能取代个人判断、移动训练或人工协助。",
+        "p3": "该系统利用短程传感器、基于人工智能的视觉识别、GPS 跟踪、路线导航、触觉反馈和单向语音警报。由于技术和环境因素，系统可能会出现延迟、不准确或服务中断的情况。",
+        "p4": "用户承认障碍物检测仅限于传感器范围，人工智能识别可能不完全准确，GPS和导航功能取决于网络可用性和信号条件。该系统不保证完全避免危险。",
+        "p5": "用户在导航过程中必须时刻保持注意力集中，并对自身安全负责。监护人或护理人员同意仅出于安全和支持目的使用监控、消息传递和位置功能。",
+        "p6": "紧急 SOS 功能旨在通过向指定联系人发送警报和位置数据来在紧急情况下提供帮助。成功交付取决于移动网络覆盖范围和足够的 SIM 负载。不保证立即响应。",
+        "p7": "参与系统测试、调查和评估是自愿的。参与者可以随时退出而不会受到处罚。该系统不适合商业用途。",
+        "p8": "有关数据相关权利和处理详细信息，请查看<link>隐私政策部分</link>。"
+      },
+      "bullets": {
+        "b1": "使用系统时始终优先考虑<strong>现实世界意识</strong>。",
+        "b2": "将所有警报视为<strong>辅助指导</strong>，而不是绝对保证。",
+        "b3": "仅将设备用于预期的<strong>研究和安全支持</strong>目的。"
+      }
+    },
+    "privacy": {
+      "title": "隐私政策",
+      "paragraphs": {
+        "p1": "该系统收集和处理系统功能、安全监控、应急响应和学术研究目的所需的个人数据。收集的数据可能包括 GPS 位置、系统使用日志、设备标识符和监护人联系信息。",
+        "p2": "所有个人数据均按照 2012 年《数据隐私法》（共和国法第 10173 号）进行处理。实施合理的组织、物理和技术安全措施，以保护收集的数据免遭未经授权的访问、丢失或滥用。",
+        "p3": "位置数据用于支持路线导航、监护人监控和紧急SOS警报。实时跟踪功能需要有效的互联网连接，并且在网络覆盖较弱或没有网络覆盖的区域可能会受到限制。",
+        "p4": "收集的数据应仅在实现研究目标和系统评估所需的时间内保留。用于分析的数据将被匿名化和汇总，以保护参与者的身份。",
+        "p5": "数据主体有权通过与项目研究人员或系统管理员协调，随时了解、访问、更正、反对处理和撤回有关其个人数据的同意。",
+        "p6": "尽管采取了合理的保护措施，但没有任何系统可以保证绝对的数据安全。通过使用该系统，用户承认并接受这些固有风险。"
+      },
+      "bullets": {
+        "b1": "我们仅收集安全和系统运行<strong>必要</strong>的数据。",
+        "b2": "研究报告尽可能使用<strong>匿名或汇总</strong>数据。",
+        "b3": "您可以通过项目管理员请求<strong>访问或更正</strong>您的数据。"
+      }
+    },
+    "consentLabel": "我确认已阅读并向我解释了<strong>条款和条件</strong>以及<strong>隐私政策</strong>。我自愿同意收集和处理我的个人数据，并承担与使用此研究原型相关的风险。"
+  }
+}

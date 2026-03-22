@@ -20,6 +20,136 @@
   "dashboard": {
     "title": "Dashboard"
   },
+  "tour": {
+    "ui": {
+      "back": "Back",
+      "next": "Next",
+      "done": "Done",
+      "skip": "Skip"
+    },
+    "steps": {
+      "dashboard": {
+        "switchVip": {
+          "title": "Switch Your VIP",
+          "description": "Use this dropdown to switch between your paired iCane devices. Each device is assigned to a specific VIP."
+        },
+        "connectionStatus": {
+          "title": "Connection Status",
+          "description": "This badge shows whether your iCane is live and transmitting data. Green means connected - grey means the device is offline."
+        },
+        "alerts": {
+          "title": "Alerts & Notifications",
+          "description": "Tap the bell to view incoming alerts from your iCane - fall detection, low battery, emergency triggers, and more."
+        },
+        "accountMenu": {
+          "title": "Your Account Menu",
+          "description": "Access your profile, activity history, app settings, or sign out from this menu."
+        },
+        "liveMap": {
+          "title": "Live Location Tracking",
+          "description": "See your iCane's real-time position on the map. Tap anywhere on the map to open routing options and set a destination for your VIP."
+        },
+        "gpsInfo": {
+          "title": "GPS Signal Info",
+          "description": "Monitor the satellite count, signal quality, and last known GPS coordinates of your iCane device."
+        },
+        "guardianNetwork": {
+          "title": "Guardian Network",
+          "description": "See which co-guardians are currently online. Green means active - they're monitoring alongside you right now."
+        },
+        "recentAlerts": {
+          "title": "Recent Alerts",
+          "description": "Stay updated with the latest fall detection and emergency alerts triggered by the iCane device."
+        },
+        "sendNote": {
+          "title": "Send a Quick Note",
+          "description": "Send a short reminder or message directly to your VIP through the iCane's voice engine."
+        },
+        "mapControls": {
+          "title": "Map Controls",
+          "description": "Lock the map to your VIP's route, follow their movement in real time, center on your own location, or zoom in and out using these controls."
+        }
+      },
+      "devices": {
+        "devicesHeader": {
+          "title": "Your Paired iCane Devices",
+          "description": "All iCane devices linked to your account are shown here. You can manage, rename, or unpair any device."
+        },
+        "addDevice": {
+          "title": "Add a New Device",
+          "description": "Tap 'Add Cane' and scan the QR code on your iCane to pair it with your account. It only takes a few seconds."
+        },
+        "deviceActions": {
+          "title": "Open Device Actions",
+          "description": "Click Manage on a device card to open quick actions for nickname, guardians, and pairing controls."
+        },
+        "deviceMenu": {
+          "title": "Device Action Menu",
+          "description": "These options let you edit nickname, manage guardians, or unpair the device. Click Manage Guardians to continue."
+        },
+        "inviteGuardian": {
+          "title": "Invite Another Guardian",
+          "description": "Use this button to invite a new guardian by email so they can help monitor this VIP."
+        },
+        "editGuardian": {
+          "title": "Edit Guardian Details",
+          "description": "Use this edit icon on a guardian card to update relationship details when roles change."
+        },
+        "guardianStats": {
+          "title": "Guardian Summary Stats",
+          "description": "Track Total Guardians, currently Active guardians, and Pending Invites from these summary cards."
+        }
+      },
+      "activity_logs": {
+        "activityHeader": {
+          "title": "Activity Reports",
+          "description": "A full audit trail of all account actions - logins, device changes, guardian invites, and more."
+        },
+        "activitySearch": {
+          "title": "Search & Filter",
+          "description": "Quickly find specific activities by searching for a guardian name, action type, or description."
+        }
+      },
+      "device_logs": {
+        "deviceLogsHeader": {
+          "title": "Device Activity Logs",
+          "description": "View route activities, safety events, and movement history for your VIP's iCane device."
+        },
+        "deviceLogsSearch": {
+          "title": "Search and Filters",
+          "description": "Quickly narrow records by keyword, status, or date range to find the events you need."
+        }
+      },
+      "weather_board": {
+        "weatherMain": {
+          "title": "Weather Forecast",
+          "description": "Check current conditions and multi-day forecasts to help plan safe outdoor activities for your VIP."
+        },
+        "weatherSearch": {
+          "title": "Search Any Location",
+          "description": "Type any city or place in the Philippines to get a localized forecast for that area."
+        }
+      },
+      "advanced": {
+        "advancedHeader": {
+          "title": "Component Management",
+          "description": "Monitor real-time health of each hardware component and tweak sensor thresholds from here."
+        },
+        "deviceStatus": {
+          "title": "Health at a Glance",
+          "description": "This panel summarizes how many components are online and gives an overall health percentage for your iCane."
+        }
+      }
+    },
+    "mobile": {
+      "dashboard": {
+        "headerMenuIntro": {
+          "title": "Open the Header Menu",
+          "description": "Open the Header Menu to access your connection status, VIP dropdown, and other settings."
+        }
+      }
+    }
+  },
   "dashboardPage": {
     "title": "Live Location",
     "subtitle": "Real-time monitoring and safety features for your iCane device",
@@ -531,6 +661,49 @@
       }
     }
   },
+  "termsModal": {
+    "title": "Terms and Privacy Policy",
+    "actions": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "accept": "Accept"
+    },
+    "terms": {
+      "title": "Terms and Conditions",
+      "paragraphs": {
+        "p1": "By using, testing, or participating in the <strong>IoT-Enabled Smart Cane with AI-Based Visual Recognition and Route Navigation</strong> (\"the System\"), the user and/or their authorized guardian agrees to be bound by these Terms and Conditions.",
+        "p2": "The System is a research prototype designed to enhance the mobility, safety, and independence of visually impaired individuals. It is intended to assist navigation and hazard awareness but does not replace personal judgment, mobility training, or human assistance.",
+        "p3": "The System utilizes short-range sensors, AI-based visual recognition, GPS tracking, route navigation, haptic feedback, and one-way voice alerts. Due to technical and environmental factors, the System may experience delays, inaccuracies, or service interruptions.",
+        "p4": "Users acknowledge that obstacle detection is limited to sensor range, AI recognition may not be fully accurate, and GPS and navigation features depend on network availability and signal conditions. The System does not guarantee complete avoidance of hazards.",
+        "p5": "Users must remain attentive at all times and are responsible for their own safety during navigation. Guardians or caregivers agree to use monitoring, messaging, and location features solely for safety and support purposes.",
+        "p6": "The emergency SOS feature is intended to assist in emergency situations by sending alerts and location data to designated contacts. Successful delivery depends on mobile network coverage and sufficient SIM load. Immediate response is not guaranteed.",
+        "p7": "Participation in system testing, surveys, and evaluations is voluntary. Participants may withdraw at any time without penalty. The system is not intended for commercial use.",
+        "p8": "For data-related rights and processing details, please review the <link>Privacy Policy section</link>."
+      },
+      "bullets": {
+        "b1": "Always prioritize <strong>real-world awareness</strong> while using the System.",
+        "b2": "Treat all alerts as <strong>assistive guidance</strong>, not absolute guarantees.",
+        "b3": "Use the device only for its intended <strong>research and safety support</strong> purpose."
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "paragraphs": {
+        "p1": "The System collects and processes personal data necessary for system functionality, safety monitoring, emergency response, and academic research purposes. Collected data may include GPS location, system usage logs, device identifiers, and guardian contact information.",
+        "p2": "All personal data is processed in compliance with the Data Privacy Act of 2012 (Republic Act No. 10173). Reasonable organizational, physical, and technical security measures are implemented to protect collected data against unauthorized access, loss, or misuse.",
+        "p3": "Location data is used to support route navigation, guardian monitoring, and emergency SOS alerts. Real-time tracking features require an active internet connection and may be limited in areas with weak or no network coverage.",
+        "p4": "Collected data shall be retained only for the duration necessary to fulfill research objectives and system evaluation. Data used for analysis will be anonymized and aggregated to protect participant identity.",
+        "p5": "Data subjects have the right to be informed, access, correct, object to processing, and withdraw consent regarding their personal data at any time by coordinating with the project researchers or system administrators.",
+        "p6": "While reasonable safeguards are applied, no system can guarantee absolute data security. By using the System, users acknowledge and accept these inherent risks."
+      },
+      "bullets": {
+        "b1": "We collect only data that is <strong>necessary</strong> for safety and system operation.",
+        "b2": "Research reporting uses <strong>anonymized or aggregated</strong> data whenever possible.",
+        "b3": "You may request to <strong>access or correct</strong> your data through project administrators."
+      }
+    },
+    "consentLabel": "I confirm that the <strong>Terms and Conditions</strong> and <strong>Privacy Policy</strong> have been read and explained to me. I voluntarily consent to the collection and processing of my personal data and assume the risks associated with using this research prototype."
+  },
   "auth": {
     "login": {
       "heading": "Welcome",
@@ -573,6 +746,9 @@
         "cancel": "Cancel"
       },
       "modal": {
+        "noValidDeviceTitle": "No Valid Device",
+        "noValidDeviceMessage": "It seems like you don't have a paired iCane device. Please pair your device to continue.",
+        "pairedSuccessfullyTitle": "Paired Successfully",
         "proceedToDashboard": "Proceed to Dashboard",
         "continueToDashboard": "You can now continue to dashboard and start using your account.",
         "redirecting": "Redirecting in {{seconds}}s..."
@@ -624,7 +800,75 @@
       "privacy": "Privacy Policy.",
       "scanTitle": "Scan your iCane Device",
       "scanDescription": "Point your camera at the QR code on your iCane device to pair it automatically.",
+      "placeholders": {
+        "province": "Province...",
+        "city": "City...",
+        "barangay": "Barangay...",
+        "village": "Village...",
+        "contactNumber": "09XX XXX XXXX",
+        "email": "sample.email@gmail.com"
+      },
+      "validation": {
+        "firstNameRequired": "First Name is required",
+        "lastNameRequired": "Last Name is required",
+        "lettersAndSpacesOnly": "Should contain only letters and spaces",
+        "minTwoChars": "Should be at least 2 characters long",
+        "maxFiftyChars": "Should not exceed 50 characters",
+        "usernameRequired": "Username is required",
+        "usernameMinThree": "Username must be at least 3 characters long",
+        "usernameMaxTwenty": "Username must not exceed 20 characters",
+        "usernameAllowedChars": "Username can only contain letters, numbers, and underscores",
+        "usernameMinLetters": "Username must contain at least 3 letters",
+        "passwordRequired": "Password is required",
+        "passwordMinEight": "Password must be at least 8 characters long",
+        "passwordMaxSixtyFour": "Password must not exceed 64 characters",
+        "passwordNeedsLowercase": "Password must contain at least one lowercase letter",
+        "passwordNeedsUppercase": "Password must contain at least one uppercase letter",
+        "passwordNeedsNumber": "Password must contain at least one number",
+        "passwordNeedsSpecial": "Password must contain at least one special character (@$!%*?&)",
+        "confirmPasswordRequired": "Confirm Password is required",
+        "passwordsDontMatch": "Passwords don't match!",
+        "streetAddressRequired": "Street Address is required",
+        "addressMoreSpecific": "Address should be more specific",
+        "addressMaxHundred": "Address should not exceed 100 characters",
+        "emailRequired": "Email is required",
+        "emailMaxHundred": "Email should not exceed 100 characters",
+        "validEmail": "Please enter a valid email address",
+        "contactNumberRequired": "Contact Number is required",
+        "contactDigits": "Contact number must be {{count}} digits",
+        "contactStarts09": "Contact number must start with 09 and contain 11 digits",
+        "otpSixDigits": "Please enter the complete 6-digit OTP"
+      },
+      "errors": {
+        "generic": "Registration failed",
+        "usernameTaken": "Username already taken",
+        "emailRegistered": "Email already registered",
+        "contactRegistered": "Contact number is already registered",
+        "otpSendFailed": "Failed to send OTP. Please try again."
+      },
       "modal": {
+        "inviteCreatedTitle": "Account Created via Invite!",
+        "inviteCreatedMessage": "Your account has been created successfully using the invite link.",
+        "accountCreatedTitle": "Account Created!",
+        "accountCreatedPairMessage": "Account successfully created. Please pair your device to proceed.",
+        "setupCompleteTitle": "Setup Complete!",
+        "setupCompleteMessage": "Your account has been created and device paired successfully.",
+        "manualPairMessage": "Account created successfully. Please manually pair your device.",
+        "goToLogin": "Go to Login",
+        "proceedToLogin": "Proceed to Login",
+        "pairedSuccessfullyTitle": "Paired Successfully",
+        "tooManyRequestsTitle": "Too Many Requests",
+        "tooManyRequestsMessage": "You have made too many requests in a short period. Please wait a while before trying again.",
+        "networkErrorTitle": "Network Error",
+        "networkErrorMessage": "We're having trouble connecting to the server. Please check your internet connection and try again. If the problem persists, try refreshing the page or contacting support.",
+        "deviceVerifiedTitle": "Device Verified",
+        "deviceAlreadyPairedTitle": "Device Already Paired",
+        "deviceNotFoundTitle": "Device Not Found",
+        "deviceVerifiedMessage": "Your device has been successfully verified and is ready to be paired. Register your account to continue.",
+        "deviceAlreadyPairedMessage": "This device is already linked to another account. If you believe this is a mistake, please contact support.",
+        "deviceNotFoundMessage": "We couldn't locate a device with this serial code. Please check and try again.",
+        "invalidDeviceTitle": "Invalid Device",
+        "invalidDeviceMessage": "Invalid device. Please try again.",
         "continueToLogin": "You can now continue to login and start using your account.",
         "redirecting": "Redirecting in {{seconds}}s..."
       }

@@ -18,8 +18,8 @@ export const updateGuardian = (payload) =>
 export const getMyProfile = () =>
   handleRequest(() => backendApi.get("/guardian/profile"));
 
-export const markTourComplete = () =>
-  handleRequest(() => backendApi.patch("/guardian/tour-complete"));
+export const markTourComplete = (payload) =>
+  handleRequest(() => backendApi.patch("/guardian/tour-complete", payload));
 
 export const getVIPs = () => handleRequest(() => backendApi.get("/vip"));
 

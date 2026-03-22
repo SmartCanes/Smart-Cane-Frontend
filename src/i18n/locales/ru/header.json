@@ -1,0 +1,20 @@
+{
+  "openMenu": "Открыть меню",
+  "closeMenu": "Закрыть меню",
+  "selectDevice": "Выберите устройство",
+  "noVip": "Нет VIP",
+  "noVipAvailable": "VIP-доступа нет",
+  "noVipDevices": "Нет VIP-устройств",
+  "connection": "Связь",
+  "connected": "Подключено",
+  "disconnected": "Отключено",
+  "notifications": "Уведомления",
+  "noNotificationsYet": "Уведомлений пока нет",
+  "total": "{{count}} всего",
+  "seeAllNotifications": "Просмотреть все уведомления",
+  "markAllAsRead": "Отметить все как прочитанное",
+  "profile": "Профиль",
+  "history": "История",
+  "settings": "Настройки",
+  "logout": "Выход из системы"
+}

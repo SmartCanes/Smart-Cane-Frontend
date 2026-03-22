@@ -1,0 +1,226 @@
+{
+  "nav": {
+    "home": "Lar",
+    "icane": "iCane",
+    "about": "Sobre nós",
+    "faqs": "Perguntas frequentes",
+    "contact": "Contate-nos",
+    "login": "Conecte-se"
+  },
+  "mobileMenu": {
+    "open": "Abrir menu",
+    "close": "Fechar menu"
+  },
+  "hero": {
+    "title": "O iCane que vê o futuro.",
+    "subtitle": "SmartCane: Redefinindo a mobilidade com segurança alimentada por IA.",
+    "description": "iCane usa tecnologia de sensor avançada e IA para detectar obstáculos, analisar terreno e orientá-lo com feedback em tempo real. Ganhe confiança e independência com um dispositivo desenvolvido para sua viagem.",
+    "cta": "Comece",
+    "imageAlt": "Grupo de pessoas andando com bengalas"
+  },
+  "sections": {
+    "icane": "iCane",
+    "about": "SOBRE NÓS",
+    "faq": "Perguntas frequentes",
+    "contact": "CONTATE-NOS"
+  },
+  "about": {
+    "imageAlt": "Foto da equipe",
+    "paragraph1": "Na iCane, acreditamos que a tecnologia deve facilitar a vida de todos. Nossa bengala inteligente foi projetada para ajudar pessoas com deficiência visual a se movimentarem com segurança e confiança todos os dias.",
+    "paragraph2": "O iCane utiliza sensores inteligentes e feedback simples para orientar os usuários e evitar obstáculos. Ele foi desenvolvido para ser confiável, fácil de usar e oferecer maior independência.",
+    "paragraph3": "Nossa equipe é apaixonada por criar ferramentas que realmente fazem a diferença. Ouvimos nossos usuários, aprendemos com suas experiências e continuamos melhorando para tornar o iCane ainda melhor."
+  },
+  "faq": {
+    "heading": "Perguntas frequentes",
+    "items": [
+      {
+        "question": "O que é SmartCane?",
+        "answer": "SmartCane (iCane) é uma bengala inteligente para deficientes visuais. Ele combina tecnologia IoT, detecção de objetos baseada em IA e ferramentas de navegação para oferecer suporte a viagens mais seguras e independentes."
+      },
+      {
+        "question": "Como faço para criar uma conta e fazer login?",
+        "answer": "Visite o site SmartCane e clique em Cadastre-se. Insira seus dados, crie sua conta e faça login usando seu e-mail e senha para acessar seu painel."
+      },
+      {
+        "question": "Como utilizo o site SmartCane?",
+        "answer": "Após fazer login, você pode gerenciar seu perfil, monitorar o status do dispositivo, revisar notificações, usar ferramentas de navegação e gerenciar responsáveis ​​e conexões VIP."
+      },
+      {
+        "question": "Como funcionam os responsáveis ​​e usuários VIP?",
+        "answer": "Os guardiões são contatos confiáveis ​​que podem monitorar e auxiliar os usuários VIP. Uma vez conectados, os responsáveis ​​podem receber alertas, monitorar a localização e fornecer ajuda quando necessário."
+      },
+      {
+        "question": "Quais recursos de segurança o SmartCane oferece?",
+        "answer": "SmartCane fornece detecção de obstáculos, alertas de voz ou vibração, rastreamento GPS e notificações SOS de emergência para melhorar a segurança durante o movimento."
+      },
+      {
+        "question": "Como carrego e faço a manutenção do SmartCane?",
+        "answer": "Use um cabo USB para carregar a bengala. Uma carga completa geralmente leva cerca de 2 a 3 horas. O dispositivo é resistente à água contra chuva leve, mas não deve ser submerso."
+      }
+    ]
+  },
+  "contact": {
+    "introTitle": "Bem vindo ao iCane",
+    "intro": "Estamos aqui para ajudar.",
+    "description": "Se você tiver dúvidas, precisar de suporte ou quiser compartilhar sua experiência, nossa equipe está pronta para ajudar.",
+    "callTitle": "Ligue para nós",
+    "callDescription": "Estamos a apenas uma chamada de distância para qualquer dúvida ou suporte que você precisar.",
+    "emailTitle": "Envie-nos um e-mail",
+    "emailDescription": "Envie-nos um e-mail e entraremos em contato com você o mais breve possível.",
+    "callIconAlt": "Chamar",
+    "emailIconAlt": "E-mail"
+  },
+  "footer": {
+    "description": "Uma bengala de mobilidade inteligente que capacita os deficientes visuais com segurança, orientação e conectividade.",
+    "category": "Categoria",
+    "contactInfo": "Informações de contato",
+    "socialMedia": "Mídias Sociais",
+    "facebookAria": "Visite a página do iCane no Facebook",
+    "instagramAria": "Visite a página do Instagram do iCane",
+    "facebookIconAlt": "Ícone do Facebook",
+    "instagramIconAlt": "Ícone do Instagram",
+    "copyright": "© 2026 iCane · Todos os direitos reservados"
+  },
+  "features": {
+    "Visual-Recognition": {
+      "title": "Reconhecimento visual baseado em IA",
+      "description": "Através do reconhecimento visual alimentado por IA, o Smart Cane identifica objetos e arredores, fornecendo aos usuários descrições de áudio instantâneas que melhoram a conscientização e apoiam a tomada de decisões mais seguras durante a viagem."
+    },
+    "route-navigation": {
+      "title": "Navegação de rota",
+      "description": "O recurso de navegação de rota do Smart Cane fornece instruções guiadas por meio de comandos de voz em tempo real, ajudando os usuários a se moverem com confiança e segurança em direção ao seu destino, sem depender apenas de dicas táteis."
+    },
+    "gps": {
+      "title": "GPS",
+      "description": "Com rastreamento GPS em tempo real, os responsáveis ​​podem monitorar facilmente a localização do usuário por meio do aplicativo web conectado, garantindo segurança e tranquilidade onde quer que estejam."
+    },
+    "emergency-sos": {
+      "title": "SOS",
+      "description": "Durante emergências, o iCane envia automaticamente um alerta SOS com a localização exata do usuário para os responsáveis ​​cadastrados, possibilitando resposta rápida e atendimento imediato."
+    },
+    "iot-connectivity": {
+      "title": "Conectividade IOT",
+      "description": "A integração IoT do iCane conecta o dispositivo a um aplicativo da web complementar que fornece conectividade, detecção de quedas, alertas de emergência e localização do usuário para monitoramento contínuo."
+    },
+    "weather": {
+      "title": "Notificações meteorológicas",
+      "description": "Fique um passo à frente do clima. O iCane fornece alertas meteorológicos instantâneos para ajudar os usuários a se prepararem para as condições externas e garantir uma navegação mais segura."
+    },
+    "document": {
+      "title": "Notas e lembretes compartilhados",
+      "description": "Através do recurso de notas compartilhadas, os responsáveis ​​podem enviar mensagens de texto que o iCane lê em voz alta por meio de seu assistente de IA, mantendo os usuários informados, lembrados e conectados a qualquer momento."
+    }
+  },
+  "caneViewer": {
+    "logoAlt": "Logotipo do iCane",
+    "brandLine": "iCane - Bengala Inteligente",
+    "controls": {
+      "resetAria": "Redefinir visualização 3D",
+      "resetTitle": "Redefinir visualização",
+      "explore3d": "Explorar 3D",
+      "exit3d": "Sair do 3D"
+    },
+    "mobile": {
+      "dragHint": "Arrastar, aplicar zoom e deslocar",
+      "tapHint": "Toque em Explorar 3D"
+    },
+    "ads": {
+      "voiceGuidedNavigation": {
+        "label": "Navegação guiada por voz",
+        "headline": "Navegue com confiança",
+        "sub": "A detecção de obstáculos em tempo real mantém cada passo seguro."
+      },
+      "alwaysConnected": {
+        "label": "Sempre conectado",
+        "headline": "Tranquilidade em qualquer lugar",
+        "sub": "Rastreamento GPS ao vivo para que os responsáveis ​​nunca fiquem fora do circuito."
+      },
+      "emergencyReady": {
+        "label": "Pronto para Emergência",
+        "headline": "SOS ao seu alcance",
+        "sub": "Alertas instantâneos enviados aos seus responsáveis ​​quando for mais importante."
+      },
+      "smartAssistiveTech": {
+        "label": "Tecnologia Assistiva Inteligente",
+        "headline": "Inteligente. Seguro. Independente.",
+        "sub": "O futuro da mobilidade assistida finalmente chegou."
+      }
+    }
+  },
+  "team": {
+    "heading": {
+      "prefix": "Conheça o",
+      "highlight": "Equipe"
+    },
+    "subtitle": "Especialistas apaixonados e dedicados a redefinir a mobilidade através de tecnologia inovadora e design inclusivo.",
+    "filters": {
+      "all": "Todos",
+      "developers": "Desenvolvedores",
+      "designers": "Designers",
+      "documentation": "Documentação"
+    },
+    "empty": {
+      "message": "Nenhum membro da equipe encontrado nesta categoria.",
+      "showAll": "Mostrar tudo"
+    },
+    "members": {
+      "1": {
+        "role": "Designer líder de produto e especialista em UI/UX",
+        "bio": "Lidera a experiência do produto iCane, do conceito ao protótipo, traduzindo as necessidades do usuário em interfaces acessíveis e intuitivas e sistemas de design consistentes."
+      },
+      "2": {
+        "role": "Especialista Principal em Documentação e Pesquisa",
+        "bio": "Lidera pesquisas e documentação para o iCane, consolidando descobertas técnicas em relatórios claros, diagramas e recursos visuais anotados para apoiar o desenvolvimento e a avaliação."
+      },
+      "3": {
+        "role": "Engenheiro Web e UI",
+        "bio": "Constrói a IU da web do iCane com foco em componentes limpos, layouts responsivos e interações suaves para usuários e responsáveis."
+      },
+      "4": {
+        "role": "Gerente Assistente de Documentação e Produto",
+        "bio": "Apoia o planejamento e a documentação do produto, coordenando os requisitos, mantendo o progresso alinhado e garantindo que as entregas sejam claramente escritas e bem estruturadas."
+      },
+      "5": {
+        "role": "Desenvolvedor Web e Engenheiro de Hardware",
+        "bio": "Une software e hardware desenvolvendo recursos da web e ajudando a integrar sensores e componentes de dispositivos para funcionalidade confiável de ponta a ponta."
+      },
+      "6": {
+        "role": "Desenvolvedor Web Full Stack e Usuário com Deficiência Visual",
+        "bio": "Desenvolve recursos full-stack ao mesmo tempo que fornece uma perspectiva direta do usuário, ajudando a validar fluxos, feedback e decisões de acessibilidade a partir do uso no mundo real."
+      },
+      "7": {
+        "role": "Designer UI/UX e Especialista em Layout",
+        "bio": "Projeta layouts e materiais de apresentação para o iCane, garantindo que telas, relatórios e recursos visuais comuniquem informações de forma clara e consistente."
+      },
+      "8": {
+        "role": "Pesquisador e Especialista em Documentação",
+        "bio": "Suporta pesquisas e testes do iCane, documentando experimentos, resultados e notas de implementação para manter a equipe alinhada e o projeto reproduzível."
+      },
+      "9": {
+        "role": "Gerente de Projetos e Garantia de Qualidade",
+        "bio": "Lidera o planejamento e a garantia de qualidade do iCane, organizando tarefas, acompanhando o progresso e verificando recursos por meio de testes estruturados e validação."
+      },
+      "10": {
+        "role": "Designer Gráfico e UI/UX Designer",
+        "bio": "Cria os ativos visuais e o aprimoramento da interface do usuário do iCane, combinando branding, design gráfico e design de interface para produzir uma aparência coesa."
+      },
+      "11": {
+        "role": "Pesquisador e Especialista em Documentação",
+        "bio": "Coordena tarefas de documentação e pesquisa, mantendo as notas do projeto organizadas e garantindo que os resultados sejam claros, consistentes e prontos para envio."
+      },
+      "12": {
+        "role": "Pesquisador e Especialista em Documentação",
+        "bio": "Auxilia na pesquisa e documentação, traduzindo o trabalho técnico em redações compreensíveis e mantendo registros claros das decisões de implementação."
+      },
+      "13": {
+        "role": "Pesquisador e redator técnico",
+        "bio": "Escreve e edita o conteúdo técnico do iCane, garantindo que o papel, as legendas e a documentação sejam legíveis, consistentes e devidamente estruturados."
+      },
+      "14": {
+        "role": "Desenvolvedor líder",
+        "bio": "Lidera a arquitetura e implementação do sistema, reunindo componentes em uma solução confiável, segura e escalonável em tempo real."
+      }
+    }
+  },
+  "backToTop": "Voltar ao topo"
+}

@@ -2,7 +2,17 @@
   "languages": {
     "en": "Iningles",
     "tl": "Tagalog",
-    "ceb": "Bisaya"
+    "ceb": "Bisaya",
+    "ko": "Koreano",
+    "zh": "Mandarin",
+    "ja": "Hapon",
+    "it": "Italyano",
+    "es": "Espanol",
+    "pt": "Portugues",
+    "ru": "Ruso",
+    "fr": "Pranses",
+    "hi": "Hindi",
+    "ar": "Arabo"
   },
   "languageSwitcher": {
     "label": "Pinulongan",
@@ -13,5 +23,16 @@
     "loading": "Naga-load...",
     "save": "I-save",
     "cancel": "Kansela"
+  },
+  "passwordField": {
+    "showPassword": "Ipakita ang password",
+    "hidePassword": "Itago ang password",
+    "validIconAlt": "Balido nga lagda",
+    "rules": {
+      "lowerUpper": "Lowercase ug Uppercase",
+      "number": "Numero (0-9)",
+      "special": "Espesyal nga Character (!@#$%^&*)",
+      "length": "Labing menos 8 ka Character"
+    }
   }
 }

@@ -1,0 +1,38 @@
+{
+  "languages": {
+    "en": "英語",
+    "tl": "タガログ語",
+    "ceb": "ビサヤ語",
+    "ko": "韓国語",
+    "zh": "中国語",
+    "ja": "日本語",
+    "it": "イタリア語",
+    "es": "スペイン語",
+    "pt": "ポルトガル語",
+    "ru": "ロシア語",
+    "fr": "フランス語",
+    "hi": "ヒンディー語",
+    "ar": "アラビア語"
+  },
+  "languageSwitcher": {
+    "label": "言語",
+    "ariaLabel": "サイトの言語を変更",
+    "changed": "言語が{{language}}に変更されました"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "passwordField": {
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを隠す",
+    "validIconAlt": "有効なルール",
+    "rules": {
+      "lowerUpper": "小文字と大文字",
+      "number": "数字 (0 ～ 9)",
+      "special": "特殊文字 (!@#$%^&*)",
+      "length": "少なくとも 8 文字"
+    }
+  }
+}

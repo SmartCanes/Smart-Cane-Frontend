@@ -3,30 +3,56 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import { useTranslation } from "react-i18next";
 import { useTourStore } from "@/stores/useTourStore";
 import { useUserStore, useUIStore } from "@/stores/useStore";
-import { MOBILE_TOUR_FLOW, TOUR_STEPS } from "@/data/tourConfig";
-import { markTourComplete } from "@/api/backendService";
+import { useTourSteps } from "@/data/tourConfig";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const SPOTLIGHT_PADDING = 10; // extra space around the target element
 const TOOLTIP_MARGIN = 14; // gap between target edge and tooltip
 const TOOLTIP_SIDE_PADDING = 16; // minimum gap from viewport edge
+const BOTTOM_NAV_HEIGHT = 80;
+const MOBILE_TARGET_TOOLTIP_GAP = 20;
 
 // Responsive tooltip width: shrink on narrow screens so it never clips
 const getTooltipWidth = () =>
   Math.min(320, window.innerWidth - TOOLTIP_SIDE_PADDING * 2);
 
-function normalizeTourFlag(value) {
-  if (typeof value === "boolean") return value;
-  if (value === 1 || value === "1") return true;
-  if (value === 0 || value === "0") return false;
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-    if (normalized === "true") return true;
-    if (normalized === "false") return false;
-  }
-  return null;
+function waitForTourTarget(
+  target,
+  onFound,
+  onTimeout,
+  interval = 100,
+  maxAttempts = 40
+) {
+  let attempts = 0;
+  let cancelled = false;
+  let timer = null;
+
+  const tryFind = () => {
+    if (cancelled) return;
+    const el = document.querySelector(`[data-tour="${target}"]`);
+    if (el && (el.offsetWidth > 0 || el.offsetHeight > 0)) {
+      onFound?.(el);
+      return;
+    }
+
+    if (attempts >= maxAttempts) {
+      onTimeout?.();
+      return;
+    }
+
+    attempts += 1;
+    timer = setTimeout(tryFind, interval);
+  };
+
+  tryFind();
+
+  return () => {
+    cancelled = true;
+    clearTimeout(timer);
+  };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -34,17 +60,28 @@ function normalizeTourFlag(value) {
 /**
  * Clamp a tooltip position so it stays fully inside the viewport.
  */
-function clampToViewport(top, left, tooltipWidth, tooltipHeight) {
+function clampToViewport(
+  top,
+  left,
+  tooltipWidth,
+  tooltipHeight,
+  {
+    minTop = TOOLTIP_SIDE_PADDING,
+    minLeft = TOOLTIP_SIDE_PADDING,
+    maxRightInset = TOOLTIP_SIDE_PADDING,
+    maxBottomInset = TOOLTIP_SIDE_PADDING
+  } = {}
+) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   return {
     top: Math.max(
-      TOOLTIP_SIDE_PADDING,
-      Math.min(top, vh - tooltipHeight - TOOLTIP_SIDE_PADDING)
+      minTop,
+      Math.min(top, vh - tooltipHeight - maxBottomInset)
     ),
     left: Math.max(
-      TOOLTIP_SIDE_PADDING,
-      Math.min(left, vw - tooltipWidth - TOOLTIP_SIDE_PADDING)
+      minLeft,
+      Math.min(left, vw - tooltipWidth - maxRightInset)
     )
   };
 }
@@ -52,8 +89,8 @@ function clampToViewport(top, left, tooltipWidth, tooltipHeight) {
 /**
  * Calculate the best tooltip position relative to the target element rect.
  * Tries the preferred direction first, then falls back through the others.
- * On mobile (isMobile=true) always returns a bottom-center fixed modal position
- * so the tooltip never overflows or clips against the spotlight.
+ * On mobile, placement is computed dynamically (above or below the spotlight)
+ * while preserving a safe area above the fixed bottom navigation.
  */
 function computeTooltipPos(
   rect,
@@ -65,20 +102,45 @@ function computeTooltipPos(
   const vh = window.innerHeight;
   const tw = getTooltipWidth();
 
-  // ── Mobile: anchor tooltip to the bottom-centre of the viewport ──────────
-  // This avoids the tooltip being squeezed between the spotlight and screen
-  // edges, which is a common source of overflow/flicker on narrow screens.
-  if (isMobile) {
-    return clampToViewport(
-      vh - tooltipHeight - 24,
-      (vw - tw) / 2,
-      tw,
-      tooltipHeight
-    );
-  }
-
   const p = SPOTLIGHT_PADDING;
   const m = TOOLTIP_MARGIN;
+
+  // ── Mobile: choose above/below dynamically with strict spotlight spacing ──
+  if (isMobile) {
+    const gap = Math.max(m, MOBILE_TARGET_TOOLTIP_GAP);
+    const minTop = TOOLTIP_SIDE_PADDING;
+    const maxBottomInset = TOOLTIP_SIDE_PADDING + BOTTOM_NAV_HEIGHT;
+    const centerLeft = rect.left + rect.width / 2 - tw / 2;
+
+    const belowTop = rect.bottom + p + gap;
+    const aboveTop = rect.top - p - gap - tooltipHeight;
+
+    const spaceBelow = vh - maxBottomInset - (rect.bottom + p + gap);
+    const spaceAbove = rect.top - p - gap - minTop;
+
+    const fitsBelow = spaceBelow >= tooltipHeight;
+    const fitsAbove = spaceAbove >= tooltipHeight;
+
+    let chosenTop;
+    if (fitsBelow && fitsAbove) {
+      chosenTop = spaceBelow >= spaceAbove ? belowTop : aboveTop;
+    } else if (fitsBelow) {
+      chosenTop = belowTop;
+    } else if (fitsAbove) {
+      chosenTop = aboveTop;
+    } else {
+      // If space is tight on both sides, prefer the side with more room.
+      chosenTop = spaceBelow >= spaceAbove ? belowTop : aboveTop;
+    }
+
+    return clampToViewport(
+      chosenTop,
+      centerLeft,
+      tw,
+      tooltipHeight,
+      { minTop, maxBottomInset }
+    );
+  }
 
   const candidates = {
     bottom: {
@@ -147,11 +209,15 @@ const MOBILE_HEADER_STEP_MAP = {
 
 const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
   const location = useLocation();
+  const { t, i18n } = useTranslation("pages");
+  const isRtl = i18n.language === "ar" || i18n.resolvedLanguage === "ar";
+  const { tourSteps, mobileTourFlow } = useTourSteps();
   const {
-    hasVisited,
+    hasCompletedPage,
     activeTourPage,
     currentStep,
     startTour,
+    completePage,
     endTour,
     nextStep,
     prevStep
@@ -175,26 +241,33 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
   const hasEvaluatedAutoStartRef = useRef(false);
   const evaluatedForPathRef = useRef(null);
 
-  const { user, updateUser } = useUserStore();
+  const { user } = useUserStore();
   const { hydrate } = useTourStore();
   const { setMobileMenuOpen } = useUIStore();
 
   // Normalize keys because auth/login payloads may use camelCase while
   // hydrated profile data from backend uses snake_case.
   const guardianId = user?.guardianId ?? user?.guardian_id ?? null;
-  const hasSeenTourBackend =
-    normalizeTourFlag(user?.has_seen_tour) ??
-    normalizeTourFlag(user?.hasSeenTour) ??
-    null;
+  const hasSeenTourCsv =
+    typeof user?.has_seen_tour === "string"
+      ? user.has_seen_tour
+      : typeof user?.hasSeenTour === "string"
+        ? user.hasSeenTour
+        : "";
+  // const hasSeenEmergencyTour =
+  //   user?.has_seen_emergency_tour ?? user?.hasSeenEmergencyTour ?? false;
 
-  // ── Hydrate per-user localStorage data whenever the logged-in user changes ─
-  // This is the key fix: each guardian ID gets its own localStorage key, so
-  // a new account on the same browser never inherits another user's tour history.
+  // ── Hydrate per-user backend data whenever the logged-in user changes ─
   useEffect(() => {
     if (guardianId) {
-      hydrate(guardianId);
+      hydrate({
+        guardian_id: guardianId,
+        has_seen_tour: hasSeenTourCsv,
+        // has_seen_emergency_tour: hasSeenEmergencyTour,
+      });
     }
-  }, [guardianId, hydrate]);
+    
+  }, [guardianId, hasSeenTourCsv,  hydrate]);
 
   // ── Track mobile breakpoint as React state so steps recompute on resize ─
   const [isMobileView, setIsMobileView] = useState(
@@ -207,10 +280,10 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
   }, []);
 
   const rawSteps = useMemo(
-    () => TOUR_STEPS[location.pathname] ?? [],
-    [location.pathname]
+    () => tourSteps[location.pathname] ?? [],
+    [location.pathname, tourSteps]
   );
-  const mobileFlow = MOBILE_TOUR_FLOW[location.pathname];
+  const mobileFlow = mobileTourFlow[location.pathname];
 
   const steps = useMemo(() => {
     if (!isMobileView) return rawSteps;
@@ -258,17 +331,7 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
   const isActive = activeTourPage === location.pathname;
   const step = isActive && steps[currentStep] ? steps[currentStep] : null;
   const firstStepTarget = steps[0]?.target ?? null;
-  const allTourPaths = useMemo(
-    () =>
-      Object.keys(TOUR_STEPS).filter(
-        (path) => (TOUR_STEPS[path] ?? []).length > 0
-      ),
-    []
-  );
-
-  // ── Auto-start for first-time page visits ─────────────────────────────────
-  // Backend `has_seen_tour` is the source of truth so the tour never replays
-  // across browsers/devices after completion.
+  // ── Auto-start for incomplete page tours ──────────────────────────────────
   useEffect(() => {
     if (!canAutoStart) return;
 
@@ -278,25 +341,14 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
       evaluatedForPathRef.current = location.pathname;
     }
 
-    // Global guard: backend completion is absolute source of truth.
-    // If backend says completed, tour must never auto-start on any page.
-    if (hasSeenTourBackend === true) {
-      hasEvaluatedAutoStartRef.current = true;
-      return;
-    }
-
     // // Already decided for this page — don't re-evaluate on re-renders
     if (hasEvaluatedAutoStartRef.current) return;
 
     if (steps.length === 0) return;
     if (!guardianId) return; // wait for user to finish loading
 
-    // Wait until backend completion status is known and explicitly false.
-    // Multi-page onboarding only runs while backend still says "not completed".
-    if (hasSeenTourBackend !== false) return;
-
-    // During onboarding phase, localStorage tracks per-page progression.
-    if (hasVisited(location.pathname)) {
+    // Page already completed in backend CSV, do not re-trigger it.
+    if (hasCompletedPage(location.pathname)) {
       hasEvaluatedAutoStartRef.current = true;
       return;
     }
@@ -341,8 +393,7 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
     steps,
     firstStepTarget,
     guardianId,
-    hasSeenTourBackend,
-    hasVisited,
+    hasCompletedPage,
     startTour
   ]);
 
@@ -359,17 +410,17 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
   // no dimensions — they've already been remapped to "tour-mobile-menu" via
   // the effectiveSteps logic above, so no further remapping is needed here.
   const updatePosition = useCallback(() => {
-    if (!step) return;
+    if (!step) return false;
 
     const el = document.querySelector(`[data-tour="${step.target}"]`);
-    if (!el) return;
+    if (!el) return false;
 
     const tw = getTooltipWidth();
     setTooltipWidth(tw);
 
     const rect = el.getBoundingClientRect();
     // Skip if the element has no size yet (menu still animating in)
-    if (rect.width === 0 && rect.height === 0) return;
+    if (rect.width === 0 && rect.height === 0) return false;
 
     setSpotlightRect({ ...rect.toJSON() });
 
@@ -383,6 +434,7 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
       )
     );
     setStepReady(true);
+    return true;
   }, [step, isMobileView]);
 
   // When the active step changes: scroll to target, wait for scroll to settle,
@@ -391,15 +443,23 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
     setStepReady(false);
     if (!step) return;
 
+    let retryTimer = null;
+    let skipTimer = null;
+    let attempts = 0;
+    const maxAttempts = 40;
+
     const el = document.querySelector(`[data-tour="${step.target}"]`);
     if (el) {
       // Only scroll if the element isn't already fully visible — prevents
       // programmatic scroll from firing accidental touch/click events on
       // mobile (e.g. accidentally toggling the hamburger menu).
       const r = el.getBoundingClientRect();
+      const safeBottom = isMobileView
+        ? window.innerHeight - (BOTTOM_NAV_HEIGHT + TOOLTIP_SIDE_PADDING)
+        : window.innerHeight;
       const inViewport =
         r.top >= 0 &&
-        r.bottom <= window.innerHeight &&
+        r.bottom <= safeBottom &&
         r.left >= 0 &&
         r.right <= window.innerWidth;
       if (!inViewport) {
@@ -409,7 +469,7 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
         clearTimeout(scrollLockTimerRef.current);
         el.scrollIntoView({
           behavior: "smooth",
-          block: "center",
+          block: isMobileView ? "start" : "center",
           inline: "nearest"
         });
         // Release the lock once the smooth scroll has had time to settle.
@@ -421,17 +481,39 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
       }
     }
 
+    const tryMeasure = () => {
+      const measured = updatePosition();
+      if (measured) return;
+
+      if (attempts >= maxAttempts) {
+        if (step.skipIfMissing) {
+          skipTimer = setTimeout(() => {
+            setStepReady(false);
+            if (currentStep < steps.length - 1) {
+              nextStep();
+            }
+          }, 0);
+        }
+        return;
+      }
+
+      attempts += 1;
+      retryTimer = setTimeout(tryMeasure, 120);
+    };
+
     // Steps that need the mobile menu open require a longer settle time:
     // the menu control effect opens it at t≈80ms, the spring animation
     // finishes around t≈400ms, so we measure at t=620ms to be safe.
     const delay = step.requiresMobileMenu ? 620 : 360;
-    const t = setTimeout(updatePosition, delay);
+    const t = setTimeout(tryMeasure, delay);
     return () => {
       clearTimeout(t);
+      clearTimeout(retryTimer);
+      clearTimeout(skipTimer);
       clearTimeout(scrollLockTimerRef.current);
       isScrollingRef.current = false;
     };
-  }, [step, updatePosition]);
+  }, [step, updatePosition, currentStep, steps.length, nextStep]);
 
   // Recompute positions on scroll or resize.
   // The scroll handler is guarded by isScrollingRef so that programmatic
@@ -489,10 +571,15 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
   // ── Persist onboarding completion to backend ───────────────────────────────
   // Completion is delayed until either:
   // 1) user skips onboarding, or
-  // 2) user completes the last page in the configured tour sequence.
+  // 2) user has explicitly completed every configured page in the sequence.
   const completeTour = useCallback(
     async (mode = "page-complete") => {
       setMobileMenuOpen(false); // close drawer if it was opened by the tour
+
+      if (mode === "page-complete") {
+        await completePage(location.pathname);
+      }
+
       endTour();
 
       if (mode === "skip") {
@@ -501,32 +588,103 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
         onComplete?.();
       }
 
-      const lastTourPath = allTourPaths[allTourPaths.length - 1];
-      const isLastPageInSequence = location.pathname === lastTourPath;
-      const shouldMarkComplete =
-        mode === "skip" || (mode === "page-complete" && isLastPageInSequence);
-
-      // Delayed backend completion: only on Skip or final page completion.
-      if (!shouldMarkComplete || hasSeenTourBackend === true) return;
-
-      try {
-        await markTourComplete();
-        updateUser({ has_seen_tour: true, hasSeenTour: true });
-      } catch {
-        // Non-critical — per-page localStorage guard still prevents re-show
-      }
+      // Page-level completion is already persisted by completePage().
+      // Skip mode intentionally does not mark the page as completed.
     },
     [
-      allTourPaths,
       location.pathname,
-      hasSeenTourBackend,
+      completePage,
       endTour,
       onClose,
       onComplete,
-      setMobileMenuOpen,
-      updateUser
+      setMobileMenuOpen
     ]
   );
+
+  // ── Interaction-gated steps ─────────────────────────────────────────────
+  // Some steps intentionally hide "Next" and advance only after a specific
+  // UI interaction (e.g. opening a dropdown, then opening a modal).
+  useEffect(() => {
+    if (!isActive || !step?.advanceOn) return;
+
+    const {
+      target,
+      event = "click",
+      waitForTarget,
+      waitInterval = 100,
+      waitMaxAttempts = 40,
+      settleDelay = 0
+    } = step.advanceOn;
+
+    let disposed = false;
+    let unbind = null;
+    let cleanupWait = null;
+
+    const advance = () => {
+      if (disposed) return;
+      const runAdvance = () => {
+        if (disposed) return;
+        setStepReady(false);
+        if (currentStep < steps.length - 1) {
+          nextStep();
+        }
+      };
+
+      if (!waitForTarget) {
+        if (settleDelay > 0) {
+          setTimeout(runAdvance, settleDelay);
+        } else {
+          runAdvance();
+        }
+        return;
+      }
+
+      cleanupWait = waitForTourTarget(
+        waitForTarget,
+        () => {
+          if (settleDelay > 0) {
+            setTimeout(runAdvance, settleDelay);
+          } else {
+            runAdvance();
+          }
+        },
+        runAdvance,
+        waitInterval,
+        waitMaxAttempts
+      );
+    };
+
+    const bindInteraction = () => {
+      const actionEl = document.querySelector(`[data-tour="${target}"]`);
+      if (!actionEl) {
+        cleanupWait = waitForTourTarget(
+          target,
+          (el) => {
+            if (disposed) return;
+            const handler = () => advance();
+            el.addEventListener(event, handler, { once: true });
+            unbind = () => el.removeEventListener(event, handler);
+          },
+          undefined,
+          100,
+          40
+        );
+        return;
+      }
+
+      const handler = () => advance();
+      actionEl.addEventListener(event, handler, { once: true });
+      unbind = () => actionEl.removeEventListener(event, handler);
+    };
+
+    bindInteraction();
+
+    return () => {
+      disposed = true;
+      unbind?.();
+      cleanupWait?.();
+    };
+  }, [isActive, step, currentStep, steps.length, nextStep]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleNext = () => {
@@ -561,6 +719,15 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
   };
 
   const isLastStep = currentStep >= steps.length - 1;
+  const BADGE_SIZE = 24;
+  const badgeTop = Math.max(TOOLTIP_SIDE_PADDING, hl.top - 10);
+  const badgeLeft = Math.max(
+    TOOLTIP_SIDE_PADDING,
+    Math.min(
+      hl.left + hl.width - 10,
+      window.innerWidth - BADGE_SIZE - TOOLTIP_SIDE_PADDING
+    )
+  );
 
   return createPortal(
     <AnimatePresence>
@@ -641,8 +808,8 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
         key="tour-badge"
         className="fixed z-[10001] flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 border-2 border-white shadow-lg pointer-events-none text-[10px] font-bold text-white"
         style={{
-          top: hl.top - 10,
-          left: hl.left + hl.width - 10
+          top: badgeTop,
+          left: badgeLeft
         }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -657,8 +824,12 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
         key={`tooltip-${step.target}`}
         ref={tooltipRef}
         className="fixed z-[10000] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
+        dir={isRtl ? "rtl" : "ltr"}
         style={{
           width: tooltipWidth,
+          maxHeight: isMobileView
+            ? `calc(100vh - ${BOTTOM_NAV_HEIGHT + TOOLTIP_SIDE_PADDING * 2}px)`
+            : undefined,
           top: tooltipPos.top,
           left: tooltipPos.left
         }}
@@ -670,7 +841,15 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
         {/* Top colour accent bar */}
         <div className="h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 w-full" />
 
-        <div className="p-4">
+        <div
+          className={`px-4 pt-4 pb-5 sm:px-5 ${isRtl ? "text-right" : "text-left"}`}
+          style={{
+            maxHeight: isMobileView
+              ? `calc(100vh - ${BOTTOM_NAV_HEIGHT + TOOLTIP_SIDE_PADDING * 2 + 6}px)`
+              : undefined,
+            overflowY: isMobileView ? "auto" : undefined
+          }}
+        >
           {/* Header row: icon + title + close */}
           <div className="flex items-start justify-between gap-3 mb-2.5">
             <div className="flex items-center gap-2.5">
@@ -689,7 +868,7 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
             <button
               onClick={handleSkip}
               className="text-gray-400 hover:text-gray-600 transition-colors shrink-0 mt-0.5 cursor-pointer"
-              aria-label="Skip tour"
+              aria-label={t("tour.ui.skip", { defaultValue: "Skip" })}
             >
               <Icon icon="ph:x-bold" className="text-sm" />
             </button>
@@ -701,9 +880,13 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
           </p>
 
           {/* Footer: progress dots + navigation buttons */}
-          <div className="flex items-center justify-between">
+          <div
+            className={`mt-1 flex ${isMobileView ? "flex-col gap-3" : `items-center gap-4 ${isRtl ? "flex-row-reverse" : ""}`}`}
+          >
             {/* Step progress dots */}
-            <div className="flex items-center gap-1.5">
+            <div
+              className={`flex items-center ${isMobileView ? "justify-center gap-2" : "shrink-0 gap-1.5"}`}
+            >
               {steps.map((_, i) => (
                 <div
                   key={i}
@@ -719,31 +902,46 @@ const TourGuide = ({ canAutoStart = true, onComplete, onClose }) => {
             </div>
 
             {/* Navigation buttons */}
-            <div className="flex items-center gap-2">
+            <div
+              className={`flex flex-wrap items-center gap-2 ${
+                isMobileView
+                  ? isRtl
+                    ? "justify-start"
+                    : "justify-end"
+                  : isRtl
+                    ? "mr-auto flex-row-reverse justify-start"
+                    : "ml-auto justify-end"
+              }`}
+            >
               {currentStep > 0 && (
                 <button
                   onClick={handlePrev}
-                  className="px-3 py-1.5 text-xs font-medium text-gray-600 rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 min-w-[58px] text-xs font-medium text-gray-600 rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer"
                 >
-                  Back
+                  {t("tour.ui.back", { defaultValue: "Back" })}
                 </button>
               )}
-              <button
-                onClick={handleNext}
-                className="px-4 py-1.5 text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
-              >
-                {isLastStep ? (
-                  <>
-                    Done
-                    <Icon icon="ph:check-bold" className="text-[11px]" />
-                  </>
-                ) : (
-                  <>
-                    Next
-                    <Icon icon="ph:arrow-right-bold" className="text-[11px]" />
-                  </>
-                )}
-              </button>
+              {!step.hideNext && (
+                <button
+                  onClick={handleNext}
+                  className="px-4 py-1.5 min-w-[62px] text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  {isLastStep ? (
+                    <>
+                      {t("tour.ui.done", { defaultValue: "Done" })}
+                      <Icon icon="ph:check-bold" className="text-[11px]" />
+                    </>
+                  ) : (
+                    <>
+                      {t("tour.ui.next", { defaultValue: "Next" })}
+                      <Icon
+                        icon="ph:arrow-right-bold"
+                        className="text-[11px]"
+                      />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -2,7 +2,17 @@
   "languages": {
     "en": "Ingles",
     "tl": "Tagalog",
-    "ceb": "Bisaya"
+    "ceb": "Bisaya",
+    "ko": "Koreano",
+    "zh": "Mandarin",
+    "ja": "Hapon",
+    "it": "Italyano",
+    "es": "Espanyol",
+    "pt": "Portuges",
+    "ru": "Ruso",
+    "fr": "Pranses",
+    "hi": "Hindi",
+    "ar": "Arabe"
   },
   "languageSwitcher": {
     "label": "Wika",
@@ -13,5 +23,16 @@
     "loading": "Naglo-load...",
     "save": "I-save",
     "cancel": "Kanselahin"
+  },
+  "passwordField": {
+    "showPassword": "Ipakita ang password",
+    "hidePassword": "Itago ang password",
+    "validIconAlt": "Valid na panuntunan",
+    "rules": {
+      "lowerUpper": "Lowercase at Uppercase",
+      "number": "Numero (0-9)",
+      "special": "Espesyal na Character (!@#$%^&*)",
+      "length": "Hindi bababa sa 8 Character"
+    }
   }
 }

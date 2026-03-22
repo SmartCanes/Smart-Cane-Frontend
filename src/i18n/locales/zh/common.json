@@ -1,0 +1,38 @@
+{
+  "languages": {
+    "en": "英语",
+    "tl": "他加禄语",
+    "ceb": "宿务语",
+    "ko": "韩语",
+    "zh": "中文",
+    "ja": "日语",
+    "it": "意大利语",
+    "es": "西班牙语",
+    "pt": "葡萄牙语",
+    "ru": "俄语",
+    "fr": "法语",
+    "hi": "印地语",
+    "ar": "阿拉伯语"
+  },
+  "languageSwitcher": {
+    "label": "语言",
+    "ariaLabel": "更改网站语言",
+    "changed": "语言已更改为{{language}}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "passwordField": {
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "validIconAlt": "有效规则",
+    "rules": {
+      "lowerUpper": "小写和大写",
+      "number": "数字（0-9）",
+      "special": "特殊字符 (!@#$%^&*)",
+      "length": "至少 8 个字符"
+    }
+  }
+}

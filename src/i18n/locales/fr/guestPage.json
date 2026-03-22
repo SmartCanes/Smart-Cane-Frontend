@@ -1,0 +1,226 @@
+{
+  "nav": {
+    "home": "Maison",
+    "icane": "iCanne",
+    "about": "À propos de nous",
+    "faqs": "FAQ",
+    "contact": "Contactez-nous",
+    "login": "Se connecter"
+  },
+  "mobileMenu": {
+    "open": "Ouvrir le menu",
+    "close": "Fermer le menu"
+  },
+  "hero": {
+    "title": "L'iCane qui voit devant.",
+    "subtitle": "SmartCane : redéfinir la mobilité avec la sécurité basée sur l'IA.",
+    "description": "iCane utilise une technologie de capteur avancée et l'IA pour détecter les obstacles, analyser le terrain et vous guider avec des commentaires en temps réel. Gagnez en confiance et en indépendance avec un appareil conçu pour votre voyage.",
+    "cta": "Commencer",
+    "imageAlt": "Groupe de personnes marchant avec des cannes"
+  },
+  "sections": {
+    "icane": "iCanne",
+    "about": "À PROPOS DE NOUS",
+    "faq": "FAQ",
+    "contact": "CONTACTEZ-NOUS"
+  },
+  "about": {
+    "imageAlt": "Photo d'équipe",
+    "paragraph1": "Chez iCane, nous pensons que la technologie devrait faciliter la vie de tous. Notre canne intelligente est conçue pour aider les personnes malvoyantes à se déplacer chaque jour en toute sécurité et en toute confiance.",
+    "paragraph2": "L'iCane utilise des capteurs intelligents et un retour d'information simple pour guider les utilisateurs et éviter les obstacles. Il est conçu pour être fiable, facile à utiliser et favorable à une plus grande indépendance.",
+    "paragraph3": "Notre équipe est passionnée par la création d’outils qui font réellement la différence. Nous écoutons nos utilisateurs, apprenons de leurs expériences et continuons à nous améliorer pour rendre iCane encore meilleur."
+  },
+  "faq": {
+    "heading": "Foire aux questions",
+    "items": [
+      {
+        "question": "Qu’est-ce que SmartCane ?",
+        "answer": "SmartCane (iCane) est une canne de marche intelligente destinée aux personnes malvoyantes. Il combine la technologie IoT, la détection d'objets basée sur l'IA et des outils de navigation pour permettre des déplacements plus sûrs et plus indépendants."
+      },
+      {
+        "question": "Comment créer un compte et me connecter ?",
+        "answer": "Visitez le site Web SmartCane et cliquez sur S'inscrire. Saisissez vos coordonnées, créez votre compte, puis connectez-vous avec votre email et votre mot de passe pour accéder à votre tableau de bord."
+      },
+      {
+        "question": "Comment utiliser le site SmartCane ?",
+        "answer": "Une fois connecté, vous pouvez gérer votre profil, surveiller l'état de l'appareil, consulter les notifications, utiliser les outils de navigation et gérer les tuteurs et les connexions VIP."
+      },
+      {
+        "question": "Comment fonctionnent les tuteurs et les utilisateurs VIP ?",
+        "answer": "Les tuteurs sont des contacts de confiance qui peuvent surveiller et assister les utilisateurs VIP. Une fois connectés, les tuteurs peuvent recevoir des alertes, surveiller l'emplacement et fournir de l'aide en cas de besoin."
+      },
+      {
+        "question": "Quelles fonctionnalités de sécurité SmartCane fournit-il ?",
+        "answer": "SmartCane fournit une détection d'obstacles, des alertes vocales ou vibratoires, un suivi GPS et des notifications SOS d'urgence pour améliorer la sécurité pendant les mouvements."
+      },
+      {
+        "question": "Comment charger et entretenir SmartCane ?",
+        "answer": "Utilisez un câble USB pour charger la canne. Une charge complète prend généralement environ 2 à 3 heures. L'appareil est résistant à l'eau en cas de pluie légère mais ne doit pas être immergé."
+      }
+    ]
+  },
+  "contact": {
+    "introTitle": "Bienvenue sur iCane",
+    "intro": "Nous sommes là pour vous aider.",
+    "description": "Que vous ayez des questions, besoin d'aide ou souhaitiez partager votre expérience, notre équipe est prête à vous aider.",
+    "callTitle": "Appelez-nous",
+    "callDescription": "Nous sommes à votre disposition pour toute question ou assistance dont vous avez besoin.",
+    "emailTitle": "Envoyez-nous un courriel",
+    "emailDescription": "Envoyez-nous un email et nous vous répondrons dans les plus brefs délais.",
+    "callIconAlt": "Appel",
+    "emailIconAlt": "E-mail"
+  },
+  "footer": {
+    "description": "Une canne de mobilité intelligente offrant aux malvoyants sécurité, guidage et connectivité.",
+    "category": "Catégorie",
+    "contactInfo": "Coordonnées",
+    "socialMedia": "Réseaux sociaux",
+    "facebookAria": "Visitez la page Facebook d'iCane",
+    "instagramAria": "Visitez la page Instagram d'iCane",
+    "facebookIconAlt": "Icône Facebook",
+    "instagramIconAlt": "Icône Instagram",
+    "copyright": "© 2026 iCane · Tous droits réservés"
+  },
+  "features": {
+    "Visual-Recognition": {
+      "title": "Reconnaissance visuelle basée sur l'IA",
+      "description": "Grâce à la reconnaissance visuelle basée sur l'IA, la Smart Cane identifie les objets et l'environnement, offrant aux utilisateurs des descriptions audio instantanées qui améliorent leur conscience et facilitent une prise de décision plus sûre pendant le voyage."
+    },
+    "route-navigation": {
+      "title": "Navigation routière",
+      "description": "La fonction de navigation d'itinéraire de Smart Cane fournit des instructions guidées via des invites vocales en temps réel, aidant les utilisateurs à se déplacer en toute confiance et en toute sécurité vers leur destination sans se fier uniquement aux signaux tactiles."
+    },
+    "gps": {
+      "title": "GPS",
+      "description": "Grâce au suivi GPS en temps réel, les gardiens peuvent facilement surveiller la position de l'utilisateur via l'application Web connectée, garantissant ainsi sécurité et tranquillité d'esprit où qu'il aille."
+    },
+    "emergency-sos": {
+      "title": "SOS",
+      "description": "En cas d'urgence, iCane envoie automatiquement une alerte SOS avec l'emplacement exact de l'utilisateur aux tuteurs enregistrés, permettant une réponse rapide et une assistance immédiate."
+    },
+    "iot-connectivity": {
+      "title": "Connectivité IOT",
+      "description": "L'intégration IoT d'iCane relie l'appareil à une application Web complémentaire qui fournit la connectivité, la détection des chutes, les alertes d'urgence et la localisation de l'utilisateur pour une surveillance continue."
+    },
+    "weather": {
+      "title": "Notifications météo",
+      "description": "Gardez une longueur d'avance sur la météo. iCane fournit des alertes météorologiques instantanées pour aider les utilisateurs à se préparer aux conditions extérieures et à garantir une navigation plus sûre."
+    },
+    "document": {
+      "title": "Notes et rappels partagés",
+      "description": "Grâce à la fonction de notes partagées, les tuteurs peuvent envoyer des messages texte qu'iCane lit à haute voix via son assistant IA, gardant ainsi les utilisateurs informés, rappelés et connectés à tout moment."
+    }
+  },
+  "caneViewer": {
+    "logoAlt": "logo iCane",
+    "brandLine": "iCane - Canne intelligente",
+    "controls": {
+      "resetAria": "Réinitialiser la vue 3D",
+      "resetTitle": "Réinitialiser la vue",
+      "explore3d": "Explorez la 3D",
+      "exit3d": "Quitter la 3D"
+    },
+    "mobile": {
+      "dragHint": "Faites glisser, zoomez et effectuez un panoramique",
+      "tapHint": "Appuyez sur Explorer 3D"
+    },
+    "ads": {
+      "voiceGuidedNavigation": {
+        "label": "Navigation guidée par la voix",
+        "headline": "Naviguez en toute confiance",
+        "sub": "La détection d'obstacles en temps réel assure la sécurité de chaque pas."
+      },
+      "alwaysConnected": {
+        "label": "Toujours connecté",
+        "headline": "Tranquillité d'esprit, partout",
+        "sub": "Suivi GPS en direct pour que les gardiens ne soient jamais hors de propos."
+      },
+      "emergencyReady": {
+        "label": "Prêt en cas d'urgence",
+        "headline": "SOS à portée de main",
+        "sub": "Alertes instantanées envoyées à vos tuteurs lorsque cela compte le plus."
+      },
+      "smartAssistiveTech": {
+        "label": "Technologie d'assistance intelligente",
+        "headline": "Intelligent. Sûr. Indépendant.",
+        "sub": "L’avenir de la mobilité assistée est enfin là."
+      }
+    }
+  },
+  "team": {
+    "heading": {
+      "prefix": "Rencontrez le",
+      "highlight": "Équipe"
+    },
+    "subtitle": "Des experts passionnés dédiés à redéfinir la mobilité grâce à une technologie innovante et un design inclusif.",
+    "filters": {
+      "all": "Tous",
+      "developers": "Développeurs",
+      "designers": "Créateurs",
+      "documentation": "Documentation"
+    },
+    "empty": {
+      "message": "Aucun membre de l'équipe trouvé dans cette catégorie.",
+      "showAll": "Afficher tout"
+    },
+    "members": {
+      "1": {
+        "role": "Concepteur de produits principal et spécialiste UI/UX",
+        "bio": "Dirige l'expérience produit d'iCane du concept au prototype, traduisant les besoins des utilisateurs en interfaces accessibles et intuitives et en systèmes de conception cohérents."
+      },
+      "2": {
+        "role": "Spécialiste en chef de la documentation et de la recherche",
+        "bio": "Diriger la recherche et la documentation pour iCane, en consolidant les résultats techniques dans des rapports clairs, des diagrammes et des visuels annotés pour soutenir le développement et l'évaluation."
+      },
+      "3": {
+        "role": "Ingénieur Web et UI",
+        "bio": "Construit l'interface utilisateur Web d'iCane en mettant l'accent sur des composants propres, des mises en page réactives et des interactions utilisateur fluides pour les utilisateurs et les tuteurs."
+      },
+      "4": {
+        "role": "Assistante Documentation & Chef de Produit",
+        "bio": "Prend en charge la planification et la documentation des produits en coordonnant les exigences, en maintenant les progrès alignés et en garantissant que les livrables sont clairement rédigés et bien structurés."
+      },
+      "5": {
+        "role": "Développeur Web et ingénieur matériel",
+        "bio": "Relie les logiciels et le matériel en développant des fonctionnalités Web tout en aidant à intégrer des capteurs et des composants d'appareil pour une fonctionnalité fiable de bout en bout."
+      },
+      "6": {
+        "role": "Développeur Web Full Stack & Utilisateur Déficient Visuel",
+        "bio": "Développe des fonctionnalités complètes tout en offrant une perspective directe à l'utilisateur, aidant ainsi à valider les flux, les commentaires et les décisions d'accessibilité à partir d'une utilisation réelle."
+      },
+      "7": {
+        "role": "Concepteur UI/UX et spécialiste de la mise en page",
+        "bio": "Concevoir des mises en page et des supports de présentation pour iCane, en garantissant que les écrans, les rapports et les visuels communiquent les informations de manière claire et cohérente."
+      },
+      "8": {
+        "role": "Chercheur et spécialiste en documentation",
+        "bio": "Prend en charge la recherche et les tests iCane, en documentant les expériences, les résultats et les notes de mise en œuvre pour que l'équipe reste alignée et que le projet soit reproductible."
+      },
+      "9": {
+        "role": "Chef de projet et assurance qualité",
+        "bio": "Dirige la planification et l'assurance qualité d'iCane, organise les tâches, suit les progrès et vérifie les fonctionnalités grâce à des tests et des validations structurés."
+      },
+      "10": {
+        "role": "Graphiste & UI/UX Designer",
+        "bio": "Crée les actifs visuels et l'interface utilisateur d'iCane, en combinant l'image de marque, la conception graphique et la conception de l'interface pour produire une apparence cohérente."
+      },
+      "11": {
+        "role": "Chercheur et spécialiste en documentation",
+        "bio": "Coordonne les tâches de documentation et de recherche, en gardant les notes de projet organisées et en s'assurant que les résultats sont clairs, cohérents et prêts à être soumis."
+      },
+      "12": {
+        "role": "Chercheur et spécialiste en documentation",
+        "bio": "Aide à la recherche et à la documentation, en traduisant le travail technique en rédactions compréhensibles et en conservant des enregistrements clairs des décisions de mise en œuvre."
+      },
+      "13": {
+        "role": "Chercheur et rédacteur technique",
+        "bio": "Rédige et édite le contenu technique d'iCane, en garantissant que le document, les légendes et la documentation sont lisibles, cohérents et correctement structurés."
+      },
+      "14": {
+        "role": "Développeur principal",
+        "bio": "Dirige l'architecture et la mise en œuvre du système, en réunissant les composants dans une solution en temps réel fiable, sécurisée et évolutive."
+      }
+    }
+  },
+  "backToTop": "Retour en haut"
+}

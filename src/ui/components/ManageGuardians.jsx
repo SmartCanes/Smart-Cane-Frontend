@@ -11,6 +11,7 @@ import {
   removeGuardianFromDevice,
   toggleEmergencyContact
 } from "@/api/backendService";
+import { useTourStore } from "@/stores/useTourStore";
 import { useGuardiansStore, useUserStore } from "@/stores/useStore";
 import { capitalizeWords } from "@/utils/Capitalize";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
@@ -494,6 +495,7 @@ const GuardianTile = ({
         <div className="flex gap-2 shrink-0 ml-auto">
           {canEditRelationship && (
             <button
+              data-tour="tour-manage-guardians-edit-relationship"
               onClick={() => onEditRelationship(guardian)}
               title="Edit relationship"
               className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
@@ -866,6 +868,14 @@ const ManageGuardiansModal = ({
     pendingInvitesCount
   } = useGuardiansStore();
   const { user } = useUserStore();
+  const {
+    startTour,
+    endTour,
+    completeEmergencyTour,
+    isEmergencyTourEligible,
+    hasCompletedPage,
+    activeTourPage
+  } = useTourStore();
   const [email, setEmail] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [selectedGuardian, setSelectedGuardian] = useState(null);
@@ -882,8 +892,36 @@ const ManageGuardiansModal = ({
   const [viewMode, setViewMode] = useState("tiles");
 
   const currentGuardians = guardians(deviceId);
+  const noEmergencyContactSet = currentGuardians.every(
+    (g) => !g.isEmergencyContact
+  );
 
   const currentRole = currentGuardianRole(user.guardianId);
+
+  // Trigger the emergency mini-tour only when:
+  // 1) modal is open, 2) /devices tour is completed,
+  // 3) more than one guardian exists, 4) none is emergency yet.
+  useEffect(() => {
+    if (
+      isOpen &&
+      hasCompletedPage("/devices") &&
+      isEmergencyTourEligible() &&
+      currentGuardians.length > 1 &&
+      noEmergencyContactSet &&
+      activeTourPage !== "emergency-feature"
+    ) {
+      const t = setTimeout(() => startTour("emergency-feature"), 500);
+      return () => clearTimeout(t);
+    }
+  }, [
+    isOpen,
+    hasCompletedPage,
+    isEmergencyTourEligible,
+    currentGuardians.length,
+    noEmergencyContactSet,
+    activeTourPage,
+    startTour
+  ]);
 
   useEffect(() => {
     if (isOpen) {
@@ -1171,6 +1209,7 @@ const ManageGuardiansModal = ({
         >
           <div className="relative z-10 w-full max-w-6xl px-4 sm:px-6">
             <motion.div
+              data-tour="tour-manage-guardians-modal"
               className="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] flex flex-col border border-gray-100 overflow-hidden"
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1232,6 +1271,7 @@ const ManageGuardiansModal = ({
 
                     <div className="w-full md:w-auto mt-3 md:mt-0">
                       <button
+                        data-tour="tour-manage-guardians-invite"
                         onClick={() => setInviteModalOpen(true)}
                         className="bg-[#2ECC71] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 justify-center cursor-pointer hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto whitespace-nowrap text-sm sm:text-base"
                         disabled={isSubmitting}
@@ -1339,7 +1379,10 @@ const ManageGuardiansModal = ({
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                <div
+                  data-tour="tour-manage-guardians-stats"
+                  className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8"
+                >
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 p-2 rounded-lg">

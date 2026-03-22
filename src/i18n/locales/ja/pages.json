@@ -1,0 +1,921 @@
+{
+  "tour": {
+    "ui": {
+      "back": "戻る",
+      "next": "次",
+      "done": "終わり",
+      "skip": "スキップ"
+    },
+    "steps": {
+      "dashboard": {
+        "switchVip": {
+          "title": "VIPを切り替える",
+          "description": "このドロップダウンを使用して、ペアリングされた iCane デバイスを切り替えます。各デバイスは特定の VIP に割り当てられます。"
+        },
+        "connectionStatus": {
+          "title": "接続ステータス",
+          "description": "このバッジは、iCane がライブでデータを送信しているかどうかを示します。緑色は接続されていることを意味し、灰色はデバイスがオフラインであることを意味します。"
+        },
+        "alerts": {
+          "title": "アラートと通知",
+          "description": "ベルをタップすると、iCane からの着信アラート (転倒検出、バッテリー残量低下、緊急トリガーなど) が表示されます。"
+        },
+        "accountMenu": {
+          "title": "あなたのアカウントメニュー",
+          "description": "このメニューからプロフィール、アクティビティ履歴、アプリ設定にアクセスしたり、サインアウトしたりできます。"
+        },
+        "liveMap": {
+          "title": "ライブ位置追跡",
+          "description": "地図上で iCane のリアルタイムの位置を確認します。地図上の任意の場所をタップしてルート オプションを開き、VIP の目的地を設定します。"
+        },
+        "gpsInfo": {
+          "title": "GPS信号情報",
+          "description": "iCane デバイスの衛星数、信号品質、最後に確認された GPS 座標を監視します。"
+        },
+        "guardianNetwork": {
+          "title": "ガーディアンネットワーク",
+          "description": "現在オンラインになっている共同保護者を確認します。緑色はアクティブを意味します - 彼らは現在あなたと一緒に監視しています。"
+        },
+        "recentAlerts": {
+          "title": "最近のアラート",
+          "description": "iCane デバイスによってトリガーされる最新の転倒検出と緊急アラートで最新情報を入手してください。"
+        },
+        "sendNote": {
+          "title": "クイックノートを送信する",
+          "description": "iCane の音声エンジンを通じて、短いリマインダーやメッセージを VIP に直接送信します。"
+        },
+        "mapControls": {
+          "title": "マップコントロール",
+          "description": "これらのコントロールを使用して、地図を VIP のルートにロックしたり、リアルタイムで彼らの動きを追跡したり、自分の位置を中心にしたり、ズームインおよびズームアウトしたりできます。"
+        }
+      },
+      "devices": {
+        "devicesHeader": {
+          "title": "ペアリングされた iCane デバイス",
+          "description": "アカウントにリンクされているすべての iCane デバイスがここに表示されます。任意のデバイスを管理、名前変更、またはペアリング解除できます。"
+        },
+        "addDevice": {
+          "title": "新しいデバイスを追加する",
+          "description": "「Add Cane」をタップし、iCane の QR コードをスキャンしてアカウントとペアリングします。ほんの数秒しかかかりません。"
+        },
+        "deviceActions": {
+          "title": "デバイスアクションを開く",
+          "description": "デバイス カードの [管理] をクリックすると、ニックネーム、保護者、およびペアリング コントロールのクイック アクションが開きます。"
+        },
+        "deviceMenu": {
+          "title": "デバイスアクションメニュー",
+          "description": "これらのオプションを使用すると、ニックネームの編集、保護者の管理、またはデバイスのペアリングの解除を行うことができます。 「保護者の管理」をクリックして続行します。"
+        },
+        "inviteGuardian": {
+          "title": "別のガーディアンを招待する",
+          "description": "このボタンを使用して新しい保護者を電子メールで招待し、保護者がこの VIP の監視を支援できるようにします。"
+        },
+        "editGuardian": {
+          "title": "ガーディアンの詳細を編集する",
+          "description": "役割が変わったときに関係の詳細を更新するには、保護者カードのこの編集アイコンを使用します。"
+        },
+        "guardianStats": {
+          "title": "ガーディアンの概要統計",
+          "description": "これらの概要カードから合計ガーディアン、現在アクティブなガーディアン、および保留中の招待を追跡します。"
+        }
+      },
+      "activity_logs": {
+        "activityHeader": {
+          "title": "活動報告",
+          "description": "ログイン、デバイスの変更、保護者の招待など、すべてのアカウント アクションの完全な監査証跡。"
+        },
+        "activitySearch": {
+          "title": "検索とフィルター",
+          "description": "ガーディアン名、アクション タイプ、または説明を検索して、特定のアクティビティをすばやく見つけます。"
+        }
+      },
+      "device_logs": {
+        "deviceLogsHeader": {
+          "title": "デバイスアクティビティログ",
+          "description": "VIP の iCane デバイスのルート アクティビティ、安全イベント、移動履歴を表示します。"
+        },
+        "deviceLogsSearch": {
+          "title": "検索とフィルター",
+          "description": "キーワード、ステータス、または日付範囲でレコードをすばやく絞り込み、必要なイベントを見つけます。"
+        }
+      },
+      "weather_board": {
+        "weatherMain": {
+          "title": "天気予報",
+          "description": "現在の状況と数日間の予報を確認して、VIP のために安全な屋外アクティビティを計画するのに役立ててください。"
+        },
+        "weatherSearch": {
+          "title": "あらゆる場所を検索",
+          "description": "フィリピンの都市または場所を入力すると、その地域の地域別の天気予報が表示されます。"
+        }
+      },
+      "advanced": {
+        "advancedHeader": {
+          "title": "コンポーネント管理",
+          "description": "各ハードウェア コンポーネントの状態をリアルタイムで監視し、ここからセンサーのしきい値を調整します。"
+        },
+        "deviceStatus": {
+          "title": "一目で分かる健康状態",
+          "description": "このパネルには、オンラインになっているコンポーネントの数が要約され、iCane の全体的な健全性の割合が表示されます。"
+        }
+      }
+    },
+    "mobile": {
+      "dashboard": {
+        "headerMenuIntro": {
+          "title": "ヘッダーメニューを開く",
+          "description": "ヘッダー メニューを開いて、接続ステータス、VIP ドロップダウン、その他の設定にアクセスします。"
+        }
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "modal": {
+        "noValidDeviceTitle": "有効なデバイスがありません",
+        "noValidDeviceMessage": "ペアリングされた iCane デバイスがないようです。続行するにはデバイスをペアリングしてください。",
+        "pairedSuccessfullyTitle": "正常にペアリングされました",
+        "proceedToDashboard": "ダッシュボードに進む",
+        "continueToDashboard": "これで、ダッシュボードを続行してアカウントの使用を開始できるようになります。",
+        "redirecting": "{{seconds}}秒後にリダイレクトしています..."
+      },
+      "heading": "いらっしゃいませ",
+      "subheading": "準備はできていますか?ログインして、ダッシュボードに直接ジャンプします。",
+      "mobileHeading": "アカウントにログインします",
+      "identifierLabel": "メールアドレスまたはユーザー名",
+      "identifierPlaceholder": "メールアドレスまたはユーザー名を入力してください...",
+      "passwordLabel": "パスワード",
+      "passwordPlaceholder": "パスワードを入力してください...",
+      "forgotPassword": "パスワードをお忘れですか？",
+      "captchaLoading": "キャプチャを読み込み中...",
+      "signingIn": "サインイン中...",
+      "signIn": "サインイン",
+      "noAccount": "アカウントをお持ちではありませんか?",
+      "signUp": "サインアップ",
+      "scanTitle": "iCane デバイスをスキャンします",
+      "scanDescription": "iCane デバイスの QR コードにカメラを向けると、自動的にペアリングされます。",
+      "errors": {
+        "identifierRequired": "メールアドレスまたはユーザー名は必須です",
+        "passwordRequired": "パスワードが必要です",
+        "captchaRequired": "キャプチャを完了してください",
+        "loginFailed": "ログインに失敗しました",
+        "twoFactorEmailRequired": "2 要素認証には有効な電子メール アドレスが必要です。",
+        "otpSendFailed": "OTPの送信に失敗しました。もう一度試してください。",
+        "otpIncomplete": "6 桁の完全なコードを入力してください。",
+        "invalidCode": "無効なコードです。もう一度試してください。",
+        "retryAfter": "失敗したログイン試行が多すぎます。 {{seconds}} 秒後にもう一度お試しください。"
+      },
+      "twoFactor": {
+        "title": "メール認証",
+        "promptPrefix": "を入力してください",
+        "codeLabel": "6桁の認証コード",
+        "promptSuffix": "あなたのメールアドレスに送信しました。",
+        "noCode": "コードを受け取っていませんか?",
+        "sending": "送信中...",
+        "resendIn": "{{seconds}}秒以内に再送信してください",
+        "resend": "確認コードを再送信する",
+        "verifying": "確認中...",
+        "verify": "確認する",
+        "cancel": "キャンセル"
+      }
+    },
+    "register": {
+      "placeholders": {
+        "province": "州...",
+        "city": "市...",
+        "barangay": "バランガイ...",
+        "village": "村...",
+        "contactNumber": "09XX XXX XXXX",
+        "email": "サンプル.email@gmail.com"
+      },
+      "validation": {
+        "firstNameRequired": "名は必須です",
+        "lastNameRequired": "姓は必須です",
+        "lettersAndSpacesOnly": "文字とスペースのみを含める必要があります",
+        "minTwoChars": "少なくとも 2 文字の長さである必要があります",
+        "maxFiftyChars": "50文字を超えてはなりません",
+        "usernameRequired": "ユーザー名は必須です",
+        "usernameMinThree": "ユーザー名は 3 文字以上である必要があります",
+        "usernameMaxTwenty": "ユーザー名は 20 文字を超えてはなりません",
+        "usernameAllowedChars": "ユーザー名には文字、数字、アンダースコアのみを含めることができます",
+        "usernameMinLetters": "ユーザー名には少なくとも 3 文字を含める必要があります",
+        "passwordRequired": "パスワードが必要です",
+        "passwordMinEight": "パスワードは8文字以上である必要があります",
+        "passwordMaxSixtyFour": "パスワードは64文字を超えてはなりません",
+        "passwordNeedsLowercase": "パスワードには少なくとも 1 つの小文字が含まれている必要があります",
+        "passwordNeedsUppercase": "パスワードには少なくとも 1 つの大文字が含まれている必要があります",
+        "passwordNeedsNumber": "パスワードには少なくとも 1 つの数字が含まれている必要があります",
+        "passwordNeedsSpecial": "パスワードには少なくとも 1 つの特殊文字 (@$!%*?&) が含まれている必要があります",
+        "confirmPasswordRequired": "パスワードが必要であることを確認してください",
+        "passwordsDontMatch": "パスワードが一致しません!",
+        "streetAddressRequired": "住所は必須です",
+        "addressMoreSpecific": "住所はもっと具体的にする必要があります",
+        "addressMaxHundred": "住所は100文字を超えてはなりません",
+        "emailRequired": "メールアドレスは必須です",
+        "emailMaxHundred": "メールは100文字以内にしてください",
+        "validEmail": "有効なメールアドレスを入力してください",
+        "contactNumberRequired": "連絡先番号は必須です",
+        "contactDigits": "連絡先番号は{{count}}桁である必要があります",
+        "contactStarts09": "連絡先番号は 09 で始まり 11 桁を含む必要があります",
+        "otpSixDigits": "完全な 6 桁の OTP を入力してください"
+      },
+      "errors": {
+        "generic": "登録に失敗しました",
+        "usernameTaken": "ユーザー名はすでに取得されています",
+        "emailRegistered": "メールアドレスはすでに登録されています",
+        "contactRegistered": "連絡先番号はすでに登録されています",
+        "otpSendFailed": "OTPの送信に失敗しました。もう一度試してください。"
+      },
+      "modal": {
+        "inviteCreatedTitle": "招待経由でアカウントが作成されました!",
+        "inviteCreatedMessage": "招待リンクを使用してアカウントが正常に作成されました。",
+        "accountCreatedTitle": "アカウントが作成されました!",
+        "accountCreatedPairMessage": "アカウントが正常に作成されました。続行するにはデバイスをペアリングしてください。",
+        "setupCompleteTitle": "セットアップ完了！",
+        "setupCompleteMessage": "アカウントが作成され、デバイスが正常にペアリングされました。",
+        "manualPairMessage": "アカウントが正常に作成されました。デバイスを手動でペアリングしてください。",
+        "goToLogin": "ログインに移動",
+        "proceedToLogin": "ログインに進む",
+        "pairedSuccessfullyTitle": "正常にペアリングされました",
+        "tooManyRequestsTitle": "リクエストが多すぎます",
+        "tooManyRequestsMessage": "短期間に多すぎるリクエストを行いました。しばらく待ってからもう一度お試しください。",
+        "networkErrorTitle": "ネットワークエラー",
+        "networkErrorMessage": "サーバーに接続できません。インターネット接続を確認して、もう一度試してください。問題が解決しない場合は、ページを更新するか、サポートに連絡してください。",
+        "deviceVerifiedTitle": "デバイス検証済み",
+        "deviceAlreadyPairedTitle": "デバイスはすでにペアリングされています",
+        "deviceNotFoundTitle": "デバイスが見つかりません",
+        "deviceVerifiedMessage": "デバイスは正常に検証され、ペアリングする準備ができています。続行するにはアカウントを登録してください。",
+        "deviceAlreadyPairedMessage": "このデバイスはすでに別のアカウントにリンクされています。これが間違いであると思われる場合は、サポートにお問い合わせください。",
+        "deviceNotFoundMessage": "このシリアル コードを持つデバイスが見つかりませんでした。確認してもう一度お試しください。",
+        "invalidDeviceTitle": "無効なデバイス",
+        "invalidDeviceMessage": "無効なデバイスです。もう一度試してください。",
+        "continueToLogin": "これで、引き続きログインしてアカウントの使用を開始できるようになります。",
+        "redirecting": "{{seconds}}秒後にリダイレクトしています..."
+      },
+      "heading": "いらっしゃいませ",
+      "verifyHeading": "メール認証",
+      "mobileHeading": "アカウントを作成する",
+      "step1Description": "iCane の使用を開始するには、アカウントを作成してください。",
+      "step2Description": "サインアップして、より安全でスマートなモビリティへの旅を始めましょう。",
+      "verifyPrefix": "を入力してください",
+      "verifyCodeLabel": "6桁の認証コード",
+      "verifySuffix": "あなたのメールアドレスに送信しました。",
+      "firstName": "ファーストネーム",
+      "firstNamePlaceholder": "ファーストネーム...",
+      "middleName": "ミドルネーム",
+      "middleNamePlaceholder": "ミドルネーム...",
+      "lastName": "苗字",
+      "lastNamePlaceholder": "苗字...",
+      "username": "ユーザー名",
+      "usernamePlaceholder": "ユーザー名を入力してください...",
+      "password": "パスワード",
+      "passwordPlaceholder": "パスワードを入力してください...",
+      "confirmPassword": "パスワード再入力",
+      "confirmPasswordPlaceholder": "パスワードを再入力してください...",
+      "streetAddress": "地番/建物/番地",
+      "streetAddressPlaceholder": "ロット番号を入力してください...",
+      "province": "州",
+      "city": "市",
+      "barangay": "バランガイ",
+      "village": "村",
+      "contactNumber": "連絡先番号",
+      "email": "電子メールアドレス",
+      "noCode": "コードを受け取っていませんか?",
+      "sending": "送信中...",
+      "resendIn": "{{seconds}}秒以内に再送信してください",
+      "resend": "確認コードを再送信する",
+      "creating": "アカウントを作成しています...",
+      "checking": "チェック中...",
+      "createAccount": "アカウントを作成する",
+      "next": "次",
+      "back": "戻る",
+      "haveAccount": "すでにアカウントをお持ちですか?",
+      "signIn": "サインイン",
+      "termsPrefix": "サインアップすると、次のことに同意します",
+      "terms": "利用規約",
+      "and": "そして",
+      "privacy": "プライバシーポリシー。",
+      "scanTitle": "iCane デバイスをスキャンします",
+      "scanDescription": "iCane デバイスの QR コードにカメラを向けると、自動的にペアリングされます。"
+    },
+    "forgotPassword": {
+      "heading": "パスワードをお忘れですか",
+      "verificationCode": "検証コード",
+      "changePassword": "パスワードを変更する",
+      "step1Description": "メールアドレスを入力してください。コードを送信します。",
+      "step3Description": "コードが確認されました。新しいパスワードを入力してください。",
+      "codeSentPrefix": "確認コードを次の宛先に送信しました。",
+      "expiresIn": "(5分で切れます)",
+      "email": "電子メールアドレス",
+      "sending": "送信中...",
+      "sendCode": "コードを送信する",
+      "back": "戻る",
+      "noCode": "コードを受信しませんでしたか?",
+      "resendOtp": "OTPを再送信する",
+      "verifying": "確認中...",
+      "verifyCode": "コードの検証",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "パスワード再入力",
+      "passwordHint": "少なくとも 6 文字である必要があります",
+      "updating": "更新中...",
+      "submit": "提出する",
+      "errors": {
+        "otpExpired": "OTP の有効期限が切れています。新しいものをリクエストしてください。",
+        "validEmail": "有効なメールアドレスを入力してください",
+        "invalidOtp": "無効な OTP。もう一度試してください。",
+        "passwordMismatch": "パスワードが一致しません!",
+        "passwordMin": "パスワードは6文字以上である必要があります",
+        "otpSendFailed": "OTPの送信に失敗しました。もう一度試してください。",
+        "network": "ネットワークエラー。接続を確認してください。",
+        "generic": "何か問題が発生しました。もう一度試してください。",
+        "resetFailed": "パスワードのリセットに失敗しました",
+        "resendFailed": "OTPの再送信に失敗しました。もう一度試してください。"
+      },
+      "modal": {
+        "passwordResetTitle": "パスワードのリセット",
+        "codeSent": "確認コードをあなたのメールアドレスに送信しました: {{email}}",
+        "successTitle": "成功",
+        "passwordUpdated": "パスワードが正常に更新されました。",
+        "sessionExpiredTitle": "セッションが期限切れになりました",
+        "sessionExpiredBody": "セッションの有効期限が切れました。リセットプロセスを再度開始してください。",
+        "verificationTitle": "検証",
+        "newOtpSent": "新しい OTP がメールに送信されました。"
+      }
+    }
+  },
+  "guestPage": {
+    "title": "いらっしゃいませ"
+  },
+  "login": {
+    "title": "ログイン"
+  },
+  "register": {
+    "title": "アカウントを作成する"
+  },
+  "forgotPassword": {
+    "title": "パスワードをお忘れですか"
+  },
+  "getStarted": {
+    "title": "始めましょう"
+  },
+  "emergencyDetails": {
+    "title": "緊急事態の詳細"
+  },
+  "dashboard": {
+    "title": "ダッシュボード"
+  },
+  "dashboardPage": {
+    "title": "ライブロケーション",
+    "subtitle": "iCane デバイスのリアルタイム監視と安全機能",
+    "liveLocationTracking": "ライブ位置追跡",
+    "trackLive": "ライブを追跡する",
+    "satellites": "衛星",
+    "lastLocation": "最後の場所",
+    "gpsBadge": {
+      "noSignal": "信号がありません",
+      "ready": "準備ができて",
+      "lowSignal": "低信号"
+    },
+    "location": {
+      "resolving": "解決中...",
+      "none": "利用できる場所がありません",
+      "unableToResolve": "場所を解決できません",
+      "unknownArea": "未知の領域",
+      "updating": "更新中..."
+    }
+  },
+  "devices": {
+    "title": "デバイス",
+    "header": {
+      "title": "デバイスの管理",
+      "subtitle": "ペアになった杖の表示と管理、VIP プロファイルの割り当てなどを行います。",
+      "countSummary": "{{total}} 杖 • {{active}} アクティブ",
+      "countSummary_other": "{{total}} 杖 • {{active}} アクティブ"
+    },
+    "view": {
+      "tiles": "タイル",
+      "list": "リスト"
+    },
+    "actions": {
+      "addCane": "杖を追加する",
+      "view": "ビュー",
+      "edit": "編集",
+      "remove": "取り除く",
+      "assignVip": "VIPの割り当て",
+      "manage": "管理",
+      "editNickname": "ニックネームの編集",
+      "manageGuardians": "ガーディアンの管理",
+      "unpair": "ペアリングを解除する",
+      "unpairDevice": "デバイスのペアリングを解除する",
+      "manageCaneOptions": "杖オプションの管理",
+      "viewVip": "VIPを見る",
+      "editVip": "VIPの編集",
+      "removeVip": "VIPの削除"
+    },
+    "card": {
+      "unnamedCane": "名前のない杖",
+      "editNicknameTitle": "杖のニックネームを編集する",
+      "activeNow": "現在アクティブです",
+      "lastActive": "最終アクティブ: {{lastActive}}",
+      "paired": "ペアリング済み",
+      "assignedVip": "割り当てられたVIP",
+      "added": "追加: {{date}}"
+    },
+    "vip": {
+      "vipId": "VIP ID",
+      "noVipAssigned": "VIPは割り当てられていません",
+      "noVipAvailable": "VIPは利用できません",
+      "modal": {
+        "viewTitle": "ケーン VIP プロフィール",
+        "createTitle": "ケーンにVIPを追加",
+        "editTitle": "ケーンVIPを編集",
+        "creating": "作成...",
+        "create": "作成する",
+        "updating": "更新中...",
+        "update": "アップデート"
+      }
+    },
+    "modal": {
+      "unpair": {
+        "title": "杖のペアを解除しますか？",
+        "message": "これにより、ペアリングが解除され、アカウントから杖が削除されます。",
+        "confirmLoading": "ペアリングを解除しています...",
+        "confirm": "ペアリングを解除する"
+      },
+      "removeVip": {
+        "title": "VIP プロフィールを削除しますか?",
+        "message": "これにより、この杖に割り当てられた VIP プロファイルが削除されます。",
+        "confirmLoading": "削除中...",
+        "confirm": "取り除く"
+      },
+      "editNickname": {
+        "title": "ニックネームの編集",
+        "label": "ケーンのニックネーム *",
+        "placeholder": "ニックネームを入力してください",
+        "resetting": "リセット中...",
+        "resetToDefault": "デフォルトにリセット",
+        "reset": "リセット",
+        "saving": "保存中...",
+        "saveChanges": "変更を保存",
+        "save": "保存"
+      }
+    },
+    "scanner": {
+      "modalTitle": "iCane デバイスをスキャンします",
+      "or": "または",
+      "enterSerialCode": "シリアルコードを入力してください",
+      "pairing": "ペアリング中...",
+      "pair": "ペア",
+      "errors": {
+        "httpsRequired": "カメラにはHTTPS (またはローカルホスト) が必要です。電話機からローカル IP 経由でこれを開いた場合は、HTTPS を使用してください。",
+        "invalidQrFormat": "無効な QR コード形式です",
+        "noSerialInQr": "QR コードにデバイスのシリアルが見つかりません",
+        "unableToAccessCamera": "カメラにアクセスできません。",
+        "noCameraDetected": "カメラが検出されませんでした。カメラ付き端末をご利用ください。"
+      }
+    },
+    "empty": {
+      "title": "まだ杖は追加されていません。",
+      "subtitle": "「杖を追加」をクリックして開始してください"
+    },
+    "toast": {
+      "nicknameUpdated": "杖のニックネームが更新されました",
+      "nicknameUpdateFailed": "杖のニックネームを更新できませんでした",
+      "unpairedSuccess": "ケーンのペアリングが解除され、アカウントから削除されました",
+      "unpairFailed": "ケーンのペアリングを解除できませんでした",
+      "pairedSuccess": "Cane はアカウントと正常にペアリングされました",
+      "pairFailed": "デバイスのペアリングに失敗しました",
+      "vipCreated": "杖用に作成された VIP プロファイル",
+      "vipUpdated": "杖の VIP プロフィールが更新されました",
+      "vipRemoved": "VIP プロフィールが杖から削除されました",
+      "vipRemoveFailed": "VIPの削除に失敗しました"
+    }
+  },
+  "weatherBoard": {
+    "title": "気象委員会",
+    "forecastTitle": "天気予報",
+    "searchPlaceholder": "フィリピンの都市または場所を検索...",
+    "defaultLocation": "デフォルトの場所: {{location}}",
+    "useDefaultLocation": "ケソンシティのノバリチェスを使用",
+    "tomorrow": {
+      "label": "明日",
+      "safeToWalk": "安全に歩けます",
+      "stayIndoors": "屋内で過ごす"
+    },
+    "today": {
+      "title": "今日の天気",
+      "subtitle": "天気に関して必要なその他の情報は次のとおりです"
+    },
+    "metrics": {
+      "sunrise": "日の出：",
+      "sunset": "日没：",
+      "humidity": "湿度:",
+      "wind": "風：",
+      "feelsLike": "次のような感じ:",
+      "pressure": "プレッシャー：",
+      "visibility": "可視性:",
+      "uvIndex": "紫外線指数:"
+    },
+    "twoWeek": {
+      "title": "2週間の予報",
+      "subtitle": "今後14日間の天気予報はこちら"
+    },
+    "errors": {
+      "failedLoad": "気象データの読み込みに失敗しました。"
+    },
+    "modal": {
+      "closeAria": "予測の詳細を閉じる",
+      "high": "高い",
+      "low": "低い",
+      "average": "平均",
+      "rainChance": "レインチャンス"
+    }
+  },
+  "settings": {
+    "title": "設定"
+  },
+  "guardianProfile": {
+    "title": "ガーディアンプロフィール"
+  },
+  "notes": {
+    "title": "注意事項"
+  },
+  "advanced": {
+    "title": "高度な"
+  },
+  "notifications": {
+    "title": "通知",
+    "loading": "読み込み中...",
+    "summary": "合計 {{total}} 件 • 未読 {{unread}} 件",
+    "markAllAsRead": "すべて既読としてマークする",
+    "markAsRead": "既読としてマークする",
+    "viewLog": "ログを表示する",
+    "filters": {
+      "all": "全て",
+      "unread": "未読",
+      "read": "読む"
+    },
+    "group": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "thisWeek": "今週",
+      "older": "古い"
+    },
+    "time": {
+      "justNow": "ちょうど今",
+      "minutesAgo": "{{count}}分前",
+      "hoursAgo": "{{count}}時間前",
+      "daysAgo": "{{count}}日前"
+    },
+    "empty": {
+      "allCaughtUp": "全員追いついた！",
+      "noNotifications": "通知はありません",
+      "noUnread": "現在未読の通知はありません。",
+      "description": "重大なライブ アラートとデバイスのアクティビティがここに表示されます。"
+    },
+    "stats": {
+      "total": "合計",
+      "unread": "未読",
+      "actionTypes": "アクションの種類"
+    },
+    "meta": {
+      "weather": "気象警報",
+      "emergency": "緊急警報",
+      "arrival": "目的地に到着しました",
+      "fall": "落下を検出",
+      "default": "スマート杖アラート",
+      "actions": {
+        "CREATE": "デバイスが作成されました",
+        "UPDATE": "デバイスが更新されました",
+        "DELETE": "デバイスが削除されました",
+        "PAIR": "デバイスがペアリングされました",
+        "UNPAIR": "デバイスがペアリングされていません",
+        "INVITE": "保護者が招待されました",
+        "REMOVE_GUARDIAN": "ガーディアンが削除されました",
+        "UPDATE_ROLE": "役割が更新されました",
+        "ACCEPT_INVITE": "招待が承認されました",
+        "SET_EMERGENCY": "緊急連絡先セット",
+        "UPDATE_RELATIONSHIP": "関係が更新されました",
+        "LIVE_WEATHER": "気象警報",
+        "LIVE_EMERGENCY": "緊急警報",
+        "LIVE_FALL": "落下を検出",
+        "ROUTE_ARRIVAL": "目的地に到着しました"
+      }
+    },
+    "messages": {
+      "importantActivity": "iCane で重要なアクティビティが検出されました。"
+    },
+    "dynamicMessages": {
+      "setEmergencyContact": "{{actor}} 保護者 {{guardian}} をデバイス {{device}} の緊急連絡先として設定します"
+    }
+  },
+  "commonEnums": {
+    "roles": {
+      "primary": "主要な",
+      "secondary": "二次",
+      "guardian": "ガーディアン"
+    },
+    "status": {
+      "online": "オンライン",
+      "offline": "オフライン"
+    }
+  },
+  "manageGuardians": {
+    "emergency": {
+      "removeAsEmergency": "緊急連絡先として削除する",
+      "setAsEmergency": "緊急連絡先に設定する",
+      "emergencyContact": "緊急連絡先",
+      "setAsEmergencyShort": "緊急として設定"
+    }
+  },
+  "toast": {
+    "closeAria": "乾杯を閉じる",
+    "close": "近い",
+    "typeIconAlt": "{{type}} アイコン"
+  },
+  "emergencyToast": {
+    "title": "緊急警報",
+    "subtitle": "SOS信号が作動しました",
+    "defaultMessage": "フアン・デラ・クルスは危険にさらされているようだ。"
+  },
+  "dashboardLayout": {
+    "toast": {
+      "emergency": "緊急警報！すぐに所在地を確認してください。",
+      "fall": "落下を検知しました！すぐにユーザーのステータスを確認してください。",
+      "loginSuccess": "アカウントに正常にログインしました。"
+    }
+  },
+  "dashboardSide": {
+    "menu": {
+      "dashboard": "ダッシュボード",
+      "deviceLogs": "デバイスログ",
+      "weatherBoard": "気象委員会",
+      "devices": "デバイス",
+      "advanced": "高度な"
+    },
+    "mobile": {
+      "weather": "天気",
+      "logs": "ログ",
+      "home": "家",
+      "devices": "デバイス",
+      "advanced": "高度な"
+    },
+    "signOut": "サインアウト"
+  },
+  "sendNote": {
+    "title": "メモの送信",
+    "description": "メッセージを作成して {{name}} に送信します",
+    "defaultRecipient": "あなたのデバイス",
+    "messageLabel": "メッセージ",
+    "placeholder": "ここにメッセージを入力してください...",
+    "charactersCount": "{{count}} / {{max}} 文字",
+    "cancel": "キャンセル",
+    "sending": "送信中...",
+    "send": "送信",
+    "sendNote": "メモの送信",
+    "toast": {
+      "errorTitle": "エラー！",
+      "errorMessage": "メッセージの送信中にエラーが発生しました。後でもう一度試してください。",
+      "sentTitle": "送信済み！",
+      "sentMessage": "メッセージは正常に送信されました。"
+    }
+  },
+  "guardianInvite": {
+    "title": {
+      "processing": "招待状の処理中",
+      "accepted": "招待を受け入れました!",
+      "registerRequired": "ガーディアンになる",
+      "expired": "招待状の期限が切れました",
+      "invalid": "無効な招待状",
+      "error": "処理に失敗しました"
+    },
+    "messages": {
+      "invalidTokenMissing": "無効な招待リンク - トークンがありません",
+      "acceptedDashboard": "準備は完了です!保護者の招待が受理されました。ダッシュボードにリダイレクトしています...",
+      "acceptedLogin": "おめでとうございます、{{email}} さん!あなたの招待は受理されました。ログインにリダイレクトしています...",
+      "registerRequired": "いらっしゃいませ！あなたは保護者になるよう招待されました。",
+      "serverUnavailable": "サーバーに到達できませんでした。接続を確認して、もう一度試してください。",
+      "unexpectedError": "招待状の処理中に予期しないエラーが発生しました。",
+      "invitationAccepted": "招待を受け付けました!"
+    },
+    "actions": {
+      "goToDashboard": "今すぐダッシュボードに移動",
+      "goToLogin": "今すぐログインに移動",
+      "returnHomePage": "ホームページに戻る",
+      "registerNow": "今すぐ登録",
+      "alreadyHaveAccount": "すでにアカウントをお持ちですか?ログイン",
+      "returnHome": "ホームに戻る",
+      "contactSupport": "サポートに連絡する",
+      "tryAgain": "もう一度やり直してください",
+      "goToHomePage": "ホームページへ行く"
+    },
+    "invitationFor": "招待状:",
+    "redirectingIn": "{{count}} 秒後にリダイレクトします",
+    "redirectingIn_other": "{{count}} 秒後にリダイレクトします"
+  },
+  "recentAlerts": {
+    "title": "最近のアラート",
+    "checkingWeather": "ノバリチェスの天気を確認しています...",
+    "noAlerts": "最近のアラートはありません"
+  },
+  "liveMap": {
+    "searchPlaceholder": "場所を検索...",
+    "defaultCountry": "フィリピン",
+    "clearDestinationAria": "目的地をクリアする",
+    "clearDestination": "目的地を明確にする",
+    "openFullscreenAria": "全画面マップを開く",
+    "exitFullscreenAria": "全画面マップを終了する",
+    "fullscreen": "全画面表示",
+    "exitFullscreen": "全画面表示を終了する",
+    "popups": {
+      "currentLocation": "あなたの現在地。",
+      "vipLocation": "VIPの現在地。",
+      "destination": "行き先",
+      "adjustLocation": "位置を調整する"
+    },
+    "locationPrompt": {
+      "title": "場所へのアクセスが必要です",
+      "body": "現在地がオフになっています。設定で位置情報を有効にすると、地図があなたを中心に表示されます。",
+      "notNow": "今じゃない",
+      "openSettings": "設定を開く"
+    },
+    "clickMenu": {
+      "chooseAction": "アクションの選択",
+      "setAsDestination": "目的地として設定"
+    }
+  },
+  "activityLogs": {
+    "title": "アクティビティログ",
+    "subtitle": "システム内のすべてのガーディアンアクティビティを監視および追跡します",
+    "tryAgain": "もう一度やり直してください",
+    "searchPlaceholder": "名前、アクション、または説明で検索します...",
+    "clearAll": "すべてクリア",
+    "clearFilters": "フィルターをクリアする",
+    "empty": {
+      "nothingToSee": "ここには何も見当たりません",
+      "noActivity": "まだ活動はありません",
+      "adjustFilters": "検索またはフィルターを調整してみてください。",
+      "actionsAppear": "実行したアクションがここに表示されます。"
+    },
+    "table": {
+      "guardian": "ガーディアン",
+      "action": "アクション",
+      "description": "説明",
+      "dateCreated": "作成日"
+    },
+    "pagination": {
+      "showing": "{{total}} アクティビティ中 {{from}}-{{to}} を表示しています",
+      "showingShort": "{{total}}中{{from}}-{{to}}を表示中"
+    },
+    "actions": {
+      "login": "ログイン",
+      "create": "作成する",
+      "update": "アップデート",
+      "delete": "消去",
+      "pair": "ペア",
+      "unpair": "ペアリングを解除する",
+      "invite": "招待する",
+      "removeGuardian": "ガーディアンを削除する",
+      "updateRole": "役割の更新",
+      "acceptInvite": "招待を承諾する",
+      "setEmergency": "緊急事態を設定する",
+      "relationship": "関係"
+    }
+  },
+  "deviceLogs": {
+    "title": "デバイスログ",
+    "subtitle": "詳細な VIP の移動とアクティビティ履歴を監視および追跡します。",
+    "searchPlaceholder": "保護者、VIP、アクティビティ、またはデバイスで検索...",
+    "clearAll": "すべてクリア",
+    "clearFilters": "フィルターをクリアする",
+    "noDevice": "デバイスがありません",
+    "origin": "起源",
+    "destination": "行き先",
+    "empty": {
+      "nothingToSee": "ここには何も見当たりません",
+      "adjustFilters": "検索またはフィルターを調整してみてください。",
+      "noActivities": "「{{searchTerm}}」に一致するアクティビティが見つかりませんでした。"
+    },
+    "table": {
+      "vip": "VIP",
+      "vipName": "VIP名",
+      "activity": "活動",
+      "locations": "所在地",
+      "dateTime": "日付と時刻",
+      "status": "状態"
+    },
+    "pagination": {
+      "showing": "{{total}}中{{from}}-{{to}}を表示中"
+    },
+    "status": {
+      "completed": "完了しました",
+      "ongoing": "進行中",
+      "emergency": "緊急",
+      "fallDetected": "落下を検出",
+      "cancelled": "キャンセル"
+    }
+  },
+  "weatherService": {
+    "alertTitle": "気象警報",
+    "updateTitle": "天気の最新情報",
+    "rainInLocation": "雨が予想されます / {{location}} に雨が降ります。",
+    "clearSkies": "{{location}} ({{temp}}°C) 晴れ",
+    "labels": {
+      "clearSky": "晴れた空",
+      "mainlyClear": "メインクリア",
+      "partlyCloudy": "所により曇り",
+      "overcast": "曇り",
+      "foggy": "霧深い",
+      "drizzle": "霧雨",
+      "rain": "雨",
+      "snowfall": "降雪",
+      "rainShowers": "にわか雨",
+      "thunderstorm": "雷雨",
+      "rainyShowers": "雨・にわか雨"
+    },
+    "recommendation": {
+      "heavyRain": "明日は激しい雨またはにわか雨が予想されます。屋内にいたほうがいいです。",
+      "sunny": "明日は晴れるでしょう。傘を持って水分補給を忘れずに。",
+      "cloudy": "明日は曇りになります。散歩には良い日ですね。",
+      "safeWalk": "明日の散歩は安全そうです。いつものように iCane を使用してください。"
+    }
+  },
+  "importantNotifications": {
+    "theVip": "VIP",
+    "deviceLabel": "デバイス {{serial}} 上",
+    "guardians": {
+      "safetyMonitor": "iCane 安全モニター",
+      "navigationAssistant": "ナビゲーションアシスタント",
+      "weatherService": "気象局"
+    },
+    "emergency": {
+      "title": "緊急警報",
+      "message": "{{vipName}} が緊急警報{{deviceLabel}} をトリガーしました。今すぐライブロケーションを開いて、割り当てられた緊急保護者にすぐに連絡してください。"
+    },
+    "fall": {
+      "title": "落下の可能性が検出されました",
+      "message": "{{vipName}}{{deviceLabel}} で転倒の可能性が検出されました。ライブマップをチェックして、できるだけ早く状況を確認してください。"
+    },
+    "arrival": {
+      "title": "目的地に到着しました",
+      "message": "{{vipName}} は選択した目的地{{deviceLabel}} に到着しました。ルート追跡は正常にクリアされました。"
+    },
+    "weather": {
+      "storm": {
+        "title": "荒天警報",
+        "message": "{{location}} 付近で雷雨状態が検出されました。現時点では屋外旅行は安全ではない可能性があります。出かける前に天気予報ボードを確認してください。"
+      },
+      "wind": {
+        "title": "強風注意報",
+        "message": "{{location}} 付近で時速 {{windSpeed}} km 程度の強風が検出されました。屋外でのナビゲーションは不安定になる可能性があるため、特に注意することをお勧めします。"
+      },
+      "rain": {
+        "title": "雨警報",
+        "message": "現在、雨が{{location}}{{temperature}}に影響を与えています。道路は滑りやすい場合がありますので、屋外での移動には注意してください。"
+      }
+    }
+  },
+  "termsModal": {
+    "title": "規約とプライバシーポリシー",
+    "actions": {
+      "close": "近い",
+      "cancel": "キャンセル",
+      "accept": "受け入れる"
+    },
+    "terms": {
+      "title": "利用規約",
+      "paragraphs": {
+        "p1": "AI ベースの視覚認識とルート ナビゲーションを備えた<strong>IoT 対応スマート ケーン</strong> (以下「システム」) を使用、テスト、または参加することにより、ユーザーおよび/またはその認定された保護者は、これらの利用規約に拘束されることに同意するものとします。",
+        "p2": "このシステムは、視覚障害者の移動性、安全性、自立性を高めるために設計された研究プロトタイプです。これは、ナビゲーションと危険認識を支援することを目的としていますが、個人の判断、移動訓練、または人間の支援に代わるものではありません。",
+        "p3": "このシステムは、短距離センサー、AI ベースの視覚認識、GPS 追跡、ルート ナビゲーション、触覚フィードバック、および一方通行の音声アラートを利用します。技術的および環境的要因により、システムに遅延、不正確さ、またはサービスの中断が発生する可能性があります。",
+        "p4": "ユーザーは、障害物の検出がセンサーの範囲に限定されていること、AI 認識が完全に正確ではない可能性があること、GPS とナビゲーション機能がネットワークの可用性と信号状態に依存することを認識しています。このシステムは危険を完全に回避することを保証するものではありません。",
+        "p5": "ユーザーは常に注意を払う必要があり、航行中は自分自身の安全に責任を負います。保護者または介護者は、監視、メッセージング、位置情報機能を安全とサポートの目的のみに使用することに同意します。",
+        "p6": "緊急 SOS 機能は、指定された連絡先にアラートと位置データを送信することで緊急事態を支援することを目的としています。配信が成功するかどうかは、モバイル ネットワークのカバレッジと十分な SIM 負荷にかかっています。即時の対応は保証されません。",
+        "p7": "システムのテスト、調査、評価への参加は任意です。参加者はいつでもペナルティなしで退会できます。このシステムは商用利用を目的としたものではありません。",
+        "p8": "データ関連の権利と処理の詳細については、<link>プライバシー ポリシー セクション</link>をご覧ください。"
+      },
+      "bullets": {
+        "b1": "システムを使用する際は常に<strong>現実世界の認識</strong>を優先してください。",
+        "b2": "すべてのアラートは絶対的な保証ではなく<strong>補助的なガイダンス</strong>として扱います。",
+        "b3": "デバイスは本来の<strong>研究および安全サポート</strong>の目的にのみ使用してください。"
+      }
+    },
+    "privacy": {
+      "title": "プライバシーポリシー",
+      "paragraphs": {
+        "p1": "このシステムは、システムの機能、安全監視、緊急対応、学術研究の目的に必要な個人データを収集および処理します。収集されるデータには、GPS 位置情報、システム使用ログ、デバイス識別子、保護者の連絡先情報が含まれる場合があります。",
+        "p2": "すべての個人データは、2012 年データプライバシー法 (共和国法第 10173 号) に従って処理されます。収集されたデータを不正アクセス、損失、または悪用から保護するために、合理的な組織的、物理的、技術的セキュリティ対策が実装されています。",
+        "p3": "位置データは、ルート ナビゲーション、保護者の監視、緊急 SOS アラートをサポートするために使用されます。リアルタイム追跡機能にはアクティブなインターネット接続が必要であり、ネットワーク カバレッジが弱い地域またはネットワーク カバレッジがない地域では制限される場合があります。",
+        "p4": "収集されたデータは、研究目的の達成とシステム評価に必要な期間のみ保持されます。分析に使用されるデータは匿名化され、参加者の身元を保護するために集約されます。",
+        "p5": "データ主体は、プロジェクトの研究者またはシステム管理者と調整することで、いつでも自分の個人データについて通知を受け、アクセスし、修正し、処理に反対し、同意を撤回する権利を有します。",
+        "p6": "合理的な保護手段が適用されていますが、絶対的なデータ セキュリティを保証できるシステムはありません。システムを使用することにより、ユーザーはこれらの固有のリスクを認識し、受け入れることになります。"
+      },
+      "bullets": {
+        "b1": "安全性とシステムの運用に<strong>必要</strong>なデータのみを収集します。",
+        "b2": "調査レポートでは、 可能な限り<strong>匿名化または集計されたデータ</strong>が使用されます。",
+        "b3": "プロジェクト管理者を通じてデータの<strong>アクセスまたは修正</strong>をリクエストすることができます。"
+      }
+    },
+    "consentLabel": "私は<strong>利用規約</strong>と<strong>プライバシーポリシー</strong>を読んで説明を受けたことを確認します。私は個人データの収集と処理に自発的に同意し、この研究プロトタイプの使用に伴うリスクを引き受けます。"
+  }
+}

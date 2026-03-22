@@ -20,6 +20,136 @@
   "dashboard": {
     "title": "Dashboard"
   },
+  "tour": {
+    "ui": {
+      "back": "Bumalik",
+      "next": "Susunod",
+      "done": "Tapos na",
+      "skip": "Laktawan"
+    },
+    "steps": {
+      "dashboard": {
+        "switchVip": {
+          "title": "Ilipat ang Iyong VIP",
+          "description": "Gamitin ang dropdown na ito upang lumipat sa pagitan ng iyong mga ipinares na iCane device. Ang bawat device ay itinalaga sa isang partikular na VIP."
+        },
+        "connectionStatus": {
+          "title": "Katayuan ng Koneksyon",
+          "description": "Ipinapakita ng badge na ito kung live ang iyong iCane at nagpapadala ng data. Ang berde ay nangangahulugang konektado - ang kulay abo ay nangangahulugan na offline ang device."
+        },
+        "alerts": {
+          "title": "Mga Alerto at Notification",
+          "description": "I-tap ang bell para tingnan ang mga papasok na alerto mula sa iyong iCane - pag-detect ng taglagas, mahina ang baterya, mga pang-emergency na trigger, at higit pa."
+        },
+        "accountMenu": {
+          "title": "Iyong Account Menu",
+          "description": "I-access ang iyong profile, history ng aktibidad, mga setting ng app, o mag-sign out mula sa menu na ito."
+        },
+        "liveMap": {
+          "title": "Live na Pagsubaybay sa Lokasyon",
+          "description": "Tingnan ang real-time na posisyon ng iyong iCane sa mapa. Mag-tap kahit saan sa mapa para buksan ang mga opsyon sa pagruruta at magtakda ng destinasyon para sa iyong VIP."
+        },
+        "gpsInfo": {
+          "title": "Impormasyon ng GPS Signal",
+          "description": "Subaybayan ang bilang ng satellite, kalidad ng signal, at huling kilalang mga coordinate ng GPS ng iyong iCane device."
+        },
+        "guardianNetwork": {
+          "title": "Network ng Tagapangalaga",
+          "description": "Tingnan kung sinong mga co-guardian ang kasalukuyang online. Ang ibig sabihin ng berde ay aktibo - sinusubaybayan ka nila ngayon."
+        },
+        "recentAlerts": {
+          "title": "Mga Kamakailang Alerto",
+          "description": "Manatiling updated sa pinakabagong pag-detect ng taglagas at mga alertong pang-emergency na na-trigger ng iCane device."
+        },
+        "sendNote": {
+          "title": "Magpadala ng Mabilisang Tala",
+          "description": "Direktang magpadala ng maikling paalala o mensahe sa iyong VIP sa pamamagitan ng voice engine ng iCane."
+        },
+        "mapControls": {
+          "title": "Mga Kontrol sa Mapa",
+          "description": "I-lock ang mapa sa ruta ng iyong VIP, sundan ang kanilang paggalaw sa real time, isentro sa sarili mong lokasyon, o mag-zoom in at out gamit ang mga kontrol na ito."
+        }
+      },
+      "devices": {
+        "devicesHeader": {
+          "title": "Iyong Mga Nakapares na iCane Device",
+          "description": "Ang lahat ng iCane device na naka-link sa iyong account ay ipinapakita dito. Maaari mong pamahalaan, palitan ang pangalan, o i-unpair ang anumang device."
+        },
+        "addDevice": {
+          "title": "Magdagdag ng Bagong Device",
+          "description": "I-tap ang 'Add Cane' at i-scan ang QR code sa iyong iCane para ipares ito sa iyong account. Ito ay tumatagal lamang ng ilang segundo."
+        },
+        "deviceActions": {
+          "title": "Buksan ang Device Actions",
+          "description": "I-click ang Pamahalaan sa isang card ng device upang magbukas ng mga mabilisang pagkilos para sa palayaw, mga tagapag-alaga, at mga kontrol sa pagpapares."
+        },
+        "deviceMenu": {
+          "title": "Menu ng Pagkilos ng Device",
+          "description": "Hinahayaan ka ng mga opsyong ito na i-edit ang nickname, pamahalaan ang mga tagapag-alaga, o i-unpair ang device. I-click ang Manage Guardians para magpatuloy."
+        },
+        "inviteGuardian": {
+          "title": "Mag-imbita ng Isa pang Tagapangalaga",
+          "description": "Gamitin ang button na ito para mag-imbita ng bagong tagapag-alaga sa pamamagitan ng email para makatulong sila sa pagsubaybay sa VIP na ito."
+        },
+        "editGuardian": {
+          "title": "I-edit ang Mga Detalye ng Tagapangalaga",
+          "description": "Gamitin ang icon na ito sa pag-edit sa isang guardian card para i-update ang mga detalye ng relasyon kapag nagbago ang mga tungkulin."
+        },
+        "guardianStats": {
+          "title": "Mga Istatistika ng Buod ng Tagapangalaga",
+          "description": "Subaybayan ang Kabuuang Mga Tagapangalaga, kasalukuyang Aktibong tagapag-alaga, at Mga Nakabinbing Imbitasyon mula sa mga card na ito ng buod."
+        }
+      },
+      "activity_logs": {
+        "activityHeader": {
+          "title": "Mga Ulat sa Aktibidad",
+          "description": "Isang buong audit trail ng lahat ng pagkilos ng account - mga pag-log in, pagbabago ng device, imbitasyon ng tagapag-alaga, at higit pa."
+        },
+        "activitySearch": {
+          "title": "Maghanap at Salain",
+          "description": "Mabilis na maghanap ng mga partikular na aktibidad sa pamamagitan ng paghahanap ng pangalan ng tagapag-alaga, uri ng pagkilos, o paglalarawan."
+        }
+      },
+      "device_logs": {
+        "deviceLogsHeader": {
+          "title": "Mga Log ng Aktibidad ng Device",
+          "description": "Tingnan ang mga aktibidad sa ruta, mga kaganapang pangkaligtasan, at kasaysayan ng paggalaw para sa iCane device ng iyong VIP."
+        },
+        "deviceLogsSearch": {
+          "title": "Maghanap at Mga Filter",
+          "description": "Mabilis na paliitin ang mga tala sa pamamagitan ng keyword, katayuan, o hanay ng petsa upang mahanap ang mga kaganapang kailangan mo."
+        }
+      },
+      "weather_board": {
+        "weatherMain": {
+          "title": "Pagtataya ng Panahon",
+          "description": "Suriin ang mga kasalukuyang kundisyon at mga pagtataya sa maraming araw upang makatulong na magplano ng mga ligtas na aktibidad sa labas para sa iyong VIP."
+        },
+        "weatherSearch": {
+          "title": "Maghanap sa Anumang Lokasyon",
+          "description": "I-type ang anumang lungsod o lugar sa Pilipinas para makakuha ng localized na forecast para sa lugar na iyon."
+        }
+      },
+      "advanced": {
+        "advancedHeader": {
+          "title": "Pamamahala ng Bahagi",
+          "description": "Subaybayan ang real-time na kalusugan ng bawat bahagi ng hardware at i-tweak ang mga threshold ng sensor mula rito."
+        },
+        "deviceStatus": {
+          "title": "Kalusugan sa isang Sulyap",
+          "description": "Binubuod ng panel na ito kung gaano karaming mga bahagi ang online at nagbibigay ng pangkalahatang porsyento ng kalusugan para sa iyong iCane."
+        }
+      }
+    },
+    "mobile": {
+      "dashboard": {
+        "headerMenuIntro": {
+          "title": "Buksan ang Menu ng Header",
+          "description": "Buksan ang Header Menu para ma-access ang status ng iyong koneksyon, VIP dropdown, at iba pang mga setting."
+        }
+      }
+    }
+  },
   "dashboardPage": {
     "title": "Live Location",
     "subtitle": "Real-time monitoring at safety features para sa iyong iCane device",
@@ -572,6 +702,9 @@
         "cancel": "Kanselahin"
       },
       "modal": {
+        "noValidDeviceTitle": "Walang Valid na Device",
+        "noValidDeviceMessage": "Mukhang wala kang naka-pair na iCane device. I-pair muna ang iyong device para makapagpatuloy.",
+        "pairedSuccessfullyTitle": "Matagumpay ang Pag-pair",
         "proceedToDashboard": "Magpatuloy sa Dashboard",
         "continueToDashboard": "Maaari ka nang magpatuloy sa dashboard at simulan gamitin ang account mo.",
         "redirecting": "Nire-redirect sa {{seconds}}s..."
@@ -623,7 +756,75 @@
       "privacy": "Privacy Policy.",
       "scanTitle": "I-scan ang iyong iCane Device",
       "scanDescription": "Itapat ang camera sa QR code ng iCane device mo para ma-pair ito.",
+      "placeholders": {
+        "province": "Probinsya...",
+        "city": "Lungsod...",
+        "barangay": "Barangay...",
+        "village": "Village...",
+        "contactNumber": "09XX XXX XXXX",
+        "email": "sample.email@gmail.com"
+      },
+      "validation": {
+        "firstNameRequired": "Kailangan ang Unang Pangalan",
+        "lastNameRequired": "Kailangan ang Apelyido",
+        "lettersAndSpacesOnly": "Mga letra at espasyo lang ang puwede",
+        "minTwoChars": "Dapat hindi bababa sa 2 character",
+        "maxFiftyChars": "Hindi dapat lumampas sa 50 character",
+        "usernameRequired": "Kailangan ang Username",
+        "usernameMinThree": "Dapat hindi bababa sa 3 character ang username",
+        "usernameMaxTwenty": "Hindi dapat lumampas sa 20 character ang username",
+        "usernameAllowedChars": "Ang username ay puwedeng letra, numero, at underscore lang",
+        "usernameMinLetters": "Dapat may hindi bababa sa 3 letra ang username",
+        "passwordRequired": "Kailangan ang Password",
+        "passwordMinEight": "Dapat hindi bababa sa 8 character ang password",
+        "passwordMaxSixtyFour": "Hindi dapat lumampas sa 64 character ang password",
+        "passwordNeedsLowercase": "Dapat may kahit isang lowercase na letra ang password",
+        "passwordNeedsUppercase": "Dapat may kahit isang uppercase na letra ang password",
+        "passwordNeedsNumber": "Dapat may kahit isang numero ang password",
+        "passwordNeedsSpecial": "Dapat may kahit isang special character ang password (@$!%*?&)",
+        "confirmPasswordRequired": "Kailangan ang Confirm Password",
+        "passwordsDontMatch": "Hindi magkapareho ang password!",
+        "streetAddressRequired": "Kailangan ang Street Address",
+        "addressMoreSpecific": "Dapat mas detalyado ang address",
+        "addressMaxHundred": "Hindi dapat lumampas sa 100 character ang address",
+        "emailRequired": "Kailangan ang Email",
+        "emailMaxHundred": "Hindi dapat lumampas sa 100 character ang email",
+        "validEmail": "Pakilagay ang tamang email address",
+        "contactNumberRequired": "Kailangan ang Contact Number",
+        "contactDigits": "Dapat {{count}} digits ang contact number",
+        "contactStarts09": "Dapat nagsisimula sa 09 at may 11 digits ang contact number",
+        "otpSixDigits": "Pakilagay ang kumpletong 6-digit OTP"
+      },
+      "errors": {
+        "generic": "Hindi nagtagumpay ang registration",
+        "usernameTaken": "May gumagamit na ng username na ito",
+        "emailRegistered": "Naka-register na ang email",
+        "contactRegistered": "Naka-register na ang contact number",
+        "otpSendFailed": "Hindi naipadala ang OTP. Pakisubukang muli."
+      },
       "modal": {
+        "inviteCreatedTitle": "Nagawa ang Account gamit ang Invite!",
+        "inviteCreatedMessage": "Matagumpay na nagawa ang account mo gamit ang invite link.",
+        "accountCreatedTitle": "Nagawa ang Account!",
+        "accountCreatedPairMessage": "Matagumpay na nagawa ang account. I-pair ang device para makapagpatuloy.",
+        "setupCompleteTitle": "Kumpleto na ang Setup!",
+        "setupCompleteMessage": "Nagawa na ang account mo at matagumpay na na-pair ang device.",
+        "manualPairMessage": "Nagawa na ang account. Paki-manual pair ang iyong device.",
+        "goToLogin": "Pumunta sa Login",
+        "proceedToLogin": "Magpatuloy sa Login",
+        "pairedSuccessfullyTitle": "Matagumpay ang Pag-pair",
+        "tooManyRequestsTitle": "Masyadong Maraming Request",
+        "tooManyRequestsMessage": "Masyadong marami kang request sa maikling oras. Maghintay muna bago subukan ulit.",
+        "networkErrorTitle": "Network Error",
+        "networkErrorMessage": "Nagkakaproblema sa koneksyon sa server. Pakicheck ang internet mo at subukan ulit. Kung magpatuloy ang problema, i-refresh ang page o makipag-ugnayan sa support.",
+        "deviceVerifiedTitle": "Na-verify ang Device",
+        "deviceAlreadyPairedTitle": "Naka-pair na ang Device",
+        "deviceNotFoundTitle": "Hindi Nahanap ang Device",
+        "deviceVerifiedMessage": "Matagumpay na na-verify ang device at handa na itong i-pair. Mag-register ng account para magpatuloy.",
+        "deviceAlreadyPairedMessage": "Naka-link na ang device na ito sa ibang account. Kung sa tingin mo ay mali ito, makipag-ugnayan sa support.",
+        "deviceNotFoundMessage": "Hindi namin mahanap ang device gamit ang serial code na ito. Paki-check at subukang muli.",
+        "invalidDeviceTitle": "Invalid Device",
+        "invalidDeviceMessage": "Invalid ang device. Pakisubukang muli.",
         "continueToLogin": "Maaari ka nang magpatuloy sa login at gamitin ang account mo.",
         "redirecting": "Nire-redirect sa {{seconds}}s..."
       }
@@ -672,5 +873,48 @@
         "newOtpSent": "Naipadala na ang bagong OTP sa iyong email!"
       }
     }
+  },
+  "termsModal": {
+    "title": "Mga Tuntunin at Patakaran sa Privacy",
+    "actions": {
+      "close": "Isara",
+      "cancel": "Kanselahin",
+      "accept": "Tanggapin"
+    },
+    "terms": {
+      "title": "Mga Tuntunin at Kundisyon",
+      "paragraphs": {
+        "p1": "Sa pamamagitan ng paggamit, pagsubok, o pakikilahok sa <strong>IoT-Enabled Smart Cane na may AI-Based Visual Recognition at Route Navigation</strong> (\"ang System\"), sumasang-ayon ang user at/o ang kanilang awtorisadong tagapag-alaga na sumunod sa Mga Tuntunin at Kundisyon na ito.",
+        "p2": "Ang System ay isang prototype ng pananaliksik na idinisenyo upang mapahusay ang kadaliang kumilos, kaligtasan, at kalayaan ng mga indibidwal na may kapansanan sa paningin. Nilalayon nitong tulungan ang nabigasyon at kamalayan sa panganib ngunit hindi pinapalitan ang personal na paghuhusga, pagsasanay sa kadaliang kumilos, o tulong ng tao.",
+        "p3": "Gumagamit ang System ng mga short-range na sensor, AI-based visual recognition, GPS tracking, route navigation, haptic feedback, at one-way na voice alert. Dahil sa teknikal at pangkapaligiran na mga salik, ang System ay maaaring makaranas ng mga pagkaantala, mga kamalian, o mga pagkaantala sa serbisyo.",
+        "p4": "Kinikilala ng mga user na ang pagtukoy ng obstacle ay limitado sa hanay ng sensor, maaaring hindi ganap na tumpak ang pagkilala sa AI, at ang GPS at mga feature ng navigation ay nakadepende sa availability ng network at mga kondisyon ng signal. Hindi ginagarantiya ng System ang kumpletong pag-iwas sa mga panganib.",
+        "p5": "Ang mga gumagamit ay dapat manatiling matulungin sa lahat ng oras at responsable para sa kanilang sariling kaligtasan sa panahon ng nabigasyon. Sumasang-ayon ang mga tagapag-alaga o tagapag-alaga na gamitin ang mga feature ng pagsubaybay, pagmemensahe, at lokasyon para lamang sa mga layunin ng kaligtasan at suporta.",
+        "p6": "Ang tampok na emergency na SOS ay inilaan upang tumulong sa mga sitwasyong pang-emergency sa pamamagitan ng pagpapadala ng mga alerto at data ng lokasyon sa mga itinalagang contact. Ang matagumpay na paghahatid ay nakasalalay sa saklaw ng mobile network at sapat na pag-load ng SIM. Ang agarang tugon ay hindi ginagarantiyahan.",
+        "p7": "Ang paglahok sa system testing, survey, at evaluation ay boluntaryo. Ang mga kalahok ay maaaring mag-withdraw anumang oras nang walang parusa. Ang sistema ay hindi inilaan para sa komersyal na paggamit.",
+        "p8": "Para sa mga karapatang nauugnay sa data at mga detalye sa pagproseso, pakisuri ang <link>seksyon ng Patakaran sa Privacy</link>."
+      },
+      "bullets": {
+        "b1": "Palaging unahin ang <strong>real-world na kamalayan</strong> habang ginagamit ang System.",
+        "b2": "Ituring ang lahat ng alerto bilang <strong>pantulong na gabay</strong>, hindi ganap na garantiya.",
+        "b3": "Gamitin lang ang device para sa layunin nitong <strong>pananaliksik at suporta sa kaligtasan</strong>."
+      }
+    },
+    "privacy": {
+      "title": "Patakaran sa Privacy",
+      "paragraphs": {
+        "p1": "Kinokolekta at pinoproseso ng System ang personal na data na kinakailangan para sa functionality ng system, pagsubaybay sa kaligtasan, pagtugon sa emerhensiya, at mga layunin ng pananaliksik sa akademiko. Maaaring kabilang sa mga nakolektang data ang lokasyon ng GPS, mga log ng paggamit ng system, mga identifier ng device, at impormasyon sa pakikipag-ugnayan ng tagapag-alaga.",
+        "p2": "Ang lahat ng personal na data ay pinoproseso bilang pagsunod sa Data Privacy Act of 2012 (Republic Act No. 10173). Ang mga makatwirang pang-organisasyon, pisikal, at teknikal na mga hakbang sa seguridad ay ipinapatupad upang protektahan ang nakolektang data laban sa hindi awtorisadong pag-access, pagkawala, o maling paggamit.",
+        "p3": "Ginagamit ang data ng lokasyon upang suportahan ang pag-navigate sa ruta, pagsubaybay ng tagapag-alaga, at mga alerto sa emergency na SOS. Ang mga real-time na feature sa pagsubaybay ay nangangailangan ng aktibong koneksyon sa internet at maaaring limitado sa mga lugar na mahina o walang network coverage.",
+        "p4": "Ang mga nakolektang data ay dapat panatilihin lamang para sa tagal na kinakailangan upang matupad ang mga layunin ng pananaliksik at pagsusuri ng system. Ang data na ginamit para sa pagsusuri ay gagawing anonymize at pagsasama-samahin upang maprotektahan ang pagkakakilanlan ng kalahok.",
+        "p5": "Ang mga paksa ng data ay may karapatang malaman, ma-access, tama, tumutol sa pagproseso, at bawiin ang pahintulot tungkol sa kanilang personal na data anumang oras sa pamamagitan ng pakikipag-ugnayan sa mga mananaliksik ng proyekto o mga tagapangasiwa ng system.",
+        "p6": "Bagama't inilalapat ang mga makatwirang pag-iingat, walang sistema ang makakagarantiya ng ganap na seguridad ng data. Sa paggamit ng System, kinikilala at tinatanggap ng mga user ang mga likas na panganib na ito."
+      },
+      "bullets": {
+        "b1": "Kinokolekta lang namin ang data na <strong>kailangan</strong> para sa kaligtasan at pagpapatakbo ng system.",
+        "b2": "Gumagamit ang pag-uulat ng pananaliksik ng <strong>na-anonymize o pinagsama-samang</strong> data hangga't maaari.",
+        "b3": "Maaari kang humiling na <strong>i-access o itama</strong> ang iyong data sa pamamagitan ng mga administrator ng proyekto."
+      }
+    },
+    "consentLabel": "Kinukumpirma ko na ang <strong>Mga Tuntunin at Kundisyon</strong> at <strong>Patakaran sa Privacy</strong> ay nabasa at ipinaliwanag sa akin. Kusang-loob akong pumayag sa pangongolekta at pagproseso ng aking personal na data at inaako ang mga panganib na nauugnay sa paggamit ng prototype ng pananaliksik na ito."
   }
 }

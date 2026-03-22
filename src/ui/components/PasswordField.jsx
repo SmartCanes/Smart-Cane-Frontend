@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import checkboxIcon from "@/assets/images/checkbox.png";
 import EyeOn from "@/assets/images/eye-on.svg";
 import EyeOff from "@/assets/images/eye-off.svg";
@@ -20,6 +21,7 @@ const PasswordField = ({
   reserveErrorSpace = false,
   ...rest
 }) => {
+  const { t } = useTranslation("common");
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const validationColor = "var(--color-validation-100, #CE4B34)";
@@ -51,22 +53,22 @@ const PasswordField = ({
   const passwordRules = [
     {
       key: "lowerUpper",
-      label: "Lowercase & Uppercase",
+      label: t("passwordField.rules.lowerUpper"),
       isValid: hasLower && hasUpper
     },
     {
       key: "number",
-      label: "Number (0-9)",
+      label: t("passwordField.rules.number"),
       isValid: hasNumber
     },
     {
       key: "special",
-      label: "Special Character (!@#$%^&*)",
+      label: t("passwordField.rules.special"),
       isValid: hasSpecial
     },
     {
       key: "length",
-      label: "At least 8 Characters",
+      label: t("passwordField.rules.length"),
       isValid: hasLength
     }
   ];
@@ -94,7 +96,7 @@ const PasswordField = ({
         <img
           loading="lazy"
           src={checkboxIcon}
-          alt="Valid"
+          alt={t("passwordField.validIconAlt")}
           className="h-4 w-4"
         />
       )}
@@ -144,12 +146,26 @@ const PasswordField = ({
         <button
           type="button"
           onClick={togglePasswordVisibility}
+          aria-label={
+            showPassword
+              ? t("passwordField.hidePassword")
+              : t("passwordField.showPassword")
+          }
+          title={
+            showPassword
+              ? t("passwordField.hidePassword")
+              : t("passwordField.showPassword")
+          }
           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
         >
           <img
             loading="lazy"
             src={showPassword ? EyeOn : EyeOff}
-            alt={showPassword ? "Hide password" : "Show password"}
+            alt={
+              showPassword
+                ? t("passwordField.hidePassword")
+                : t("passwordField.showPassword")
+            }
             className="item-center h-5 w-5"
           />
         </button>

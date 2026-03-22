@@ -1,0 +1,20 @@
+{
+  "openMenu": "메뉴 열기",
+  "closeMenu": "메뉴 닫기",
+  "selectDevice": "기기 선택",
+  "noVip": "VIP 없음",
+  "noVipAvailable": "VIP 이용 불가",
+  "noVipDevices": "VIP 장치 없음",
+  "connection": "연결",
+  "connected": "연결됨",
+  "disconnected": "연결이 끊김",
+  "notifications": "알림",
+  "noNotificationsYet": "아직 알림이 없습니다",
+  "total": "총 {{count}}",
+  "seeAllNotifications": "모든 알림 보기",
+  "markAllAsRead": "모두 읽음으로 표시",
+  "profile": "윤곽",
+  "history": "역사",
+  "settings": "설정",
+  "logout": "로그아웃"
+}

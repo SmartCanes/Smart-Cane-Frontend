@@ -1,0 +1,921 @@
+{
+  "tour": {
+    "ui": {
+      "back": "Atrás",
+      "next": "Próximo",
+      "done": "Hecho",
+      "skip": "Saltar"
+    },
+    "steps": {
+      "dashboard": {
+        "switchVip": {
+          "title": "Cambia tu VIP",
+          "description": "Utilice este menú desplegable para cambiar entre sus dispositivos iCane emparejados. Cada dispositivo está asignado a un VIP específico."
+        },
+        "connectionStatus": {
+          "title": "Estado de conexión",
+          "description": "Esta insignia muestra si su iCane está activo y transmitiendo datos. Verde significa conectado; gris significa que el dispositivo está fuera de línea."
+        },
+        "alerts": {
+          "title": "Alertas y notificaciones",
+          "description": "Toque la campana para ver las alertas entrantes de su iCane: detección de caídas, batería baja, activadores de emergencia y más."
+        },
+        "accountMenu": {
+          "title": "Menú de tu cuenta",
+          "description": "Acceda a su perfil, historial de actividad, configuración de aplicaciones o cierre sesión desde este menú."
+        },
+        "liveMap": {
+          "title": "Seguimiento de ubicación en vivo",
+          "description": "Vea la posición de su iCane en tiempo real en el mapa. Toque en cualquier parte del mapa para abrir opciones de ruta y establecer un destino para su VIP."
+        },
+        "gpsInfo": {
+          "title": "Información de señal GPS",
+          "description": "Supervise el recuento de satélites, la calidad de la señal y las últimas coordenadas GPS conocidas de su dispositivo iCane."
+        },
+        "guardianNetwork": {
+          "title": "Red de Guardianes",
+          "description": "Vea qué cotutores están actualmente en línea. Verde significa activo: están monitoreando junto a usted en este momento."
+        },
+        "recentAlerts": {
+          "title": "Alertas recientes",
+          "description": "Manténgase actualizado con las últimas alertas de emergencia y detección de caídas activadas por el dispositivo iCane."
+        },
+        "sendNote": {
+          "title": "Enviar una nota rápida",
+          "description": "Envíe un breve recordatorio o mensaje directamente a su VIP a través del motor de voz de iCane."
+        },
+        "mapControls": {
+          "title": "Controles del mapa",
+          "description": "Bloquee el mapa en la ruta de su VIP, siga su movimiento en tiempo real, céntrese en su propia ubicación o acerque y aleje usando estos controles."
+        }
+      },
+      "devices": {
+        "devicesHeader": {
+          "title": "Sus dispositivos iCane emparejados",
+          "description": "Todos los dispositivos iCane vinculados a su cuenta se muestran aquí. Puede administrar, cambiar el nombre o desvincular cualquier dispositivo."
+        },
+        "addDevice": {
+          "title": "Agregar un nuevo dispositivo",
+          "description": "Toque 'Agregar bastón' y escanee el código QR en su iCane para vincularlo con su cuenta. Sólo lleva unos segundos."
+        },
+        "deviceActions": {
+          "title": "Abrir acciones del dispositivo",
+          "description": "Haga clic en Administrar en la tarjeta de un dispositivo para abrir acciones rápidas para apodos, tutores y controles de emparejamiento."
+        },
+        "deviceMenu": {
+          "title": "Menú de acción del dispositivo",
+          "description": "Estas opciones te permiten editar el apodo, administrar tutores o desvincular el dispositivo. Haga clic en Administrar tutores para continuar."
+        },
+        "inviteGuardian": {
+          "title": "Invitar a otro tutor",
+          "description": "Utilice este botón para invitar a un nuevo tutor por correo electrónico para que pueda ayudar a monitorear este VIP."
+        },
+        "editGuardian": {
+          "title": "Editar detalles del tutor",
+          "description": "Utilice este ícono de edición en una tarjeta de tutor para actualizar los detalles de la relación cuando cambien los roles."
+        },
+        "guardianStats": {
+          "title": "Estadísticas resumidas del guardián",
+          "description": "Realice un seguimiento de los tutores totales, los tutores actualmente activos y las invitaciones pendientes desde estas tarjetas de resumen."
+        }
+      },
+      "activity_logs": {
+        "activityHeader": {
+          "title": "Informes de actividad",
+          "description": "Un seguimiento de auditoría completo de todas las acciones de la cuenta: inicios de sesión, cambios de dispositivo, invitaciones de tutores y más."
+        },
+        "activitySearch": {
+          "title": "Buscar y filtrar",
+          "description": "Encuentre rápidamente actividades específicas buscando el nombre del tutor, el tipo de acción o la descripción."
+        }
+      },
+      "device_logs": {
+        "deviceLogsHeader": {
+          "title": "Registros de actividad del dispositivo",
+          "description": "Vea actividades de ruta, eventos de seguridad e historial de movimientos para su dispositivo iCane de VIP."
+        },
+        "deviceLogsSearch": {
+          "title": "Búsqueda y filtros",
+          "description": "Limite rápidamente los registros por palabra clave, estado o rango de fechas para encontrar los eventos que necesita."
+        }
+      },
+      "weather_board": {
+        "weatherMain": {
+          "title": "Pronóstico del tiempo",
+          "description": "Consulte las condiciones actuales y los pronósticos para varios días para ayudar a planificar actividades seguras al aire libre para su VIP."
+        },
+        "weatherSearch": {
+          "title": "Buscar en cualquier ubicación",
+          "description": "Escriba cualquier ciudad o lugar en Filipinas para obtener un pronóstico localizado para esa área."
+        }
+      },
+      "advanced": {
+        "advancedHeader": {
+          "title": "Gestión de componentes",
+          "description": "Supervise el estado en tiempo real de cada componente de hardware y ajuste los umbrales de los sensores desde aquí."
+        },
+        "deviceStatus": {
+          "title": "Salud de un vistazo",
+          "description": "Este panel resume cuántos componentes están en línea y brinda un porcentaje de salud general para su iCane."
+        }
+      }
+    },
+    "mobile": {
+      "dashboard": {
+        "headerMenuIntro": {
+          "title": "Abra el menú de encabezado",
+          "description": "Abra el menú de encabezado para acceder al estado de su conexión, al menú desplegable VIP y a otras configuraciones."
+        }
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "modal": {
+        "noValidDeviceTitle": "Ningún dispositivo válido",
+        "noValidDeviceMessage": "Parece que no tienes un dispositivo iCane vinculado. Empareje su dispositivo para continuar.",
+        "pairedSuccessfullyTitle": "Emparejado exitosamente",
+        "proceedToDashboard": "Proceder al panel",
+        "continueToDashboard": "Ahora puede continuar en el panel y comenzar a usar su cuenta.",
+        "redirecting": "Redirigiendo en {{seconds}}s..."
+      },
+      "heading": "Bienvenido",
+      "subheading": "¿Listo para partir? Inicie sesión y acceda directamente a su panel de control.",
+      "mobileHeading": "Inicie sesión en su cuenta",
+      "identifierLabel": "Correo electrónico o nombre de usuario",
+      "identifierPlaceholder": "Introduce tu correo electrónico o nombre de usuario...",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Introduce tu contraseña...",
+      "forgotPassword": "¿Has olvidado tu contraseña?",
+      "captchaLoading": "Cargando CAPTCHA...",
+      "signingIn": "Iniciando sesión...",
+      "signIn": "Iniciar sesión",
+      "noAccount": "¿No tenías una cuenta?",
+      "signUp": "Inscribirse",
+      "scanTitle": "Escanee su dispositivo iCane",
+      "scanDescription": "Apunte su cámara al código QR de su dispositivo iCane para vincularlo automáticamente.",
+      "errors": {
+        "identifierRequired": "Se requiere correo electrónico o nombre de usuario",
+        "passwordRequired": "Se requiere contraseña",
+        "captchaRequired": "Por favor completa el CAPTCHA",
+        "loginFailed": "error de inicio de sesion",
+        "twoFactorEmailRequired": "La autenticación de dos factores requiere una dirección de correo electrónico válida.",
+        "otpSendFailed": "No se pudo enviar OTP. Por favor inténtalo de nuevo.",
+        "otpIncomplete": "Por favor ingrese el código completo de 6 dígitos.",
+        "invalidCode": "Código no válido. Por favor inténtalo de nuevo.",
+        "retryAfter": "Demasiados intentos fallidos de inicio de sesión. Inténtalo de nuevo en {{seconds}} segundos."
+      },
+      "twoFactor": {
+        "title": "Verificación de correo electrónico",
+        "promptPrefix": "Introduzca el",
+        "codeLabel": "código de verificación de 6 dígitos",
+        "promptSuffix": "enviamos a su dirección de correo electrónico.",
+        "noCode": "¿No recibiste el código?",
+        "sending": "Envío...",
+        "resendIn": "Reenviar en {{seconds}}s",
+        "resend": "Reenviar código de verificación",
+        "verifying": "Verificando...",
+        "verify": "Verificar",
+        "cancel": "Cancelar"
+      }
+    },
+    "register": {
+      "placeholders": {
+        "province": "Provincia...",
+        "city": "Ciudad...",
+        "barangay": "Barangay...",
+        "village": "Aldea...",
+        "contactNumber": "09XX XXXXXXX",
+        "email": "muestra.correo electrónico@gmail.com"
+      },
+      "validation": {
+        "firstNameRequired": "El nombre es obligatorio",
+        "lastNameRequired": "El apellido es obligatorio",
+        "lettersAndSpacesOnly": "Debe contener solo letras y espacios.",
+        "minTwoChars": "Debe tener al menos 2 caracteres",
+        "maxFiftyChars": "No debe exceder los 50 caracteres.",
+        "usernameRequired": "El nombre de usuario es obligatorio",
+        "usernameMinThree": "El nombre de usuario debe tener al menos 3 caracteres",
+        "usernameMaxTwenty": "El nombre de usuario no debe exceder los 20 caracteres.",
+        "usernameAllowedChars": "El nombre de usuario solo puede contener letras, números y guiones bajos.",
+        "usernameMinLetters": "El nombre de usuario debe contener al menos 3 letras.",
+        "passwordRequired": "Se requiere contraseña",
+        "passwordMinEight": "La contraseña debe tener al menos 8 caracteres",
+        "passwordMaxSixtyFour": "La contraseña no debe exceder los 64 caracteres",
+        "passwordNeedsLowercase": "La contraseña debe contener al menos una letra minúscula",
+        "passwordNeedsUppercase": "La contraseña debe contener al menos una letra mayúscula",
+        "passwordNeedsNumber": "La contraseña debe contener al menos un número",
+        "passwordNeedsSpecial": "La contraseña debe contener al menos un carácter especial (@$!%*?&)",
+        "confirmPasswordRequired": "Confirmar Se requiere contraseña",
+        "passwordsDontMatch": "¡Las contraseñas no coinciden!",
+        "streetAddressRequired": "Se requiere dirección postal",
+        "addressMoreSpecific": "La dirección debería ser más específica.",
+        "addressMaxHundred": "La dirección no debe exceder los 100 caracteres.",
+        "emailRequired": "Se requiere correo electrónico",
+        "emailMaxHundred": "El correo electrónico no debe exceder los 100 caracteres.",
+        "validEmail": "Por favor, introduce una dirección de correo electrónico válida",
+        "contactNumberRequired": "El número de contacto es obligatorio",
+        "contactDigits": "El número de contacto debe tener {{count}} dígitos",
+        "contactStarts09": "El número de contacto debe comenzar con 09 y contener 11 dígitos",
+        "otpSixDigits": "Ingrese la OTP completa de 6 dígitos"
+      },
+      "errors": {
+        "generic": "Registro fallido",
+        "usernameTaken": "Nombre de usuario ya tomado",
+        "emailRegistered": "Correo electrónico ya registrado",
+        "contactRegistered": "El número de contacto ya está registrado",
+        "otpSendFailed": "No se pudo enviar OTP. Por favor inténtalo de nuevo."
+      },
+      "modal": {
+        "inviteCreatedTitle": "¡Cuenta creada mediante invitación!",
+        "inviteCreatedMessage": "Su cuenta se ha creado correctamente mediante el enlace de invitación.",
+        "accountCreatedTitle": "¡Cuenta creada!",
+        "accountCreatedPairMessage": "Cuenta creada exitosamente. Empareje su dispositivo para continuar.",
+        "setupCompleteTitle": "¡Configuración completa!",
+        "setupCompleteMessage": "Su cuenta ha sido creada y su dispositivo se ha vinculado correctamente.",
+        "manualPairMessage": "Cuenta creada exitosamente. Empareje manualmente su dispositivo.",
+        "goToLogin": "Ir a Iniciar sesión",
+        "proceedToLogin": "Proceder a iniciar sesión",
+        "pairedSuccessfullyTitle": "Emparejado exitosamente",
+        "tooManyRequestsTitle": "Demasiadas solicitudes",
+        "tooManyRequestsMessage": "Ha realizado demasiadas solicitudes en un período corto. Espere un momento antes de volver a intentarlo.",
+        "networkErrorTitle": "Error de red",
+        "networkErrorMessage": "Estamos teniendo problemas para conectarnos al servidor. Por favor verifique su conexión a Internet e inténtelo nuevamente. Si el problema persiste, intente actualizar la página o comuníquese con el soporte.",
+        "deviceVerifiedTitle": "Dispositivo verificado",
+        "deviceAlreadyPairedTitle": "Dispositivo ya emparejado",
+        "deviceNotFoundTitle": "Dispositivo no encontrado",
+        "deviceVerifiedMessage": "Su dispositivo ha sido verificado exitosamente y está listo para ser emparejado. Registre su cuenta para continuar.",
+        "deviceAlreadyPairedMessage": "Este dispositivo ya está vinculado a otra cuenta. Si cree que esto es un error, comuníquese con el soporte.",
+        "deviceNotFoundMessage": "No pudimos localizar un dispositivo con este código de serie. Por favor verifique e intente nuevamente.",
+        "invalidDeviceTitle": "Dispositivo no válido",
+        "invalidDeviceMessage": "Dispositivo no válido. Por favor inténtalo de nuevo.",
+        "continueToLogin": "Ahora puede continuar iniciando sesión y comenzar a usar su cuenta.",
+        "redirecting": "Redirigiendo en {{seconds}}s..."
+      },
+      "heading": "Bienvenido",
+      "verifyHeading": "Verificación de correo electrónico",
+      "mobileHeading": "Crea tu cuenta",
+      "step1Description": "Crea tu cuenta para comenzar con iCane.",
+      "step2Description": "Comience su viaje hacia una movilidad más segura e inteligente registrándose.",
+      "verifyPrefix": "Introduzca el",
+      "verifyCodeLabel": "código de verificación de 6 dígitos",
+      "verifySuffix": "hemos enviado a su dirección de correo electrónico.",
+      "firstName": "Nombre de pila",
+      "firstNamePlaceholder": "Nombre de pila...",
+      "middleName": "Segundo nombre",
+      "middleNamePlaceholder": "Segundo nombre...",
+      "lastName": "Apellido",
+      "lastNamePlaceholder": "Apellido...",
+      "username": "Nombre de usuario",
+      "usernamePlaceholder": "Introduce tu nombre de usuario...",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Introduce tu contraseña...",
+      "confirmPassword": "Escriba la contraseña otra vez",
+      "confirmPasswordPlaceholder": "Vuelva a ingresar su contraseña...",
+      "streetAddress": "Lote No./Edificio/Calle",
+      "streetAddressPlaceholder": "Ingrese su número de lote...",
+      "province": "Provincia",
+      "city": "Ciudad",
+      "barangay": "Barangay",
+      "village": "Aldea",
+      "contactNumber": "Número de contacto",
+      "email": "Dirección de correo electrónico",
+      "noCode": "¿No recibiste el código?",
+      "sending": "Envío...",
+      "resendIn": "Reenviar en {{seconds}}s",
+      "resend": "Reenviar código de verificación",
+      "creating": "Creando cuenta...",
+      "checking": "De cheques...",
+      "createAccount": "Crear una cuenta",
+      "next": "Próximo",
+      "back": "Atrás",
+      "haveAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Iniciar sesión",
+      "termsPrefix": "Al registrarme acepto las",
+      "terms": "Términos y condiciones",
+      "and": "y",
+      "privacy": "Política de privacidad.",
+      "scanTitle": "Escanee su dispositivo iCane",
+      "scanDescription": "Apunte su cámara al código QR de su dispositivo iCane para vincularlo automáticamente."
+    },
+    "forgotPassword": {
+      "heading": "Has olvidado tu contraseña",
+      "verificationCode": "Código de verificación",
+      "changePassword": "Cambiar la contraseña",
+      "step1Description": "Introduce tu dirección de correo electrónico y te enviaremos un código.",
+      "step3Description": "Su código ha sido verificado. Ingrese su nueva contraseña.",
+      "codeSentPrefix": "Hemos enviado un código de verificación a:",
+      "expiresIn": "(Expira en 5 minutos)",
+      "email": "Dirección de correo electrónico",
+      "sending": "Envío...",
+      "sendCode": "Enviar código",
+      "back": "Atrás",
+      "noCode": "¿No recibiste el código?",
+      "resendOtp": "Reenviar OTP",
+      "verifying": "Verificando...",
+      "verifyCode": "Verificar código",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Escriba la contraseña otra vez",
+      "passwordHint": "Debe tener al menos 6 caracteres.",
+      "updating": "Actualizando...",
+      "submit": "Entregar",
+      "errors": {
+        "otpExpired": "La OTP ha caducado. Por favor solicite uno nuevo.",
+        "validEmail": "Por favor, introduce una dirección de correo electrónico válida",
+        "invalidOtp": "OTP no válida. Por favor inténtalo de nuevo.",
+        "passwordMismatch": "¡La contraseña no coincide!",
+        "passwordMin": "La contraseña debe tener al menos 6 caracteres.",
+        "otpSendFailed": "No se pudo enviar OTP. Por favor inténtalo de nuevo.",
+        "network": "Error de red. Por favor verifique su conexión.",
+        "generic": "Algo salió mal. Por favor inténtalo de nuevo.",
+        "resetFailed": "No se pudo restablecer la contraseña",
+        "resendFailed": "No se pudo reenviar OTP. Por favor inténtalo de nuevo."
+      },
+      "modal": {
+        "passwordResetTitle": "Restablecer contraseña",
+        "codeSent": "Hemos enviado un código de verificación a su correo electrónico: {{email}}",
+        "successTitle": "Éxito",
+        "passwordUpdated": "¡Contraseña actualizada exitosamente!",
+        "sessionExpiredTitle": "Sesión caducada",
+        "sessionExpiredBody": "La sesión expiró. Inicie el proceso de reinicio nuevamente.",
+        "verificationTitle": "Verificación",
+        "newOtpSent": "¡Nueva OTP enviada a tu correo electrónico!"
+      }
+    }
+  },
+  "guestPage": {
+    "title": "Bienvenido"
+  },
+  "login": {
+    "title": "Acceso"
+  },
+  "register": {
+    "title": "Crear una cuenta"
+  },
+  "forgotPassword": {
+    "title": "Has olvidado tu contraseña"
+  },
+  "getStarted": {
+    "title": "Empezar"
+  },
+  "emergencyDetails": {
+    "title": "Detalles de emergencia"
+  },
+  "dashboard": {
+    "title": "Panel"
+  },
+  "dashboardPage": {
+    "title": "Ubicación en vivo",
+    "subtitle": "Funciones de seguridad y monitoreo en tiempo real para su dispositivo iCane",
+    "liveLocationTracking": "Seguimiento de ubicación en vivo",
+    "trackLive": "Seguimiento en vivo",
+    "satellites": "Satélites",
+    "lastLocation": "Última ubicación",
+    "gpsBadge": {
+      "noSignal": "Sin señal",
+      "ready": "Listo",
+      "lowSignal": "señal baja"
+    },
+    "location": {
+      "resolving": "Resolviendo...",
+      "none": "No hay ubicación disponible",
+      "unableToResolve": "No se puede resolver la ubicación",
+      "unknownArea": "Zona desconocida",
+      "updating": "Actualizando..."
+    }
+  },
+  "devices": {
+    "title": "Dispositivos",
+    "header": {
+      "title": "Administrar dispositivos",
+      "subtitle": "Vea y administre sus bastones emparejados, asigne perfiles VIP y más.",
+      "countSummary": "{{total}} bastón • {{active}} activo",
+      "countSummary_other": "{{total}} bastones • {{active}} activo"
+    },
+    "view": {
+      "tiles": "Azulejos",
+      "list": "Lista"
+    },
+    "actions": {
+      "addCane": "Agregar caña",
+      "view": "Vista",
+      "edit": "Editar",
+      "remove": "Eliminar",
+      "assignVip": "Asignar VIP",
+      "manage": "Administrar",
+      "editNickname": "Editar apodo",
+      "manageGuardians": "Administrar tutores",
+      "unpair": "Desemparejar",
+      "unpairDevice": "Desvincular dispositivo",
+      "manageCaneOptions": "Administrar opciones de bastón",
+      "viewVip": "Ver VIP",
+      "editVip": "Editar VIP",
+      "removeVip": "Eliminar VIP"
+    },
+    "card": {
+      "unnamedCane": "Caña sin nombre",
+      "editNicknameTitle": "Editar apodo de bastón",
+      "activeNow": "Activo ahora",
+      "lastActive": "Último activo: {{lastActive}}",
+      "paired": "emparejado",
+      "assignedVip": "VIP asignado",
+      "added": "Añadido: {{date}}"
+    },
+    "vip": {
+      "vipId": "Identificación VIP",
+      "noVipAssigned": "No hay VIP asignado",
+      "noVipAvailable": "No hay VIP disponibles",
+      "modal": {
+        "viewTitle": "Perfil VIP de caña",
+        "createTitle": "Agregar VIP a Cane",
+        "editTitle": "Editar caña VIP",
+        "creating": "Creando...",
+        "create": "Crear",
+        "updating": "Actualizando...",
+        "update": "Actualizar"
+      }
+    },
+    "modal": {
+      "unpair": {
+        "title": "¿Desemparejar bastón?",
+        "message": "Esto desvinculará y eliminará el bastón de su cuenta.",
+        "confirmLoading": "Desemparejando...",
+        "confirm": "Desemparejar"
+      },
+      "removeVip": {
+        "title": "¿Eliminar perfil VIP?",
+        "message": "Esto eliminará el perfil VIP asignado a este bastón.",
+        "confirmLoading": "Eliminando...",
+        "confirm": "Eliminar"
+      },
+      "editNickname": {
+        "title": "Editar apodo",
+        "label": "Apodo del bastón *",
+        "placeholder": "Introduce el apodo",
+        "resetting": "Restableciendo...",
+        "resetToDefault": "Restablecer los valores predeterminados",
+        "reset": "Reiniciar",
+        "saving": "Ahorro...",
+        "saveChanges": "Guardar cambios",
+        "save": "Ahorrar"
+      }
+    },
+    "scanner": {
+      "modalTitle": "Escanear dispositivo iCane",
+      "or": "o",
+      "enterSerialCode": "Ingrese el código de serie",
+      "pairing": "Emparejamiento...",
+      "pair": "Par",
+      "errors": {
+        "httpsRequired": "La cámara requiere HTTPS (o localhost). Si abrió esto desde un teléfono a través de IP local, use HTTPS.",
+        "invalidQrFormat": "Formato de código QR no válido",
+        "noSerialInQr": "No se encontró ningún número de serie del dispositivo en el código QR",
+        "unableToAccessCamera": "No se puede acceder a la cámara.",
+        "noCameraDetected": "No se detectó ninguna cámara. Utilice un dispositivo con cámara."
+      }
+    },
+    "empty": {
+      "title": "Aún no se han añadido bastones.",
+      "subtitle": "Haga clic en 'Agregar bastón' para comenzar"
+    },
+    "toast": {
+      "nicknameUpdated": "Apodo de caña actualizado",
+      "nicknameUpdateFailed": "No se pudo actualizar el apodo del bastón",
+      "unpairedSuccess": "Bastón desemparejado y eliminado de tu cuenta",
+      "unpairFailed": "No se pudo desemparejar el bastón",
+      "pairedSuccess": "Cane se emparejó exitosamente con su cuenta",
+      "pairFailed": "No se pudieron emparejar los dispositivos",
+      "vipCreated": "Perfil VIP creado para caña",
+      "vipUpdated": "Perfil VIP actualizado para caña",
+      "vipRemoved": "Perfil VIP eliminado del bastón",
+      "vipRemoveFailed": "No se pudo eliminar VIP"
+    }
+  },
+  "weatherBoard": {
+    "title": "Junta meteorológica",
+    "forecastTitle": "Pronóstico del tiempo",
+    "searchPlaceholder": "Buscar una ciudad o lugar en Filipinas...",
+    "defaultLocation": "Ubicación predeterminada: {{location}}",
+    "useDefaultLocation": "Utilice Novaliches, Ciudad Quezón",
+    "tomorrow": {
+      "label": "Mañana",
+      "safeToWalk": "Seguro para caminar",
+      "stayIndoors": "Quédese adentro"
+    },
+    "today": {
+      "title": "El tiempo de hoy",
+      "subtitle": "Aquí está otra información que puede necesitar sobre nuestro clima."
+    },
+    "metrics": {
+      "sunrise": "Amanecer:",
+      "sunset": "Atardecer:",
+      "humidity": "Humedad:",
+      "wind": "Viento:",
+      "feelsLike": "Se siente como:",
+      "pressure": "Presión:",
+      "visibility": "Visibilidad:",
+      "uvIndex": "Índice UV:"
+    },
+    "twoWeek": {
+      "title": "Pronóstico de 2 semanas",
+      "subtitle": "Aquí está la previsión meteorológica para los próximos 14 días."
+    },
+    "errors": {
+      "failedLoad": "No se pudieron cargar los datos meteorológicos."
+    },
+    "modal": {
+      "closeAria": "Cerrar detalles del pronóstico",
+      "high": "Alto",
+      "low": "Bajo",
+      "average": "Promedio",
+      "rainChance": "Probabilidad de lluvia"
+    }
+  },
+  "settings": {
+    "title": "Ajustes"
+  },
+  "guardianProfile": {
+    "title": "Perfil de tutor"
+  },
+  "notes": {
+    "title": "Notas"
+  },
+  "advanced": {
+    "title": "Avanzado"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "loading": "Cargando...",
+    "summary": "{{total}} total • {{unread}} no leído",
+    "markAllAsRead": "Marcar todo como leído",
+    "markAsRead": "Marcar como leído",
+    "viewLog": "Ver registro",
+    "filters": {
+      "all": "Todo",
+      "unread": "No leído",
+      "read": "Leer"
+    },
+    "group": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "thisWeek": "Esta semana",
+      "older": "Más viejo"
+    },
+    "time": {
+      "justNow": "En este momento",
+      "minutesAgo": "Hace {{count}}m",
+      "hoursAgo": "Hace {{count}}h",
+      "daysAgo": "Hace {{count}}d"
+    },
+    "empty": {
+      "allCaughtUp": "¡Todos atrapados!",
+      "noNotifications": "Sin notificaciones",
+      "noUnread": "No hay notificaciones no leídas en este momento.",
+      "description": "Aquí aparecerán alertas críticas en vivo y actividad del dispositivo."
+    },
+    "stats": {
+      "total": "Total",
+      "unread": "No leído",
+      "actionTypes": "Tipos de acción"
+    },
+    "meta": {
+      "weather": "Alerta meteorológica",
+      "emergency": "Alerta de emergencia",
+      "arrival": "Destino alcanzado",
+      "fall": "Caída detectada",
+      "default": "Alerta de bastón inteligente",
+      "actions": {
+        "CREATE": "Dispositivo creado",
+        "UPDATE": "Dispositivo actualizado",
+        "DELETE": "Dispositivo eliminado",
+        "PAIR": "Dispositivo emparejado",
+        "UNPAIR": "Dispositivo no emparejado",
+        "INVITE": "Guardián invitado",
+        "REMOVE_GUARDIAN": "Guardián eliminado",
+        "UPDATE_ROLE": "Rol actualizado",
+        "ACCEPT_INVITE": "Invitación aceptada",
+        "SET_EMERGENCY": "Conjunto de contactos de emergencia",
+        "UPDATE_RELATIONSHIP": "Relación actualizada",
+        "LIVE_WEATHER": "Alerta meteorológica",
+        "LIVE_EMERGENCY": "Alerta de emergencia",
+        "LIVE_FALL": "Caída detectada",
+        "ROUTE_ARRIVAL": "Destino alcanzado"
+      }
+    },
+    "messages": {
+      "importantActivity": "Se detectó actividad importante en iCane."
+    },
+    "dynamicMessages": {
+      "setEmergencyContact": "{{actor}} establece el tutor {{guardian}} como contacto de emergencia para el dispositivo {{device}}"
+    }
+  },
+  "commonEnums": {
+    "roles": {
+      "primary": "Primario",
+      "secondary": "Secundario",
+      "guardian": "Guardián"
+    },
+    "status": {
+      "online": "En línea",
+      "offline": "Desconectado"
+    }
+  },
+  "manageGuardians": {
+    "emergency": {
+      "removeAsEmergency": "Quitar como contacto de emergencia",
+      "setAsEmergency": "Establecer como contacto de emergencia",
+      "emergencyContact": "Contacto de emergencia",
+      "setAsEmergencyShort": "Establecer como emergencia"
+    }
+  },
+  "toast": {
+    "closeAria": "Cerrar brindis",
+    "close": "Cerca",
+    "typeIconAlt": "{{type}} icono"
+  },
+  "emergencyToast": {
+    "title": "Alerta de emergencia",
+    "subtitle": "Señal SOS activada",
+    "defaultMessage": "Juan Dela Cruz parece en peligro."
+  },
+  "dashboardLayout": {
+    "toast": {
+      "emergency": "¡Alerta de emergencia! Verifique la ubicación en vivo de inmediato.",
+      "fall": "¡Caída detectada! Por favor verifique el estado del usuario inmediatamente.",
+      "loginSuccess": "Ha iniciado sesión exitosamente en su cuenta."
+    }
+  },
+  "dashboardSide": {
+    "menu": {
+      "dashboard": "Panel",
+      "deviceLogs": "Registros de dispositivos",
+      "weatherBoard": "Junta meteorológica",
+      "devices": "Dispositivos",
+      "advanced": "Avanzado"
+    },
+    "mobile": {
+      "weather": "Clima",
+      "logs": "Registros",
+      "home": "Hogar",
+      "devices": "Dispositivos",
+      "advanced": "Avanzado"
+    },
+    "signOut": "Desconectar"
+  },
+  "sendNote": {
+    "title": "Enviar nota",
+    "description": "Redactar y enviar un mensaje a {{name}}",
+    "defaultRecipient": "tu dispositivo",
+    "messageLabel": "Mensaje",
+    "placeholder": "Escribe tu mensaje aquí...",
+    "charactersCount": "{{count}} / {{max}} caracteres",
+    "cancel": "Cancelar",
+    "sending": "Envío...",
+    "send": "Enviar",
+    "sendNote": "Enviar nota",
+    "toast": {
+      "errorTitle": "¡Error!",
+      "errorMessage": "Hubo un error al enviar tu mensaje. Inténtelo de nuevo más tarde.",
+      "sentTitle": "¡Enviado!",
+      "sentMessage": "Su mensaje ha sido enviado exitosamente."
+    }
+  },
+  "guardianInvite": {
+    "title": {
+      "processing": "Procesamiento de invitación",
+      "accepted": "¡Invitación aceptada!",
+      "registerRequired": "Conviértete en guardián",
+      "expired": "Invitación caducada",
+      "invalid": "Invitación no válida",
+      "error": "Error de procesamiento"
+    },
+    "messages": {
+      "invalidTokenMissing": "Enlace de invitación no válido: falta el token",
+      "acceptedDashboard": "¡Estás listo! Su invitación de tutor ha sido aceptada. Redirigiendo al panel...",
+      "acceptedLogin": "¡Felicitaciones, {{email}}! Tu invitación ha sido aceptada. Redirigiendo para iniciar sesión...",
+      "registerRequired": "¡Bienvenido! Te han invitado a convertirte en tutor.",
+      "serverUnavailable": "No se pudo llegar al servidor. Por favor verifique su conexión e inténtelo nuevamente.",
+      "unexpectedError": "Se produjo un error inesperado al procesar su invitación.",
+      "invitationAccepted": "¡Invitación aceptada!"
+    },
+    "actions": {
+      "goToDashboard": "Ir al panel ahora",
+      "goToLogin": "Ir a Iniciar sesión ahora",
+      "returnHomePage": "Volver a la página de inicio",
+      "registerNow": "Regístrese ahora",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta? Acceso",
+      "returnHome": "Regreso a casa",
+      "contactSupport": "Contactar con soporte",
+      "tryAgain": "Intentar otra vez",
+      "goToHomePage": "Ir a la página de inicio"
+    },
+    "invitationFor": "Invitación para:",
+    "redirectingIn": "Redirigiendo en {{count}} segundo",
+    "redirectingIn_other": "Redirigiendo en {{count}} segundos"
+  },
+  "recentAlerts": {
+    "title": "Alertas recientes",
+    "checkingWeather": "Comprobando el tiempo en Novaliches...",
+    "noAlerts": "No hay alertas recientes"
+  },
+  "liveMap": {
+    "searchPlaceholder": "Buscar ubicación...",
+    "defaultCountry": "Filipinas",
+    "clearDestinationAria": "Borrar destino",
+    "clearDestination": "Borrar destino",
+    "openFullscreenAria": "Abrir mapa en pantalla completa",
+    "exitFullscreenAria": "Salir del mapa en pantalla completa",
+    "fullscreen": "Pantalla completa",
+    "exitFullscreen": "Salir de pantalla completa",
+    "popups": {
+      "currentLocation": "Tu ubicación actual.",
+      "vipLocation": "Ubicación VIP actual.",
+      "destination": "Destino",
+      "adjustLocation": "Ajustar ubicación"
+    },
+    "locationPrompt": {
+      "title": "Se necesita acceso a la ubicación",
+      "body": "Tu ubicación actual está desactivada. Habilite la ubicación en Configuración para que podamos centrar el mapa en usted.",
+      "notNow": "Ahora no",
+      "openSettings": "Abrir configuración"
+    },
+    "clickMenu": {
+      "chooseAction": "Elija acción",
+      "setAsDestination": "Establecer como destino"
+    }
+  },
+  "activityLogs": {
+    "title": "Registros de actividad",
+    "subtitle": "Supervise y rastree todas las actividades de los guardianes en su sistema",
+    "tryAgain": "Intentar otra vez",
+    "searchPlaceholder": "Buscar por nombre, acción o descripción...",
+    "clearAll": "Borrar todo",
+    "clearFilters": "Limpiar filtros",
+    "empty": {
+      "nothingToSee": "Nada que ver aquí",
+      "noActivity": "Aún no hay actividad",
+      "adjustFilters": "Intente ajustar su búsqueda o filtros.",
+      "actionsAppear": "Las acciones que realices aparecerán aquí."
+    },
+    "table": {
+      "guardian": "Guardián",
+      "action": "Acción",
+      "description": "Descripción",
+      "dateCreated": "Fecha de creación"
+    },
+    "pagination": {
+      "showing": "Mostrando {{from}}-{{to}} de {{total}} actividades",
+      "showingShort": "Mostrando {{from}}-{{to}} de {{total}}"
+    },
+    "actions": {
+      "login": "Acceso",
+      "create": "Crear",
+      "update": "Actualizar",
+      "delete": "Borrar",
+      "pair": "Par",
+      "unpair": "Desemparejar",
+      "invite": "Invitar",
+      "removeGuardian": "Quitar guardián",
+      "updateRole": "Actualizar rol",
+      "acceptInvite": "Aceptar invitación",
+      "setEmergency": "Establecer emergencia",
+      "relationship": "Relación"
+    }
+  },
+  "deviceLogs": {
+    "title": "Registros de dispositivos",
+    "subtitle": "Supervise y realice un seguimiento detallado del movimiento VIP y del historial de actividad.",
+    "searchPlaceholder": "Busque por tutor, VIP, actividad o dispositivo...",
+    "clearAll": "Borrar todo",
+    "clearFilters": "Limpiar filtros",
+    "noDevice": "Sin dispositivo",
+    "origin": "Origen",
+    "destination": "Destino",
+    "empty": {
+      "nothingToSee": "Nada que ver aquí",
+      "adjustFilters": "Intente ajustar su búsqueda o filtros.",
+      "noActivities": "No pudimos encontrar ninguna actividad que coincida con \"{{searchTerm}}\"."
+    },
+    "table": {
+      "vip": "personaje",
+      "vipName": "Nombre VIP",
+      "activity": "Actividad",
+      "locations": "Ubicaciones",
+      "dateTime": "Fecha y hora",
+      "status": "Estado"
+    },
+    "pagination": {
+      "showing": "Mostrando {{from}}-{{to}} de {{total}}"
+    },
+    "status": {
+      "completed": "Terminado",
+      "ongoing": "En curso",
+      "emergency": "Emergencia",
+      "fallDetected": "Caída detectada",
+      "cancelled": "Cancelado"
+    }
+  },
+  "weatherService": {
+    "alertTitle": "Alerta meteorológica",
+    "updateTitle": "Actualización del clima",
+    "rainInLocation": "Se espera lluvia / Lloviendo en {{location}}.",
+    "clearSkies": "Cielos despejados en {{location}} ({{temp}}°C)",
+    "labels": {
+      "clearSky": "Cielo despejado",
+      "mainlyClear": "Principalmente claro",
+      "partlyCloudy": "Parcialmente nublado",
+      "overcast": "Nublado",
+      "foggy": "Neblinoso",
+      "drizzle": "Llovizna",
+      "rain": "Lluvia",
+      "snowfall": "Nevada",
+      "rainShowers": "Duchas de lluvia",
+      "thunderstorm": "Tormenta",
+      "rainyShowers": "Lluvioso / Chubascos"
+    },
+    "recommendation": {
+      "heavyRain": "Para mañana se esperan fuertes lluvias o chubascos. Es mejor quedarse en casa.",
+      "sunny": "Mañana estará soleado. No olvides traer un paraguas y mantenerte hidratado.",
+      "cloudy": "Estará nublado mañana. Un buen día para pasear.",
+      "safeWalk": "Mañana parece seguro para dar un paseo. Utilice su iCane como de costumbre."
+    }
+  },
+  "importantNotifications": {
+    "theVip": "el vip",
+    "deviceLabel": "en el dispositivo {{serial}}",
+    "guardians": {
+      "safetyMonitor": "Monitor de seguridad iCane",
+      "navigationAssistant": "Asistente de navegación",
+      "weatherService": "Servicio Meteorológico"
+    },
+    "emergency": {
+      "title": "Alerta de emergencia",
+      "message": "{{vipName}} activó una alerta de emergencia {{deviceLabel}}. Abra Live Location ahora y comuníquese con los guardianes de emergencia asignados de inmediato."
+    },
+    "fall": {
+      "title": "Posible caída detectada",
+      "message": "Se detectó una posible caída de {{vipName}}{{deviceLabel}}. Consulta el mapa en vivo y confirma su estado lo antes posible."
+    },
+    "arrival": {
+      "title": "Destino alcanzado",
+      "message": "{{vipName}} ha llegado al destino seleccionado {{deviceLabel}}. El seguimiento de ruta se ha borrado correctamente."
+    },
+    "weather": {
+      "storm": {
+        "title": "Advertencia de clima severo",
+        "message": "Se detectaron condiciones de tormenta cerca de {{location}}. Viajar al aire libre puede resultar inseguro en este momento. Revise el tablero meteorológico antes de salir."
+      },
+      "wind": {
+        "title": "Aviso de viento fuerte",
+        "message": "Se detectaron fuertes vientos de alrededor de {{windSpeed}} km/h cerca de {{location}}. La navegación en exteriores puede resultar inestable, por lo que se recomienda extrema precaución."
+      },
+      "rain": {
+        "title": "Alerta de lluvia",
+        "message": "La lluvia está afectando a {{location}} en estos momentos{{temperature}}. Las carreteras pueden estar resbaladizas, así que controle atentamente los viajes al aire libre."
+      }
+    }
+  },
+  "termsModal": {
+    "title": "Términos y política de privacidad",
+    "actions": {
+      "close": "Cerca",
+      "cancel": "Cancelar",
+      "accept": "Aceptar"
+    },
+    "terms": {
+      "title": "Términos y condiciones",
+      "paragraphs": {
+        "p1": "Al usar, probar o participar en el <strong>Bastón inteligente habilitado para IoT con reconocimiento visual y navegación de ruta basados ​​en IA</strong> (\"el Sistema\"), el usuario y/o su tutor autorizado acepta estar sujeto a estos Términos y condiciones.",
+        "p2": "El Sistema es un prototipo de investigación diseñado para mejorar la movilidad, la seguridad y la independencia de las personas con discapacidad visual. Su objetivo es ayudar a la navegación y la conciencia de peligros, pero no reemplaza el juicio personal, el entrenamiento de movilidad o la asistencia humana.",
+        "p3": "El sistema utiliza sensores de corto alcance, reconocimiento visual basado en inteligencia artificial, seguimiento por GPS, navegación de rutas, retroalimentación háptica y alertas de voz unidireccionales. Debido a factores técnicos y ambientales, el Sistema puede experimentar retrasos, imprecisiones o interrupciones del servicio.",
+        "p4": "Los usuarios reconocen que la detección de obstáculos se limita al alcance del sensor, que el reconocimiento de IA puede no ser completamente preciso y que las funciones de navegación y GPS dependen de la disponibilidad de la red y las condiciones de la señal. El Sistema no garantiza la total evitación de peligros.",
+        "p5": "Los usuarios deberán permanecer atentos en todo momento y son responsables de su propia seguridad durante la navegación. Los tutores o cuidadores aceptan utilizar funciones de monitoreo, mensajería y ubicación únicamente con fines de seguridad y apoyo.",
+        "p6": "La función SOS de emergencia está destinada a ayudar en situaciones de emergencia enviando alertas y datos de ubicación a contactos designados. La entrega exitosa depende de la cobertura de la red móvil y de una carga SIM suficiente. No se garantiza una respuesta inmediata.",
+        "p7": "La participación en las pruebas, encuestas y evaluaciones del sistema es voluntaria. Los participantes podrán retirarse en cualquier momento sin penalización. El sistema no está diseñado para uso comercial.",
+        "p8": "Para conocer los derechos relacionados con los datos y los detalles del procesamiento, consulte la <link>sección Política de privacidad</link>."
+      },
+      "bullets": {
+        "b1": "Priorice siempre la <strong>conciencia del mundo real</strong> al utilizar el sistema.",
+        "b2": "Trate todas las alertas como <strong>orientación de asistencia</strong>, no como garantías absolutas.",
+        "b3": "Utilice el dispositivo únicamente para los fines <strong>de investigación y apoyo a la seguridad</strong> previstos."
+      }
+    },
+    "privacy": {
+      "title": "política de privacidad",
+      "paragraphs": {
+        "p1": "El Sistema recopila y procesa datos personales necesarios para la funcionalidad del sistema, monitoreo de seguridad, respuesta a emergencias y fines de investigación académica. Los datos recopilados pueden incluir ubicación GPS, registros de uso del sistema, identificadores de dispositivos e información de contacto del tutor.",
+        "p2": "Todos los datos personales se procesan de conformidad con la Ley de Privacidad de Datos de 2012 (Ley de la República N° 10173). Se implementan medidas de seguridad organizativas, físicas y técnicas razonables para proteger los datos recopilados contra el acceso no autorizado, la pérdida o el uso indebido.",
+        "p3": "Los datos de ubicación se utilizan para respaldar la navegación de rutas, el monitoreo de guardianes y las alertas de emergencia SOS. Las funciones de seguimiento en tiempo real requieren una conexión a Internet activa y pueden estar limitadas en áreas con cobertura de red débil o nula.",
+        "p4": "Los datos recopilados se conservarán únicamente durante el tiempo necesario para cumplir los objetivos de la investigación y la evaluación del sistema. Los datos utilizados para el análisis serán anonimizados y agregados para proteger la identidad del participante.",
+        "p5": "Los interesados ​​tienen derecho a ser informados, acceder, rectificar, oponerse al procesamiento y retirar el consentimiento sobre sus datos personales en cualquier momento, coordinando con los investigadores del proyecto o administradores del sistema.",
+        "p6": "Si bien se aplican salvaguardias razonables, ningún sistema puede garantizar la seguridad absoluta de los datos. Al utilizar el Sistema, los usuarios reconocen y aceptan estos riesgos inherentes."
+      },
+      "bullets": {
+        "b1": "Solo recopilamos datos que son <strong>necesarios</strong> para la seguridad y el funcionamiento del sistema.",
+        "b2": "Los informes de investigación utilizan datos <strong>anonimizados o agregados</strong> siempre que sea posible.",
+        "b3": "Podrás solicitar <strong>acceder o corregir</strong> tus datos a través de los administradores del proyecto."
+      }
+    },
+    "consentLabel": "Confirmo que me han leído y explicado los <strong>Términos y Condiciones</strong> y la <strong>Política de Privacidad</strong>. Doy mi consentimiento voluntariamente para la recopilación y el procesamiento de mis datos personales y asumo los riesgos asociados con el uso de este prototipo de investigación."
+  }
+}

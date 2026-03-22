@@ -1,0 +1,20 @@
+{
+  "openMenu": "打开菜单",
+  "closeMenu": "关闭菜单",
+  "selectDevice": "选择设备",
+  "noVip": "无贵宾",
+  "noVipAvailable": "没有可用的 VIP",
+  "noVipDevices": "没有 VIP 设备",
+  "connection": "联系",
+  "connected": "已连接",
+  "disconnected": "已断开连接",
+  "notifications": "通知",
+  "noNotificationsYet": "还没有通知",
+  "total": "总计 {{count}}",
+  "seeAllNotifications": "查看所有通知",
+  "markAllAsRead": "全部标记为已读",
+  "profile": "轮廓",
+  "history": "历史",
+  "settings": "设置",
+  "logout": "退出"
+}

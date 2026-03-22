@@ -1,0 +1,20 @@
+{
+  "openMenu": "メニューを開く",
+  "closeMenu": "メニューを閉じる",
+  "selectDevice": "デバイスの選択",
+  "noVip": "VIPなし",
+  "noVipAvailable": "VIPは利用できません",
+  "noVipDevices": "VIP デバイスはありません",
+  "connection": "繋がり",
+  "connected": "接続済み",
+  "disconnected": "切断されました",
+  "notifications": "通知",
+  "noNotificationsYet": "まだ通知はありません",
+  "total": "合計 {{count}}",
+  "seeAllNotifications": "すべての通知を見る",
+  "markAllAsRead": "すべて既読としてマークする",
+  "profile": "プロフィール",
+  "history": "歴史",
+  "settings": "設定",
+  "logout": "ログアウト"
+}

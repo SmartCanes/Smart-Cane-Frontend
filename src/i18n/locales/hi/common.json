@@ -1,0 +1,38 @@
+{
+  "languages": {
+    "en": "अंग्रेज़ी",
+    "tl": "टैगलॉग",
+    "ceb": "बिसाया",
+    "ko": "कोरियाई",
+    "zh": "मंदारिन",
+    "ja": "जापानी",
+    "it": "इतालवी",
+    "es": "स्पेनिश",
+    "pt": "पुर्तगाली",
+    "ru": "रूसी",
+    "fr": "फ़्रेंच",
+    "hi": "हिंदी",
+    "ar": "अरबी"
+  },
+  "languageSwitcher": {
+    "label": "भाषा",
+    "ariaLabel": "वेबसाइट भाषा बदलें",
+    "changed": "भाषा {{language}} में बदल गई"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "passwordField": {
+    "showPassword": "पासवर्ड दिखाए",
+    "hidePassword": "पासवर्ड छिपाएं",
+    "validIconAlt": "वैध नियम",
+    "rules": {
+      "lowerUpper": "लोअरकेस और अपरकेस",
+      "number": "संख्या (0-9)",
+      "special": "विशेष पात्र (!@#$%^&*)",
+      "length": "कम से कम 8 अक्षर"
+    }
+  }
+}

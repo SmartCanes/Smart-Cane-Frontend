@@ -1,0 +1,38 @@
+{
+  "languages": {
+    "en": "Inglese",
+    "tl": "Tagalog",
+    "ceb": "Bisaya",
+    "ko": "Coreano",
+    "zh": "Mandarino",
+    "ja": "Giapponese",
+    "it": "Italiano",
+    "es": "Spagnolo",
+    "pt": "Portoghese",
+    "ru": "Russo",
+    "fr": "Francese",
+    "hi": "Hindi",
+    "ar": "Arabo"
+  },
+  "languageSwitcher": {
+    "label": "Lingua",
+    "ariaLabel": "Cambia lingua del sito",
+    "changed": "Lingua cambiata in {{language}}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "passwordField": {
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi la password",
+    "validIconAlt": "Regola valida",
+    "rules": {
+      "lowerUpper": "Minuscolo e maiuscolo",
+      "number": "Numero (0-9)",
+      "special": "Carattere speciale (!@#$%^&*)",
+      "length": "Almeno 8 caratteri"
+    }
+  }
+}

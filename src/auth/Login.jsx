@@ -141,9 +141,13 @@ const Login = () => {
       setModalConfig({
         isOpen: true,
         variant: "banner",
-        title: "No Valid Device",
-        message:
-          "It seems like you don't have a paired iCane device. Please pair your device to continue.",
+        title: t("auth.login.modal.noValidDeviceTitle", {
+          defaultValue: "No Valid Device"
+        }),
+        message: t("auth.login.modal.noValidDeviceMessage", {
+          defaultValue:
+            "It seems like you don't have a paired iCane device. Please pair your device to continue."
+        }),
         onClose: () => setModalConfig((prev) => ({ ...prev, isOpen: false }))
       });
       setShowScanner(true);
@@ -293,7 +297,9 @@ const Login = () => {
     setModalConfig({
       isOpen: true,
       variant: "banner",
-      title: "Paired Successfully",
+      title: t("auth.login.modal.pairedSuccessfullyTitle", {
+        defaultValue: "Paired Successfully"
+      }),
       actionText: t("auth.login.modal.proceedToDashboard"),
       onAction: handleLogin,
       onClose: () => {},

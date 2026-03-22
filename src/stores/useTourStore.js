@@ -1,34 +1,30 @@
 import { create } from "zustand";
+import { markTourComplete } from "@/api/backendService";
 
 /**
- * Tour store for the first-time user onboarding pointer system.
+ * Tour store for backend-synced per-page onboarding progression.
  *
- * - `visitedPages` is stored in localStorage under a PER-USER key:
- *   `icane-tour:<guardianId>` — so different accounts on the same browser
- *   each maintain their own independent tour history.
- * - Active tour state (activeTourPage, currentStep) is always runtime-only.
+ * `has_seen_tour` is persisted by the API as a comma-separated list of paths:
+ *   "/dashboard,/devices,/weather-board"
  */
 
-// ─── localStorage helpers (per-user key) ─────────────────────────────────────
+function parseCompletedPages(csvValue) {
+  if (typeof csvValue !== "string" || !csvValue.trim()) return {};
 
-const storageKey = (guardianId) => `icane-tour:${guardianId}`;
-
-function readVisited(guardianId) {
-  if (!guardianId) return {};
-  try {
-    return JSON.parse(localStorage.getItem(storageKey(guardianId)) ?? "{}");
-  } catch {
-    return {};
-  }
+  return csvValue
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p && p.startsWith("/"))
+    .reduce((acc, p) => {
+      acc[p] = true;
+      return acc;
+    }, {});
 }
 
-function writeVisited(guardianId, visitedPages) {
-  if (!guardianId) return;
-  try {
-    localStorage.setItem(storageKey(guardianId), JSON.stringify(visitedPages));
-  } catch {
-    // localStorage quota exceeded – silently ignore
-  }
+function toCsv(completedPages) {
+  return Object.keys(completedPages)
+    .filter((path) => completedPages[path])
+    .join(",");
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -37,8 +33,12 @@ export const useTourStore = create((set, get) => ({
   // ─── Runtime state ─────────────────────────────────────────────────────────
   /** Visited pages map for the currently loaded user. */
   visitedPages: {},
+  /** Completed pages map for the currently loaded user. */
+  completedPages: {},
   /** Guardian ID whose visited data is currently loaded. */
   currentGuardianId: null,
+  /** Backend completion for mini-tour gating. */
+  hasSeenEmergencyTour: false,
   /** Pathname of the page whose tour is currently active, or null. */
   activeTourPage: null,
   /** Zero-based index of the current tour step. */
@@ -46,34 +46,83 @@ export const useTourStore = create((set, get) => ({
 
   // ─── Selectors ─────────────────────────────────────────────────────────────
   hasVisited: (path) => !!get().visitedPages[path],
+  hasCompletedPage: (path) => !!get().completedPages[path],
+  isEmergencyTourEligible: () => !get().hasSeenEmergencyTour,
+  areAllTrackedPagesCompleted: (paths) => {
+    const completedPages = get().completedPages;
+    return paths.every((path) => !!completedPages[path]);
+  },
 
   // ─── Actions ───────────────────────────────────────────────────────────────
 
   /**
-   * Must be called once the logged-in user is known (e.g. on mount in
-   * TourGuide or after login). Loads the per-user visited map from
-   * localStorage so the correct tour history is used.
+   * Hydrate from logged-in user payload.
    */
-  hydrate: (guardianId) => {
+  hydrate: (userLike) => {
+    if (!userLike) return;
+
+    const guardianId =
+      userLike?.guardian_id ??
+      userLike?.guardianId ??
+      (typeof userLike === "number" ? userLike : null);
+
     if (!guardianId) return;
-    // Already loaded for this user — nothing to do.
-    if (get().currentGuardianId === guardianId) return;
+
+    const csv =
+      typeof userLike === "object"
+        ? userLike?.has_seen_tour ?? userLike?.hasSeenTour ?? ""
+        : "";
+    const completedPages = parseCompletedPages(csv);
+
     set({
-      visitedPages: readVisited(guardianId),
-      currentGuardianId: guardianId
+      visitedPages: { ...completedPages },
+      completedPages,
+      currentGuardianId: guardianId,
+      hasSeenEmergencyTour: Boolean(
+        userLike?.has_seen_emergency_tour ?? userLike?.hasSeenEmergencyTour
+      )
     });
   },
 
   /**
-   * Start the tour for `path`. Immediately marks the page as visited and
-   * persists that to the user-scoped localStorage key.
+   * Start the tour for a page/feature key.
    */
   startTour: (path) => {
-    const { currentGuardianId } = get();
-    const updated = { ...get().visitedPages, [path]: true };
-    writeVisited(currentGuardianId, updated);
-    set({ activeTourPage: path, currentStep: 0, visitedPages: updated });
+    const visitedPages = { ...get().visitedPages, [path]: true };
+    set({ activeTourPage: path, currentStep: 0, visitedPages });
   },
+
+  completePage: async (path) => {
+    if (!path) return;
+
+    const completedPages = { ...get().completedPages };
+    if (completedPages[path]) return;
+
+    completedPages[path] = true;
+    set({ completedPages });
+
+    try {
+      await markTourComplete({ completed_page: path });
+    } catch (error) {
+      // Keep UI responsive but rollback to avoid drift from backend truth.
+      const rollback = { ...get().completedPages };
+      delete rollback[path];
+      set({ completedPages: rollback });
+      throw error;
+    }
+  },
+
+  completeMainTour: async () => {
+    const activePath = get().activeTourPage;
+    if (!activePath || !activePath.startsWith("/")) return;
+    await get().completePage(activePath);
+  },
+
+  completeEmergencyTour: () => set({ hasSeenEmergencyTour: true }),
+
+  getCompletedPagesCsv: () => toCsv(get().completedPages),
+
+  backendHasSeenTour: false,
 
   endTour: () => set({ activeTourPage: null, currentStep: 0 }),
 
@@ -81,10 +130,8 @@ export const useTourStore = create((set, get) => ({
 
   prevStep: () => set((s) => ({ currentStep: Math.max(0, s.currentStep - 1) })),
 
-  /** Dev / testing helper — clears tour history for the current user. */
+  /** Dev / testing helper — clears runtime state. */
   resetAllTours: () => {
-    const { currentGuardianId } = get();
-    writeVisited(currentGuardianId, {});
-    set({ visitedPages: {} });
+    set({ visitedPages: {}, completedPages: {}, hasSeenEmergencyTour: false });
   }
 }));

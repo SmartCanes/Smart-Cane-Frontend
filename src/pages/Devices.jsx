@@ -968,6 +968,7 @@ const DeviceCard = ({
           {/* Manage button with Dropdown */}
           <div className="relative" ref={actionsMenuRef}>
             <button
+              data-tour="tour-device-manage-button"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowActionsMenu(!showActionsMenu);
@@ -980,9 +981,13 @@ const DeviceCard = ({
 
             {/* Dropdown Menu - Positioned absolutely and stays on top */}
             {showActionsMenu && (
-              <div className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+              <div
+                data-tour="tour-device-manage-dropdown"
+                className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
+              >
                 <div className="py-1">
                   <button
+                    data-tour="tour-device-edit-nickname"
                     onClick={(e) => {
                       e.stopPropagation();
                       onEditDevice(device);
@@ -995,6 +1000,7 @@ const DeviceCard = ({
                   </button>
 
                   <button
+                    data-tour="tour-device-manage-guardians"
                     onClick={(e) => {
                       e.stopPropagation();
                       onManageGuardians();
@@ -1007,6 +1013,7 @@ const DeviceCard = ({
                   </button>
 
                   <button
+                    data-tour="tour-device-unpair"
                     onClick={(e) => {
                       e.stopPropagation();
                       onUnpairDevice(device.deviceId);

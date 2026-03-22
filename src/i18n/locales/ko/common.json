@@ -1,0 +1,38 @@
+{
+  "languages": {
+    "en": "영어",
+    "tl": "타갈로그어",
+    "ceb": "비사야어",
+    "ko": "한국어",
+    "zh": "중국어",
+    "ja": "일본어",
+    "it": "이탈리아어",
+    "es": "스페인어",
+    "pt": "포르투갈어",
+    "ru": "러시아어",
+    "fr": "프랑스어",
+    "hi": "힌디어",
+    "ar": "아랍어"
+  },
+  "languageSwitcher": {
+    "label": "언어",
+    "ariaLabel": "웹사이트 언어 변경",
+    "changed": "언어가 {{language}}(으)로 변경되었습니다"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "passwordField": {
+    "showPassword": "비밀번호 표시",
+    "hidePassword": "비밀번호 숨기기",
+    "validIconAlt": "유효한 규칙",
+    "rules": {
+      "lowerUpper": "소문자 및 대문자",
+      "number": "숫자(0-9)",
+      "special": "특수 문자(!@#$%^&*)",
+      "length": "8자 이상"
+    }
+  }
+}

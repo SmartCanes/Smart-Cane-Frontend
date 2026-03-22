@@ -1,0 +1,20 @@
+{
+  "openMenu": "मेनू खोलें",
+  "closeMenu": "मेनू बंद करें",
+  "selectDevice": "डिवाइस का चयन करें",
+  "noVip": "कोई वीआईपी नहीं",
+  "noVipAvailable": "कोई वीआईपी उपलब्ध नहीं",
+  "noVipDevices": "कोई वीआईपी डिवाइस नहीं",
+  "connection": "संबंध",
+  "connected": "जुड़े हुए",
+  "disconnected": "डिस्कनेक्ट किया गया",
+  "notifications": "सूचनाएं",
+  "noNotificationsYet": "अभी तक कोई सूचना नहीं",
+  "total": "{{count}} कुल",
+  "seeAllNotifications": "सभी सूचनाएं देखें",
+  "markAllAsRead": "सभी को पढ़ा हुआ मार्क करें",
+  "profile": "प्रोफ़ाइल",
+  "history": "इतिहास",
+  "settings": "सेटिंग्स",
+  "logout": "लॉग आउट"
+}

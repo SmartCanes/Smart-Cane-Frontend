@@ -8,7 +8,7 @@ import Header from "@/ui/components/Header";
 import ImportantNotificationsBridge from "@/ui/components/ImportantNotificationsBridge";
 import PushNotificationsBridge from "@/ui/components/PushNotificationsBridge";
 import TourGuide from "@/ui/components/TourGuide";
-import { TOUR_STEPS } from "@/data/tourConfig";
+import { useTourSteps } from "@/data/tourConfig";
 import { useTourStore } from "@/stores/useTourStore";
 import { createContext, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
@@ -18,22 +18,11 @@ const ScrollContext = createContext();
 const LOGIN_TOAST_DURATION_MS = 3000;
 const TOUR_STABILIZE_MS = 450;
 
-function normalizeTourFlag(value) {
-  if (typeof value === "boolean") return value;
-  if (value === 1 || value === "1") return true;
-  if (value === 0 || value === "0") return false;
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-    if (normalized === "true") return true;
-    if (normalized === "false") return false;
-  }
-  return null;
-}
-
 const DashboardLayoutContent = () => {
   const { t, i18n } = useTranslation("pages");
-  const { user, setUser } = useUserStore();
-  const { hasVisited } = useTourStore();
+  const { tourSteps } = useTourSteps();
+  const { setUser } = useUserStore();
+  const { hasCompletedPage } = useTourStore();
   const { emergency, fall, connectWs, disconnectWs } = useRealtimeStore();
   const location = useLocation();
   const { showToast, clearToast } = useToast();
@@ -43,18 +32,17 @@ const DashboardLayoutContent = () => {
   const tRef = useRef(t);
   const toastShownRef = useRef(false);
   const pendingLoginToastRef = useRef(false);
+  const justLoggedInRef = useRef(Boolean(location.state?.justLoggedIn));
+  const waitingForTourFinishRef = useRef(false);
   const tourReadyTimerRef = useRef(null);
-
-  const hasSeenTourBackend =
-    normalizeTourFlag(user?.has_seen_tour) ??
-    normalizeTourFlag(user?.hasSeenTour) ??
-    null;
 
   const showLoginSuccessToast = () => {
     if (toastShownRef.current) return;
 
     toastShownRef.current = true;
     pendingLoginToastRef.current = false;
+    waitingForTourFinishRef.current = false;
+    justLoggedInRef.current = false;
 
     showToast({
       message: tRef.current("dashboardLayout.toast.loginSuccess"),
@@ -80,6 +68,10 @@ const DashboardLayoutContent = () => {
   useEffect(() => {
     tRef.current = t;
   }, [t]);
+
+  useEffect(() => {
+    justLoggedInRef.current = Boolean(location.state?.justLoggedIn);
+  }, [location.state]);
 
   useEffect(() => {
     scheduleTourAutostart(TOUR_STABILIZE_MS);
@@ -144,17 +136,12 @@ const DashboardLayoutContent = () => {
     if (!justLoggedIn || toastShownRef.current || emergency) return;
 
     pendingLoginToastRef.current = true;
-
-    if (hasSeenTourBackend === null) {
-      return;
-    }
-
-    const isFirstTimeUser = hasSeenTourBackend === false;
-    const hasTourSteps = (TOUR_STEPS[location.pathname] ?? []).length > 0;
-    const isPageVisited = hasVisited(location.pathname);
-    const shouldWaitForTour = isFirstTimeUser && hasTourSteps && !isPageVisited;
+    const hasTourSteps = (tourSteps[location.pathname] ?? []).length > 0;
+    const isPageCompleted = hasCompletedPage(location.pathname);
+    const shouldWaitForTour = hasTourSteps && !isPageCompleted;
 
     if (shouldWaitForTour) {
+      waitingForTourFinishRef.current = true;
       return;
     }
 
@@ -163,18 +150,17 @@ const DashboardLayoutContent = () => {
     emergency,
     location.pathname,
     location.state,
-    hasSeenTourBackend,
-    hasVisited,
+    hasCompletedPage,
+    tourSteps,
     showToast
   ]);
 
-  const handleTourComplete = () => {
-    if (!pendingLoginToastRef.current || toastShownRef.current) return;
-    showLoginSuccessToast();
-  };
+  const handleTourFinish = () => {
+    if (toastShownRef.current) return;
+    if (!pendingLoginToastRef.current) return;
+    if (!waitingForTourFinishRef.current) return;
+    if (!justLoggedInRef.current) return;
 
-  const handleTourClose = () => {
-    if (!pendingLoginToastRef.current || toastShownRef.current) return;
     showLoginSuccessToast();
   };
 
@@ -204,8 +190,8 @@ const DashboardLayoutContent = () => {
         {activeAlert === "emergency" && <EmergencyOverlay emergency={true} />}
         <TourGuide
           canAutoStart={canAutoStartTour}
-          onComplete={handleTourComplete}
-          onClose={handleTourClose}
+          onComplete={handleTourFinish}
+          onClose={handleTourFinish}
         />
         <ImportantNotificationsBridge />
         <PushNotificationsBridge />

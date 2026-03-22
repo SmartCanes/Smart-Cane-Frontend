@@ -1,0 +1,921 @@
+{
+  "tour": {
+    "ui": {
+      "back": "뒤쪽에",
+      "next": "다음",
+      "done": "완료",
+      "skip": "건너뛰다"
+    },
+    "steps": {
+      "dashboard": {
+        "switchVip": {
+          "title": "VIP 전환",
+          "description": "이 드롭다운을 사용하여 페어링된 iCane 장치 간에 전환하세요. 각 장치는 특정 VIP에 할당됩니다."
+        },
+        "connectionStatus": {
+          "title": "연결 상태",
+          "description": "이 배지는 iCane이 활성화되어 데이터를 전송하고 있는지 여부를 보여줍니다. 녹색은 연결되었음을 의미하고, 회색은 장치가 오프라인임을 의미합니다."
+        },
+        "alerts": {
+          "title": "경고 및 알림",
+          "description": "iCane에서 넘어짐 감지, 배터리 부족, 비상 트리거 등의 수신 알림을 보려면 벨을 탭하세요."
+        },
+        "accountMenu": {
+          "title": "귀하의 계정 메뉴",
+          "description": "프로필, 활동 기록, 앱 설정에 액세스하거나 이 메뉴에서 로그아웃하세요."
+        },
+        "liveMap": {
+          "title": "실시간 위치 추적",
+          "description": "지도에서 iCane의 실시간 위치를 확인하세요. 지도의 아무 곳이나 탭하여 경로 옵션을 열고 VIP의 목적지를 설정하세요."
+        },
+        "gpsInfo": {
+          "title": "GPS 신호 정보",
+          "description": "iCane 장치의 위성 수, 신호 품질 및 마지막으로 알려진 GPS 좌표를 모니터링합니다."
+        },
+        "guardianNetwork": {
+          "title": "가디언 네트워크",
+          "description": "현재 온라인 상태인 공동 보호자를 확인하세요. 녹색은 활성을 의미합니다. 현재 귀하와 함께 모니터링하고 있습니다."
+        },
+        "recentAlerts": {
+          "title": "최근 알림",
+          "description": "iCane 장치에서 실행되는 최신 추락 감지 및 긴급 경보로 최신 정보를 받아보세요."
+        },
+        "sendNote": {
+          "title": "빠른 메모 보내기",
+          "description": "iCane의 음성 엔진을 통해 VIP에게 직접 짧은 알림이나 메시지를 보내세요."
+        },
+        "mapControls": {
+          "title": "지도 컨트롤",
+          "description": "VIP의 경로에 지도를 고정하고, 실시간으로 VIP의 움직임을 추적하고, 자신의 위치를 ​​중심으로 하거나, 이러한 컨트롤을 사용하여 확대 및 축소할 수 있습니다."
+        }
+      },
+      "devices": {
+        "devicesHeader": {
+          "title": "페어링된 iCane 장치",
+          "description": "귀하의 계정에 연결된 모든 iCane 장치가 여기에 표시됩니다. 모든 장치를 관리하거나 이름을 바꾸거나 페어링을 해제할 수 있습니다."
+        },
+        "addDevice": {
+          "title": "새 장치 추가",
+          "description": "'지팡이 추가'를 누르고 iCane의 QR 코드를 스캔하여 계정과 페어링하세요. 몇 초 밖에 걸리지 않습니다."
+        },
+        "deviceActions": {
+          "title": "장치 작업 열기",
+          "description": "닉네임, 보호자, 페어링 제어에 대한 빠른 작업을 열려면 기기 카드에서 관리를 클릭하세요."
+        },
+        "deviceMenu": {
+          "title": "장치 작업 메뉴",
+          "description": "이 옵션을 사용하면 닉네임을 수정하고, 보호자를 관리하고, 기기 페어링을 해제할 수 있습니다. 계속하려면 보호자 관리를 클릭하세요."
+        },
+        "inviteGuardian": {
+          "title": "다른 보호자 초대",
+          "description": "이 버튼을 사용하면 이메일로 새 보호자를 초대하여 VIP 모니터링을 도울 수 있습니다."
+        },
+        "editGuardian": {
+          "title": "보호자 세부정보 수정",
+          "description": "역할이 변경될 때 관계 세부 정보를 업데이트하려면 보호자 카드에 있는 이 편집 아이콘을 사용하세요."
+        },
+        "guardianStats": {
+          "title": "Guardian 요약 통계",
+          "description": "이 요약 카드에서 총 보호자, 현재 활성 보호자, 대기 중인 초대를 추적하세요."
+        }
+      },
+      "activity_logs": {
+        "activityHeader": {
+          "title": "활동 보고서",
+          "description": "로그인, 기기 변경, 보호자 초대 등 모든 계정 활동에 대한 전체 감사 추적입니다."
+        },
+        "activitySearch": {
+          "title": "검색 및 필터",
+          "description": "보호자 이름, 작업 유형, 설명을 검색하여 특정 활동을 빠르게 찾아보세요."
+        }
+      },
+      "device_logs": {
+        "deviceLogsHeader": {
+          "title": "장치 활동 로그",
+          "description": "VIP의 iCane 장치에 대한 경로 활동, 안전 이벤트 및 이동 기록을 봅니다."
+        },
+        "deviceLogsSearch": {
+          "title": "검색 및 필터",
+          "description": "키워드, 상태 또는 날짜 범위별로 레코드 범위를 빠르게 좁혀 필요한 이벤트를 찾으세요."
+        }
+      },
+      "weather_board": {
+        "weatherMain": {
+          "title": "일기 예보",
+          "description": "VIP를 위한 안전한 야외 활동을 계획하는 데 도움이 되도록 현재 상태와 며칠 간의 일기예보를 확인하세요."
+        },
+        "weatherSearch": {
+          "title": "모든 위치 검색",
+          "description": "해당 지역에 대한 현지 일기예보를 얻으려면 필리핀의 도시나 장소를 입력하세요."
+        }
+      },
+      "advanced": {
+        "advancedHeader": {
+          "title": "구성 요소 관리",
+          "description": "여기에서 각 하드웨어 구성 요소의 상태를 실시간으로 모니터링하고 센서 임계값을 조정할 수 있습니다."
+        },
+        "deviceStatus": {
+          "title": "건강을 한눈에",
+          "description": "이 패널은 온라인에 있는 구성 요소 수를 요약하고 iCane의 전반적인 상태 비율을 제공합니다."
+        }
+      }
+    },
+    "mobile": {
+      "dashboard": {
+        "headerMenuIntro": {
+          "title": "헤더 메뉴 열기",
+          "description": "연결 상태, VIP 드롭다운 및 기타 설정에 액세스하려면 헤더 메뉴를 엽니다."
+        }
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "modal": {
+        "noValidDeviceTitle": "유효한 장치가 없습니다",
+        "noValidDeviceMessage": "페어링된 iCane 장치가 없는 것 같습니다. 계속하려면 장치를 페어링하세요.",
+        "pairedSuccessfullyTitle": "성공적으로 페어링됨",
+        "proceedToDashboard": "대시보드로 이동",
+        "continueToDashboard": "이제 대시보드를 계속 사용하고 계정 사용을 시작할 수 있습니다.",
+        "redirecting": "{{seconds}}초 후에 리디렉션 중..."
+      },
+      "heading": "환영",
+      "subheading": "갈 준비가 되셨나요? 로그인하고 대시보드로 바로 이동하세요.",
+      "mobileHeading": "귀하의 계정에 로그인하십시오",
+      "identifierLabel": "이메일 또는 사용자 이름",
+      "identifierPlaceholder": "이메일이나 사용자 이름을 입력하세요...",
+      "passwordLabel": "비밀번호",
+      "passwordPlaceholder": "비밀번호를 입력하세요...",
+      "forgotPassword": "비밀번호를 잊으셨나요?",
+      "captchaLoading": "보안문자 로드 중...",
+      "signingIn": "로그인 중...",
+      "signIn": "로그인",
+      "noAccount": "계정이 없으셨나요?",
+      "signUp": "가입",
+      "scanTitle": "iCane 장치를 스캔하세요",
+      "scanDescription": "iCane 장치의 QR 코드에 카메라를 대면 자동으로 페어링됩니다.",
+      "errors": {
+        "identifierRequired": "이메일 또는 사용자 이름이 필요합니다",
+        "passwordRequired": "비밀번호가 필요합니다",
+        "captchaRequired": "보안 문자를 작성해 주세요",
+        "loginFailed": "로그인 실패",
+        "twoFactorEmailRequired": "2단계 인증에는 유효한 이메일 주소가 필요합니다.",
+        "otpSendFailed": "OTP 전송에 실패했습니다. 다시 시도해 주세요.",
+        "otpIncomplete": "전체 6자리 코드를 입력하세요.",
+        "invalidCode": "코드가 잘못되었습니다. 다시 시도해 주세요.",
+        "retryAfter": "실패한 로그인 시도 횟수가 너무 많습니다. {{seconds}}초 후에 다시 시도하세요."
+      },
+      "twoFactor": {
+        "title": "이메일 확인",
+        "promptPrefix": "다음을 입력하세요.",
+        "codeLabel": "6자리 인증코드",
+        "promptSuffix": "귀하의 이메일 주소로 보내드렸습니다.",
+        "noCode": "코드를 받지 못하셨나요?",
+        "sending": "배상...",
+        "resendIn": "{{seconds}}초 후에 재전송",
+        "resend": "인증코드 재전송",
+        "verifying": "확인 중...",
+        "verify": "확인하다",
+        "cancel": "취소"
+      }
+    },
+    "register": {
+      "placeholders": {
+        "province": "주...",
+        "city": "도시...",
+        "barangay": "바랑가이...",
+        "village": "마을...",
+        "contactNumber": "09XX XXX XXXX",
+        "email": "샘플.이메일@gmail.com"
+      },
+      "validation": {
+        "firstNameRequired": "이름은 필수 항목입니다.",
+        "lastNameRequired": "성은 필수 항목입니다.",
+        "lettersAndSpacesOnly": "문자와 공백만 포함해야 합니다.",
+        "minTwoChars": "길이는 2자 이상이어야 합니다.",
+        "maxFiftyChars": "50자를 초과할 수 없습니다.",
+        "usernameRequired": "사용자 이름이 필요합니다",
+        "usernameMinThree": "사용자 이름은 3자 이상이어야 합니다.",
+        "usernameMaxTwenty": "사용자 이름은 20자를 초과할 수 없습니다.",
+        "usernameAllowedChars": "사용자 이름에는 문자, 숫자, 밑줄만 포함할 수 있습니다.",
+        "usernameMinLetters": "사용자 이름은 3자 이상이어야 합니다.",
+        "passwordRequired": "비밀번호가 필요합니다",
+        "passwordMinEight": "비밀번호는 8자 이상이어야 합니다.",
+        "passwordMaxSixtyFour": "비밀번호는 64자를 초과할 수 없습니다.",
+        "passwordNeedsLowercase": "비밀번호에는 소문자가 하나 이상 포함되어야 합니다.",
+        "passwordNeedsUppercase": "비밀번호에는 대문자가 하나 이상 포함되어야 합니다.",
+        "passwordNeedsNumber": "비밀번호에는 숫자가 하나 이상 포함되어야 합니다.",
+        "passwordNeedsSpecial": "비밀번호에는 특수 문자(@$!%*?&)가 하나 이상 포함되어야 합니다.",
+        "confirmPasswordRequired": "비밀번호 확인이 필요합니다",
+        "passwordsDontMatch": "비밀번호가 일치하지 않습니다!",
+        "streetAddressRequired": "거리 주소가 필요합니다",
+        "addressMoreSpecific": "주소는 더 구체적이어야 합니다.",
+        "addressMaxHundred": "주소는 100자를 초과할 수 없습니다.",
+        "emailRequired": "이메일은 필수입니다",
+        "emailMaxHundred": "이메일은 100자를 초과할 수 없습니다.",
+        "validEmail": "유효한 이메일 주소를 입력하세요.",
+        "contactNumberRequired": "연락처가 필요합니다",
+        "contactDigits": "연락처 번호는 {{count}}자리여야 합니다.",
+        "contactStarts09": "연락처 번호는 09로 시작하고 11자리 숫자를 포함해야 합니다.",
+        "otpSixDigits": "전체 6자리 OTP를 입력하세요."
+      },
+      "errors": {
+        "generic": "등록 실패",
+        "usernameTaken": "이미 사용 중인 사용자 이름",
+        "emailRegistered": "이미 등록된 이메일",
+        "contactRegistered": "연락처가 이미 등록되어 있습니다.",
+        "otpSendFailed": "OTP 전송에 실패했습니다. 다시 시도해 주세요."
+      },
+      "modal": {
+        "inviteCreatedTitle": "초대를 통해 계정이 생성되었습니다!",
+        "inviteCreatedMessage": "초대 링크를 사용하여 귀하의 계정이 성공적으로 생성되었습니다.",
+        "accountCreatedTitle": "계정이 생성되었습니다!",
+        "accountCreatedPairMessage": "계정이 성공적으로 생성되었습니다. 계속하려면 장치를 페어링하세요.",
+        "setupCompleteTitle": "설정 완료!",
+        "setupCompleteMessage": "귀하의 계정이 생성되었으며 장치가 성공적으로 페어링되었습니다.",
+        "manualPairMessage": "계정이 성공적으로 생성되었습니다. 장치를 수동으로 페어링하십시오.",
+        "goToLogin": "로그인으로 이동",
+        "proceedToLogin": "로그인으로 진행",
+        "pairedSuccessfullyTitle": "성공적으로 페어링됨",
+        "tooManyRequestsTitle": "요청이 너무 많습니다",
+        "tooManyRequestsMessage": "짧은 기간 동안 너무 많은 요청을 하셨습니다. 다시 시도하기 전에 잠시 기다려 주십시오.",
+        "networkErrorTitle": "네트워크 오류",
+        "networkErrorMessage": "서버에 연결하는 데 문제가 있습니다. 인터넷 연결을 확인하고 다시 시도해 주세요. 문제가 지속되면 페이지를 새로 고치거나 지원팀에 문의해 보세요.",
+        "deviceVerifiedTitle": "장치가 확인되었습니다",
+        "deviceAlreadyPairedTitle": "장치가 이미 페어링되었습니다",
+        "deviceNotFoundTitle": "장치를 찾을 수 없음",
+        "deviceVerifiedMessage": "장치가 성공적으로 확인되었으며 페어링할 준비가 되었습니다. 계속하려면 계정을 등록하세요.",
+        "deviceAlreadyPairedMessage": "이 기기는 이미 다른 계정에 연결되어 있습니다. 이것이 실수라고 생각되면 지원팀에 문의하세요.",
+        "deviceNotFoundMessage": "이 일련번호가 있는 기기를 찾을 수 없습니다. 확인하신 후 다시 시도해 주세요.",
+        "invalidDeviceTitle": "잘못된 장치",
+        "invalidDeviceMessage": "잘못된 장치입니다. 다시 시도해 주세요.",
+        "continueToLogin": "이제 계속 로그인하여 계정을 사용할 수 있습니다.",
+        "redirecting": "{{seconds}}초 후에 리디렉션 중..."
+      },
+      "heading": "환영",
+      "verifyHeading": "이메일 확인",
+      "mobileHeading": "계정 만들기",
+      "step1Description": "iCane을 시작하려면 계정을 만드세요.",
+      "step2Description": "가입하여 더욱 안전하고 스마트한 이동성을 향한 여정을 시작해 보세요.",
+      "verifyPrefix": "다음을 입력하세요.",
+      "verifyCodeLabel": "6자리 인증코드",
+      "verifySuffix": "귀하의 이메일 주소로 보내드렸습니다.",
+      "firstName": "이름",
+      "firstNamePlaceholder": "이름...",
+      "middleName": "중간 이름",
+      "middleNamePlaceholder": "중간 이름...",
+      "lastName": "성",
+      "lastNamePlaceholder": "성...",
+      "username": "사용자 이름",
+      "usernamePlaceholder": "사용자 이름을 입력하세요...",
+      "password": "비밀번호",
+      "passwordPlaceholder": "비밀번호를 입력하세요...",
+      "confirmPassword": "비밀번호 재입력",
+      "confirmPasswordPlaceholder": "비밀번호를 다시 입력하세요...",
+      "streetAddress": "지번/건물/거리",
+      "streetAddressPlaceholder": "로트 번호를 입력하세요...",
+      "province": "주",
+      "city": "도시",
+      "barangay": "바랑가이",
+      "village": "마을",
+      "contactNumber": "연락처",
+      "email": "이메일 주소",
+      "noCode": "코드를 받지 못하셨나요?",
+      "sending": "배상...",
+      "resendIn": "{{seconds}}초 후에 재전송",
+      "resend": "인증코드 재전송",
+      "creating": "계정 생성 중...",
+      "checking": "확인 중...",
+      "createAccount": "계정 만들기",
+      "next": "다음",
+      "back": "뒤쪽에",
+      "haveAccount": "이미 계정이 있습니까?",
+      "signIn": "로그인",
+      "termsPrefix": "가입함으로써 나는 다음에 동의합니다.",
+      "terms": "이용약관",
+      "and": "그리고",
+      "privacy": "개인 정보 보호 정책.",
+      "scanTitle": "iCane 장치를 스캔하세요",
+      "scanDescription": "iCane 장치의 QR 코드에 카메라를 대면 자동으로 페어링됩니다."
+    },
+    "forgotPassword": {
+      "heading": "비밀번호를 잊으셨나요?",
+      "verificationCode": "인증코드",
+      "changePassword": "비밀번호 변경",
+      "step1Description": "이메일 주소를 입력하시면 코드를 보내드립니다.",
+      "step3Description": "귀하의 코드가 확인되었습니다. 새 비밀번호를 입력하세요.",
+      "codeSentPrefix": "다음 주소로 인증 코드를 보냈습니다.",
+      "expiresIn": "(5분 후에 만료됩니다)",
+      "email": "이메일 주소",
+      "sending": "배상...",
+      "sendCode": "코드 보내기",
+      "back": "뒤쪽에",
+      "noCode": "코드를 받지 못하셨나요?",
+      "resendOtp": "OTP 재전송",
+      "verifying": "확인 중...",
+      "verifyCode": "코드 확인",
+      "newPassword": "새 비밀번호",
+      "confirmPassword": "비밀번호 재입력",
+      "passwordHint": "6자 이상이어야 합니다.",
+      "updating": "업데이트 중...",
+      "submit": "제출하다",
+      "errors": {
+        "otpExpired": "OTP가 만료되었습니다. 새로운 것을 요청하세요.",
+        "validEmail": "유효한 이메일 주소를 입력하세요.",
+        "invalidOtp": "OTP가 잘못되었습니다. 다시 시도해 주세요.",
+        "passwordMismatch": "비밀번호가 일치하지 않습니다!",
+        "passwordMin": "비밀번호는 6자 이상이어야 합니다.",
+        "otpSendFailed": "OTP 전송에 실패했습니다. 다시 시도해 주세요.",
+        "network": "네트워크 오류입니다. 연결을 확인해주세요.",
+        "generic": "문제가 발생했습니다. 다시 시도해 주세요.",
+        "resetFailed": "비밀번호를 재설정하지 못했습니다.",
+        "resendFailed": "OTP 재전송에 실패했습니다. 다시 시도해 주세요."
+      },
+      "modal": {
+        "passwordResetTitle": "비밀번호 재설정",
+        "codeSent": "귀하의 이메일({{email}})로 인증 코드를 보냈습니다.",
+        "successTitle": "성공",
+        "passwordUpdated": "비밀번호가 성공적으로 업데이트되었습니다!",
+        "sessionExpiredTitle": "세션이 만료되었습니다",
+        "sessionExpiredBody": "세션이 만료되었습니다. 재설정 프로세스를 다시 시작하십시오.",
+        "verificationTitle": "확인",
+        "newOtpSent": "귀하의 이메일로 새로운 OTP가 전송되었습니다!"
+      }
+    }
+  },
+  "guestPage": {
+    "title": "환영"
+  },
+  "login": {
+    "title": "로그인"
+  },
+  "register": {
+    "title": "계정 만들기"
+  },
+  "forgotPassword": {
+    "title": "비밀번호를 잊으셨나요?"
+  },
+  "getStarted": {
+    "title": "시작하기"
+  },
+  "emergencyDetails": {
+    "title": "긴급 상황 세부정보"
+  },
+  "dashboard": {
+    "title": "계기반"
+  },
+  "dashboardPage": {
+    "title": "실시간 위치",
+    "subtitle": "iCane 장치에 대한 실시간 모니터링 및 안전 기능",
+    "liveLocationTracking": "실시간 위치 추적",
+    "trackLive": "라이브 트랙",
+    "satellites": "위성",
+    "lastLocation": "마지막 위치",
+    "gpsBadge": {
+      "noSignal": "신호 없음",
+      "ready": "준비가 된",
+      "lowSignal": "낮은 신호"
+    },
+    "location": {
+      "resolving": "해결 중...",
+      "none": "사용 가능한 위치가 없습니다.",
+      "unableToResolve": "위치를 확인할 수 없습니다.",
+      "unknownArea": "알 수 없는 지역",
+      "updating": "업데이트 중..."
+    }
+  },
+  "devices": {
+    "title": "장치",
+    "header": {
+      "title": "장치 관리",
+      "subtitle": "페어링된 지팡이를 보고 관리하고 VIP 프로필을 할당하는 등의 작업을 수행하세요.",
+      "countSummary": "{{total}} 지팡이 • {{active}} 활성",
+      "countSummary_other": "{{total}} 지팡이 • {{active}} 활성"
+    },
+    "view": {
+      "tiles": "타일",
+      "list": "목록"
+    },
+    "actions": {
+      "addCane": "지팡이 추가",
+      "view": "보다",
+      "edit": "편집하다",
+      "remove": "제거하다",
+      "assignVip": "VIP 할당",
+      "manage": "관리하다",
+      "editNickname": "닉네임 수정",
+      "manageGuardians": "보호자 관리",
+      "unpair": "페어링 해제",
+      "unpairDevice": "장치 페어링 해제",
+      "manageCaneOptions": "지팡이 옵션 관리",
+      "viewVip": "VIP 보기",
+      "editVip": "VIP 편집",
+      "removeVip": "VIP 제거"
+    },
+    "card": {
+      "unnamedCane": "이름 없는 지팡이",
+      "editNicknameTitle": "지팡이 닉네임 수정",
+      "activeNow": "현재 활동 중",
+      "lastActive": "마지막 활성: {{lastActive}}",
+      "paired": "페어링됨",
+      "assignedVip": "할당된 VIP",
+      "added": "추가됨: {{date}}"
+    },
+    "vip": {
+      "vipId": "VIP 아이디",
+      "noVipAssigned": "할당된 VIP 없음",
+      "noVipAvailable": "VIP 이용 불가",
+      "modal": {
+        "viewTitle": "지팡이 VIP 프로필",
+        "createTitle": "지팡이에 VIP 추가",
+        "editTitle": "지팡이 VIP 편집",
+        "creating": "만드는 중...",
+        "create": "만들다",
+        "updating": "업데이트 중...",
+        "update": "업데이트"
+      }
+    },
+    "modal": {
+      "unpair": {
+        "title": "지팡이 페어링을 해제하시겠습니까?",
+        "message": "이렇게 하면 계정에서 지팡이의 페어링이 해제되고 제거됩니다.",
+        "confirmLoading": "페어링 해제 중...",
+        "confirm": "페어링 해제"
+      },
+      "removeVip": {
+        "title": "VIP 프로필을 삭제하시겠습니까?",
+        "message": "이 지팡이에 할당된 VIP 프로필이 제거됩니다.",
+        "confirmLoading": "풀이...",
+        "confirm": "제거하다"
+      },
+      "editNickname": {
+        "title": "닉네임 수정",
+        "label": "지팡이 별명 *",
+        "placeholder": "닉네임을 입력하세요",
+        "resetting": "재설정 중...",
+        "resetToDefault": "기본값으로 재설정",
+        "reset": "다시 놓기",
+        "saving": "절약...",
+        "saveChanges": "변경 사항 저장",
+        "save": "구하다"
+      }
+    },
+    "scanner": {
+      "modalTitle": "iCane 장치 스캔",
+      "or": "또는",
+      "enterSerialCode": "일련번호를 입력하세요",
+      "pairing": "편성...",
+      "pair": "쌍",
+      "errors": {
+        "httpsRequired": "카메라에는 HTTPS(또는 localhost)가 필요합니다. 로컬 IP를 통해 휴대폰에서 열었다면 HTTPS를 사용하세요.",
+        "invalidQrFormat": "잘못된 QR 코드 형식",
+        "noSerialInQr": "QR 코드에서 장치 일련번호를 찾을 수 없습니다.",
+        "unableToAccessCamera": "카메라에 액세스할 수 없습니다.",
+        "noCameraDetected": "카메라가 감지되지 않았습니다. 카메라가 있는 기기를 사용해 주세요."
+      }
+    },
+    "empty": {
+      "title": "아직 지팡이가 추가되지 않았습니다.",
+      "subtitle": "시작하려면 '지팡이 추가'를 클릭하세요."
+    },
+    "toast": {
+      "nicknameUpdated": "지팡이 닉네임이 업데이트되었습니다.",
+      "nicknameUpdateFailed": "지팡이 닉네임을 업데이트하지 못했습니다.",
+      "unpairedSuccess": "지팡이가 페어링 해제되어 계정에서 제거되었습니다.",
+      "unpairFailed": "지팡이 페어링을 해제하지 못했습니다.",
+      "pairedSuccess": "Cane이 귀하의 계정에 성공적으로 페어링되었습니다.",
+      "pairFailed": "장치를 페어링하지 못했습니다.",
+      "vipCreated": "지팡이를 위해 생성된 VIP 프로필",
+      "vipUpdated": "지팡이에 대한 VIP 프로필이 업데이트되었습니다.",
+      "vipRemoved": "지팡이에서 제거된 VIP 프로필",
+      "vipRemoveFailed": "VIP를 제거하지 못했습니다."
+    }
+  },
+  "weatherBoard": {
+    "title": "기상청",
+    "forecastTitle": "일기 예보",
+    "searchPlaceholder": "필리핀의 도시나 장소를 검색하세요...",
+    "defaultLocation": "기본 위치: {{location}}",
+    "useDefaultLocation": "Novaliches, Quezon City 사용",
+    "tomorrow": {
+      "label": "내일",
+      "safeToWalk": "걷기에 안전함",
+      "stayIndoors": "실내에 머무르세요"
+    },
+    "today": {
+      "title": "오늘의 날씨",
+      "subtitle": "날씨에 관해 필요할 수 있는 기타 정보는 다음과 같습니다."
+    },
+    "metrics": {
+      "sunrise": "해돋이:",
+      "sunset": "일몰:",
+      "humidity": "습기:",
+      "wind": "바람:",
+      "feelsLike": "느낌:",
+      "pressure": "압력:",
+      "visibility": "시계:",
+      "uvIndex": "자외선 지수:"
+    },
+    "twoWeek": {
+      "title": "2주 예측",
+      "subtitle": "앞으로 14일 동안의 날씨 전망은 다음과 같습니다."
+    },
+    "errors": {
+      "failedLoad": "날씨 데이터를 로드하지 못했습니다."
+    },
+    "modal": {
+      "closeAria": "예측 세부정보 닫기",
+      "high": "높은",
+      "low": "낮은",
+      "average": "평균",
+      "rainChance": "비가 올 확률"
+    }
+  },
+  "settings": {
+    "title": "설정"
+  },
+  "guardianProfile": {
+    "title": "보호자 프로필"
+  },
+  "notes": {
+    "title": "메모"
+  },
+  "advanced": {
+    "title": "고급의"
+  },
+  "notifications": {
+    "title": "알림",
+    "loading": "로드 중...",
+    "summary": "총 {{total}} • 읽지 않음 {{unread}}",
+    "markAllAsRead": "모두 읽음으로 표시",
+    "markAsRead": "읽음으로 표시",
+    "viewLog": "로그 보기",
+    "filters": {
+      "all": "모두",
+      "unread": "읽히지 않는",
+      "read": "읽다"
+    },
+    "group": {
+      "today": "오늘",
+      "yesterday": "어제",
+      "thisWeek": "이번 주",
+      "older": "이전"
+    },
+    "time": {
+      "justNow": "방금",
+      "minutesAgo": "{{count}}분 전",
+      "hoursAgo": "{{count}}시간 전",
+      "daysAgo": "{{count}}d 전"
+    },
+    "empty": {
+      "allCaughtUp": "모두 따라잡았어!",
+      "noNotifications": "알림 없음",
+      "noUnread": "지금은 읽지 않은 알림이 없습니다.",
+      "description": "중요한 실시간 알림 및 기기 활동이 여기에 표시됩니다."
+    },
+    "stats": {
+      "total": "총",
+      "unread": "읽히지 않는",
+      "actionTypes": "작업 유형"
+    },
+    "meta": {
+      "weather": "날씨 경보",
+      "emergency": "긴급 경보",
+      "arrival": "목적지 도달",
+      "fall": "추락 감지",
+      "default": "스마트 지팡이 경고",
+      "actions": {
+        "CREATE": "장치가 생성되었습니다.",
+        "UPDATE": "장치가 업데이트되었습니다.",
+        "DELETE": "기기가 삭제되었습니다.",
+        "PAIR": "장치가 페어링됨",
+        "UNPAIR": "장치가 페어링되지 않음",
+        "INVITE": "수호자 초대",
+        "REMOVE_GUARDIAN": "가디언이 삭제되었습니다.",
+        "UPDATE_ROLE": "역할이 업데이트되었습니다.",
+        "ACCEPT_INVITE": "초대 수락됨",
+        "SET_EMERGENCY": "비상 연락처 세트",
+        "UPDATE_RELATIONSHIP": "관계가 업데이트되었습니다.",
+        "LIVE_WEATHER": "날씨 경보",
+        "LIVE_EMERGENCY": "긴급 경보",
+        "LIVE_FALL": "추락 감지",
+        "ROUTE_ARRIVAL": "목적지 도달"
+      }
+    },
+    "messages": {
+      "importantActivity": "iCane에서 중요한 활동이 감지되었습니다."
+    },
+    "dynamicMessages": {
+      "setEmergencyContact": "{{actor}} 보호자 {{guardian}}을 기기 {{device}}의 비상 연락처로 설정"
+    }
+  },
+  "commonEnums": {
+    "roles": {
+      "primary": "주요한",
+      "secondary": "반성",
+      "guardian": "보호자"
+    },
+    "status": {
+      "online": "온라인",
+      "offline": "오프라인"
+    }
+  },
+  "manageGuardians": {
+    "emergency": {
+      "removeAsEmergency": "비상 연락처 삭제",
+      "setAsEmergency": "비상연락처로 설정",
+      "emergencyContact": "비상연락처",
+      "setAsEmergencyShort": "긴급상황으로 설정"
+    }
+  },
+  "toast": {
+    "closeAria": "토스트를 닫으세요",
+    "close": "닫다",
+    "typeIconAlt": "{{type}} 아이콘"
+  },
+  "emergencyToast": {
+    "title": "긴급 경보",
+    "subtitle": "SOS 신호 활성화",
+    "defaultMessage": "후안 델라 크루즈는 위험에 빠진 것 같습니다."
+  },
+  "dashboardLayout": {
+    "toast": {
+      "emergency": "긴급 경보! 실시간 위치를 바로 확인해주세요.",
+      "fall": "추락이 감지되었습니다! 즉시 사용자의 상태를 확인하시기 바랍니다.",
+      "loginSuccess": "귀하의 계정에 성공적으로 로그인되었습니다."
+    }
+  },
+  "dashboardSide": {
+    "menu": {
+      "dashboard": "계기반",
+      "deviceLogs": "장치 로그",
+      "weatherBoard": "기상청",
+      "devices": "장치",
+      "advanced": "고급의"
+    },
+    "mobile": {
+      "weather": "날씨",
+      "logs": "로그",
+      "home": "집",
+      "devices": "장치",
+      "advanced": "고급의"
+    },
+    "signOut": "로그아웃"
+  },
+  "sendNote": {
+    "title": "메모 보내기",
+    "description": "메시지를 작성하여 {{name}}에 보내세요.",
+    "defaultRecipient": "당신의 장치",
+    "messageLabel": "메시지",
+    "placeholder": "여기에 메시지를 입력하세요...",
+    "charactersCount": "{{count}} / {{max}}자",
+    "cancel": "취소",
+    "sending": "배상...",
+    "send": "보내다",
+    "sendNote": "메모 보내기",
+    "toast": {
+      "errorTitle": "오류!",
+      "errorMessage": "메시지를 보내는 동안 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
+      "sentTitle": "전송된!",
+      "sentMessage": "귀하의 메시지가 성공적으로 전송되었습니다."
+    }
+  },
+  "guardianInvite": {
+    "title": {
+      "processing": "초대 처리 중",
+      "accepted": "초대가 수락되었습니다!",
+      "registerRequired": "보호자가 되세요",
+      "expired": "초대가 만료되었습니다",
+      "invalid": "잘못된 초대",
+      "error": "처리 실패"
+    },
+    "messages": {
+      "invalidTokenMissing": "잘못된 초대 링크 - 토큰 누락",
+      "acceptedDashboard": "모든 준비가 완료되었습니다. 보호자 초대가 수락되었습니다. 대시보드로 리디렉션 중...",
+      "acceptedLogin": "축하합니다, {{email}}! 귀하의 초대가 수락되었습니다. 로그인으로 리디렉션 중...",
+      "registerRequired": "환영! 귀하는 보호자로 초대되었습니다.",
+      "serverUnavailable": "서버에 연결할 수 없습니다. 연결을 확인하고 다시 시도해 주세요.",
+      "unexpectedError": "초대를 처리하는 동안 예상치 못한 오류가 발생했습니다.",
+      "invitationAccepted": "초대가 수락되었습니다!"
+    },
+    "actions": {
+      "goToDashboard": "지금 대시보드로 이동",
+      "goToLogin": "지금 로그인으로 이동",
+      "returnHomePage": "홈페이지로 돌아가기",
+      "registerNow": "지금 등록하세요",
+      "alreadyHaveAccount": "이미 계정이 있나요? 로그인",
+      "returnHome": "홈으로 돌아가기",
+      "contactSupport": "지원팀에 문의",
+      "tryAgain": "다시 시도",
+      "goToHomePage": "홈페이지로 이동"
+    },
+    "invitationFor": "초대 대상:",
+    "redirectingIn": "{{count}}초 후에 리디렉션 중",
+    "redirectingIn_other": "{{count}}초 후에 리디렉션 중"
+  },
+  "recentAlerts": {
+    "title": "최근 알림",
+    "checkingWeather": "노발리체스 날씨 확인 중...",
+    "noAlerts": "최근 알림 없음"
+  },
+  "liveMap": {
+    "searchPlaceholder": "위치 검색...",
+    "defaultCountry": "필리핀 제도",
+    "clearDestinationAria": "목적지 지우기",
+    "clearDestination": "목적지 지우기",
+    "openFullscreenAria": "전체 화면 지도 열기",
+    "exitFullscreenAria": "전체화면 지도 종료",
+    "fullscreen": "전체 화면",
+    "exitFullscreen": "전체 화면 종료",
+    "popups": {
+      "currentLocation": "현재 위치.",
+      "vipLocation": "VIP 현재 위치.",
+      "destination": "목적지",
+      "adjustLocation": "위치 조정"
+    },
+    "locationPrompt": {
+      "title": "위치 액세스가 필요함",
+      "body": "현재 위치가 꺼져 있습니다. 지도 중앙에 위치할 수 있도록 설정에서 위치를 활성화하세요.",
+      "notNow": "지금은 아님",
+      "openSettings": "설정 열기"
+    },
+    "clickMenu": {
+      "chooseAction": "작업 선택",
+      "setAsDestination": "목적지로 설정"
+    }
+  },
+  "activityLogs": {
+    "title": "활동 로그",
+    "subtitle": "시스템의 모든 보호자 활동을 모니터링하고 추적합니다.",
+    "tryAgain": "다시 시도하세요",
+    "searchPlaceholder": "이름, 작업, 설명으로 검색하세요...",
+    "clearAll": "모두 지우기",
+    "clearFilters": "필터 지우기",
+    "empty": {
+      "nothingToSee": "여기에는 볼 것이 없습니다.",
+      "noActivity": "아직 활동이 없습니다",
+      "adjustFilters": "검색이나 필터를 조정해 보세요.",
+      "actionsAppear": "수행하는 작업이 여기에 표시됩니다."
+    },
+    "table": {
+      "guardian": "보호자",
+      "action": "행동",
+      "description": "설명",
+      "dateCreated": "생성된 날짜"
+    },
+    "pagination": {
+      "showing": "{{total}} 활동 중 {{from}}-{{to}} 표시 중",
+      "showingShort": "{{total}} 중 {{from}}-{{to}} 표시 중"
+    },
+    "actions": {
+      "login": "로그인",
+      "create": "만들다",
+      "update": "업데이트",
+      "delete": "삭제",
+      "pair": "쌍",
+      "unpair": "페어링 해제",
+      "invite": "초대하다",
+      "removeGuardian": "Guardian 제거",
+      "updateRole": "역할 업데이트",
+      "acceptInvite": "초대 수락",
+      "setEmergency": "긴급상황 설정",
+      "relationship": "관계"
+    }
+  },
+  "deviceLogs": {
+    "title": "장치 로그",
+    "subtitle": "자세한 VIP 이동 및 활동 내역을 모니터링하고 추적하세요.",
+    "searchPlaceholder": "보호자, VIP, 활동, 기기별로 검색하세요...",
+    "clearAll": "모두 지우기",
+    "clearFilters": "필터 지우기",
+    "noDevice": "장치 없음",
+    "origin": "기원",
+    "destination": "목적지",
+    "empty": {
+      "nothingToSee": "여기에는 볼 것이 없습니다.",
+      "adjustFilters": "검색이나 필터를 조정해 보세요.",
+      "noActivities": "\"{{searchTerm}}\"과(와) 일치하는 활동을 찾을 수 없습니다."
+    },
+    "table": {
+      "vip": "요일",
+      "vipName": "VIP 이름",
+      "activity": "활동",
+      "locations": "위치",
+      "dateTime": "날짜 및 시간",
+      "status": "상태"
+    },
+    "pagination": {
+      "showing": "{{total}} 중 {{from}}-{{to}} 표시 중"
+    },
+    "status": {
+      "completed": "완전한",
+      "ongoing": "전진",
+      "emergency": "비상",
+      "fallDetected": "추락 감지",
+      "cancelled": "취소"
+    }
+  },
+  "weatherService": {
+    "alertTitle": "날씨 경보",
+    "updateTitle": "날씨 업데이트",
+    "rainInLocation": "비가 올 것으로 예상됨/{{location}}에 비가 내립니다.",
+    "clearSkies": "{{location}}({{temp}}°C)의 맑은 하늘",
+    "labels": {
+      "clearSky": "맑은 하늘",
+      "mainlyClear": "주로 맑은",
+      "partlyCloudy": "부분적으로 흐림",
+      "overcast": "흐린",
+      "foggy": "흐린",
+      "drizzle": "이슬비",
+      "rain": "비",
+      "snowfall": "강설량",
+      "rainShowers": "소나기",
+      "thunderstorm": "뇌우",
+      "rainyShowers": "비/소나기"
+    },
+    "recommendation": {
+      "heavyRain": "내일은 폭우나 소나기가 예상됩니다. 실내에 머무르는 것이 더 좋습니다.",
+      "sunny": "내일은 맑을 것입니다. 우산을 챙기고 수분을 유지하는 것을 잊지 마세요.",
+      "cloudy": "내일은 흐릴 것입니다. 산책하기 좋은 날.",
+      "safeWalk": "내일은 산책하기에 안전할 것 같습니다. 평소처럼 iCane을 사용하십시오."
+    }
+  },
+  "importantNotifications": {
+    "theVip": "VIP",
+    "deviceLabel": "{{serial}} 기기에서",
+    "guardians": {
+      "safetyMonitor": "iCane 안전 모니터",
+      "navigationAssistant": "내비게이션 도우미",
+      "weatherService": "기상청"
+    },
+    "emergency": {
+      "title": "긴급 경보",
+      "message": "{{vipName}}이(가) 긴급 경보를 발령했습니다{{deviceLabel}}. 지금 라이브 위치를 열고 지정된 비상 보호자에게 즉시 연락하세요."
+    },
+    "fall": {
+      "title": "추락 가능성이 감지됨",
+      "message": "{{vipName}}{{deviceLabel}}에서 추락 가능성이 감지되었습니다. 실시간 지도를 확인하고 가능한 한 빨리 상태를 확인하세요."
+    },
+    "arrival": {
+      "title": "목적지 도달",
+      "message": "{{vipName}}이(가) 선택한 목적지{{deviceLabel}}에 도착했습니다. 경로 추적이 성공적으로 삭제되었습니다."
+    },
+    "weather": {
+      "storm": {
+        "title": "악천후 경고",
+        "message": "{{location}} 근처에서 뇌우 상황이 감지되었습니다. 지금은 야외 여행이 안전하지 않을 수 있습니다. 밖으로 나가기 전에 기상청을 검토하세요."
+      },
+      "wind": {
+        "title": "강풍 주의보",
+        "message": "{{location}} 근처에서 약 {{windSpeed}}km/h의 강풍이 감지되었습니다. 실외 내비게이션은 불안정할 수 있으므로 각별한 주의가 필요합니다."
+      },
+      "rain": {
+        "title": "비 경보",
+        "message": "현재 {{location}}{{temperature}}에 비가 내리고 있습니다. 도로가 미끄러울 수 있으니 야외 이동 시 주의 깊게 관찰하시기 바랍니다."
+      }
+    }
+  },
+  "termsModal": {
+    "title": "이용약관 및 개인정보 보호정책",
+    "actions": {
+      "close": "닫다",
+      "cancel": "취소",
+      "accept": "수용하다"
+    },
+    "terms": {
+      "title": "이용약관",
+      "paragraphs": {
+        "p1": "<strong>AI 기반 시각 인식 및 경로 탐색 기능을 갖춘 IoT 지원 스마트 지팡이</strong>('시스템')를 사용, 테스트 또는 참여함으로써 사용자 및/또는 승인된 보호자는 본 이용약관을 준수할 것에 동의합니다.",
+        "p2": "이 시스템은 시각 장애가 있는 개인의 이동성, 안전성 및 독립성을 향상시키기 위해 설계된 연구 프로토타입입니다. 이는 탐색 및 위험 인식을 지원하기 위한 것이지만 개인 판단, 이동성 훈련 또는 사람의 지원을 대체하지는 않습니다.",
+        "p3": "이 시스템은 단거리 센서, AI 기반 시각적 인식, GPS 추적, 경로 탐색, 촉각 피드백 및 단방향 음성 경고를 활용합니다. 기술적 및 환경적 요인으로 인해 시스템은 지연, 부정확성 또는 서비스 중단을 경험할 수 있습니다.",
+        "p4": "사용자는 장애물 감지가 센서 범위로 제한되고, AI 인식이 완전히 정확하지 않을 수 있으며, GPS 및 내비게이션 기능은 네트워크 가용성 및 신호 상태에 따라 달라질 수 있다는 점을 인정합니다. 시스템은 위험의 완전한 방지를 보장하지 않습니다.",
+        "p5": "사용자는 항상 주의를 기울여야 하며 탐색 중에 자신의 안전에 대한 책임을 져야 합니다. 보호자 또는 간병인은 안전 및 지원 목적으로만 모니터링, 메시지, 위치 기능을 사용하는 데 동의합니다.",
+        "p6": "긴급 SOS 기능은 지정된 연락처에 경고 및 위치 데이터를 전송하여 긴급 상황을 지원하기 위한 것입니다. 성공적인 배송은 모바일 네트워크 범위와 충분한 SIM 로드에 따라 달라집니다. 즉각적인 응답은 보장되지 않습니다.",
+        "p7": "시스템 테스트, 설문 조사 및 평가에 대한 참여는 자발적입니다. 참가자는 언제든지 위약금 없이 탈퇴할 수 있습니다. 이 시스템은 상업적인 용도로 사용되지 않습니다.",
+        "p8": "데이터 관련 권리 및 처리 세부정보는 <link>개인정보 보호정책 섹션</link>을 검토하세요."
+      },
+      "bullets": {
+        "b1": "시스템을 사용하는 동안 항상 <strong>실제 인식</strong>을 우선시하세요.",
+        "b2": "모든 알림을 절대적인 보장이 아닌 <strong>지원 안내</strong>로 취급하세요.",
+        "b3": "<strong>연구 및 안전 지원</strong> 목적으로만 기기를 사용하세요."
+      }
+    },
+    "privacy": {
+      "title": "개인 정보 보호 정책",
+      "paragraphs": {
+        "p1": "시스템은 시스템 기능, 안전 모니터링, 비상 대응, 학술 연구 목적에 필요한 개인정보를 수집하고 처리합니다. 수집된 데이터에는 GPS 위치, 시스템 사용 로그, 장치 식별자 및 보호자 연락처 정보가 포함될 수 있습니다.",
+        "p2": "모든 개인 데이터는 2012년 데이터 개인정보 보호법(공화국법 10173호)에 따라 처리됩니다. 수집된 데이터를 무단 액세스, 손실 또는 오용으로부터 보호하기 위해 합리적인 조직적, 물리적, 기술적 보안 조치가 구현됩니다.",
+        "p3": "위치 데이터는 경로 탐색, 보호자 모니터링, 긴급 SOS 알림을 지원하는 데 사용됩니다. 실시간 추적 기능은 활성 인터넷 연결이 필요하며 네트워크 범위가 약하거나 없는 지역에서는 제한될 수 있습니다.",
+        "p4": "수집된 데이터는 연구 목적 및 시스템 평가를 달성하는 데 필요한 기간 동안만 보관됩니다. 분석에 사용되는 데이터는 참가자의 신원을 보호하기 위해 익명화되고 집계됩니다.",
+        "p5": "데이터 주체는 프로젝트 연구원 또는 시스템 관리자와 협력하여 언제든지 자신의 개인 데이터에 대한 정보를 받고, 접근하고, 수정하고, 처리를 거부하고, 동의를 철회할 권리가 있습니다.",
+        "p6": "합리적인 보호 조치가 적용되기는 하지만 어떤 시스템도 절대적인 데이터 보안을 보장할 수는 없습니다. 사용자는 시스템을 사용함으로써 이러한 내재된 위험을 인정하고 수용합니다."
+      },
+      "bullets": {
+        "b1": "우리는 안전과 시스템 운영을 위해 <strong>필요한</strong> 데이터만 수집합니다.",
+        "b2": "연구 보고에서는 가능할 때마다 <strong>익명처리되거나 집계된</strong> 데이터를 사용합니다.",
+        "b3": "프로젝트 관리자를 통해 데이터 <strong>액세스 또는 수정</strong>을 요청할 수 있습니다."
+      }
+    },
+    "consentLabel": "<strong>이용약관</strong> 및 <strong>개인정보 보호정책</strong>을 읽고 설명했음을 확인합니다. 나는 개인 데이터의 수집 및 처리에 자발적으로 동의하며 이 연구 프로토타입 사용과 관련된 위험을 감수합니다."
+  }
+}
