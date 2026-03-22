@@ -34,8 +34,7 @@ const ensureSerialPrefix = (serial) => {
 function buildGuardianResolver(deviceId) {
   if (!deviceId) return null;
 
-  const guardians =
-    useGuardiansStore.getState?.().guardians(deviceId) || [];
+  const guardians = useGuardiansStore.getState?.().guardians(deviceId) || [];
   const currentUser = useUserStore.getState?.().user;
 
   const lookup = new Map();
@@ -159,7 +158,8 @@ export const useRealtimeStore = create(
             const res = await getLocationByCoords(lat, lng);
             const features = res?.features || res?.data?.features;
             const feature = Array.isArray(features) ? features[0] : null;
-            const geocoding = feature?.properties?.geocoding || feature?.properties;
+            const geocoding =
+              feature?.properties?.geocoding || feature?.properties;
             const label =
               geocoding?.label ||
               geocoding?.name ||
@@ -179,7 +179,6 @@ export const useRealtimeStore = create(
             return null;
           }
         };
-
 
         const normalizeIncomingConfig = (rawConfig) => {
           if (!rawConfig || typeof rawConfig !== "object") return {};
@@ -276,7 +275,8 @@ export const useRealtimeStore = create(
 
           const nowIso = new Date().toISOString();
           const lat = payload?.lat ?? payload?.latitude ?? null;
-          const lng = payload?.lng ?? payload?.lon ?? payload?.longitude ?? null;
+          const lng =
+            payload?.lng ?? payload?.lon ?? payload?.longitude ?? null;
           const locationLabel =
             payload?.location ||
             payload?.locationLabel ||
@@ -312,11 +312,9 @@ export const useRealtimeStore = create(
             ? buildGuardianResolver(deviceId)
             : null;
 
-          const normalized = normalizeDeviceLogs(
-            [rawLog],
-            selectedDevice,
-            { guardianResolver }
-          );
+          const normalized = normalizeDeviceLogs([rawLog], selectedDevice, {
+            guardianResolver
+          });
           if (!normalized.length) return;
 
           const logEntry = normalized[0];
@@ -498,8 +496,6 @@ export const useRealtimeStore = create(
           await refreshSharedRoute();
           refreshDeviceLogs();
         });
-
-
       },
 
       setGuardianLocation: (loc) => set({ guardianPosition: loc }),
@@ -544,9 +540,9 @@ export const useRealtimeStore = create(
                   set((state) =>
                     state._guardianWatchId === watchId
                       ? {
-                        _guardianWatchId: null,
-                        guardianPosition: null
-                      }
+                          _guardianWatchId: null,
+                          guardianPosition: null
+                        }
                       : state
                   );
                 },
@@ -604,7 +600,8 @@ export const useRealtimeStore = create(
           const response = await getLastLocation(serial);
           if (!response?.success) return null;
 
-          const payload = response?.data?.lastLocation || response?.data || null;
+          const payload =
+            response?.data?.lastLocation || response?.data || null;
           const lat = payload?.lat != null ? Number(payload.lat) : null;
           const lng = payload?.lng != null ? Number(payload.lng) : null;
 
@@ -638,14 +635,14 @@ export const useRealtimeStore = create(
             gps: isDemoMode
               ? state.gps
               : {
-                status: 0,
-                sats: 0,
-                fix: false,
-                hdop: null,
-                ready: false,
-                lat: null,
-                lng: null
-              },
+                  status: 0,
+                  sats: 0,
+                  fix: false,
+                  hdop: null,
+                  ready: false,
+                  lat: null,
+                  lng: null
+                },
             componentHealth: {
               gpsStatus: false,
               obstacleDetectionStatus: false,
@@ -739,10 +736,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                d.deviceId === updatedDevice.deviceId
-                  ? { ...d, ...updatedDevice }
-                  : d
-              )
+                  d.deviceId === updatedDevice.deviceId
+                    ? { ...d, ...updatedDevice }
+                    : d
+                )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -783,7 +780,6 @@ export const useDevicesStore = create(
           wsApi.emit("subscribe", { serial: nextSerial });
           wsApi.emit("requestStatus", { serial: nextSerial });
           wsApi.emit("requestDeviceConfig", { serial: nextSerial });
-
 
           useRealtimeStore.getState().loadLastLocation(nextSerial);
 
@@ -850,10 +846,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                  g.guardianId === guardian.guardianId
-                    ? { ...g, ...guardian }
-                    : g
-                )
+                    g.guardianId === guardian.guardianId
+                      ? { ...g, ...guardian }
+                      : g
+                  )
                 : [...d.guardians, guardian]
             };
           })
@@ -872,11 +868,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                ...d,
-                guardians: d.guardians.filter(
-                  (g) => g.guardianId !== guardianId
-                )
-              }
+                  ...d,
+                  guardians: d.guardians.filter(
+                    (g) => g.guardianId !== guardianId
+                  )
+                }
               : d
           )
         })),
@@ -1105,11 +1101,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: true,
-                  trusted: true
-                }
+                    ...d,
+                    paired: true,
+                    connected: true,
+                    trusted: true
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -1138,11 +1134,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: true,
-                  trusted: true
-                }
+                    ...d,
+                    paired: true,
+                    connected: true,
+                    trusted: true
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -1171,10 +1167,10 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                  ...d,
-                  paired: true,
-                  connected: false
-                }
+                    ...d,
+                    paired: true,
+                    connected: false
+                  }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -1314,26 +1310,25 @@ export const useActivityReportsStore = create(
 
           const scopedHistory = deviceId
             ? history.filter(
-              (item) =>
-                Number(item?.device_id ?? item?.deviceId) ===
-                Number(deviceId)
-            )
+                (item) =>
+                  Number(item?.device_id ?? item?.deviceId) === Number(deviceId)
+              )
             : history;
 
           set({
             history: scopedHistory,
             historyByDevice: deviceId
               ? {
-                ...get().historyByDevice,
-                [deviceId]: scopedHistory
-              }
+                  ...get().historyByDevice,
+                  [deviceId]: scopedHistory
+                }
               : get().historyByDevice,
             lastFetchedAt: Date.now(),
             lastFetchedAtByDevice: deviceId
               ? {
-                ...get().lastFetchedAtByDevice,
-                [deviceId]: Date.now()
-              }
+                  ...get().lastFetchedAtByDevice,
+                  [deviceId]: Date.now()
+                }
               : get().lastFetchedAtByDevice,
             error: null
           });
@@ -1421,7 +1416,9 @@ const enrichRouteLabels = async (logs = []) => {
       if (
         Array.isArray(log.originCoords) &&
         log.originCoords.length === 2 &&
-        (!log.location || log.location === "No origin available" || /^\-?\d+\.\d+,\s*\-?\d+\.\d+$/.test(log.location))
+        (!log.location ||
+          log.location === "No origin available" ||
+          /^\-?\d+\.\d+,\s*\-?\d+\.\d+$/.test(log.location))
       ) {
         const label = await resolveLocationLabelByCoords(
           log.originCoords[0],
@@ -1699,7 +1696,8 @@ export const useSettingsStore = create(
       hydrateSettingsFromServer: async (guardianIdOverride = null) => {
         if (get().isHydratingFromServer) return null;
 
-        const userGuardianId = guardianIdOverride ??
+        const userGuardianId =
+          guardianIdOverride ??
           useUserStore.getState().user?.guardian_id ??
           useUserStore.getState().user?.guardianId ??
           null;
@@ -1748,7 +1746,8 @@ export const useSettingsStore = create(
           return null;
         }
 
-        const userGuardianId = guardianIdOverride ??
+        const userGuardianId =
+          guardianIdOverride ??
           useUserStore.getState().user?.guardian_id ??
           useUserStore.getState().user?.guardianId ??
           null;
@@ -1758,8 +1757,12 @@ export const useSettingsStore = create(
         return get().hydrateSettingsFromServer(userGuardianId);
       },
 
-      persistSettingsToServer: async (overrides = {}, guardianIdOverride = null) => {
-        const userGuardianId = guardianIdOverride ??
+      persistSettingsToServer: async (
+        overrides = {},
+        guardianIdOverride = null
+      ) => {
+        const userGuardianId =
+          guardianIdOverride ??
           useUserStore.getState().user?.guardian_id ??
           useUserStore.getState().user?.guardianId ??
           null;
@@ -1774,7 +1777,9 @@ export const useSettingsStore = create(
           push_notifications:
             overrides.push_notifications ?? current.notifications.push ?? false,
           email_notifications:
-            overrides.email_notifications ?? current.notifications.email ?? false,
+            overrides.email_notifications ??
+            current.notifications.email ??
+            false,
           sms_alerts:
             overrides.sms_alerts ?? current.notifications.sms ?? false,
           two_factor_enabled:
@@ -2064,9 +2069,9 @@ export const useNotificationsStore = create(
 
           const nextCooldowns = dedupeKey
             ? trimEventCooldowns({
-              ...state.eventCooldowns,
-              [dedupeKey]: now
-            })
+                ...state.eventCooldowns,
+                [dedupeKey]: now
+              })
             : state.eventCooldowns;
 
           return {

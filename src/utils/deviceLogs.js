@@ -285,7 +285,11 @@ const formatGuardianNameFromRecord = (guardian) =>
     guardian?.email
   );
 
-const buildGuardianName = (metadata, resolvedGuardian = null, guardianId = null) =>
+const buildGuardianName = (
+  metadata,
+  resolvedGuardian = null,
+  guardianId = null
+) =>
   pickFirstString(
     metadata?.guardianName,
     metadata?.guardian_name,
@@ -316,7 +320,8 @@ const appendGuardianContext = (
 ) => {
   if (!guardianName) return message;
 
-  const baseMessage = message ||
+  const baseMessage =
+    message ||
     (action === "SET_ROUTE"
       ? destinationLabel
         ? `Route set to ${destinationLabel}`
@@ -578,7 +583,11 @@ export const normalizeDeviceLogType = (activityType) =>
 export const isSupportedDeviceLogType = (activityType) =>
   Boolean(normalizeDeviceLogType(activityType));
 
-export const normalizeDeviceLogs = (logs = [], selectedDevice = null, options = {}) =>
+export const normalizeDeviceLogs = (
+  logs = [],
+  selectedDevice = null,
+  options = {}
+) =>
   toArray(logs)
     .map((log) => {
       const { guardianResolver = null } = options;
@@ -707,14 +716,13 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null, options = 
 
       const messageWithGuardian =
         guardianDisplayName &&
-          (normalizedType === "SET_ROUTE" ||
-            normalizedType === "ROUTE_CLEARED")
+        (normalizedType === "SET_ROUTE" || normalizedType === "ROUTE_CLEARED")
           ? appendGuardianContext(
-            baseMessage,
-            normalizedType,
-            guardianDisplayName,
-            destination
-          )
+              baseMessage,
+              normalizedType,
+              guardianDisplayName,
+              destination
+            )
           : baseMessage;
 
       return {

@@ -87,7 +87,7 @@ export const notifyFallAlert = ({ vipName, deviceSerial } = {}) =>
       navigation: {
         path: "/dashboard"
       }
-    }, 
+    },
     {
       dedupeKey: `fall:${deviceSerial || "unknown"}`,
       cooldownMs: SAFETY_NOTIFICATION_COOLDOWN_MS,

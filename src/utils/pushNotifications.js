@@ -31,7 +31,10 @@ const fetchVapidPublicKey = async () => {
       return key;
     }
   } catch (error) {
-    console.warn("Failed to fetch VAPID public key from middleware:", error?.message || error);
+    console.warn(
+      "Failed to fetch VAPID public key from middleware:",
+      error?.message || error
+    );
   }
 
   if (fallbackKey) {
@@ -47,7 +50,8 @@ export const registerPushServiceWorker = async () => {
   }
 
   try {
-    const registration = await navigator.serviceWorker.register(SERVICE_WORKER_PATH);
+    const registration =
+      await navigator.serviceWorker.register(SERVICE_WORKER_PATH);
     return registration;
   } catch (error) {
     console.error("Service worker registration failed:", error);
