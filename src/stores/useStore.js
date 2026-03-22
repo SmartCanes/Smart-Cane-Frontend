@@ -1938,7 +1938,7 @@ const trimEventCooldowns = (cooldowns) =>
 export const NOTIFICATION_META = {
   CREATE: {
     label: "Device Created",
-    icon: "ph:device-mobile-plus",
+    icon: "ph:desktop",
     color: "blue"
   },
   UPDATE: {
