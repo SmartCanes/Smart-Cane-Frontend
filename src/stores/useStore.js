@@ -31,6 +31,38 @@ const ensureSerialPrefix = (serial) => {
   return `SC-${withoutPrefix}`;
 };
 
+function buildGuardianResolver(deviceId) {
+  if (!deviceId) return null;
+
+  const guardians =
+    useGuardiansStore.getState?.().guardians(deviceId) || [];
+  const currentUser = useUserStore.getState?.().user;
+
+  const lookup = new Map();
+
+  guardians.forEach((guardian) => {
+    if (guardian?.guardianId == null) return;
+    const id = Number(guardian.guardianId);
+    if (!Number.isFinite(id)) return;
+    lookup.set(id, guardian);
+  });
+
+  if (currentUser?.guardianId != null) {
+    const id = Number(currentUser.guardianId);
+    if (Number.isFinite(id) && !lookup.has(id)) {
+      lookup.set(id, currentUser);
+    }
+  }
+
+  if (lookup.size === 0) return null;
+
+  return (guardianId) => {
+    const id = Number(guardianId);
+    if (!Number.isFinite(id)) return null;
+    return lookup.get(id) || null;
+  };
+}
+
 export const useUserStore = create(
   persist(
     (set, get) => ({
@@ -276,7 +308,15 @@ export const useRealtimeStore = create(
             }
           };
 
-          const normalized = normalizeDeviceLogs([rawLog], selectedDevice);
+          const guardianResolver = deviceId
+            ? buildGuardianResolver(deviceId)
+            : null;
+
+          const normalized = normalizeDeviceLogs(
+            [rawLog],
+            selectedDevice,
+            { guardianResolver }
+          );
           if (!normalized.length) return;
 
           const logEntry = normalized[0];
@@ -1503,8 +1543,12 @@ export const useDeviceLogsStore = create(
             ? { ...resolvedDevice, deviceSerialNumber: effectiveSerial }
             : { deviceSerialNumber: effectiveSerial };
 
+          const guardianResolver = buildGuardianResolver(deviceId);
+
           const normalizedLogs = await enrichRouteLabels(
-            normalizeDeviceLogs(rawLogs, normalizedDevice)
+            normalizeDeviceLogs(rawLogs, normalizedDevice, {
+              guardianResolver
+            })
           );
 
           set((state) => ({

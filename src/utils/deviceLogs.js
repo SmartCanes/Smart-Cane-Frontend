@@ -274,13 +274,29 @@ const buildVipName = (selectedDevice, metadata) => {
   );
 };
 
-const buildGuardianName = (metadata) =>
+const formatGuardianNameFromRecord = (guardian) =>
+  pickFirstString(
+    guardian?.fullName,
+    guardian?.full_name,
+    [guardian?.firstName, guardian?.lastName].filter(Boolean).join(" "),
+    guardian?.guardianName,
+    guardian?.name,
+    guardian?.username,
+    guardian?.email
+  );
+
+const buildGuardianName = (metadata, resolvedGuardian = null, guardianId = null) =>
   pickFirstString(
     metadata?.guardianName,
     metadata?.guardian_name,
     metadata?.guardian?.name,
     metadata?.guardian?.fullName,
-    metadata?.assignedBy
+    [metadata?.guardian?.firstName, metadata?.guardian?.lastName]
+      .filter(Boolean)
+      .join(" "),
+    metadata?.assignedBy,
+    formatGuardianNameFromRecord(resolvedGuardian),
+    guardianId != null ? `Guardian #${guardianId}` : null
   ) || "iCane System";
 
 const buildAvatar = (selectedDevice, metadata) =>
@@ -291,6 +307,35 @@ const buildAvatar = (selectedDevice, metadata) =>
     metadata?.vip?.imageUrl,
     selectedDevice?.vip?.vipImageUrl
   );
+
+const appendGuardianContext = (
+  message,
+  action,
+  guardianName,
+  destinationLabel = null
+) => {
+  if (!guardianName) return message;
+
+  const baseMessage = message ||
+    (action === "SET_ROUTE"
+      ? destinationLabel
+        ? `Route set to ${destinationLabel}`
+        : "Route set"
+      : "Route updated");
+
+  const lowerBase = baseMessage.toLowerCase();
+  if (lowerBase.includes(guardianName.toLowerCase())) return baseMessage;
+
+  if (action === "ROUTE_CLEARED") {
+    return `${baseMessage} • Cleared by ${guardianName}`;
+  }
+
+  if (action === "SET_ROUTE") {
+    return `${baseMessage} • Set by ${guardianName}`;
+  }
+
+  return `${baseMessage} • ${guardianName}`;
+};
 
 const toNumber = (value) => {
   if (value === null || value === undefined || value === "") return null;
@@ -533,11 +578,20 @@ export const normalizeDeviceLogType = (activityType) =>
 export const isSupportedDeviceLogType = (activityType) =>
   Boolean(normalizeDeviceLogType(activityType));
 
-export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
+export const normalizeDeviceLogs = (logs = [], selectedDevice = null, options = {}) =>
   toArray(logs)
     .map((log) => {
+      const { guardianResolver = null } = options;
       const metadata =
         log?.metadata_json || log?.metadataJson || log?.metadata || {};
+
+      const metadataGuardianId =
+        metadata?.guardianId ??
+        metadata?.guardian_id ??
+        metadata?.guardian?.guardianId ??
+        metadata?.guardian?.guardian_id ??
+        metadata?.guardian?.id ??
+        null;
 
       const rawType = toLookupKey(log?.activity_type || log?.activityType);
       const rawStatus = toLookupKey(log?.status);
@@ -564,6 +618,9 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
       const logId = log?.log_id ?? log?.logId;
       const deviceId =
         log?.device_id ?? log?.deviceId ?? selectedDevice?.deviceId;
+      const guardianId = toNumber(
+        log?.guardian_id ?? log?.guardianId ?? metadataGuardianId
+      );
       const rawTimestamp = log?.created_at || log?.createdAt;
       const status = normalizeStatus(log?.status, meta.status);
 
@@ -609,6 +666,20 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
           ? [destinationCoordsObj.lat, destinationCoordsObj.lng]
           : null;
 
+      const resolvedGuardian =
+        typeof guardianResolver === "function" && guardianId != null
+          ? guardianResolver(guardianId)
+          : null;
+
+      const guardianName = buildGuardianName(
+        metadata,
+        resolvedGuardian,
+        guardianId
+      );
+
+      const guardianDisplayName =
+        guardianName && guardianName !== "iCane System" ? guardianName : null;
+
       let mapMode = "point";
       let isClickable = true;
 
@@ -629,21 +700,35 @@ export const normalizeDeviceLogs = (logs = [], selectedDevice = null) =>
         isClickable = routeLatLng.length >= 2 || Boolean(coords?.coords);
       }
 
+      const baseMessage =
+        log?.message ||
+        metadata?.message ||
+        `${meta.label} was recorded for this device.`;
+
+      const messageWithGuardian =
+        guardianDisplayName &&
+          (normalizedType === "SET_ROUTE" ||
+            normalizedType === "ROUTE_CLEARED")
+          ? appendGuardianContext(
+            baseMessage,
+            normalizedType,
+            guardianDisplayName,
+            destination
+          )
+          : baseMessage;
+
       return {
         id: `device-log-${logId}`,
         logId,
         deviceId,
-        guardianId: log?.guardian_id ?? log?.guardianId ?? null,
+        guardianId,
         action: normalizedType,
         activityType: normalizedType,
         activity: meta.activity,
         title: meta.label,
-        message:
-          log?.message ||
-          metadata?.message ||
-          `${meta.label} was recorded for this device.`,
-        description: log?.message || metadata?.message || "—",
-        guardianName: buildGuardianName(metadata),
+        message: messageWithGuardian,
+        description: messageWithGuardian,
+        guardianName,
         vipName: buildVipName(selectedDevice, metadata),
         avatar: buildAvatar(selectedDevice, metadata),
         location,

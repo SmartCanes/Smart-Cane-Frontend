@@ -439,6 +439,13 @@ const DeviceLogs = () => {
                         <p className="text-sm text-gray-700 font-medium">
                           {log.activity}
                         </p>
+                        {(log.action === "SET_ROUTE" ||
+                          log.action === "ROUTE_CLEARED") &&
+                          log.guardianName && (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              By {log.guardianName}
+                            </p>
+                          )}
                       </td>
                       <td className="py-4 px-6">
                         {log.isRoute ? (
@@ -531,6 +538,13 @@ const DeviceLogs = () => {
                         <Icon icon="ph:activity-light" className="text-lg" />
                         {log.activity}
                       </div>
+                      {(log.action === "SET_ROUTE" ||
+                        log.action === "ROUTE_CLEARED") &&
+                        log.guardianName && (
+                          <p className="text-xs text-gray-500 mb-3">
+                            By {log.guardianName}
+                          </p>
+                        )}
                       {log.isRoute ? (
                         <div className="flex flex-col gap-2 relative pl-2">
                           <div className="absolute left-[13px] top-[14px] bottom-[14px] w-px bg-gray-300"></div>
