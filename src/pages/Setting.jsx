@@ -951,14 +951,12 @@ const Setting = () => {
       .map((item) => item.trim())
       .filter(Boolean);
 
+    // Only auto-open when explicitly requested via query params
+    if (!requiredFlag && requiredFromQuery.length === 0) return;
+
     const required = requiredFromQuery.length
       ? requiredFromQuery
-      : [
-          ...(!settings?.privacy?.location ? ["location"] : []),
-          ...(!settings?.notifications?.push ? ["push"] : [])
-        ];
-
-    if (!requiredFlag && required.length === 0) return;
+      : ["location", "push"];
 
     hasAutoOpenedPermissionsRef.current = true;
     openPermissionsModal(required[0] || null);
