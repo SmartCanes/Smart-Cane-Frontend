@@ -861,7 +861,7 @@ const GuestPage = () => {
                   />
                 </a> */}
                 <a
-                  href="#!"
+                  href="https://www.instagram.com/icane2026/?fbclid=IwY2xjawQs9ClleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAEwAAEe0xIuhJdggoHbkaqJJx_C0EVzoQ9ynYHYH_orCG56DphgCPIrGTau2z6bjX8_aem_k_ng0MyQaG6nbDLTpbUg8Q"
                   aria-label="Visit the iCane Instagram page"
                   className="inline-flex h-10 w-10 items-center justify-center"
                 >
