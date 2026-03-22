@@ -1609,6 +1609,8 @@ export const useSettingsStore = create(
         },
         demoMode: false
       },
+      isHydratingFromServer: false,
+      hasHydratedFromServer: false,
 
       setSettings: (updater) =>
         set((state) => ({
@@ -1619,6 +1621,8 @@ export const useSettingsStore = create(
         })),
 
       hydrateSettingsFromServer: async (guardianIdOverride = null) => {
+        if (get().isHydratingFromServer) return null;
+
         const userGuardianId = guardianIdOverride ??
           useUserStore.getState().user?.guardian_id ??
           useUserStore.getState().user?.guardianId ??
@@ -1626,9 +1630,11 @@ export const useSettingsStore = create(
 
         if (!userGuardianId) return null;
 
+        set({ isHydratingFromServer: true });
+
         try {
-          const data = await getGuardianSettings(userGuardianId);
-          const serverSettings = data?.settings || data;
+          const response = await getGuardianSettings(userGuardianId);
+          const serverSettings = response?.data ?? response;
 
           if (!serverSettings) return null;
 
@@ -1649,14 +1655,33 @@ export const useSettingsStore = create(
             }
           }));
 
+          console.log("Hydrated settings from server:", serverSettings);
+
+          set({ hasHydratedFromServer: true, isHydratingFromServer: false });
           return serverSettings;
         } catch (error) {
           console.error(
             "Failed to hydrate guardian settings:",
             error?.message || error
           );
+          set({ isHydratingFromServer: false });
           return null;
         }
+      },
+
+      ensureHydratedFromServer: async (guardianIdOverride = null) => {
+        if (get().hasHydratedFromServer || get().isHydratingFromServer) {
+          return null;
+        }
+
+        const userGuardianId = guardianIdOverride ??
+          useUserStore.getState().user?.guardian_id ??
+          useUserStore.getState().user?.guardianId ??
+          null;
+
+        if (!userGuardianId) return null;
+
+        return get().hydrateSettingsFromServer(userGuardianId);
       },
 
       persistSettingsToServer: async (overrides = {}, guardianIdOverride = null) => {
@@ -1781,18 +1806,32 @@ export const useSettingsStore = create(
               analytics: false
             },
             demoMode: false
-          }
+          },
+          hasHydratedFromServer: false,
+          isHydratingFromServer: false
         }),
 
       getSettings: () => get().settings,
       getNotifications: () => get().settings.notifications,
-      getPrivacy: () => get().settings.privacy,
-      isDemoMode: () => get().settings.demoMode
+      getPrivacy: () => get().settings.privacy
     }),
     {
       name: "settings-storage",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ settings: state.settings })
+      partialize: (state) => ({ settings: state.settings }),
+      onRehydrateStorage: () => (state, error) => {
+        if (error) return;
+
+        // Defer to ensure the store is ready before hydrating from server
+        setTimeout(() => {
+          try {
+            const ensure = useSettingsStore.getState().ensureHydratedFromServer;
+            ensure?.();
+          } catch (err) {
+            console.error("Settings rehydrate hook failed:", err);
+          }
+        }, 0);
+      }
     }
   )
 );
