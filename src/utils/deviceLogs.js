@@ -504,6 +504,10 @@ const normalizeStatus = (rawStatus, fallbackStatus) => {
       return "Fall Detected";
     case "EMERGENCY":
       return "Emergency";
+    case "TRIGGERED":
+    case "TRIGGER":
+      // Backend alerts often mark emergencies/falls as "triggered"; fall back to the meta default
+      return fallbackStatus || "Emergency";
     case "ONGOING":
     case "IN_PROGRESS":
     case "ACTIVE":
