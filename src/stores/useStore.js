@@ -6,6 +6,10 @@ import {
   getLastLocation,
   getPendingInvites
 } from "@/api/backendService";
+import {
+  getGuardianSettings,
+  updateGuardianSettings
+} from "@/api/settingsService";
 import { getLocationByCoords } from "@/api/locationsApi";
 import { wsApi } from "@/api/ws-api";
 import {
@@ -1613,6 +1617,82 @@ export const useSettingsStore = create(
               ? updater(state.settings)
               : { ...state.settings, ...updater }
         })),
+
+      hydrateSettingsFromServer: async (guardianIdOverride = null) => {
+        const userGuardianId = guardianIdOverride ??
+          useUserStore.getState().user?.guardian_id ??
+          useUserStore.getState().user?.guardianId ??
+          null;
+
+        if (!userGuardianId) return null;
+
+        try {
+          const data = await getGuardianSettings(userGuardianId);
+          const serverSettings = data?.settings || data;
+
+          if (!serverSettings) return null;
+
+          set((state) => ({
+            settings: {
+              ...state.settings,
+              notifications: {
+                ...state.settings.notifications,
+                push: Boolean(serverSettings.push_notifications),
+                email: Boolean(serverSettings.email_notifications),
+                sms: Boolean(serverSettings.sms_alerts)
+              },
+              privacy: {
+                ...state.settings.privacy,
+                location: Boolean(serverSettings.allow_location),
+                twoFactor: Boolean(serverSettings.two_factor_enabled)
+              }
+            }
+          }));
+
+          return serverSettings;
+        } catch (error) {
+          console.error(
+            "Failed to hydrate guardian settings:",
+            error?.message || error
+          );
+          return null;
+        }
+      },
+
+      persistSettingsToServer: async (overrides = {}, guardianIdOverride = null) => {
+        const userGuardianId = guardianIdOverride ??
+          useUserStore.getState().user?.guardian_id ??
+          useUserStore.getState().user?.guardianId ??
+          null;
+
+        if (!userGuardianId) return null;
+
+        const current = get().settings;
+
+        const payload = {
+          allow_location:
+            overrides.allow_location ?? current.privacy.location ?? false,
+          push_notifications:
+            overrides.push_notifications ?? current.notifications.push ?? false,
+          email_notifications:
+            overrides.email_notifications ?? current.notifications.email ?? false,
+          sms_alerts:
+            overrides.sms_alerts ?? current.notifications.sms ?? false,
+          two_factor_enabled:
+            overrides.two_factor_enabled ?? current.privacy.twoFactor ?? false
+        };
+
+        try {
+          await updateGuardianSettings(userGuardianId, payload);
+          return payload;
+        } catch (error) {
+          console.error(
+            "Failed to persist guardian settings:",
+            error?.message || error
+          );
+          return null;
+        }
+      },
 
       updateNotifications: (updates) =>
         set((state) => ({

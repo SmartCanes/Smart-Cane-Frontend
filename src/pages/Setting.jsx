@@ -630,8 +630,17 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
 const Setting = () => {
   const location = useLocation();
-  const { settings, toggleDemoMode, updateNotifications, updatePrivacy } =
-    useSettingsStore();
+  const {
+    settings,
+    toggleDemoMode,
+    updateNotifications,
+    updatePrivacy,
+    hydrateSettingsFromServer,
+    persistSettingsToServer
+  } = useSettingsStore();
+  const guardianId = useUserStore(
+    (state) => state.user?.guardian_id ?? state.user?.guardianId ?? null
+  );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [permissionsModal, setPermissionsModal] = useState({
@@ -654,6 +663,21 @@ const Setting = () => {
   } = useRealtimeStore();
 
   const isLocationTrackingEnabled = _guardianWatchId !== null;
+
+  useEffect(() => {
+    if (!guardianId) return;
+
+    let cancelled = false;
+
+    (async () => {
+      if (cancelled) return;
+      await hydrateSettingsFromServer(guardianId);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [guardianId, hydrateSettingsFromServer]);
 
   useEffect(() => {
     updatePrivacy({ location: isLocationTrackingEnabled });
@@ -771,6 +795,7 @@ const Setting = () => {
         try {
           await removeBrowserPushSubscription();
           updateNotifications({ push: false });
+          await persistSettingsToServer({ push_notifications: false });
         } finally {
           refreshPushPermission();
           setPermissionBusyKey(null);
@@ -789,6 +814,14 @@ const Setting = () => {
     }
 
     updateNotifications({ [key]: false });
+
+    if (key === "email") {
+      await persistSettingsToServer({ email_notifications: false });
+    }
+
+    if (key === "sms") {
+      await persistSettingsToServer({ sms_alerts: false });
+    }
   };
 
   const handlePrivacyToggle = (key) => {
@@ -796,6 +829,7 @@ const Setting = () => {
       if (settings.privacy.location) {
         stopGuardianTracking();
         updatePrivacy({ location: false });
+        persistSettingsToServer({ allow_location: false });
         return;
       }
 
@@ -803,7 +837,12 @@ const Setting = () => {
       return;
     }
 
-    updatePrivacy({ [key]: !settings.privacy[key] });
+    const nextValue = !settings.privacy[key];
+    updatePrivacy({ [key]: nextValue });
+
+    if (key === "twoFactor") {
+      persistSettingsToServer({ two_factor_enabled: nextValue });
+    }
   };
 
   const handleLocationAction = async () => {
@@ -812,6 +851,7 @@ const Setting = () => {
     if (settings.privacy.location) {
       stopGuardianTracking();
       updatePrivacy({ location: false });
+      persistSettingsToServer({ allow_location: false });
       return;
     }
 
@@ -839,6 +879,7 @@ const Setting = () => {
       }
 
       updatePrivacy({ location: true });
+      persistSettingsToServer({ allow_location: true });
     } finally {
       setPermissionBusyKey(null);
     }
@@ -853,6 +894,7 @@ const Setting = () => {
       try {
         await removeBrowserPushSubscription();
         updateNotifications({ push: false });
+        await persistSettingsToServer({ push_notifications: false });
       } finally {
         refreshPushPermission();
         setPermissionBusyKey(null);
@@ -891,6 +933,7 @@ const Setting = () => {
       }
 
       updateNotifications({ push: true });
+      await persistSettingsToServer({ push_notifications: true });
     } finally {
       setPermissionBusyKey(null);
     }
@@ -925,12 +968,16 @@ const Setting = () => {
     settings?.privacy?.location
   ]);
 
-  const handleEmailAction = () => {
-    updateNotifications({ email: !settings.notifications.email });
+  const handleEmailAction = async () => {
+    const nextValue = !settings.notifications.email;
+    updateNotifications({ email: nextValue });
+    await persistSettingsToServer({ email_notifications: nextValue });
   };
 
-  const handleSmsAction = () => {
-    updateNotifications({ sms: !settings.notifications.sms });
+  const handleSmsAction = async () => {
+    const nextValue = !settings.notifications.sms;
+    updateNotifications({ sms: nextValue });
+    await persistSettingsToServer({ sms_alerts: nextValue });
   };
 
   const openModal = () => {
