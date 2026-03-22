@@ -1731,8 +1731,6 @@ export const useSettingsStore = create(
             }
           }));
 
-          console.log("Hydrated settings from server:", serverSettings);
-
           set({ hasHydratedFromServer: true, isHydratingFromServer: false });
           return serverSettings;
         } catch (error) {
