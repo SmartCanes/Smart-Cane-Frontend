@@ -656,7 +656,7 @@ const Header = () => {
               <Icon icon="ph:bell" className="w-6 h-6" />
               {/* unread count van */}
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-100 text-xxxs">
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-poppins font-bold min-w-[1.1rem] h-4 px-1 flex items-center justify-center rounded-full border-2 border-primary-100 leading-none">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
