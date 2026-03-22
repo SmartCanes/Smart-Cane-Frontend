@@ -774,6 +774,9 @@ export const useDevicesStore = create(
         if (prevSerial !== nextSerial) {
           useRealtimeStore.getState().resetRealtimeState();
           useRouteStore.getState().clearRoute();
+          useActivityReportsStore
+            .getState()
+            .fetchHistory({ deviceId: device?.deviceId ?? null });
         }
 
         if (nextSerial) {
@@ -1275,19 +1278,24 @@ export const useActivityReportsStore = create(
   persist(
     (set, get) => ({
       history: [],
+      historyByDevice: {},
       isLoading: false,
       isRefreshing: false,
       error: null,
       lastFetchedAt: null,
+      lastFetchedAtByDevice: {},
       hasHydrated: false,
 
-      fetchHistory: async () => {
-        const { history } = get();
-        const hasCache = Array.isArray(history) && history.length > 0;
+      fetchHistory: async ({ deviceId = null, silent } = {}) => {
+        const cache = deviceId
+          ? get().historyByDevice?.[deviceId] || []
+          : get().history;
 
-        await get().fetch({ silent: hasCache });
+        const hasCache = Array.isArray(cache) && cache.length > 0;
+
+        await get().fetch({ deviceId, silent: silent ?? hasCache });
       },
-      fetch: async ({ silent } = { silent: false }) => {
+      fetch: async ({ deviceId = null, silent } = { silent: false }) => {
         const { isLoading, isRefreshing } = get();
 
         // block only if the same mode is already running
@@ -1304,9 +1312,29 @@ export const useActivityReportsStore = create(
           const history =
             response.data?.history || response.data?.data?.history || [];
 
+          const scopedHistory = deviceId
+            ? history.filter(
+              (item) =>
+                Number(item?.device_id ?? item?.deviceId) ===
+                Number(deviceId)
+            )
+            : history;
+
           set({
-            history,
+            history: scopedHistory,
+            historyByDevice: deviceId
+              ? {
+                ...get().historyByDevice,
+                [deviceId]: scopedHistory
+              }
+              : get().historyByDevice,
             lastFetchedAt: Date.now(),
+            lastFetchedAtByDevice: deviceId
+              ? {
+                ...get().lastFetchedAtByDevice,
+                [deviceId]: Date.now()
+              }
+              : get().lastFetchedAtByDevice,
             error: null
           });
         } catch {
@@ -1320,10 +1348,12 @@ export const useActivityReportsStore = create(
       clearHistory: () =>
         set({
           history: [],
+          historyByDevice: {},
           isLoading: false,
           isRefreshing: false,
           error: null,
-          lastFetchedAt: null
+          lastFetchedAt: null,
+          lastFetchedAtByDevice: {}
         })
     }),
     {
@@ -1331,7 +1361,9 @@ export const useActivityReportsStore = create(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         history: state.history,
-        lastFetchedAt: state.lastFetchedAt
+        historyByDevice: state.historyByDevice,
+        lastFetchedAt: state.lastFetchedAt,
+        lastFetchedAtByDevice: state.lastFetchedAtByDevice
       }),
       onRehydrateStorage: () => (state) => {
         state?.setState?.({ hasHydrated: true });

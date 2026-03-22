@@ -247,8 +247,16 @@ const Notifications = () => {
   const deviceLogs = getDeviceLogs(selectedDevice?.deviceId);
 
   //  real data van
+  const deviceScopedHistory = !selectedDevice?.deviceId
+    ? history
+    : history.filter(
+        (item) =>
+          Number(item?.deviceId ?? item?.device_id) ===
+          Number(selectedDevice.deviceId)
+      );
+
   const allNotifications = getNotifications(
-    history,
+    deviceScopedHistory,
     deviceLogs,
     currentGuardianId
   );

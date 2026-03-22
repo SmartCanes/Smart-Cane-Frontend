@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import ActivityActions from "@/ui/components/ActivityActions";
 import DefaultProfile from "@/ui/components/DefaultProfile";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
-import { useActivityReportsStore } from "@/stores/useStore";
+import { useActivityReportsStore, useDevicesStore } from "@/stores/useStore";
 import FilterDropdown from "@/ui/components/FilterDropdown"; // ← NEW
 
 const ACTION_TYPE_MAP = {
@@ -50,6 +50,8 @@ const ActivityLogs = () => {
   const [selectedActions, setSelectedActions] = useState([]);
 
   const { history, isLoading, error } = useActivityReportsStore();
+  const { selectedDevice } = useDevicesStore();
+  const currentDeviceId = selectedDevice?.deviceId;
 
   // kasama to van
   const handleActionChange = (value) => {
@@ -67,7 +69,15 @@ const ActivityLogs = () => {
   const activeFilterCount = selectedActions.length;
 
   // filtering van
-  const filteredActivities = history.filter((activity) => {
+  const scopedHistory = !currentDeviceId
+    ? history
+    : history.filter(
+        (activity) =>
+          Number(activity?.deviceId ?? activity?.device_id) ===
+          Number(currentDeviceId)
+      );
+
+  const filteredActivities = scopedHistory.filter((activity) => {
     const matchesSearch =
       (activity.guardianName || "")
         .toLowerCase()
