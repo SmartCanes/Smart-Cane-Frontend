@@ -25,7 +25,8 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import {
   useDevicesStore,
   useRealtimeStore,
-  useUserStore
+  useUserStore,
+  useGuardiansStore
 } from "@/stores/useStore";
 import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import { useRouteStore } from "@/stores/useRouteStore";
@@ -174,6 +175,7 @@ function LiveMap() {
   const location = useLocation();
   const { user } = useUserStore();
   const guardianId = user?.guardian_id ?? user?.guardianId ?? null;
+  const { currentGuardianRole } = useGuardiansStore();
   const { guardianPosition, gps } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
   const {
@@ -210,6 +212,9 @@ function LiveMap() {
   const showCaneMarker = Boolean(
     canePosition && !historyPin && !historyRoute && !historyDestinationPin
   );
+  const guardianRole = guardianId ? currentGuardianRole(guardianId) : null;
+  const canClearDestination =
+    guardianRole === "primary" || guardianRole === "secondary";
 
   useEffect(() => {
     routeCoordsRef.current = routeCoords || [];
@@ -783,10 +788,11 @@ function LiveMap() {
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          {destinationPos && (
+          {destinationPos && canClearDestination && (
             <button
               onClick={() => {
                 if (!selectedDevice?.deviceSerialNumber) return;
+                if (!canClearDestination) return;
 
                 wsApi.emit("clearDestination", { guardianId });
               }}
