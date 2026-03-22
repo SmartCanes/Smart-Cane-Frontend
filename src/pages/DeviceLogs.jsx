@@ -406,10 +406,8 @@ const DeviceLogs = () => {
                   {paginatedLogs.map((log) => (
                     <tr
                       key={log.id}
-                      className={`transition-colors ${
-                        log.isClickable
-                          ? "hover:bg-gray-50 cursor-pointer"
-                          : "bg-gray-50/40 cursor-default opacity-80"
+                      className={`transition-colors hover:bg-gray-50 ${
+                        log.isClickable ? "cursor-pointer" : "cursor-default"
                       }`}
                       onClick={() => {
                         if (log.isClickable) handleViewOnMap(log);
