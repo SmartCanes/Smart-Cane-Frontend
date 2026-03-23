@@ -139,7 +139,31 @@ const DeviceLogs = () => {
     }
 
     if (log.mapMode === "route-history") {
-      if (!Array.isArray(log.routeCoords) || log.routeCoords.length < 2) return;
+      if (!Array.isArray(log.routeCoords) || log.routeCoords.length < 2) {
+        // Fallback: if we only have a destination, at least fly there
+        const fallbackCoords = log.destinationCoords || log.coordinates;
+        if (!Array.isArray(fallbackCoords) || fallbackCoords.length !== 2)
+          return;
+
+        navigate("/dashboard", {
+          state: {
+            historyLocation: {
+              mode: "destination-only",
+              coords: fallbackCoords,
+              destinationCoords: fallbackCoords,
+              label: log.destination || "Selected destination",
+              timestamp: log.dateTime,
+              status: log.status,
+              id: log.id,
+              activity: log.activity,
+              action: log.action || log.activityType,
+              color: log.color,
+              icon: log.icon
+            }
+          }
+        });
+        return;
+      }
 
       navigate("/dashboard", {
         state: {

@@ -693,8 +693,10 @@ export const normalizeDeviceLogs = (
       let isClickable = true;
 
       if (normalizedType === "SET_ROUTE") {
-        mapMode = "destination-only";
-        isClickable = Boolean(destinationCoords);
+        // Prefer full route when available so LiveMap can auto-fit; otherwise fall back to destination pin
+        const hasRoute = routeLatLng.length >= 2;
+        mapMode = hasRoute ? "route-history" : "destination-only";
+        isClickable = hasRoute || Boolean(destinationCoords || coords?.coords);
       } else if (normalizedType === "REACH_DESTINATION") {
         mapMode = "route-history";
         isClickable = routeLatLng.length >= 2;
@@ -716,13 +718,13 @@ export const normalizeDeviceLogs = (
 
       const messageWithGuardian =
         guardianDisplayName &&
-        (normalizedType === "SET_ROUTE" || normalizedType === "ROUTE_CLEARED")
+          (normalizedType === "SET_ROUTE" || normalizedType === "ROUTE_CLEARED")
           ? appendGuardianContext(
-              baseMessage,
-              normalizedType,
-              guardianDisplayName,
-              destination
-            )
+            baseMessage,
+            normalizedType,
+            guardianDisplayName,
+            destination
+          )
           : baseMessage;
 
       return {
