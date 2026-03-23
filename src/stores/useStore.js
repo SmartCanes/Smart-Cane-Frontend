@@ -106,6 +106,7 @@ export const useRealtimeStore = create(
       fall: false,
       lastKnownCanePosition: null,
       guardianPosition: null,
+      mobileOverrideActive: false,
       deviceConfig: {},
       gps: {
         status: 0,
@@ -114,7 +115,9 @@ export const useRealtimeStore = create(
         hdop: null,
         ready: false,
         lat: null,
-        lng: null
+        lng: null,
+        source: null,
+        mobileOverrideActive: false
       },
       componentHealth: {
         gpsStatus: false,
@@ -371,9 +374,21 @@ export const useRealtimeStore = create(
 
         wsApi.on("gps", (data) => {
           const payload = data?.payload || data;
+          console.log(payload);
 
           const lat = payload?.lat;
           const lng = payload?.lng;
+
+          const mobileOverrideActiveFlag =
+            payload?.mobileOverrideActive ??
+            payload?.mobile_override_active ??
+            payload?.mobile_override ??
+            payload?.mobile ??
+            null;
+          const mobileOverrideActive =
+            mobileOverrideActiveFlag != null
+              ? toBool(mobileOverrideActiveFlag)
+              : payload?.source === "mobile";
 
           set((state) => ({
             componentHealth: {
@@ -384,6 +399,7 @@ export const useRealtimeStore = create(
               lat != null && lng != null
                 ? [lat, lng]
                 : state.lastKnownCanePosition,
+            mobileOverrideActive,
             gps: {
               status: Number(payload?.status || 0),
               sats: Number(payload?.sats || 0),
@@ -392,7 +408,12 @@ export const useRealtimeStore = create(
                 payload?.hdop != null ? Number(payload.hdop).toFixed(2) : null,
               ready: toBool(payload?.ready),
               lat: lat ?? null,
-              lng: lng ?? null
+              lng: lng ?? null,
+              source:
+                payload?.source ||
+                (mobileOverrideActive ? "mobile" : state.gps.source) ||
+                null,
+              mobileOverrideActive
             }
           }));
 
@@ -540,9 +561,9 @@ export const useRealtimeStore = create(
                   set((state) =>
                     state._guardianWatchId === watchId
                       ? {
-                          _guardianWatchId: null,
-                          guardianPosition: null
-                        }
+                        _guardianWatchId: null,
+                        guardianPosition: null
+                      }
                       : state
                   );
                 },
@@ -635,14 +656,14 @@ export const useRealtimeStore = create(
             gps: isDemoMode
               ? state.gps
               : {
-                  status: 0,
-                  sats: 0,
-                  fix: false,
-                  hdop: null,
-                  ready: false,
-                  lat: null,
-                  lng: null
-                },
+                status: 0,
+                sats: 0,
+                fix: false,
+                hdop: null,
+                ready: false,
+                lat: null,
+                lng: null
+              },
             componentHealth: {
               gpsStatus: false,
               obstacleDetectionStatus: false,
@@ -736,10 +757,10 @@ export const useDevicesStore = create(
           return {
             devices: exists
               ? state.devices.map((d) =>
-                  d.deviceId === updatedDevice.deviceId
-                    ? { ...d, ...updatedDevice }
-                    : d
-                )
+                d.deviceId === updatedDevice.deviceId
+                  ? { ...d, ...updatedDevice }
+                  : d
+              )
               : [...state.devices, updatedDevice]
           };
         }),
@@ -846,10 +867,10 @@ export const useGuardiansStore = create(
               ...d,
               guardians: exists
                 ? d.guardians.map((g) =>
-                    g.guardianId === guardian.guardianId
-                      ? { ...g, ...guardian }
-                      : g
-                  )
+                  g.guardianId === guardian.guardianId
+                    ? { ...g, ...guardian }
+                    : g
+                )
                 : [...d.guardians, guardian]
             };
           })
@@ -868,11 +889,11 @@ export const useGuardiansStore = create(
           guardiansByDevice: state.guardiansByDevice.map((d) =>
             d.deviceId === deviceId
               ? {
-                  ...d,
-                  guardians: d.guardians.filter(
-                    (g) => g.guardianId !== guardianId
-                  )
-                }
+                ...d,
+                guardians: d.guardians.filter(
+                  (g) => g.guardianId !== guardianId
+                )
+              }
               : d
           )
         })),
@@ -1101,11 +1122,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: true,
-                    trusted: true
-                  }
+                  ...d,
+                  paired: true,
+                  connected: true,
+                  trusted: true
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -1134,11 +1155,11 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: true,
-                    trusted: true
-                  }
+                  ...d,
+                  paired: true,
+                  connected: true,
+                  trusted: true
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -1167,10 +1188,10 @@ export const useBluetoothStore = create(
             devices: state.devices.map((d) =>
               d.mac === mac
                 ? {
-                    ...d,
-                    paired: true,
-                    connected: false
-                  }
+                  ...d,
+                  paired: true,
+                  connected: false
+                }
                 : d
             ),
             isBluetoothProcessing: false,
@@ -1310,25 +1331,25 @@ export const useActivityReportsStore = create(
 
           const scopedHistory = deviceId
             ? history.filter(
-                (item) =>
-                  Number(item?.device_id ?? item?.deviceId) === Number(deviceId)
-              )
+              (item) =>
+                Number(item?.device_id ?? item?.deviceId) === Number(deviceId)
+            )
             : history;
 
           set({
             history: scopedHistory,
             historyByDevice: deviceId
               ? {
-                  ...get().historyByDevice,
-                  [deviceId]: scopedHistory
-                }
+                ...get().historyByDevice,
+                [deviceId]: scopedHistory
+              }
               : get().historyByDevice,
             lastFetchedAt: Date.now(),
             lastFetchedAtByDevice: deviceId
               ? {
-                  ...get().lastFetchedAtByDevice,
-                  [deviceId]: Date.now()
-                }
+                ...get().lastFetchedAtByDevice,
+                [deviceId]: Date.now()
+              }
               : get().lastFetchedAtByDevice,
             error: null
           });
@@ -2069,9 +2090,9 @@ export const useNotificationsStore = create(
 
           const nextCooldowns = dedupeKey
             ? trimEventCooldowns({
-                ...state.eventCooldowns,
-                [dedupeKey]: now
-              })
+              ...state.eventCooldowns,
+              [dedupeKey]: now
+            })
             : state.eventCooldowns;
 
           return {

@@ -176,7 +176,7 @@ function LiveMap() {
   const { user } = useUserStore();
   const guardianId = user?.guardian_id ?? user?.guardianId ?? null;
   const { currentGuardianRole } = useGuardiansStore();
-  const { guardianPosition, gps } = useRealtimeStore();
+  const { guardianPosition, gps, mobileOverrideActive } = useRealtimeStore();
   const { selectedDevice } = useDevicesStore();
   const {
     destinationPos,
@@ -209,6 +209,9 @@ function LiveMap() {
 
   const canePosition =
     gps?.lat != null && gps?.lng != null ? [gps.lat, gps.lng] : null;
+  const isMobileOverrideActive = Boolean(
+    mobileOverrideActive || gps?.mobileOverrideActive
+  );
   const showCaneMarker = Boolean(
     canePosition && !historyPin && !historyRoute && !historyDestinationPin
   );
@@ -783,6 +786,22 @@ function LiveMap() {
               >
                 <Icon icon="mdi:close" className="text-lg" />
               </button>
+            </div>
+          )}
+
+          {isMobileOverrideActive && (
+            <div className="bg-amber-50/95 backdrop-blur-sm border border-amber-200 text-amber-800 shadow-md rounded-2xl p-3 flex items-start gap-3 w-full lg:w-auto">
+              <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <Icon icon="mdi:cellphone-marker" className="w-5 h-5" />
+              </div>
+              <div className="leading-tight">
+                <p className="text-[11px] uppercase font-semibold tracking-wide">
+                  Phone GPS Override
+                </p>
+                <p className="text-sm font-medium">
+                  Cane position is using this device's GPS.
+                </p>
+              </div>
             </div>
           )}
         </div>
