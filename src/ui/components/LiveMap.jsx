@@ -206,6 +206,7 @@ function LiveMap() {
   const [historyDestinationPin, setHistoryDestinationPin] = useState(null);
   const routeCoordsRef = useRef([]);
   const activeIndexRef = useRef(0);
+  const historyAutoFocusRef = useRef(false);
 
   const canePosition =
     gps?.lat != null && gps?.lng != null ? [gps.lat, gps.lng] : null;
@@ -228,6 +229,8 @@ function LiveMap() {
     const incoming = location.state?.historyLocation;
 
     if (!incoming) return;
+
+    historyAutoFocusRef.current = false;
 
     setPreviewPos(null);
     setIsUserFollowingCane(false);
@@ -331,6 +334,30 @@ function LiveMap() {
 
     navigate(location.pathname, { replace: true });
   }, [location.pathname, location.state?.historyLocation, navigate]);
+
+  useEffect(() => {
+    if (historyAutoFocusRef.current) return;
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (historyRoute?.coords?.length >= 2) {
+      const bounds = L.latLngBounds(historyRoute.coords);
+      map.fitBounds(bounds, { padding: [50, 50], animate: true });
+      historyAutoFocusRef.current = true;
+      return;
+    }
+
+    if (historyDestinationPin?.coords) {
+      map.flyTo(historyDestinationPin.coords, 17, { duration: 0.6 });
+      historyAutoFocusRef.current = true;
+      return;
+    }
+
+    if (historyPin?.coords) {
+      map.flyTo(historyPin.coords, 17, { duration: 0.6 });
+      historyAutoFocusRef.current = true;
+    }
+  }, [historyRoute, historyDestinationPin, historyPin]);
 
   const advanceRoute = (currentPos) => {
     const coords = routeCoordsRef.current;
