@@ -342,7 +342,7 @@ export const useRealtimeStore = create(
             fall: emergency ? false : toBool(data.fall),
             componentHealth: {
               ...state.componentHealth,
-              obstacleDetectionStatus: toBool(data.obstacleDetectionStatus),
+              obstacleDetectionStatus: toBool(data.esp32Status === "online"),
               edgeDetectionStatus: toBool(data.edgeDetectionStatus),
               accelerometerStatus: toBool(data.accelerometerStatus),
               esp32Status: data.esp32Status === "online"
