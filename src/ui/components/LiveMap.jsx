@@ -816,7 +816,7 @@ function LiveMap() {
             </div>
           )}
 
-          {isMobileOverrideActive && (
+          {/* {isMobileOverrideActive && (
             <div className="bg-amber-50/95 backdrop-blur-sm border border-amber-200 text-amber-800 shadow-md rounded-2xl p-3 flex items-start gap-3 w-full lg:w-auto">
               <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
                 <Icon icon="mdi:cellphone-marker" className="w-5 h-5" />
@@ -830,7 +830,7 @@ function LiveMap() {
                 </p>
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
