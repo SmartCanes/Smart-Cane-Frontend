@@ -117,7 +117,7 @@ export default function Modal({
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <motion.div
             key="modal-root"
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 flex justify-center items-center"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 flex justify-center items-center px-4 py-6 sm:py-0"
             onClick={!isSubmitting ? onClose : undefined}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -206,7 +206,7 @@ export default function Modal({
 
             {variant === "banner" && (
               <motion.div
-                className="bg-white rounded-2xl shadow-xl w-full max-w-md min-h-fit flex flex-col"
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md min-h-fit flex flex-col max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -214,16 +214,16 @@ export default function Modal({
                 transition={{ duration: 0.2 }}
               >
                 <div className="bg-[#1C253C] rounded-t-2xl h-18"></div>
-                <div className="flex flex-col flex-1 gap-6 p-10 text-center rounded-b-2xl">
-                  <h1 className="font-bold text-[#1C253C] text-3xl sm:text-4xl">
+                <div className="flex flex-col flex-1 gap-4 sm:gap-6 p-6 sm:p-10 text-center rounded-b-2xl">
+                  <h1 className="font-bold text-[#1C253C] text-2xl sm:text-4xl leading-tight">
                     {title}
                   </h1>
-                  <div className="text-[#1C253C] leading-relaxed">
+                  <div className="text-[#1C253C] leading-relaxed text-sm sm:text-base">
                     {children || message}
                   </div>
                   {actionText && (
                     <Button
-                      className="w-full max-w-md text-[15px] sm:text-[18px] font-medium mt-auto"
+                      className="w-full max-w-md text-sm sm:text-[18px] font-medium mt-auto"
                       bgColor="bg-primary-100"
                       text={actionText}
                       onClick={onAction}
