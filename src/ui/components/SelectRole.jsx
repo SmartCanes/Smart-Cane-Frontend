@@ -4,27 +4,29 @@ import { useState, useMemo, useEffect } from "react";
 
 const PERMISSION_CATEGORIES = [
   {
-    name: "User Management",
-    description: "Manage user accounts and access",
+    name: "Guardians & Roles",
+    description: "Who can manage people on the device",
     permissions: [
-      "View all devices",
-      "Add new users",
-      "Edit user profiles",
+      "Invite guardians",
+      "Edit guardian roles",
       "Remove guardians",
-      "Reset passwords",
-      "Assign roles",
-      "Invite Guardians"
+      "Edit relationships",
+      "Set emergency contact"
     ]
   },
   {
-    name: "Content Management",
-    description: "Control and manage content",
-    permissions: ["Send Notes", "Set Location"]
+    name: "Device Control",
+    description: "Actions on routes and alerts",
+    permissions: [
+      "Set destinations/routes",
+      "Clear destinations/routes",
+      "Send notes to device"
+    ]
   },
   {
-    name: "Administrative",
-    description: "System administration tasks",
-    permissions: ["Access advanced features"]
+    name: "Access",
+    description: "What the guardian can see",
+    permissions: ["View all devices and activity"]
   }
 ];
 
@@ -41,23 +43,27 @@ const ROLE_OPTIONS = [
   {
     value: "secondary",
     title: "Secondary Guardian",
-    description: "Manage and publish content",
+    description: "Manage guardians below you and handle routes",
     icon: ({ className }) => (
       <Icon icon="ph:shield-chevron-bold" className={className} />
     ),
     permissions: [
-      "Invite Guardians",
-      "Publish content",
-      "Send Notes",
-      "Set Location"
+      "Invite guardians",
+      "Edit guardian roles",
+      "Remove guardians",
+      "Edit relationships",
+      "Set destinations/routes",
+      "Clear destinations/routes",
+      "Send notes to device",
+      "View all devices and activity"
     ]
   },
   {
     value: "guardian",
     title: "Guardian",
-    description: "Read-only access to content",
+    description: "View-only access",
     icon: ({ className }) => <Icon icon="ph:user-bold" className={className} />,
-    permissions: ["View all devices"]
+    permissions: ["View all devices and activity"]
   }
 ];
 
