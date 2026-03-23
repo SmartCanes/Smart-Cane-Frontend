@@ -1,5 +1,5 @@
 import logo from "@/assets/images/smartcane-logo.png";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   useDevicesStore,
   useGuardiansStore,
@@ -10,6 +10,7 @@ import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 
 const EmergencyDetails = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useUserStore();
   const { selectedDevice } = useDevicesStore();
   const { guardians } = useGuardiansStore();
@@ -190,17 +191,21 @@ const EmergencyDetails = () => {
   };
 
   return (
-    <main className="font-poppins bg-gradient-to-br rounded-t-[32px] md:rounded-none h-[calc(100vh-var(--header-height)-var(--mobile-nav-height))] md:h-[calc(100vh-var(--header-height))] overflow-hidden flex flex-col pb-[calc(var(--mobile-nav-height)+0.5rem)] md:pb-0">
+    <main className="font-poppins bg-gradient-to-br min-h-screen md:min-h-[calc(100vh-var(--header-height))] flex flex-col pb-[calc(var(--mobile-nav-height)+0.5rem)] md:pb-0">
       {/* Header with glass morphism effect */}
       <header className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 xl:px-15 relative z-20 shadow-lg">
         <div className="flex items-center gap-3 md:gap-4 min-w-0">
-          <div className="bg-white/15 p-2 rounded-xl backdrop-blur-sm">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="bg-white/15 p-2 rounded-xl backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-primary-100 transition"
+          >
             <img
               src={logo}
               alt="SmartCane Logo"
               className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 object-contain"
             />
-          </div>
+          </button>
           <div className="min-w-0">
             <p className="text-white text-base sm:text-lg md:text-xl font-bold leading-tight truncate flex items-center gap-2">
               Emergency Details
@@ -247,7 +252,7 @@ const EmergencyDetails = () => {
 
 // Extracted VIP Section component
 const VIPSection = ({ vipFullName, vipImage, vipAddress, vipFields }) => (
-  <section className="bg-white/90 backdrop-blur-sm border border-white/50 rounded-3xl shadow-xl overflow-hidden h-full flex flex-col">
+  <section className="bg-white/90 backdrop-blur-sm border border-white/50 rounded-3xl shadow-xl overflow-hidden lg:h-full flex flex-col">
     <div className="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
       <div className="flex items-center gap-3">
         <div className="bg-[#1a4a9f]/10 p-2.5 rounded-xl">
@@ -264,7 +269,7 @@ const VIPSection = ({ vipFullName, vipImage, vipAddress, vipFields }) => (
       </div>
     </div>
 
-    <div className="p-6 md:p-7 space-y-6 flex-1 overflow-y-auto">
+    <div className="p-6 md:p-7 space-y-6 flex-1 lg:overflow-y-auto overflow-visible">
       {/* VIP Header Card */}
       <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
         <div className="flex items-center gap-5">
@@ -330,7 +335,7 @@ const GuardianSection = ({
   statusColor,
   capitalize
 }) => (
-  <section className="bg-white/90 backdrop-blur-sm border border-white/50 rounded-3xl shadow-xl overflow-hidden h-full flex flex-col">
+  <section className="bg-white/90 backdrop-blur-sm border border-white/50 rounded-3xl shadow-xl overflow-hidden lg:h-full flex flex-col">
     <div className="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -353,7 +358,7 @@ const GuardianSection = ({
       </div>
     </div>
 
-    <div className="p-6 md:p-7 flex-1 overflow-y-auto">
+    <div className="p-6 md:p-7 flex-1 lg:overflow-y-auto overflow-visible">
       {!emergencyGuardian ? (
         <EmptyGuardianState />
       ) : (
