@@ -1054,7 +1054,11 @@ function LiveMap() {
             position={historyDestinationPin.coords}
             icon={historyMarkerIcon(
               historyDestinationPin.color || "#2563eb",
-              "D"
+              historyDestinationPin.activity === "EMERGENCY"
+                ? "E"
+                : historyDestinationPin.activity === "FALL"
+                  ? "F"
+                  : "D"
             )}
           >
             <Popup>
@@ -1075,7 +1079,14 @@ function LiveMap() {
         {historyPin?.coords && (
           <Marker
             position={historyPin.coords}
-            icon={historyMarkerIcon(historyPin.color || "#4f46e5", "H")}
+            icon={historyMarkerIcon(
+              historyPin.color || "#4f46e5",
+              historyPin.activity === "EMERGENCY"
+                ? "E"
+                : historyPin.activity === "FALL"
+                  ? "F"
+                  : "H"
+            )}
           >
             <Popup>
               <div className="font-poppins">
