@@ -230,7 +230,8 @@ const componentsData = [
       emergencyBuzzerDuration: [
         { label: "60 seconds (Default)", value: 60000 },
         { label: "30 seconds (Short Alert)", value: 30000 },
-        { label: "120 seconds (Extended Alert)", value: 120000 }
+        { label: "120 seconds (Extended Alert)", value: 120000 },
+        { label: "No Timeout (Indefinite)", value: 100000000 }
       ],
       emergencyBuzzerPattern: [
         { label: "Normal (Default)", value: 100 },
