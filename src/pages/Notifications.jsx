@@ -60,17 +60,56 @@ const COLOR = {
 // convertion ng time van
 const toManilaDate = (raw) => {
   if (!raw) return null;
+
+  // Normalize to UTC when the timestamp is missing timezone info (DB sends UTC).
+  // If the string already has an offset or Z, keep it as-is.
   const str = typeof raw === "string" ? raw.replace(" ", "T") : String(raw);
-  const withZ = !str.endsWith("Z") && !str.includes("+") ? str + "Z" : str;
-  const date = new Date(withZ);
+  const hasTz = /[+-]\d{2}:?\d{2}$/.test(str) || str.endsWith("Z");
+  const iso = hasTz ? str : `${str}Z`;
+
+  const date = new Date(iso);
   return isNaN(date.getTime()) ? null : date;
+};
+
+const formatAbsoluteManila = (raw) => {
+  const date = toManilaDate(raw);
+  if (!date) return null;
+
+  return date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  });
+};
+
+const stripEmbeddedTimestamp = (message) => {
+  if (typeof message !== "string") return message;
+
+  // Remove any embedded "Mar 23, 2026, 3:26 AM"-style timestamps to avoid double time display.
+  const cleaned = message
+    .replace(
+      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4},\s+\d{1,2}:\d{2}\s?(AM|PM)\b/gi,
+      ""
+    )
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return cleaned;
 };
 
 // kasama sa convertion ng time van
 const formatTime = (raw) => {
   const date = toManilaDate(raw);
   if (!date) return "—";
-  const diff = Date.now() - date.getTime();
+  // Compute diff using Manila local time to avoid client timezone drift.
+  const nowManila = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" })
+  );
+  const diff = nowManila.getTime() - date.getTime();
   const mins = Math.floor(diff / 60_000);
   const hours = Math.floor(diff / 3_600_000);
   const days = Math.floor(diff / 86_400_000);
@@ -125,6 +164,11 @@ const DateDivider = ({ label }) => (
 // single notif van
 const NotifCard = ({ notif, onRead, onNavigate, index }) => {
   const c = COLOR[notif.color] || COLOR.gray;
+  const absoluteTime = formatAbsoluteManila(notif.timestamp);
+  const cleanedMessage = stripEmbeddedTimestamp(notif.message);
+  const displayMessage = absoluteTime
+    ? [cleanedMessage, absoluteTime].filter(Boolean).join(" • ")
+    : cleanedMessage || "—";
 
   const handleClick = () => {
     if (!notif.read) onRead(notif.historyId);
@@ -180,7 +224,7 @@ const NotifCard = ({ notif, onRead, onNavigate, index }) => {
         </div>
 
         <p className="text-sm text-gray-700 mt-1.5 leading-snug line-clamp-2">
-          {notif.message}
+          {displayMessage}
         </p>
 
         <div className="flex items-center justify-between mt-2">

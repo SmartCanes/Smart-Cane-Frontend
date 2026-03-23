@@ -6,9 +6,40 @@ import { useDeviceLogsStore, useDevicesStore } from "@/stores/useStore";
 const toValidDate = (raw) => {
   if (!raw) return null;
   const str = typeof raw === "string" ? raw.replace(" ", "T") : String(raw);
-  const withZ = !str.endsWith("Z") && !str.includes("+") ? `${str}Z` : str;
-  const date = new Date(withZ);
+  const hasTz = /[+-]\d{2}:?\d{2}$/.test(str) || str.endsWith("Z");
+  const iso = hasTz ? str : `${str}Z`;
+
+  const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatAbsoluteManila = (raw) => {
+  const date = toValidDate(raw);
+  if (!date) return null;
+
+  return date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  });
+};
+
+const stripEmbeddedTimestamp = (message) => {
+  if (typeof message !== "string") return message;
+
+  const cleaned = message
+    .replace(
+      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4},\s+\d{1,2}:\d{2}\s?(AM|PM)\b/gi,
+      ""
+    )
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return cleaned;
 };
 
 const formatAlertTime = (raw) => {
@@ -193,6 +224,11 @@ const RecentAlerts = () => {
             }
 
             const style = getNotificationStyle(alert.color);
+            const absoluteTime = formatAbsoluteManila(alert.timestamp);
+            const cleanedMessage = stripEmbeddedTimestamp(alert.message);
+            const displayMessage = absoluteTime
+              ? [cleanedMessage, absoluteTime].filter(Boolean).join(" • ")
+              : cleanedMessage || "—";
 
             return (
               <div
@@ -212,7 +248,7 @@ const RecentAlerts = () => {
                     {alert.title}
                   </p>
                   <p className={`text-xs ${style.messageColor}`}>
-                    {alert.message}
+                    {displayMessage}
                   </p>
                 </div>
               </div>

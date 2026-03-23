@@ -6,6 +6,30 @@ import { resolveProfileImageSrc } from "@/utils/ResolveImage";
 import { useActivityReportsStore, useDevicesStore } from "@/stores/useStore";
 import FilterDropdown from "@/ui/components/FilterDropdown"; // ← NEW
 
+const toManilaDate = (raw) => {
+  if (!raw) return null;
+  const str = typeof raw === "string" ? raw.replace(" ", "T") : String(raw);
+  const hasTz = /[+-]\d{2}:?\d{2}$/.test(str) || str.endsWith("Z");
+  const iso = hasTz ? str : `${str}Z`;
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatManilaDateTime = (raw) => {
+  const date = toManilaDate(raw);
+  if (!date) return "—";
+
+  return date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  });
+};
+
 const ACTION_TYPE_MAP = {
   CREATE: "device",
   UPDATE: "settings",
@@ -374,11 +398,7 @@ const ActivityLogs = () => {
                             </td>
                             <td className="py-4 px-6 text-right">
                               <p className="text-sm text-gray-500 font-medium">
-                                {activity.createdAt
-                                  ? activity.createdAt
-                                      .replace("T", " ")
-                                      .split(".")[0]
-                                  : "—"}
+                                {formatManilaDateTime(activity.createdAt)}
                               </p>
                             </td>
                           </tr>
@@ -443,9 +463,7 @@ const ActivityLogs = () => {
                           {activity.guardianName || "—"}
                         </p>
                         <p className="text-xs text-gray-400 font-medium mt-1">
-                          {activity.createdAt
-                            ? activity.createdAt.replace("T", " ").split(".")[0]
-                            : "—"}
+                          {formatManilaDateTime(activity.createdAt)}
                         </p>
                       </div>
                     </div>
