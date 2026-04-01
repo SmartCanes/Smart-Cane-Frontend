@@ -138,9 +138,9 @@ const componentsData = [
     configurable: true,
     configOptions: {
       obstacleDistanceThreshold: [
-        { label: "Medium Sensitivity (Default)", value: 300 },
-        { label: "High Sensitivity", value: 400 },
-        { label: "Low Sensitivity", value: 200 }
+        { label: "Medium Sensitivity (Default)", value: 150 },
+        { label: "High Sensitivity", value: 200 },
+        { label: "Low Sensitivity", value: 100 }
       ],
       obstacleFeedbackPattern: [
         { label: "Continuous (Default)", value: 0 },
@@ -179,12 +179,12 @@ const componentsData = [
         },
         {
           label: "Medium Sensitivity",
-          value: 400,
+          value: 330,
           description: "Warning activates closer to edge"
         },
         {
           label: "Low Sensitivity",
-          value: 500,
+          value: 350,
           description: "Only trigger on potential hole or cliff"
         }
       ]
