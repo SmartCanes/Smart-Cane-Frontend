@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import { api } from "@/api/index"; // van
 import icaneLogo from "@/assets/images/smartcane-logo-blue.png";
 import heroBackground from "@/assets/images/background.png";
 import gpsCardArrow from "@/assets/images/gps-card-arrow.png";
@@ -276,6 +277,60 @@ const GuestPage = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
+
+  // State for contact form van
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formStatus, setFormStatus] = useState({ submitting: false, success: false, error: false, cooldownMsg: '' }); 
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => { 
+    e.preventDefault(); 
+
+    const now = Date.now(); 
+    const lastSendTime = parseInt(localStorage.getItem('contactLastSendTime') || '0', 10); 
+    const sendCount = parseInt(localStorage.getItem('contactSendCount') || '0', 10); 
+
+    let waitTime = 0; 
+    if (sendCount === 1) waitTime = 60 * 1000; // first message 1 min 
+    else if (sendCount === 2) waitTime = 5 * 60 * 1000; // 2nd 5 mins 
+    else if (sendCount >= 3) waitTime = 60 * 60 * 1000; // 3rd 1 hr 
+
+    const timeSinceLastSend = now - lastSendTime; 
+    if (sendCount > 0 && timeSinceLastSend < waitTime) { 
+      const remainingMs = waitTime - timeSinceLastSend; 
+      const remainingMinutes = Math.ceil(remainingMs / (60 * 1000)); 
+      setFormStatus({ submitting: false, success: false, error: false, cooldownMsg: `Please wait ${remainingMinutes} minute(s) before sending again.` });
+      setTimeout(() => setFormStatus(prev => ({ ...prev, cooldownMsg: '' })), 5000); 
+      return;
+    } 
+
+    setFormStatus({ submitting: true, success: false, error: false, cooldownMsg: '' }); 
+
+    try { // van
+      const response = await api.post('/contact', formData); 
+      const result = response.data; 
+
+      if (response.status === 200 || response.status === 201) { 
+        localStorage.setItem('contactLastSendTime', now.toString()); 
+        localStorage.setItem('contactSendCount', (sendCount + 1).toString()); 
+
+        setFormStatus({ submitting: false, success: true, error: false, cooldownMsg: '' }); 
+        setFormData({ name: '', email: '', message: '' }); 
+        setTimeout(() => setFormStatus(prev => ({ ...prev, success: false })), 5000); 
+      } else {
+        throw new Error(result.error || 'Submission failed'); 
+      } 
+    } catch (err) {
+      console.error('Contact form error:', err); 
+      setFormStatus({ submitting: false, success: false, error: true, cooldownMsg: '' }); 
+      setTimeout(() => setFormStatus(prev => ({ ...prev, error: false })), 5000); 
+    } 
+  }; 
+ //end ng State for contact form van
 
   useEffect(() => {
     const onScroll = () => {
@@ -669,14 +724,12 @@ const GuestPage = () => {
         </SlideInFromRight>
       </div>
 
+      {/* start of contact us section van */}
       <div
         id="contact"
         className="relative mx-auto flex w-full items-center justify-center py-12 md:py-12"
       >
-        {/* Section divider for Contact Us */}
-
-        <div className="h-px  w-full bg-[#bfcef0]" aria-hidden="true" />
-
+        <div className="h-px w-full bg-[#bfcef0]" aria-hidden="true" />
         <h3 className="absolute bg-[#FDFCF9] px-12 sm:px-20 text-[14px] font-semibold tracking-[0.5em] text-[#11285A]">
           CONTACT US
         </h3>
@@ -698,65 +751,149 @@ const GuestPage = () => {
         </p>
       </FadeIn>
 
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-y-10 px-4 text-center text-[12px] sm:grid-cols-2 sm:items-stretch sm:gap-x-12 sm:text-left">
-        {/* LEFT */}
-        <div>
-          <SlideInFromLeft
-            delay={0.6}
-            className="flex h-full flex-col items-center sm:items-start sm:justify-between"
-          >
-            {/* top content */}
-            <div className="flex flex-col items-center gap-3 sm:items-start">
-              <h3 className="text-lg font-semibold text-card-100">Call Us</h3>
+      {/* contact form van*/}
+      <SlideUp delay={0.6} className="mt-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="rounded-2xl bg-white p-6 shadow-lg sm:p-8 border border-gray-100">
+            <h3 className="mb-6 text-center text-2xl font-semibold text-[#11285A] sm:text-left">
+              Send us a message
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="name" className="mb-1 block text-sm font-medium text-[#1C253C]">
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-[#1C253C] transition focus:border-[#11285A] focus:outline-none focus:ring-2 focus:ring-[#11285A]/20"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="mb-1 block text-sm font-medium text-[#1C253C]">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-[#1C253C] transition focus:border-[#11285A] focus:outline-none focus:ring-2 focus:ring-[#11285A]/20"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="message" className="mb-1 block text-sm font-medium text-[#1C253C]">
+                  Message *
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={5}
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-[#1C253C] transition focus:border-[#11285A] focus:outline-none focus:ring-2 focus:ring-[#11285A]/20"
+                />
+              </div>
 
-              <p className="max-w-md text-sm">
-                We’re just a call away for any questions or support you need.
-              </p>
-            </div>
-
-            {/* bottom row (aligned) */}
-            <div className="mx-auto mt-4 flex w-[230px] items-center justify-start gap-3 sm:mx-0 sm:w-auto">
-              <a
-                href="tel:09696273011"
-                className="flex h-10 w-10 items-center justify-center"
-              >
-                <HoverIcon src={callIcon} alt="Call" size={40} />
-              </a>
-              <p className="leading-none text-sm">+63-969-627-3011</p>
-            </div>
-          </SlideInFromLeft>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"> 
+                <div className="flex-1"> 
+                  {formStatus.success && ( 
+                    <p className="text-sm text-green-600">Thank you! Your message has been sent.</p> 
+                  )} 
+                  {formStatus.error && ( 
+                    <p className="text-sm text-red-600">Something went wrong. Please try again.</p> 
+                  )} 
+                  {formStatus.cooldownMsg && ( 
+                    <p className="text-sm text-amber-600">{formStatus.cooldownMsg}</p> 
+                  )} 
+                </div> 
+                <div> 
+                  <button
+                    type="submit"
+                    disabled={formStatus.submitting}
+                    className="flex w-full items-center justify-center rounded-[10px] bg-[#1C253C] px-8 py-3 font-medium text-white transition-all hover:bg-[#0d1c3f] active:scale-95 active:bg-[#0a1630] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-[180px]"
+                  >
+                    {formStatus.submitting ? (
+                      <>
+                        <Icon icon="mdi:loading" className="mr-2 animate-spin text-xl" />
+                        Sending...
+                      </>
+                    ) : (
+                      'Send Message'
+                    )}
+                  </button>
+                </div> 
+              </div> 
+            </form>
+          </div>
         </div>
+      </SlideUp>
+      {/* end ng form van */}
 
-        {/* RIGHT */}
-        <div>
-          <SlideInFromRight
-            delay={0.6}
-            className="flex h-full flex-col items-center sm:items-start sm:justify-between"
-          >
-            {/* top content */}
-            <div className="flex flex-col items-center gap-3 sm:items-start">
-              <h3 className="text-lg font-semibold text-card-100">Email Us</h3>
+      <div className="mx-auto mt-12 max-w-7xl px-4 text-center text-[12px] sm:px-6 md:px-8">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-y-10 text-center text-[12px] sm:grid-cols-2 sm:items-stretch sm:gap-x-12 sm:text-left">
+          {/* LEFT - Call */}
+          <div>
+            <SlideInFromLeft
+              delay={0.8}
+              className="flex h-full flex-col items-center sm:items-start sm:justify-between"
+            >
+              <div className="flex flex-col items-center gap-3 sm:items-start">
+                <h3 className="text-lg font-semibold text-card-100">Call Us</h3>
+                <p className="max-w-md text-sm">
+                  We’re just a call away for any questions or support you need.
+                </p>
+              </div>
+              <div className="mx-auto mt-4 flex w-[230px] items-center justify-start gap-3 sm:mx-0 sm:w-auto">
+                <a
+                  href="tel:09696273011"
+                  className="flex h-10 w-10 items-center justify-center"
+                >
+                  <HoverIcon src={callIcon} alt="Call" size={40} />
+                </a>
+                <p className="leading-none text-sm">+63-969-627-3011</p>
+              </div>
+            </SlideInFromLeft>
+          </div>
 
-              <p className="max-w-md text-sm">
-                Send us an email and we’ll get back to you as soon as possible.
-              </p>
-            </div>
-
-            {/* bottom row (aligned) */}
-            <div className="mx-auto mt-4 flex w-[230px] items-center justify-start gap-3 sm:mx-0 sm:w-auto">
-              <a
-                href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center"
-              >
-                <HoverIcon src={emailIcon} alt="Email" size={40} />
-              </a>
-              <p className="leading-none text-sm">iCane@gmail.com</p>
-            </div>
-          </SlideInFromRight>
+          {/* RIGHT - Email*/}
+          <div>
+            <SlideInFromRight
+              delay={0.8}
+              className="flex h-full flex-col items-center sm:items-start sm:justify-between"
+            >
+              <div className="flex flex-col items-center gap-3 sm:items-start">
+                <h3 className="text-lg font-semibold text-card-100">Email Us</h3>
+                <p className="max-w-md text-sm">
+                  Send us an email and we’ll get back to you as soon as possible.
+                </p>
+              </div>
+              <div className="mx-auto mt-4 flex w-[230px] items-center justify-start gap-3 sm:mx-0 sm:w-auto">
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=iCane@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-10 w-10 items-center justify-center"
+                >
+                  <HoverIcon src={emailIcon} alt="Email" size={40} />
+                </a>
+                <p className="leading-none text-sm">iCane@gmail.com</p>
+              </div>
+            </SlideInFromRight>
+          </div>
         </div>
       </div>
+      {/* end of contact section van*/}
+
       {/* Footer */}
       <footer className="mt-8 bg-[#11285A] text-white">
         <div className="max-w-5xl mx-auto px-6 py-14 space-y-12">
