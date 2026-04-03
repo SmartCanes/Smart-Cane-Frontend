@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 //  Config & Auth Helpers
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
 const getToken = () => localStorage.getItem("access_token");
 
 const apiFetch = async (path, options = {}) => {
@@ -181,7 +181,7 @@ export default function ManageVip() {
               </span>
             </div>
 
-            <div className="overflow-x-auto">
+            <div>
               {loading ? (
                 <LoadingSkeleton />
               ) : vips.length === 0 ? (
@@ -193,138 +193,245 @@ export default function ManageVip() {
                   </p>
                 </div>
               ) : (
-                <table className="w-full min-w-[820px]">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
-                      {[
-                        "VIP",
-                        "Location",
-                        "Devices",
-                        "Guardians",
-                        "Registered",
-                      ].map((h) => (
-                        <th
-                          key={h}
-                          className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vips.map((v, i) => (
-                      <tr
-                        key={v.vip_id}
-                        className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors
-                          ${i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
-                      >
-                        {/* VIP name + ID */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-1.5 bg-purple-50 rounded-lg flex-shrink-0">
+                <>
+                  <div className="xl:hidden divide-y divide-gray-100">
+                    {vips.map((v) => (
+                      <div key={v.vip_id} className="p-4 sm:p-5 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <div className="p-1.5 bg-purple-50 rounded-lg flex-shrink-0 mt-0.5">
                               <User size={14} className="text-purple-600" />
                             </div>
-                            <div>
-                              <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-[#1a2e4a] leading-tight break-words">
                                 {v.first_name}{v.middle_name ? ` ${v.middle_name}` : ""} {v.last_name}
                               </p>
                               <p className="text-xs text-gray-400">ID #{v.vip_id}</p>
                             </div>
                           </div>
-                        </td>
-
-                        {/* Location */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                            <MapPin size={12} className="text-gray-400 flex-shrink-0" />
+                          <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
+                            <Calendar size={12} className="flex-shrink-0" />
                             <span>
-                              {[v.city, v.province].filter(Boolean).join(", ") || (
-                                <span className="text-xs text-gray-400 italic">—</span>
-                              )}
+                              {v.created_at
+                                ? new Date(v.created_at).toLocaleDateString("en-PH", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                : "—"}
                             </span>
                           </div>
-                          {v.barangay && (
-                            <p className="text-xs text-gray-400 mt-0.5 ml-[18px]">{v.barangay}</p>
-                          )}
-                        </td>
+                        </div>
 
-                        {/* Devices */}
-                        <td className="px-5 py-4">
-                          {v.devices && v.devices.length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                              {v.devices.slice(0, 2).map((d) => (
-                                <span
-                                  key={d.device_id}
-                                  title={d.device_serial_number}
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap font-mono
-                                    ${d.is_paired
-                                      ? "bg-blue-50 text-blue-700 border-blue-100"
-                                      : "bg-gray-50 text-gray-500 border-gray-200"}`}
-                                >
-                                  <Cpu size={10} />
-                                  {d.device_serial_number}
-                                </span>
-                              ))}
-                              {v.devices.length > 2 && (
-                                <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">
-                                  +{v.devices.length - 2}
-                                </span>
-                              )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Location</p>
+                            <div className="mt-1.5 flex items-start gap-1.5 text-sm text-gray-600">
+                              <MapPin size={12} className="text-gray-400 flex-shrink-0 mt-1" />
+                              <div className="min-w-0">
+                                <p className="break-words">
+                                  {[v.city, v.province].filter(Boolean).join(", ") || "—"}
+                                </p>
+                                {v.barangay && (
+                                  <p className="text-xs text-gray-400 mt-0.5 break-words">{v.barangay}</p>
+                                )}
+                              </div>
                             </div>
-                          ) : (
-                            <span className="text-xs text-gray-400 italic">No device</span>
-                          )}
-                        </td>
+                          </div>
 
-                        {/* Guardians */}
-                        <td className="px-5 py-4">
+                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Devices</p>
+                            {v.devices && v.devices.length > 0 ? (
+                              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                {v.devices.slice(0, 3).map((d) => (
+                                  <span
+                                    key={d.device_id}
+                                    title={d.device_serial_number}
+                                    className={`inline-flex max-w-full items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border
+                                      ${d.is_paired
+                                        ? "bg-blue-50 text-blue-700 border-blue-100"
+                                        : "bg-gray-50 text-gray-500 border-gray-200"}`}
+                                  >
+                                    <Cpu size={10} className="flex-shrink-0" />
+                                    <span className="truncate font-mono">{d.device_serial_number}</span>
+                                  </span>
+                                ))}
+                                {v.devices.length > 3 && (
+                                  <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">
+                                    +{v.devices.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="mt-1.5 text-xs text-gray-400 italic">No device</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Guardians</p>
                           {v.guardians && v.guardians.length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                              {v.guardians.slice(0, 2).map((g) => (
+                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                              {v.guardians.slice(0, 3).map((g) => (
                                 <span
                                   key={g.guardian_id}
                                   title={`${g.first_name} ${g.last_name} · ${g.role}`}
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border max-w-full
                                     ${g.role === "primary"
                                       ? "bg-pink-50 text-pink-700 border-pink-200"
                                       : "bg-blue-50 text-blue-700 border-blue-100"}`}
                                 >
-                                  <ShieldCheck size={10} />
-                                  {g.first_name}
+                                  <ShieldCheck size={10} className="flex-shrink-0" />
+                                  <span className="truncate">{g.first_name}</span>
                                   {g.role === "primary" && (
                                     <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
                                   )}
                                 </span>
                               ))}
-                              {v.guardians.length > 2 && (
+                              {v.guardians.length > 3 && (
                                 <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">
-                                  +{v.guardians.length - 2}
+                                  +{v.guardians.length - 3}
                                 </span>
                               )}
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400 italic">No guardians</span>
+                            <p className="mt-1.5 text-xs text-gray-400 italic">No guardians</p>
                           )}
-                        </td>
-
-                        {/* Registered date */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
-                            <Calendar size={12} className="flex-shrink-0" />
-                            {v.created_at
-                              ? new Date(v.created_at).toLocaleDateString("en-PH", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })
-                              : "—"}
-                          </div>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+
+                  <div className="hidden xl:block overflow-x-auto">
+                    <table className="w-full min-w-[820px]">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
+                          {[
+                            "VIP",
+                            "Location",
+                            "Devices",
+                            "Guardians",
+                            "Registered",
+                          ].map((h) => (
+                            <th
+                              key={h}
+                              className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
+                            >
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {vips.map((v, i) => (
+                          <tr
+                            key={v.vip_id}
+                            className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors
+                              ${i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
+                          >
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className="p-1.5 bg-purple-50 rounded-lg flex-shrink-0">
+                                  <User size={14} className="text-purple-600" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
+                                    {v.first_name}{v.middle_name ? ` ${v.middle_name}` : ""} {v.last_name}
+                                  </p>
+                                  <p className="text-xs text-gray-400">ID #{v.vip_id}</p>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                <MapPin size={12} className="text-gray-400 flex-shrink-0" />
+                                <span>
+                                  {[v.city, v.province].filter(Boolean).join(", ") || (
+                                    <span className="text-xs text-gray-400 italic">—</span>
+                                  )}
+                                </span>
+                              </div>
+                              {v.barangay && (
+                                <p className="text-xs text-gray-400 mt-0.5 ml-[18px]">{v.barangay}</p>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              {v.devices && v.devices.length > 0 ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {v.devices.slice(0, 2).map((d) => (
+                                    <span
+                                      key={d.device_id}
+                                      title={d.device_serial_number}
+                                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap font-mono
+                                        ${d.is_paired
+                                          ? "bg-blue-50 text-blue-700 border-blue-100"
+                                          : "bg-gray-50 text-gray-500 border-gray-200"}`}
+                                    >
+                                      <Cpu size={10} />
+                                      {d.device_serial_number}
+                                    </span>
+                                  ))}
+                                  {v.devices.length > 2 && (
+                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">
+                                      +{v.devices.length - 2}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-xs text-gray-400 italic">No device</span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              {v.guardians && v.guardians.length > 0 ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {v.guardians.slice(0, 2).map((g) => (
+                                    <span
+                                      key={g.guardian_id}
+                                      title={`${g.first_name} ${g.last_name} · ${g.role}`}
+                                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap
+                                        ${g.role === "primary"
+                                          ? "bg-pink-50 text-pink-700 border-pink-200"
+                                          : "bg-blue-50 text-blue-700 border-blue-100"}`}
+                                    >
+                                      <ShieldCheck size={10} />
+                                      {g.first_name}
+                                      {g.role === "primary" && (
+                                        <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
+                                      )}
+                                    </span>
+                                  ))}
+                                  {v.guardians.length > 2 && (
+                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">
+                                      +{v.guardians.length - 2}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-xs text-gray-400 italic">No guardians</span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
+                                <Calendar size={12} className="flex-shrink-0" />
+                                {v.created_at
+                                  ? new Date(v.created_at).toLocaleDateString("en-PH", {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    })
+                                  : "—"}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </div>

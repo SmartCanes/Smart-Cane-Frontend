@@ -17,7 +17,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 //  Config & Auth
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
 const getToken = () => localStorage.getItem("access_token");
 
 const apiFetch = async (path, options = {}) => {
@@ -210,7 +210,7 @@ export default function ManageEmergencyLogs() {
               </span>
             </div>
 
-            <div className="overflow-x-auto">
+            <div>
               {loading ? (
                 <LoadingSkeleton />
               ) : logs.length === 0 ? (
@@ -222,146 +222,251 @@ export default function ManageEmergencyLogs() {
                   </p>
                 </div>
               ) : (
-                <table className="w-full min-w-[960px]">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
-                      {[
-                        "Device (Serial)",
-                        "Assigned VIP",
-                        "Guardians",
-                        "Emergency",
-                        "Last Location",
-                        "Date",
-                      ].map((h) => (
-                        <th
-                          key={h}
-                          className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
+                <>
+                  <div className="xl:hidden divide-y divide-gray-100">
                     {logs.map((log, idx) => (
-                      <tr
-                        key={log.id || idx}
-                        className={`border-t border-gray-50 hover:bg-red-50/20 transition-colors
-                          ${idx % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
-                      >
-                        {/* Device Serial */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
+                      <div key={log.id || idx} className="p-4 sm:p-5 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0 mt-0.5">
                               <Cpu size={14} className="text-blue-600" />
                             </div>
-                            <span className="font-mono text-sm font-semibold text-[#1a2e4a]">
-                              {log.device_serial_number}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* VIP */}
-                        <td className="px-5 py-4">
-                          {log.vip ? (
-                            <div>
-                              <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
-                                {log.vip.first_name} {log.vip.last_name}
+                            <div className="min-w-0">
+                              <p className="font-mono text-sm font-semibold text-[#1a2e4a] break-all">
+                                {log.device_serial_number}
                               </p>
-                              <p className="text-xs text-gray-400">ID #{log.vip.vip_id}</p>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-gray-400 italic">No VIP assigned</span>
-                          )}
-                        </td>
-
-                        {/* Guardians */}
-                        <td className="px-5 py-4">
-                          {log.guardians && log.guardians.length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                              {log.guardians.slice(0, 2).map((g) => (
-                                <span
-                                  key={g.guardian_id}
-                                  title={`${g.first_name} ${g.last_name} · ${g.role}`}
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap
-                                    ${g.role === "primary"
-                                      ? "bg-pink-50 text-pink-700 border-pink-200"
-                                      : "bg-blue-50 text-blue-700 border-blue-100"
-                                    }`}
-                                >
-                                  <User size={10} />
-                                  {g.first_name}
-                                  {g.role === "primary" && (
-                                    <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
-                                  )}
-                                </span>
-                              ))}
-                              {log.guardians.length > 2 && (
-                                <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center">
-                                  +{log.guardians.length - 2}
-                                </span>
+                              {log.vip ? (
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                  {log.vip.first_name} {log.vip.last_name} · ID #{log.vip.vip_id}
+                                </p>
+                              ) : (
+                                <p className="text-xs text-gray-400 italic mt-0.5">No VIP assigned</p>
                               )}
                             </div>
-                          ) : (
-                            <span className="text-xs text-gray-400 italic">None assigned</span>
-                          )}
-                        </td>
-
-                        {/* Emergency Type */}
-                        <td className="px-5 py-4">
-                          <div className="flex flex-col gap-1.5">
-                            <EmergencyBadge type={log.emergency_type} />
-                            {log.log_message && (
-                              <p className="text-xs text-gray-500 max-w-[200px] line-clamp-2">
-                                {log.log_message}
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <div className="flex items-center justify-end gap-1.5 text-xs text-gray-500 whitespace-nowrap">
+                              <Clock size={12} className="flex-shrink-0" />
+                              {log.created_at
+                                ? formatDistanceToNow(new Date(log.created_at), { addSuffix: true })
+                                : "—"}
+                            </div>
+                            {log.created_at && (
+                              <p className="text-[10px] text-gray-400 mt-0.5">
+                                {new Date(log.created_at).toLocaleString("en-PH", {
+                                  timeZone: "Asia/Manila",
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}
                               </p>
                             )}
                           </div>
-                        </td>
+                        </div>
 
-                        {/* Last Location */}
-                        <td className="px-5 py-4">
-                          {log.last_location ? (
-                            <div className="flex items-start gap-1.5 max-w-[200px]">
-                              <MapPin size={13} className="text-gray-400 mt-0.5 flex-shrink-0" />
-                              <span className="text-sm text-gray-700 leading-snug">
-                                {log.last_location}
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1.5">
-                              <WifiOff size={13} className="text-gray-300" />
-                              <span className="text-xs text-gray-400 italic">No location data</span>
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Date */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
-                            <Clock size={12} className="flex-shrink-0" />
-                            {log.created_at
-                              ? formatDistanceToNow(new Date(log.created_at), { addSuffix: true })
-                              : "—"}
+                        <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Emergency</p>
+                          <div className="mt-1.5 flex flex-col gap-1.5">
+                            <EmergencyBadge type={log.emergency_type} />
+                            {log.log_message && (
+                              <p className="text-xs text-gray-500 break-words">{log.log_message}</p>
+                            )}
                           </div>
-                          {log.created_at && (
-                            <p className="text-[10px] text-gray-400 mt-0.5 pl-4">
-                              {new Date(log.created_at).toLocaleString("en-PH", {
-                                timeZone: "Asia/Manila",
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                                hour12: true,
-                              })}
-                            </p>
-                          )}
-                        </td>
-                      </tr>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Guardians</p>
+                            {log.guardians && log.guardians.length > 0 ? (
+                              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                {log.guardians.slice(0, 3).map((g) => (
+                                  <span
+                                    key={g.guardian_id}
+                                    title={`${g.first_name} ${g.last_name} · ${g.role}`}
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border max-w-full
+                                      ${g.role === "primary"
+                                        ? "bg-pink-50 text-pink-700 border-pink-200"
+                                        : "bg-blue-50 text-blue-700 border-blue-100"}`}
+                                  >
+                                    <User size={10} className="flex-shrink-0" />
+                                    <span className="truncate">{g.first_name}</span>
+                                    {g.role === "primary" && (
+                                      <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
+                                    )}
+                                  </span>
+                                ))}
+                                {log.guardians.length > 3 && (
+                                  <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center">
+                                    +{log.guardians.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="mt-1.5 text-xs text-gray-400 italic">None assigned</p>
+                            )}
+                          </div>
+
+                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Last Location</p>
+                            {log.last_location ? (
+                              <div className="mt-1.5 flex items-start gap-1.5">
+                                <MapPin size={13} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700 leading-snug break-words">
+                                  {log.last_location}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="mt-1.5 flex items-center gap-1.5">
+                                <WifiOff size={13} className="text-gray-300" />
+                                <span className="text-xs text-gray-400 italic">No location data</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+
+                  <div className="hidden xl:block overflow-x-auto">
+                    <table className="w-full min-w-[960px]">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
+                          {[
+                            "Device (Serial)",
+                            "Assigned VIP",
+                            "Guardians",
+                            "Emergency",
+                            "Last Location",
+                            "Date",
+                          ].map((h) => (
+                            <th
+                              key={h}
+                              className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
+                            >
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {logs.map((log, idx) => (
+                          <tr
+                            key={log.id || idx}
+                            className={`border-t border-gray-50 hover:bg-red-50/20 transition-colors
+                              ${idx % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
+                          >
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
+                                  <Cpu size={14} className="text-blue-600" />
+                                </div>
+                                <span className="font-mono text-sm font-semibold text-[#1a2e4a]">
+                                  {log.device_serial_number}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="px-5 py-4">
+                              {log.vip ? (
+                                <div>
+                                  <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
+                                    {log.vip.first_name} {log.vip.last_name}
+                                  </p>
+                                  <p className="text-xs text-gray-400">ID #{log.vip.vip_id}</p>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-gray-400 italic">No VIP assigned</span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              {log.guardians && log.guardians.length > 0 ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {log.guardians.slice(0, 2).map((g) => (
+                                    <span
+                                      key={g.guardian_id}
+                                      title={`${g.first_name} ${g.last_name} · ${g.role}`}
+                                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap
+                                        ${g.role === "primary"
+                                          ? "bg-pink-50 text-pink-700 border-pink-200"
+                                          : "bg-blue-50 text-blue-700 border-blue-100"
+                                        }`}
+                                    >
+                                      <User size={10} />
+                                      {g.first_name}
+                                      {g.role === "primary" && (
+                                        <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
+                                      )}
+                                    </span>
+                                  ))}
+                                  {log.guardians.length > 2 && (
+                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center">
+                                      +{log.guardians.length - 2}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-xs text-gray-400 italic">None assigned</span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex flex-col gap-1.5">
+                                <EmergencyBadge type={log.emergency_type} />
+                                {log.log_message && (
+                                  <p className="text-xs text-gray-500 max-w-[200px] line-clamp-2">
+                                    {log.log_message}
+                                  </p>
+                                )}
+                              </div>
+                            </td>
+
+                            <td className="px-5 py-4">
+                              {log.last_location ? (
+                                <div className="flex items-start gap-1.5 max-w-[200px]">
+                                  <MapPin size={13} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                                  <span className="text-sm text-gray-700 leading-snug">
+                                    {log.last_location}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1.5">
+                                  <WifiOff size={13} className="text-gray-300" />
+                                  <span className="text-xs text-gray-400 italic">No location data</span>
+                                </div>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
+                                <Clock size={12} className="flex-shrink-0" />
+                                {log.created_at
+                                  ? formatDistanceToNow(new Date(log.created_at), { addSuffix: true })
+                                  : "—"}
+                              </div>
+                              {log.created_at && (
+                                <p className="text-[10px] text-gray-400 mt-0.5 pl-4">
+                                  {new Date(log.created_at).toLocaleString("en-PH", {
+                                    timeZone: "Asia/Manila",
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
+                                </p>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </div>

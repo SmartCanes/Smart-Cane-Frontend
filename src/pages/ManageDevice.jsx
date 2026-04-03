@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 //  Config & Auth Helpers
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const getToken = () => localStorage.getItem("access_token");
 
@@ -466,7 +466,7 @@ export default function ManageDevice() {
               </span>
             </div>
 
-            <div className="overflow-x-auto">
+            <div>
               {loading ? (
                 <LoadingSkeleton />
               ) : devices.length === 0 ? (
@@ -480,165 +480,284 @@ export default function ManageDevice() {
                   </p>
                 </div>
               ) : (
-                <table className="w-full min-w-[800px]">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
-                      {[
-                        "Serial Number",
-                        "Paired",
-                        "VIP Assigned",
-                        "Guardians",
-                        "Status",
-                        "Last Active",
-                        "Actions",
-                      ].map((h) => (
-                        <th
-                          key={h}
-                          className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {devices.map((d, i) => (
-                      <tr
-                        key={d.device_id}
-                        className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors
-                          ${i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
-                      >
-                        {/* Serial Number */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
+                <>
+                  <div className="xl:hidden divide-y divide-gray-100">
+                    {devices.map((d) => (
+                      <div key={d.device_id} className="p-4 sm:p-5 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0 mt-0.5">
                               <Cpu size={14} className="text-blue-600" />
                             </div>
-                            <span className="font-mono text-sm font-semibold text-[#1a2e4a]">
-                              {d.device_serial_number}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Paired */}
-                        <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap
-                              ${d.is_paired
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"}`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full flex-shrink-0
-                                ${d.is_paired ? "bg-green-500" : "bg-gray-400"}`}
-                            />
-                            {d.is_paired ? "Paired" : "Unpaired"}
-                          </span>
-                        </td>
-
-                        {/* VIP */}
-                        <td className="px-5 py-4">
-                          {d.vip ? (
-                            <div>
-                              <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
-                                {d.vip.first_name} {d.vip.last_name}
+                            <div className="min-w-0">
+                              <p className="font-mono text-sm font-semibold text-[#1a2e4a] break-all">
+                                {d.device_serial_number}
                               </p>
-                              <p className="text-xs text-gray-400">ID #{d.vip.vip_id}</p>
+                              <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
+                                <Clock size={12} className="flex-shrink-0" />
+                                {d.last_active_at
+                                  ? new Date(d.last_active_at).toLocaleString("en-PH", {
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })
+                                  : "Never"}
+                              </div>
                             </div>
-                          ) : (
-                            <span className="text-xs text-gray-400 italic">No VIP assigned</span>
-                          )}
-                        </td>
-
-                        {/* Guardians */}
-                        <td className="px-5 py-4">
-                          {d.guardians && d.guardians.length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                              {d.guardians.slice(0, 2).map((g) => (
-                                <span
-                                  key={g.guardian_id}
-                                  title={`${g.first_name} ${g.last_name} · ${g.role}`}
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap
-                                    ${g.role === "primary"
-                                      ? "bg-pink-50 text-pink-700 border-pink-200"
-                                      : "bg-blue-50 text-blue-700 border-blue-100"}`}
-                                >
-                                  <User size={10} />
-                                  {g.first_name}
-                                  {g.role === "primary" && (
-                                    <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
-                                  )}
-                                </span>
-                              ))}
-                              {d.guardians.length > 2 && (
-                                <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center">
-                                  +{d.guardians.length - 2}
-                                </span>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-gray-400 italic">None assigned</span>
-                          )}
-                        </td>
-
-                        {/* Status */}
-                        <td className="px-5 py-4">
-                          {d.status === "active" ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 whitespace-nowrap">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                              Active
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 whitespace-nowrap">
-                              <WifiOff size={11} />
-                              Inactive
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Last Active */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
-                            <Clock size={12} className="flex-shrink-0" />
-                            {d.last_active_at
-                              ? new Date(d.last_active_at).toLocaleString("en-PH", {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
-                              : "Never"}
                           </div>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1">
-                            {/* Edit: both admin & super_admin */}
-                            <button
-                              onClick={() => setEditModal({ open: true, device: d })}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                              title="Edit serial number"
+                          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap
+                                ${d.is_paired
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-gray-100 text-gray-500"}`}
                             >
-                              <Pencil size={15} />
-                            </button>
-
-                            {/* Delete: super_admin only */}
-                            {isSuperAdmin && (
-                              <button
-                                onClick={() => setDeleteModal({ open: true, device: d })}
-                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                                title="Delete device"
-                              >
-                                <Trash2 size={15} />
-                              </button>
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full flex-shrink-0
+                                  ${d.is_paired ? "bg-green-500" : "bg-gray-400"}`}
+                              />
+                              {d.is_paired ? "Paired" : "Unpaired"}
+                            </span>
+                            {d.status === "active" ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 whitespace-nowrap">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                Active
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 whitespace-nowrap">
+                                <WifiOff size={11} />
+                                Inactive
+                              </span>
                             )}
                           </div>
-                        </td>
-                      </tr>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">VIP Assigned</p>
+                            {d.vip ? (
+                              <div className="mt-1.5">
+                                <p className="text-sm font-semibold text-[#1a2e4a] leading-tight break-words">
+                                  {d.vip.first_name} {d.vip.last_name}
+                                </p>
+                                <p className="text-xs text-gray-400">ID #{d.vip.vip_id}</p>
+                              </div>
+                            ) : (
+                              <p className="mt-1.5 text-xs text-gray-400 italic">No VIP assigned</p>
+                            )}
+                          </div>
+
+                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Guardians</p>
+                            {d.guardians && d.guardians.length > 0 ? (
+                              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                {d.guardians.slice(0, 3).map((g) => (
+                                  <span
+                                    key={g.guardian_id}
+                                    title={`${g.first_name} ${g.last_name} · ${g.role}`}
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border max-w-full
+                                      ${g.role === "primary"
+                                        ? "bg-pink-50 text-pink-700 border-pink-200"
+                                        : "bg-blue-50 text-blue-700 border-blue-100"}`}
+                                  >
+                                    <User size={10} className="flex-shrink-0" />
+                                    <span className="truncate">{g.first_name}</span>
+                                    {g.role === "primary" && (
+                                      <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
+                                    )}
+                                  </span>
+                                ))}
+                                {d.guardians.length > 3 && (
+                                  <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center">
+                                    +{d.guardians.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="mt-1.5 text-xs text-gray-400 italic">None assigned</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-1">
+                          <button
+                            onClick={() => setEditModal({ open: true, device: d })}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                            title="Edit serial number"
+                          >
+                            <Pencil size={13} />
+                            Edit
+                          </button>
+
+                          {isSuperAdmin && (
+                            <button
+                              onClick={() => setDeleteModal({ open: true, device: d })}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
+                              title="Delete device"
+                            >
+                              <Trash2 size={13} />
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+
+                  <div className="hidden xl:block overflow-x-auto">
+                    <table className="w-full min-w-[800px]">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
+                          {[
+                            "Serial Number",
+                            "Paired",
+                            "VIP Assigned",
+                            "Guardians",
+                            "Status",
+                            "Last Active",
+                            "Actions",
+                          ].map((h) => (
+                            <th
+                              key={h}
+                              className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
+                            >
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {devices.map((d, i) => (
+                          <tr
+                            key={d.device_id}
+                            className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors
+                              ${i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
+                          >
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
+                                  <Cpu size={14} className="text-blue-600" />
+                                </div>
+                                <span className="font-mono text-sm font-semibold text-[#1a2e4a]">
+                                  {d.device_serial_number}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <span
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap
+                                  ${d.is_paired
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-gray-100 text-gray-500"}`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0
+                                    ${d.is_paired ? "bg-green-500" : "bg-gray-400"}`}
+                                />
+                                {d.is_paired ? "Paired" : "Unpaired"}
+                              </span>
+                            </td>
+
+                            <td className="px-5 py-4">
+                              {d.vip ? (
+                                <div>
+                                  <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
+                                    {d.vip.first_name} {d.vip.last_name}
+                                  </p>
+                                  <p className="text-xs text-gray-400">ID #{d.vip.vip_id}</p>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-gray-400 italic">No VIP assigned</span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              {d.guardians && d.guardians.length > 0 ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {d.guardians.slice(0, 2).map((g) => (
+                                    <span
+                                      key={g.guardian_id}
+                                      title={`${g.first_name} ${g.last_name} · ${g.role}`}
+                                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap
+                                        ${g.role === "primary"
+                                          ? "bg-pink-50 text-pink-700 border-pink-200"
+                                          : "bg-blue-50 text-blue-700 border-blue-100"}`}
+                                    >
+                                      <User size={10} />
+                                      {g.first_name}
+                                      {g.role === "primary" && (
+                                        <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
+                                      )}
+                                    </span>
+                                  ))}
+                                  {d.guardians.length > 2 && (
+                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center">
+                                      +{d.guardians.length - 2}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-xs text-gray-400 italic">None assigned</span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              {d.status === "active" ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 whitespace-nowrap">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                  Active
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 whitespace-nowrap">
+                                  <WifiOff size={11} />
+                                  Inactive
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
+                                <Clock size={12} className="flex-shrink-0" />
+                                {d.last_active_at
+                                  ? new Date(d.last_active_at).toLocaleString("en-PH", {
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })
+                                  : "Never"}
+                              </div>
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => setEditModal({ open: true, device: d })}
+                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Edit serial number"
+                                >
+                                  <Pencil size={15} />
+                                </button>
+
+                                {isSuperAdmin && (
+                                  <button
+                                    onClick={() => setDeleteModal({ open: true, device: d })}
+                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Delete device"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </div>

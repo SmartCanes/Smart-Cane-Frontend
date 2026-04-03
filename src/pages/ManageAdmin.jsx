@@ -49,6 +49,9 @@ export default function ManageAdmin() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState(emptyForm);
   const [editTarget, setEditTarget] = useState(null);
+  const [editOriginalRole, setEditOriginalRole] = useState("admin");
+  const [editRoleReasonCode, setEditRoleReasonCode] = useState("");
+  const [editRoleReasonText, setEditRoleReasonText] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
 
@@ -56,6 +59,8 @@ export default function ManageAdmin() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [deleteReasonCode, setDeleteReasonCode] = useState("");
+  const [deleteReasonText, setDeleteReasonText] = useState("");
 
   const [showAuthGuard, setShowAuthGuard] = useState(false);
 
@@ -73,13 +78,24 @@ export default function ManageAdmin() {
     setLoading(false);
   }
 
+  const sanitizeContactNumber = (value = "") =>
+    String(value).replace(/\D/g, "").slice(0, 11);
+
   const handleAddChange = (e) => {
-    setAddForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setAddForm((f) => ({
+      ...f,
+      [name]: name === "contact_number" ? sanitizeContactNumber(value) : value,
+    }));
   };
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     setAddError("");
+    if (addForm.contact_number && addForm.contact_number.length !== 11) {
+      setAddError("Contact number must be exactly 11 digits.");
+      return;
+    }
     setAddSubmitting(true);
     try {
       const res = await api.post("/api/admin/create", addForm);
@@ -87,7 +103,12 @@ export default function ManageAdmin() {
         setAddError(res?.data?.message || "Failed to create admin.");
         return;
       }
-      showToast("Admin created successfully!", "success");
+      const msg = res?.data?.message || "Admin created successfully. Invitation email sent.";
+      if (res?.data?.email_sent === false) {
+        showToast(msg, "warning");
+      } else {
+        showToast(msg, "success");
+      }
       setAddForm(emptyForm);
       fetchAdmins();
       setShowAddModal(false);
@@ -109,7 +130,11 @@ export default function ManageAdmin() {
   };
 
   const handleEditChange = (e) => {
-    setEditForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setEditForm((f) => ({
+      ...f,
+      [name]: name === "contact_number" ? sanitizeContactNumber(value) : value,
+    }));
   };
 
   const openEditModal = (admin) => {
@@ -132,6 +157,9 @@ export default function ManageAdmin() {
       street_address: admin.street_address || "",
       role: admin.role || "admin",
     });
+    setEditOriginalRole(admin.role || "admin");
+    setEditRoleReasonCode("");
+    setEditRoleReasonText("");
     setEditError("");
     setShowEditModal(true);
   };
@@ -139,10 +167,33 @@ export default function ManageAdmin() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setEditError("");
+
+    const roleChanged = editForm.role !== editOriginalRole;
+
+    if (editForm.contact_number && editForm.contact_number.length !== 11) {
+      setEditError("Contact number must be exactly 11 digits.");
+      return;
+    }
+
+    if (roleChanged) {
+      if (!editRoleReasonCode) {
+        setEditError("Please select a reason for changing role.");
+        return;
+      }
+      if (editRoleReasonText.trim().length < 10) {
+        setEditError("Please provide at least 10 characters for role change details.");
+        return;
+      }
+    }
+
     setEditSubmitting(true);
     try {
       const payload = { ...editForm };
       if (!payload.password.trim()) delete payload.password;
+      if (roleChanged) {
+        payload.reason_code = editRoleReasonCode;
+        payload.reason_text = editRoleReasonText.trim();
+      }
       const res = await api.put(`/api/admin/${editTarget.admin_id}/update`, payload);
       if (!res || !res.ok) {
         setEditError(res?.data?.message || "Failed to update admin.");
@@ -165,15 +216,30 @@ export default function ManageAdmin() {
     }
     setDeleteTarget(admin);
     setDeleteError("");
+    setDeleteReasonCode("");
+    setDeleteReasonText("");
     setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleteError("");
+
+    if (!deleteReasonCode) {
+      setDeleteError("Please select a reason for deletion.");
+      return;
+    }
+    if (deleteReasonText.trim().length < 10) {
+      setDeleteError("Please provide at least 10 characters explaining the deletion.");
+      return;
+    }
+
     setDeleteLoading(true);
     try {
-      const res = await api.delete(`/api/admin/${deleteTarget.admin_id}/delete`);
+      const res = await api.delete(`/api/admin/${deleteTarget.admin_id}/delete`, {
+        reason_code: deleteReasonCode,
+        reason_text: deleteReasonText.trim(),
+      });
       if (!res || !res.ok) {
         setDeleteError(res?.data?.message || "Failed to delete admin.");
         return;
@@ -182,6 +248,8 @@ export default function ManageAdmin() {
       fetchAdmins();
       setShowDeleteModal(false);
       setDeleteTarget(null);
+      setDeleteReasonCode("");
+      setDeleteReasonText("");
     } catch (err) {
       setDeleteError("Cannot reach the server.");
     } finally {
@@ -264,7 +332,7 @@ export default function ManageAdmin() {
               </span>
             </div>
 
-            <div className="overflow-x-auto">
+            <div>
               {loading ? (
                 <LoadingSkeleton />
               ) : admins.length === 0 ? (
@@ -276,84 +344,152 @@ export default function ManageAdmin() {
                   </p>
                 </div>
               ) : (
-                <table className="w-full min-w-[800px]">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
-                      {["#", "Name", "Username", "Email", "Role", "Status", "Actions"].map(h => (
-                        <th
-                          key={h}
-                          className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      ))}
-                     </tr>
-                  </thead>
-                  <tbody>
+                <>
+                  <div className="xl:hidden divide-y divide-gray-100">
                     {admins.map((a, i) => (
-                      <tr
-                        key={a.admin_id}
-                        className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors ${
-                          i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"
-                        }`}
-                      >
-                        <td className="px-5 py-4 text-sm text-gray-500">{i + 1}</td>
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
+                      <div key={a.admin_id} className="p-4 sm:p-5 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0 mt-0.5">
                               <UserCog size={14} className="text-blue-600" />
                             </div>
-                            <span className="text-sm font-medium text-[#1a2e4a]">
-                              {[a.first_name, a.middle_name, a.last_name].filter(Boolean).join(" ")}
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-[#1a2e4a] break-words leading-tight">
+                                {[a.first_name, a.middle_name, a.last_name].filter(Boolean).join(" ")}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-0.5">#{i + 1} · @{a.username}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                            <span
+                              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                a.role === "super_admin"
+                                  ? "bg-amber-100 text-amber-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }`}
+                            >
+                              {a.role === "super_admin" ? "Super Admin" : "Admin"}
+                            </span>
+                            <span
+                              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                a.is_first_login
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {a.is_first_login ? "Pending setup" : "Active"}
                             </span>
                           </div>
-                        </td>
-                        <td className="px-5 py-4 text-sm text-gray-700">@{a.username}</td>
-                        <td className="px-5 py-4 text-sm text-gray-700">{a.email}</td>
-                        <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                              a.role === "super_admin"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-blue-100 text-blue-800"
-                            }`}
+                        </div>
+
+                        <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Email</p>
+                          <p className="mt-1.5 text-sm text-gray-700 break-all">{a.email}</p>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-1">
+                          <button
+                            onClick={() => openEditModal(a)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+                            title="Edit"
                           >
-                            {a.role === "super_admin" ? "Super Admin" : "Admin"}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                              a.is_first_login
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
+                            <Pencil size={13} />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(a)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors"
+                            title="Delete"
                           >
-                            {a.is_first_login ? "Pending setup" : "Active"}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => openEditModal(a)}
-                              className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-                              title="Edit"
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              onClick={() => openDeleteModal(a)}
-                              className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-                              title="Delete"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                            <Trash2 size={13} />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+
+                  <div className="hidden xl:block overflow-x-auto">
+                    <table className="w-full min-w-[800px]">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
+                          {["#", "Name", "Username", "Email", "Role", "Status", "Actions"].map(h => (
+                            <th
+                              key={h}
+                              className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
+                            >
+                              {h}
+                            </th>
+                          ))}
+                         </tr>
+                      </thead>
+                      <tbody>
+                        {admins.map((a, i) => (
+                          <tr
+                            key={a.admin_id}
+                            className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors ${
+                              i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"
+                            }`}
+                          >
+                            <td className="px-5 py-4 text-sm text-gray-500">{i + 1}</td>
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
+                                  <UserCog size={14} className="text-blue-600" />
+                                </div>
+                                <span className="text-sm font-medium text-[#1a2e4a]">
+                                  {[a.first_name, a.middle_name, a.last_name].filter(Boolean).join(" ")}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 text-sm text-gray-700">@{a.username}</td>
+                            <td className="px-5 py-4 text-sm text-gray-700">{a.email}</td>
+                            <td className="px-5 py-4">
+                              <span
+                                className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                  a.role === "super_admin"
+                                    ? "bg-amber-100 text-amber-800"
+                                    : "bg-blue-100 text-blue-800"
+                                }`}
+                              >
+                                {a.role === "super_admin" ? "Super Admin" : "Admin"}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4">
+                              <span
+                                className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                  a.is_first_login
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-green-100 text-green-800"
+                                }`}
+                              >
+                                {a.is_first_login ? "Pending setup" : "Active"}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => openEditModal(a)}
+                                  className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                                  title="Edit"
+                                >
+                                  <Pencil size={16} />
+                                </button>
+                                <button
+                                  onClick={() => openDeleteModal(a)}
+                                  className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -448,6 +584,9 @@ export default function ManageAdmin() {
             value={addForm.contact_number}
             onChange={handleAddChange}
             placeholder="09123456789"
+            maxLength={11}
+            inputMode="numeric"
+            pattern="[0-9]*"
           />
         </div>
 
@@ -570,6 +709,42 @@ export default function ManageAdmin() {
           />
         </div>
 
+        {editForm.role !== editOriginalRole && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Role Change Reason
+              </label>
+              <select
+                value={editRoleReasonCode}
+                onChange={(e) => setEditRoleReasonCode(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
+              >
+                <option value="">Select reason</option>
+                <option value="least_privilege">Least privilege enforcement</option>
+                <option value="policy_violation">Policy violation</option>
+                <option value="security_incident">Security incident</option>
+                <option value="assignment_change">Assignment or org change</option>
+                <option value="user_request">User request</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Details
+              </label>
+              <textarea
+                rows={3}
+                value={editRoleReasonText}
+                onChange={(e) => setEditRoleReasonText(e.target.value)}
+                placeholder="Explain why the role is being changed..."
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-100"
+              />
+              <p className="mt-1 text-xs text-gray-500">Minimum 10 characters.</p>
+            </div>
+          </div>
+        )}
+
         {/* Row 3: Username + Password */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <TextField
@@ -608,6 +783,9 @@ export default function ManageAdmin() {
             value={editForm.contact_number}
             onChange={handleEditChange}
             placeholder="09123456789"
+            maxLength={11}
+            inputMode="numeric"
+            pattern="[0-9]*"
           />
         </div>
 
@@ -697,6 +875,42 @@ export default function ManageAdmin() {
             <p className="text-sm text-red-600 bg-red-50 rounded-lg p-2 mb-4">
               This action cannot be undone. The record will be moved to the archive.
             </p>
+
+            <div className="text-left space-y-3 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reason for deletion
+                </label>
+                <select
+                  value={deleteReasonCode}
+                  onChange={(e) => setDeleteReasonCode(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
+                >
+                  <option value="">Select reason</option>
+                  <option value="policy_violation">Policy violation</option>
+                  <option value="security_incident">Security incident</option>
+                  <option value="duplicate_account">Duplicate account</option>
+                  <option value="inactive">Inactive account</option>
+                  <option value="resigned">Resigned</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Details
+                </label>
+                <textarea
+                  value={deleteReasonText}
+                  onChange={(e) => setDeleteReasonText(e.target.value)}
+                  rows={3}
+                  placeholder="Explain why this admin account is being deleted..."
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-100"
+                />
+                <p className="mt-1 text-xs text-gray-500">Minimum 10 characters.</p>
+              </div>
+            </div>
+
             {deleteError && <p className="text-red-500 text-sm mb-4">{deleteError}</p>}
             <div className="flex justify-center gap-3">
               <button

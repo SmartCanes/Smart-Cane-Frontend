@@ -6,7 +6,7 @@ import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
 import icaneLogoWhite from "../assets/images/icane-logo-white.png";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const STEP_LOGIN = "login";
 const STEP_OTP = "otp";
@@ -32,6 +32,7 @@ export default function Login() {
   const countdownRef = useRef(null);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotOtp, setForgotOtp] = useState(["", "", "", "", "", ""]);
+  const [forgotEmailError, setForgotEmailError] = useState("");
   const [forgotOtpError, setForgotOtpError] = useState("");
   const [forgotOtpLoading, setForgotOtpLoading] = useState(false);
   const [forgotSending, setForgotSending] = useState(false);
@@ -89,7 +90,10 @@ export default function Login() {
 
       if (data.is_first_login) {
         setFirstEmail(data.email);
-        await requestOtp(data.email);
+        const otpReq = await requestOtp(data.email);
+        if (!otpReq.ok) {
+          setErrors({ general: otpReq.message || "Failed to send OTP email. Please try again." });
+        }
         setStep(STEP_OTP);
         return;
       }
@@ -104,12 +108,22 @@ export default function Login() {
   const requestOtp = async (email) => {
     setIsSending(true);
     try {
-      await fetch(`${API_URL}/api/admin/request-otp`, {
+      const res = await fetch(`${API_URL}/api/admin/request-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail = data?.error ? ` (${data.error})` : "";
+        return { ok: false, message: (data?.message || "Failed to send OTP email") + detail };
+      }
+
       startCountdown();
+      return { ok: true, message: data?.message || "OTP sent." };
+    } catch {
+      return { ok: false, message: "Cannot reach the server." };
     } finally {
       setIsSending(false);
     }
@@ -131,12 +145,20 @@ export default function Login() {
 
   const requestForgotOtp = async (email) => {
     setForgotSending(true);
+    setForgotEmailError("");
     try {
-      await fetch(`${API_URL}/api/auth/password-reset/request-otp`, {
+      const res = await fetch(`${API_URL}/api/auth/password-reset/request-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail = data?.error ? ` (${data.error})` : "";
+        return { ok: false, message: (data?.message || "Failed to send OTP email") + detail };
+      }
+
       setForgotCountdown(60);
       if (forgotCountdownRef.current) clearInterval(forgotCountdownRef.current);
       forgotCountdownRef.current = setInterval(() => {
@@ -148,6 +170,9 @@ export default function Login() {
           return prev - 1;
         });
       }, 1000);
+      return { ok: true, message: data?.message || "OTP sent." };
+    } catch {
+      return { ok: false, message: "Cannot reach the server." };
     } finally {
       setForgotSending(false);
     }
@@ -504,12 +529,21 @@ export default function Login() {
                   text={forgotSending ? "Sending..." : "Send OTP"}
                   onClick={async () => {
                     if (!forgotEmail.trim()) return;
-                    await requestForgotOtp(forgotEmail.trim());
+                    const forgotReq = await requestForgotOtp(forgotEmail.trim());
+                    if (!forgotReq.ok) {
+                      setForgotEmailError(forgotReq.message || "Failed to send OTP email.");
+                      return;
+                    }
                     setStep(STEP_FORGOT_OTP);
                   }}
                   disabled={forgotSending || !forgotEmail.trim()}
                   className="w-full py-3 sm:py-4 text-base sm:text-[18px] font-medium"
                 />
+                {forgotEmailError && (
+                  <p className="font-poppins text-center text-[#CE4B34] text-sm">
+                    {forgotEmailError}
+                  </p>
+                )}
                 <PrimaryButton
                   text="Back to login"
                   variant="outline"
@@ -566,11 +600,13 @@ export default function Login() {
                   </p>
                   <button
                     type="button"
-                    onClick={() =>
-                      !forgotSending &&
-                      forgotCountdown === 0 &&
-                      requestForgotOtp(forgotEmail)
-                    }
+                    onClick={async () => {
+                      if (forgotSending || forgotCountdown > 0) return;
+                      const resend = await requestForgotOtp(forgotEmail);
+                      if (!resend.ok) {
+                        setForgotOtpError(resend.message || "Failed to send OTP email.");
+                      }
+                    }}
                     disabled={forgotCountdown > 0 || forgotSending}
                     className={`font-poppins text-primary-100 text-sm font-medium
                       ${
@@ -692,7 +728,11 @@ export default function Login() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => !isSending && countdown === 0 && requestOtp(firstEmail)}
+                    onClick={async () => {
+                      if (isSending || countdown > 0) return;
+                      const resend = await requestOtp(firstEmail);
+                      if (!resend.ok) setOtpError(resend.message || "Failed to send OTP email.");
+                    }}
                     disabled={countdown > 0 || isSending}
                     className={`font-poppins text-primary-100 text-sm font-medium
                       ${

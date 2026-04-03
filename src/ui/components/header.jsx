@@ -3,9 +3,9 @@ import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/client";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-export default function Header() {
+export default function Header({ onMenuClick }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
@@ -152,7 +152,9 @@ export default function Header() {
 
   const timeAgo = (iso) => {
     if (!iso) return "";
-    const d = new Date(iso);
+    const normalized = /([zZ]|[+-]\d{2}:\d{2})$/.test(iso) ? iso : `${iso}Z`;
+    const d = new Date(normalized);
+    if (Number.isNaN(d.getTime())) return "";
     const ms = Date.now() - d.getTime();
     const s = Math.floor(ms / 1000);
     if (s < 60) return "just now";
@@ -165,9 +167,17 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-50 shadow-sm">
-      <div className="text-white font-semibold tracking-wide">
-      
+    <header className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-50 shadow-sm">
+      <div className="flex items-center gap-2 text-white font-semibold tracking-wide">
+        <button
+          type="button"
+          onClick={onMenuClick}
+          className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg hover:bg-white/10"
+          aria-label="Open menu"
+        >
+          <Icon icon="ph:list" className="w-6 h-6" />
+        </button>
+        <span className="text-sm sm:text-base">Admin Panel</span>
       </div>
 
       {/* Right – Actions */}
@@ -191,26 +201,26 @@ export default function Header() {
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-12 w-[360px] animate-slideDown z-30">
+            <div className="fixed left-2 right-2 top-[calc(var(--header-height)+0.5rem)] sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[min(92vw,380px)] animate-slideDown z-30">
               <div className="relative bg-white rounded-2xl shadow-lg ring-1 ring-black/5 overflow-hidden">
-                <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
+                <div className="hidden sm:block absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
 
-                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                  <div className="font-semibold text-gray-800">Notifications</div>
+                <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+                  <div className="font-semibold text-gray-800 text-sm sm:text-base">Notifications</div>
                   <button
                     onClick={markAllRead}
-                    className="text-xs font-semibold text-primary-100 hover:opacity-80"
+                    className="text-[11px] sm:text-xs font-semibold text-primary-100 hover:opacity-80 whitespace-nowrap"
                     disabled={unreadCount === 0}
                   >
                     Mark all read
                   </button>
                 </div>
 
-                <div className="max-h-[420px] overflow-y-auto">
+                <div className="max-h-[min(68vh,460px)] overflow-y-auto">
                   {notifLoading ? (
-                    <div className="p-5 text-sm text-gray-500">Loading…</div>
+                    <div className="p-4 sm:p-5 text-sm text-gray-500">Loading...</div>
                   ) : notifications.length === 0 ? (
-                    <div className="p-8 text-center text-sm text-gray-500">
+                    <div className="p-6 sm:p-8 text-center text-sm text-gray-500">
                       No notifications yet.
                     </div>
                   ) : (
@@ -219,7 +229,7 @@ export default function Header() {
                         <button
                           key={n.notification_id}
                           onClick={() => markReadAndGo(n)}
-                          className={`w-full px-5 py-3 text-left hover:bg-gray-50 transition-colors flex gap-3 ${
+                          className={`w-full px-4 sm:px-5 py-3 text-left hover:bg-gray-50 transition-colors flex gap-3 ${
                             n.is_read ? "bg-white" : "bg-blue-50/40"
                           }`}
                         >
@@ -229,16 +239,16 @@ export default function Header() {
                             <Icon icon={notifIcon(n.type)} className="w-5 h-5" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className={`text-sm font-semibold truncate ${n.is_read ? "text-gray-800" : "text-[#0f2a55]"}`}>
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-3">
+                              <div className={`text-sm font-semibold leading-snug break-words sm:line-clamp-2 ${n.is_read ? "text-gray-800" : "text-[#0f2a55]"}`}>
                                 {n.title}
                               </div>
-                              <div className="text-[11px] text-gray-400 whitespace-nowrap">
+                              <div className="text-[11px] text-gray-400 whitespace-nowrap sm:pt-0.5">
                                 {timeAgo(n.created_at)}
                               </div>
                             </div>
                             {n.body && (
-                              <div className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                              <div className="text-xs text-gray-600 mt-1 line-clamp-3 sm:line-clamp-2 break-words">
                                 {n.body}
                               </div>
                             )}
@@ -288,7 +298,7 @@ export default function Header() {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-12 w-56 animate-slideDown z-20">
+            <div className="absolute right-0 top-12 w-[min(88vw,14rem)] animate-slideDown z-20">
               <div className="relative bg-white rounded-2xl shadow-lg ring-1 ring-black/5">
                 <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
                 <div className="py-2">

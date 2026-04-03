@@ -11,7 +11,7 @@ import {
   LineChart, Line,
 } from "recharts";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
 const TOKEN = () => localStorage.getItem("access_token") || "";
 const authHeaders = () => ({
   "Content-Type": "application/json",
@@ -101,6 +101,14 @@ function buildPairedByMonth(devices) {
     });
 }
 
+function withPercent(data) {
+  const total = data.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+  return data.map((item) => ({
+    ...item,
+    pct: total > 0 ? Math.round(((Number(item.value) || 0) / total) * 100) : 0,
+  }));
+}
+
 function StatCard({ label, value, icon, loading, sub }) {
   return (
     <div style={{
@@ -153,18 +161,25 @@ function StatCard({ label, value, icon, loading, sub }) {
   );
 }
 
-function SectionCard({ title, icon, children, action }) {
+function SectionCard({ title, icon, children, action, compact = false }) {
   return (
     <div style={{
       background: C.white, borderRadius: "14px",
-      padding: "22px 24px",
+      padding: compact ? "16px 14px" : "22px 24px",
       boxShadow: "0 2px 14px rgba(17,40,90,0.08)",
       border: `1px solid ${C.border}`,
     }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+      <div style={{
+        display: "flex",
+        alignItems: compact ? "flex-start" : "center",
+        justifyContent: "space-between",
+        gap: "8px",
+        flexWrap: compact ? "wrap" : "nowrap",
+        marginBottom: compact ? "14px" : "20px"
+      }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ color: BRAND, display: "flex" }}>{icon}</span>
-          <h3 style={{ margin: 0, color: C.text, fontSize: "14px", fontWeight: 700 }}>{title}</h3>
+          <h3 style={{ margin: 0, color: C.text, fontSize: compact ? "13px" : "14px", fontWeight: 700 }}>{title}</h3>
         </div>
         {action}
       </div>
@@ -223,6 +238,20 @@ export default function Dashboard() {
   const [activityTypes, setActivityTypes]     = useState([]);
   const [overviewBar, setOverviewBar]         = useState([]);
   const [pairedByMonth, setPairedByMonth]     = useState([]);
+  const [viewportWidth, setViewportWidth]     = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1280
+  );
+
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const isPhone = viewportWidth < 640;
+  const isTablet = viewportWidth >= 640 && viewportWidth < 1024;
+  const chartHeight = isPhone ? 240 : 200;
+  const pieRadius = isPhone ? 64 : 72;
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -310,6 +339,10 @@ export default function Dashboard() {
     ? recentLogs
     : recentLogs.filter(l => l.activity_type === logFilter);
 
+  const adminPieData = withPercent(adminBreakdown);
+  const devicePieData = withPercent(deviceBreakdown);
+  const invitePieData = withPercent(inviteBreakdown);
+
   const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     if (percent < 0.05) return null;
     const RADIAN = Math.PI / 180;
@@ -339,11 +372,13 @@ export default function Dashboard() {
       <div className="dash-row" style={{
         background: C.white,
         borderRadius: "16px",
-        padding: "26px 28px",
+        padding: isPhone ? "18px 14px" : "26px 28px",
         marginBottom: "24px",
         display: "flex",
-        alignItems: "center",
+        flexDirection: isPhone ? "column" : "row",
+        alignItems: isPhone ? "flex-start" : "center",
         justifyContent: "space-between",
+        gap: isPhone ? "14px" : "0",
         boxShadow: "0 2px 14px rgba(17,40,90,0.09)",
         border: `1px solid ${C.border}`,
         position: "relative",
@@ -356,11 +391,11 @@ export default function Dashboard() {
         }} />
 
         {/* Left: greeting + name + role */}
-        <div style={{ paddingLeft: "12px" }}>
+        <div style={{ paddingLeft: "12px", width: isPhone ? "100%" : "auto" }}>
           <p style={{ margin: "0 0 3px", fontSize: "13px", color: C.sub, fontWeight: 500 }}>
             {getGreeting()},
           </p>
-          <h2 style={{ margin: "0 0 10px", fontSize: "22px", fontWeight: 800, color: C.text, letterSpacing: "-0.5px" }}>
+          <h2 style={{ margin: "0 0 10px", fontSize: isPhone ? "19px" : "22px", fontWeight: 800, color: C.text, letterSpacing: "-0.5px" }}>
             {fullName} 
           </h2>
           <span style={{
@@ -372,9 +407,9 @@ export default function Dashboard() {
         </div>
 
         {/* Right: day + date + refresh */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: "26px", fontWeight: 800, color: C.text, letterSpacing: "-1px", lineHeight: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: isPhone ? "flex-start" : "flex-end", gap: "8px", width: isPhone ? "100%" : "auto" }}>
+          <div style={{ textAlign: isPhone ? "left" : "right" }}>
+            <div style={{ fontSize: isPhone ? "22px" : "26px", fontWeight: 800, color: C.text, letterSpacing: "-1px", lineHeight: 1 }}>
               {day}
             </div>
             <div style={{ fontSize: "13px", color: C.sub, marginTop: "4px", fontWeight: 500 }}>
@@ -407,7 +442,9 @@ export default function Dashboard() {
 
       <div className="dash-row" style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))",
+        gridTemplateColumns: isPhone
+          ? "1fr"
+          : "repeat(auto-fill, minmax(175px, 1fr))",
         gap: "14px", marginBottom: "24px",
         animationDelay: "0.05s",
       }}>
@@ -428,61 +465,74 @@ export default function Dashboard() {
       </div>
 
       <div className="dash-row" style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+        display: "grid",
+        gridTemplateColumns: isPhone ? "1fr" : isTablet ? "1fr 1fr" : "1fr 1fr 1fr",
         gap: "16px", marginBottom: "24px", animationDelay: "0.1s",
       }}>
-        <SectionCard title="Admin Roles" icon={<UserCog size={15} />}>
+        <SectionCard title="Admin Roles" icon={<UserCog size={15} />} compact={isPhone}>
           {loading
-            ? <div style={{ height: 200, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
+            ? <div style={{ height: chartHeight, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
             : adminBreakdown.every(d => d.value === 0)
               ? <EmptyState label="No admin data" />
-              : <ResponsiveContainer width="100%" height={200}>
+              : <ResponsiveContainer width="100%" height={chartHeight}>
                   <PieChart>
-                    <Pie data={adminBreakdown} cx="50%" cy="50%" outerRadius={72}
+                    <Pie data={adminPieData} cx="50%" cy="50%" outerRadius={pieRadius}
                       dataKey="value" labelLine={false} label={renderCustomLabel}>
-                      {adminBreakdown.map((_, i) => <Cell key={i} fill={PIE_ADMIN[i % PIE_ADMIN.length]} />)}
+                      {adminPieData.map((_, i) => <Cell key={i} fill={PIE_ADMIN[i % PIE_ADMIN.length]} />)}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                     <Legend iconType="circle" iconSize={9}
-                      formatter={v => <span style={{ fontSize: 12, color: C.text }}>{v}</span>} />
+                      formatter={(v, entry) => (
+                        <span style={{ fontSize: isPhone ? 10 : 12, color: C.text }}>
+                          {`${v} (${entry?.payload?.pct ?? 0}%)`}
+                        </span>
+                      )} />
                   </PieChart>
                 </ResponsiveContainer>
           }
         </SectionCard>
 
-        <SectionCard title="Device Status" icon={<Wifi size={15} />}>
+        <SectionCard title="Device Status" icon={<Wifi size={15} />} compact={isPhone}>
           {loading
-            ? <div style={{ height: 200, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
+            ? <div style={{ height: chartHeight, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
             : deviceBreakdown.every(d => d.value === 0)
               ? <EmptyState label="No device data" />
-              : <ResponsiveContainer width="100%" height={200}>
+              : <ResponsiveContainer width="100%" height={chartHeight}>
                   <PieChart>
-                    <Pie data={deviceBreakdown} cx="50%" cy="50%" outerRadius={72}
+                    <Pie data={devicePieData} cx="50%" cy="50%" outerRadius={pieRadius}
                       dataKey="value" labelLine={false} label={renderCustomLabel}>
-                      {deviceBreakdown.map((_, i) => <Cell key={i} fill={PIE_DEVICE[i % PIE_DEVICE.length]} />)}
+                      {devicePieData.map((_, i) => <Cell key={i} fill={PIE_DEVICE[i % PIE_DEVICE.length]} />)}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                     <Legend iconType="circle" iconSize={9}
-                      formatter={v => <span style={{ fontSize: 12, color: C.text }}>{v}</span>} />
+                      formatter={(v, entry) => (
+                        <span style={{ fontSize: isPhone ? 10 : 12, color: C.text }}>
+                          {`${v} (${entry?.payload?.pct ?? 0}%)`}
+                        </span>
+                      )} />
                   </PieChart>
                 </ResponsiveContainer>
           }
         </SectionCard>
 
-        <SectionCard title="Guardian Invitations" icon={<Bell size={15} />}>
+        <SectionCard title="Guardian Invitations" icon={<Bell size={15} />} compact={isPhone}>
           {loading
-            ? <div style={{ height: 200, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
+            ? <div style={{ height: chartHeight, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
             : inviteBreakdown.every(d => d.value === 0)
               ? <EmptyState label="No invitation data" />
-              : <ResponsiveContainer width="100%" height={200}>
+              : <ResponsiveContainer width="100%" height={chartHeight}>
                   <PieChart>
-                    <Pie data={inviteBreakdown} cx="50%" cy="50%" outerRadius={72}
+                    <Pie data={invitePieData} cx="50%" cy="50%" outerRadius={pieRadius}
                       dataKey="value" labelLine={false} label={renderCustomLabel}>
-                      {inviteBreakdown.map((_, i) => <Cell key={i} fill={PIE_INVITE[i % PIE_INVITE.length]} />)}
+                      {invitePieData.map((_, i) => <Cell key={i} fill={PIE_INVITE[i % PIE_INVITE.length]} />)}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                     <Legend iconType="circle" iconSize={9}
-                      formatter={v => <span style={{ fontSize: 12, color: C.text }}>{v}</span>} />
+                      formatter={(v, entry) => (
+                        <span style={{ fontSize: isPhone ? 10 : 12, color: C.text }}>
+                          {`${v} (${entry?.payload?.pct ?? 0}%)`}
+                        </span>
+                      )} />
                   </PieChart>
                 </ResponsiveContainer>
           }
@@ -490,16 +540,16 @@ export default function Dashboard() {
       </div>
 
       <div className="dash-row" style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr",
+        display: "grid", gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr",
         gap: "16px", marginBottom: "24px", animationDelay: "0.15s",
       }}>
-        <SectionCard title="System Overview" icon={<TrendingUp size={15} />}>
+        <SectionCard title="System Overview" icon={<TrendingUp size={15} />} compact={isPhone}>
           {loading
-            ? <div style={{ height: 200, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
-            : <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={overviewBar} barSize={36}>
+            ? <div style={{ height: chartHeight, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
+            : <ResponsiveContainer width="100%" height={chartHeight}>
+                <BarChart data={overviewBar} barSize={isPhone ? 24 : 36}>
                   <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-                  <XAxis dataKey="label" tick={{ fontSize: 12, fill: C.sub, fontWeight: 500, fontFamily: "Poppins" }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="label" tick={{ fontSize: isPhone ? 10 : 12, fill: C.sub, fontWeight: 500, fontFamily: "Poppins" }} axisLine={false} tickLine={false} interval={0} />
                   <YAxis tick={{ fontSize: 11, fill: C.sub, fontFamily: "Poppins" }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} cursor={{ fill: BRAND_SOFT }} />
                   <Bar dataKey="count" radius={[6, 6, 0, 0]} name="Count">
@@ -510,15 +560,15 @@ export default function Dashboard() {
           }
         </SectionCard>
 
-        <SectionCard title="Devices Paired by Month" icon={<Activity size={15} />}>
+        <SectionCard title="Devices Paired by Month" icon={<Activity size={15} />} compact={isPhone}>
           {loading
-            ? <div style={{ height: 200, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
+            ? <div style={{ height: chartHeight, background: BRAND_SOFT, borderRadius: 8, animation: "pulse 1.5s infinite" }} />
             : pairedByMonth.length === 0
               ? <EmptyState label="No pairing data yet" />
-              : <ResponsiveContainer width="100%" height={200}>
+              : <ResponsiveContainer width="100%" height={chartHeight}>
                   <LineChart data={pairedByMonth}>
                     <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: C.sub, fontFamily: "Poppins" }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: isPhone ? 10 : 11, fill: C.sub, fontFamily: "Poppins" }} axisLine={false} tickLine={false} minTickGap={isPhone ? 22 : 8} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: C.sub, fontFamily: "Poppins" }} axisLine={false} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
                     <Line
@@ -537,8 +587,16 @@ export default function Dashboard() {
         <SectionCard
           title="Recent Device Logs"
           icon={<Clock size={15} />}
+          compact={isPhone}
           action={
-            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+            <div style={{
+              display: "flex",
+              gap: "6px",
+              flexWrap: isPhone ? "nowrap" : "wrap",
+              overflowX: isPhone ? "auto" : "visible",
+              paddingBottom: isPhone ? "2px" : 0,
+              maxWidth: isPhone ? "100%" : "none",
+            }}>
               {["all", ...activityTypes].map(type => (
                 <button
                   key={type}
@@ -548,10 +606,11 @@ export default function Dashboard() {
                     border: `1px solid ${logFilter === type ? BRAND : C.border}`,
                     background: logFilter === type ? BRAND_SOFT : C.white,
                     color: logFilter === type ? BRAND : C.sub,
-                    borderRadius: "20px", padding: "3px 10px",
-                    fontSize: "11px", fontWeight: 600, cursor: "pointer",
+                    borderRadius: "20px", padding: isPhone ? "3px 9px" : "3px 10px",
+                    fontSize: isPhone ? "10px" : "11px", fontWeight: 600, cursor: "pointer",
                     transition: "all 0.15s", textTransform: "capitalize",
                     fontFamily: "Poppins",
+                    whiteSpace: "nowrap",
                   }}>
                   {type === "all" ? "All" : type.replace(/_/g, " ")}
                 </button>
@@ -572,8 +631,8 @@ export default function Dashboard() {
                 const color = activityColor(log.activity_type);
                 return (
                   <div key={log.log_id || i} className="log-row" style={{
-                    display: "grid", gridTemplateColumns: "28px 1fr auto",
-                    alignItems: "center", gap: "10px",
+                    display: "grid", gridTemplateColumns: isPhone ? "28px 1fr" : "28px 1fr auto",
+                    alignItems: isPhone ? "start" : "center", gap: "10px",
                     padding: "10px", borderRadius: "8px",
                     borderBottom: i < filteredLogs.length - 1 ? `1px solid ${C.border}` : "none",
                     cursor: "default", transition: "background 0.15s",
@@ -587,13 +646,13 @@ export default function Dashboard() {
                       {activityIcon(log.activity_type)}
                     </div>
                     <div>
-                      <div style={{ fontSize: "13px", color: C.text, fontWeight: 500, lineHeight: 1.3 }}>
+                      <div style={{ fontSize: isPhone ? "12px" : "13px", color: C.text, fontWeight: 500, lineHeight: 1.3 }}>
                         {log.message || "—"}
                       </div>
-                      <div style={{ fontSize: "11px", color: C.sub, marginTop: "2px", display: "flex", gap: "8px" }}>
+                      <div style={{ fontSize: "11px", color: C.sub, marginTop: "4px", display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
                         <span style={{
                           background: color + "18", color, borderRadius: "4px",
-                          padding: "1px 6px", fontWeight: 600, textTransform: "capitalize",
+                          padding: "1px 6px", fontWeight: 600, textTransform: "capitalize", fontSize: isPhone ? "10px" : "11px",
                         }}>
                           {(log.activity_type || "").replace(/_/g, " ")}
                         </span>
@@ -603,11 +662,18 @@ export default function Dashboard() {
                             {log.status}
                           </span>
                         )}
+                        {isPhone && (
+                          <span style={{ marginLeft: "auto", whiteSpace: "nowrap", fontSize: "10px" }}>
+                            {ago(log.created_at)}
+                          </span>
+                        )}
                       </div>
                     </div>
+                    {!isPhone && (
                     <div style={{ fontSize: "11px", color: C.sub, whiteSpace: "nowrap" }}>
                       {ago(log.created_at)}
                     </div>
+                    )}
                   </div>
                 );
               })}

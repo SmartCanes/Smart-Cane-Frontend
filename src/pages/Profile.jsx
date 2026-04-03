@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import TextField from "../ui/components/TextField";
 import Toast from "../ui/components/Toast"; // adjust path if needed
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
@@ -76,9 +76,15 @@ export default function Profile() {
     }
   };
 
+  const sanitizeContactNumber = (value = "") =>
+    String(value).replace(/\D/g, "").slice(0, 11);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === "contact_number" ? sanitizeContactNumber(value) : value,
+    }));
 
     // Clear field error when user types
     if (errors[name]) {
@@ -421,20 +427,20 @@ export default function Profile() {
         />
       )}
 
-      <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-auto p-6">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8 flex flex-col gap-5">
+      <main className="bg-white md:bg-[#f9fafb] rounded-t-[32px] md:rounded-none min-h-[calc(100vh-var(--header-height))] md:max-h-[calc(100vh-var(--header-height))] overflow-y-auto p-3 sm:p-4 md:p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 md:p-8 flex flex-col gap-5 w-full max-w-5xl mx-auto">
           {/* Header: avatar, name, role, edit/save buttons */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 sm:gap-6">
+            <div className="flex items-start sm:items-center gap-4 min-w-0">
               <div className="relative flex-shrink-0">
                 {profileImageUrl ? (
                   <img
                     src={profileImageUrl}
                     alt={`${profile.first_name} ${profile.last_name}`}
-                    className="w-16 h-16 rounded-full object-cover"
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary-100 flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
                     {initials}
                   </div>
                 )}
@@ -450,11 +456,11 @@ export default function Profile() {
                 )}
               </div>
 
-              <div>
-                <h3 className="text-lg font-semibold text-primary-100">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-primary-100 break-words">
                   {`${profile.first_name} ${profile.middle_name || ""} ${profile.last_name}`}
                 </h3>
-                <p className="text-sm text-gray-500">{profile.email}</p>
+                <p className="text-xs sm:text-sm text-gray-500 break-all">{profile.email}</p>
                 <span className="inline-block mt-1 text-xs font-medium text-primary-100 bg-blue-50 px-2 py-0.5 rounded-full">
                   {profile.role === "super_admin" ? "Super Admin" : "Admin"}
                 </span>
@@ -464,18 +470,18 @@ export default function Profile() {
             {!isEditMode ? (
               <button
                 onClick={handleEditProfile}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-primary-100 text-primary-100 text-sm font-semibold hover:bg-blue-50 transition-colors cursor-pointer"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-primary-100 text-primary-100 text-sm font-semibold hover:bg-blue-50 transition-colors cursor-pointer"
               >
                 <Icon icon="solar:pen-bold" className="text-lg" />
                 Edit Profile
               </button>
             ) : (
-              <div className="flex gap-2">
+              <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
                 <button
                   type="button"
                   onClick={handleSaveProfile}
                   disabled={saving || isUploadingImage || !hasChanges() || hasValidationErrors()}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-100 text-white text-sm font-semibold hover:bg-primary-200 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary-100 text-white text-sm font-semibold hover:bg-primary-200 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {(saving || isUploadingImage || isSendingOTP || isVerifyingOTP) ? (
                     <>
@@ -492,7 +498,7 @@ export default function Profile() {
                 <button
                   onClick={handleCancelEdit}
                   disabled={saving || isUploadingImage || isSendingOTP || isVerifyingOTP}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-70"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-300 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-70"
                 >
                   <Icon icon="solar:close-circle-bold" className="text-lg" />
                   Cancel
@@ -502,7 +508,7 @@ export default function Profile() {
           </div>
 
           {/* Form fields */}
-          <form onSubmit={(e) => e.preventDefault()} className="grid md:grid-cols-2 gap-5">
+          <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">First Name *</label>
               <TextField
@@ -576,6 +582,9 @@ export default function Profile() {
                 disabled={!isEditMode}
                 error={errors.contact_number}
                 placeholder="09123456789"
+                maxLength={11}
+                inputMode="numeric"
+                pattern="[0-9]*"
               />
             </div>
             <div>
@@ -644,15 +653,15 @@ export default function Profile() {
       {showOTPModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-          <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-md relative z-10">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 w-full max-w-md relative z-10">
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Verify Your New Email</h3>
-                <p className="text-gray-600">Please enter the 6-digit code sent to your new email address</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Verify Your New Email</h3>
+                <p className="text-sm sm:text-base text-gray-600">Please enter the 6-digit code sent to your new email address</p>
               </div>
 
               <div className="flex flex-col items-center">
-                <div className="flex justify-center gap-2 mb-4">
+                <div className="flex justify-center gap-1.5 sm:gap-2 mb-4">
                   {[0, 1, 2, 3, 4, 5].map((index) => (
                     <input
                       key={index}
@@ -666,7 +675,7 @@ export default function Profile() {
                         if (e.key === "Enter") handleVerifyOTP();
                       }}
                       disabled={isVerifyingOTP}
-                      className="w-12 h-12 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-10 h-10 sm:w-12 sm:h-12 text-center text-xl sm:text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-primary-100 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   ))}
                 </div>
@@ -707,7 +716,7 @@ export default function Profile() {
                 <button
                   onClick={handleVerifyOTP}
                   disabled={otp.some((d) => d === "") || isVerifyingOTP || isSendingOTP}
-                  className="w-full py-3 text-base font-medium text-white bg-primary-100 hover:bg-primary-200 rounded-lg transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white bg-primary-100 hover:bg-primary-200 rounded-lg transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isVerifyingOTP ? (
                     <>
@@ -722,7 +731,7 @@ export default function Profile() {
                 <button
                   onClick={handleCancelOTP}
                   disabled={isVerifyingOTP || isSendingOTP}
-                  className="w-full py-3 text-base font-medium text-primary-100 border-2 border-primary-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="w-full py-2.5 sm:py-3 text-sm sm:text-base font-medium text-primary-100 border-2 border-primary-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>

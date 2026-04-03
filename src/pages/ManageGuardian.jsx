@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 //  Config & Auth Helpers
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
 const getToken = () => localStorage.getItem("access_token");
 
 const apiFetch = async (path, options = {}) => {
@@ -66,10 +66,101 @@ const LoadingSkeleton = () => (
 //  Devices Cell Component (with tooltip)
 const DevicesCell = ({ devices }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const tooltipRef = useRef(null);
+  const [expandedMobile, setExpandedMobile] = useState(false);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 1280 : false
+  );
+  const triggerRef = useRef(null);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    const onResize = () => {
+      const nextIsMobileOrTablet = window.innerWidth < 1280;
+      setIsMobileOrTablet(nextIsMobileOrTablet);
+      if (!nextIsMobileOrTablet) setExpandedMobile(false);
+    };
+
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const updateTooltipPosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const tooltipWidth = 260;
+    const margin = 10;
+    const centeredLeft = rect.left + rect.width / 2 - tooltipWidth / 2;
+    const boundedLeft = Math.max(
+      margin,
+      Math.min(centeredLeft, window.innerWidth - tooltipWidth - margin)
+    );
+
+    setTooltipPos({
+      left: boundedLeft,
+      top: Math.max(margin, rect.top - 12),
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!showTooltip) return;
+
+    updateTooltipPosition();
+    const handleViewportChange = () => updateTooltipPosition();
+    window.addEventListener("resize", handleViewportChange, { passive: true });
+    window.addEventListener("scroll", handleViewportChange, true);
+
+    return () => {
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
+    };
+  }, [showTooltip, updateTooltipPosition]);
 
   if (!devices || devices.length === 0) {
     return <span className="text-xs text-gray-400 italic">No devices</span>;
+  }
+
+  if (isMobileOrTablet) {
+    const initialVisibleCount = 3;
+    const visibleDevices = expandedMobile
+      ? devices
+      : devices.slice(0, initialVisibleCount);
+    const hiddenCount = Math.max(devices.length - initialVisibleCount, 0);
+
+    return (
+      <div>
+        <div className="flex flex-wrap gap-1.5 items-center">
+          {visibleDevices.map((d) => (
+            <span
+              key={d.device_id}
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-100 break-all"
+            >
+              <Cpu size={10} />
+              {d.device_serial_number}
+            </span>
+          ))}
+        </div>
+
+        {hiddenCount > 0 && !expandedMobile && (
+          <button
+            type="button"
+            onClick={() => setExpandedMobile(true)}
+            className="mt-2 text-xs font-semibold text-[#1565C0] hover:underline"
+          >
+            Show {hiddenCount} more device{hiddenCount > 1 ? "s" : ""}
+          </button>
+        )}
+
+        {devices.length > initialVisibleCount && expandedMobile && (
+          <button
+            type="button"
+            onClick={() => setExpandedMobile(false)}
+            className="mt-2 text-xs font-semibold text-gray-500 hover:underline"
+          >
+            Show less
+          </button>
+        )}
+      </div>
+    );
   }
 
   const visibleDevices = devices.slice(0, 2);
@@ -90,19 +181,35 @@ const DevicesCell = ({ devices }) => {
         {remainingCount > 0 && (
           <div
             className="relative"
-            onMouseEnter={() => setShowTooltip(true)}
+            onMouseEnter={() => {
+              setShowTooltip(true);
+              updateTooltipPosition();
+            }}
             onMouseLeave={() => setShowTooltip(false)}
           >
-            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold cursor-help">
+            <button
+              ref={triggerRef}
+              type="button"
+              onClick={() => {
+                setShowTooltip((prev) => !prev);
+                updateTooltipPosition();
+              }}
+              className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold cursor-help"
+              aria-label="Show all linked devices"
+            >
               +{remainingCount}
-            </span>
+            </button>
             {showTooltip && (
               <div
-                ref={tooltipRef}
-                className="absolute z-50 bottom-full left-0 mb-2 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 shadow-lg whitespace-nowrap"
+                className="fixed z-[90] bg-gray-900/95 text-white text-xs rounded-lg py-2 px-3 shadow-2xl w-[260px] max-w-[85vw] max-h-[45vh] overflow-y-auto"
+                style={{
+                  left: tooltipPos.left,
+                  top: tooltipPos.top,
+                  transform: "translateY(-100%)",
+                }}
               >
                 {devices.map((d) => (
-                  <div key={d.device_id} className="py-0.5">
+                  <div key={d.device_id} className="py-0.5 break-all leading-relaxed">
                     {d.device_serial_number}
                   </div>
                 ))}
@@ -229,99 +336,80 @@ export default function ManageGuardian() {
 
           {/* Table Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-semibold text-[#1a2e4a]">All Guardians</h3>
               <span className="text-sm text-gray-400">
                 {totalGuardians} guardian{totalGuardians !== 1 ? "s" : ""}
               </span>
             </div>
 
-            <div className="overflow-x-auto">
-              {loading ? (
-                <LoadingSkeleton />
-              ) : guardians.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                  <ShieldCheck size={52} className="mb-4 text-gray-200" />
-                  <p className="text-lg font-semibold text-gray-500">No guardians registered yet</p>
-                  <p className="text-sm mt-1 text-gray-400">
-                    Guardians register through the mobile app.
-                  </p>
-                </div>
-              ) : (
-                <table className="w-full min-w-[820px]">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
-                      {[
-                        "Guardian",
-                        "Contact",
-                        "Devices",
-                        "VIPs",
-                        "Location",
-                        "Joined",
-                      ].map((h) => (
-                        <th
-                          key={h}
-                          className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {guardians.map((g, i) => (
-                      <tr
-                        key={g.guardian_id}
-                        className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors
-                          ${i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
-                      >
-                        {/* Guardian name + username */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
-                              <ShieldCheck size={14} className="text-blue-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
-                                {g.first_name} {g.last_name}
-                              </p>
-                              <p className="text-xs text-gray-400">@{g.username}</p>
-                            </div>
+            {loading ? (
+              <LoadingSkeleton />
+            ) : guardians.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                <ShieldCheck size={52} className="mb-4 text-gray-200" />
+                <p className="text-lg font-semibold text-gray-500">No guardians registered yet</p>
+                <p className="text-sm mt-1 text-gray-400">
+                  Guardians register through the mobile app.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Mobile/Tablet cards */}
+                <div className="xl:hidden p-3 sm:p-4 space-y-3">
+                  {guardians.map((g) => (
+                    <div key={g.guardian_id} className="rounded-xl border border-gray-100 bg-[#fafcff] p-3 sm:p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
+                            <ShieldCheck size={14} className="text-blue-600" />
                           </div>
-                        </td>
-
-                        {/* Email + contact */}
-                        <td className="px-5 py-4">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                              <Mail size={11} className="text-gray-400 flex-shrink-0" />
-                              <span className="truncate max-w-[180px]">{g.email}</span>
-                            </div>
-                            {g.contact_number && (
-                              <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                                <Phone size={11} className="text-gray-400 flex-shrink-0" />
-                                {g.contact_number}
-                              </div>
-                            )}
+                          <div className="min-w-0">
+                            <p className="text-sm sm:text-base font-semibold text-[#1a2e4a] leading-tight break-words">
+                              {g.first_name} {g.last_name}
+                            </p>
+                            <p className="text-xs text-gray-400 break-all">@{g.username}</p>
                           </div>
-                        </td>
+                        </div>
+                        <div className="text-xs text-gray-500 whitespace-nowrap flex items-center gap-1.5">
+                          <Calendar size={12} className="flex-shrink-0" />
+                          {g.created_at
+                            ? new Date(g.created_at).toLocaleDateString("en-PH", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            : "—"}
+                        </div>
+                      </div>
 
-                        {/* Devices */}
-                        <td className="px-5 py-4">
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
+                          <Mail size={13} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                          <span className="break-all">{g.email || "—"}</span>
+                        </div>
+                        <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
+                          <Phone size={13} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                          <span className="break-words">{g.contact_number || "—"}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1565C0] mb-1">Devices</p>
                           <DevicesCell devices={g.devices} />
-                        </td>
-
-                        {/* VIPs */}
-                        <td className="px-5 py-4">
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#1565C0] mb-1">VIPs</p>
                           {g.vips && g.vips.length > 0 ? (
                             <div className="flex flex-wrap gap-1.5">
                               {g.vips.slice(0, 2).map((v) => (
                                 <span
                                   key={v.vip_id}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-100 whitespace-nowrap"
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-100"
                                 >
                                   <Users size={10} />
-                                  {v.first_name} {v.last_name}
+                                  <span className="max-w-[160px] truncate">{v.first_name} {v.last_name}</span>
                                 </span>
                               ))}
                               {g.vips.length > 2 && (
@@ -333,36 +421,129 @@ export default function ManageGuardian() {
                           ) : (
                             <span className="text-xs text-gray-400 italic">No VIPs</span>
                           )}
-                        </td>
+                        </div>
+                      </div>
 
-                        {/* Location */}
-                        <td className="px-5 py-4">
-                          <p className="text-sm text-gray-700">
-                            {[g.city, g.province].filter(Boolean).join(", ") || (
-                              <span className="text-xs text-gray-400 italic">—</span>
-                            )}
-                          </p>
-                        </td>
+                      <div className="mt-3 text-xs sm:text-sm text-gray-700">
+                        <span className="font-medium text-gray-500">Location: </span>
+                        {[g.city, g.province].filter(Boolean).join(", ") || "—"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-                        {/* Joined date */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
-                            <Calendar size={12} className="flex-shrink-0" />
-                            {g.created_at
-                              ? new Date(g.created_at).toLocaleDateString("en-PH", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })
-                              : "—"}
-                          </div>
-                        </td>
+                {/* Desktop table */}
+                <div className="hidden xl:block overflow-x-auto">
+                  <table className="w-full min-w-[920px]">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
+                        {[
+                          "Guardian",
+                          "Contact",
+                          "Devices",
+                          "VIPs",
+                          "Location",
+                          "Joined",
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
+                          >
+                            {h}
+                          </th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+                    </thead>
+                    <tbody>
+                      {guardians.map((g, i) => (
+                        <tr
+                          key={g.guardian_id}
+                          className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors
+                            ${i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
+                        >
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
+                                <ShieldCheck size={14} className="text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
+                                  {g.first_name} {g.last_name}
+                                </p>
+                                <p className="text-xs text-gray-400">@{g.username}</p>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                                <Mail size={11} className="text-gray-400 flex-shrink-0" />
+                                <span className="truncate max-w-[180px]">{g.email}</span>
+                              </div>
+                              {g.contact_number && (
+                                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                                  <Phone size={11} className="text-gray-400 flex-shrink-0" />
+                                  {g.contact_number}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <DevicesCell devices={g.devices} />
+                          </td>
+
+                          <td className="px-5 py-4">
+                            {g.vips && g.vips.length > 0 ? (
+                              <div className="flex flex-wrap gap-1.5">
+                                {g.vips.slice(0, 2).map((v) => (
+                                  <span
+                                    key={v.vip_id}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-100 whitespace-nowrap"
+                                  >
+                                    <Users size={10} />
+                                    {v.first_name} {v.last_name}
+                                  </span>
+                                ))}
+                                {g.vips.length > 2 && (
+                                  <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">
+                                    +{g.vips.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-gray-400 italic">No VIPs</span>
+                            )}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <p className="text-sm text-gray-700">
+                              {[g.city, g.province].filter(Boolean).join(", ") || (
+                                <span className="text-xs text-gray-400 italic">—</span>
+                              )}
+                            </p>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
+                              <Calendar size={12} className="flex-shrink-0" />
+                              {g.created_at
+                                ? new Date(g.created_at).toLocaleDateString("en-PH", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                : "—"}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
           </div>
 
         </div>

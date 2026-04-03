@@ -9,6 +9,7 @@ import ManageVip from "./pages/ManageVip";
 import ManageAdmin from "./pages/ManageAdmin";
 import ManageEmergencyLogs from "./pages/ManageEmergencyLogs"; 
 import GuardianConcerns from "./pages/GuardianConcerns"; 
+import ManageActionHistory from "./pages/ManageActionHistory";
 import Profile from "./pages/Profile";
 import './index.css'
 
@@ -28,6 +29,7 @@ export default function App() {
             <Route path="admins" element={<ManageAdmin />} />
             <Route path="emergency-logs" element={<ManageEmergencyLogs />} />
             <Route path="guardian-concerns" element={<GuardianConcerns />} />
+            <Route path="action-history" element={<ManageActionHistory />} />
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
