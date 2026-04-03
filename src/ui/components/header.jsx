@@ -1,15 +1,20 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
-import icaneLogo from "../../assets/images/smartcane-logo.png";
+import api from "../../api/client";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
-  const dropdownRef = useRef(null);
+  const profileDropdownRef = useRef(null);
+  const notifDropdownRef = useRef(null);
   const navigate = useNavigate();
 
   const firstName = localStorage.getItem("first_name") || "Admin";
@@ -59,6 +64,25 @@ export default function Header() {
     fetchProfile();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const fetchNotifications = useCallback(async () => {
+    setNotifLoading(true);
+    try {
+      const res = await api.get("/api/notifications?limit=20");
+      if (res && res.ok) {
+        setNotifications(res.data.items || []);
+        setUnreadCount(res.data.unread_count || 0);
+      }
+    } finally {
+      setNotifLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+    const id = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(id);
+  }, [fetchNotifications]);
+
   // Listen for profile-updated event (e.g., after image upload/removal)
   useEffect(() => {
     const handleProfileUpdate = () => {
@@ -73,18 +97,28 @@ export default function Header() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
+      }
+      if (notifDropdownRef.current && !notifDropdownRef.current.contains(event.target)) {
+        setNotifOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const onUpdate = () => fetchNotifications();
+    window.addEventListener("notifications-updated", onUpdate);
+    return () => window.removeEventListener("notifications-updated", onUpdate);
+  }, [fetchNotifications]);
+
   const handleLogout = () => {
     localStorage.clear();
     setDropdownOpen(false);
-    navigate("/");
+    setNotifOpen(false);
+    navigate("/login", { replace: true });
   };
 
   const handleProfile = () => {
@@ -92,22 +126,143 @@ export default function Header() {
     navigate("/profile");
   };
 
+  const markReadAndGo = async (n) => {
+    try {
+      if (!n.is_read) {
+        await api.patch(`/api/notifications/${n.notification_id}/read`, {});
+      }
+    } finally {
+      setNotifOpen(false);
+      fetchNotifications();
+      if (n.link_path) navigate(n.link_path);
+    }
+  };
+
+  const markAllRead = async () => {
+    await api.patch("/api/notifications/read-all", {});
+    fetchNotifications();
+  };
+
+  const notifIcon = (type) => {
+    if (type === "guardian_concern") return "ph:warning-circle";
+    if (type === "admin_created") return "ph:user-plus";
+    if (type === "admin_setup_completed") return "ph:check-circle";
+    return "ph:bell";
+  };
+
+  const timeAgo = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const ms = Date.now() - d.getTime();
+    const s = Math.floor(ms / 1000);
+    if (s < 60) return "just now";
+    const m = Math.floor(s / 60);
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    const days = Math.floor(h / 24);
+    return `${days}d ago`;
+  };
+
   return (
     <header className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-50 shadow-sm">
-      -
+      <div className="text-white font-semibold tracking-wide">
+      
+      </div>
 
       {/* Right – Actions */}
       <div className="flex items-center gap-3 lg:gap-4">
-        {/* Notification bell (placeholder) */}
-        <button
-          className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors"
-          aria-label="Notifications"
-        >
-          <Icon icon="ph:bell" className="w-6 h-6" />
-        </button>
+        {/* Notifications */}
+        <div className="relative" ref={notifDropdownRef}>
+          <button
+            onClick={() => {
+              setNotifOpen((p) => !p);
+              fetchNotifications();
+            }}
+            className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+            aria-label="Notifications"
+          >
+            <Icon icon="ph:bell" className="w-6 h-6" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-primary-100">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {notifOpen && (
+            <div className="absolute right-0 top-12 w-[360px] animate-slideDown z-30">
+              <div className="relative bg-white rounded-2xl shadow-lg ring-1 ring-black/5 overflow-hidden">
+                <div className="absolute -top-3 right-3 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
+
+                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                  <div className="font-semibold text-gray-800">Notifications</div>
+                  <button
+                    onClick={markAllRead}
+                    className="text-xs font-semibold text-primary-100 hover:opacity-80"
+                    disabled={unreadCount === 0}
+                  >
+                    Mark all read
+                  </button>
+                </div>
+
+                <div className="max-h-[420px] overflow-y-auto">
+                  {notifLoading ? (
+                    <div className="p-5 text-sm text-gray-500">Loading…</div>
+                  ) : notifications.length === 0 ? (
+                    <div className="p-8 text-center text-sm text-gray-500">
+                      No notifications yet.
+                    </div>
+                  ) : (
+                    <div className="py-2">
+                      {notifications.map((n) => (
+                        <button
+                          key={n.notification_id}
+                          onClick={() => markReadAndGo(n)}
+                          className={`w-full px-5 py-3 text-left hover:bg-gray-50 transition-colors flex gap-3 ${
+                            n.is_read ? "bg-white" : "bg-blue-50/40"
+                          }`}
+                        >
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                            n.is_read ? "bg-gray-100 text-gray-700" : "bg-primary-100/10 text-primary-100"
+                          }`}>
+                            <Icon icon={notifIcon(n.type)} className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className={`text-sm font-semibold truncate ${n.is_read ? "text-gray-800" : "text-[#0f2a55]"}`}>
+                                {n.title}
+                              </div>
+                              <div className="text-[11px] text-gray-400 whitespace-nowrap">
+                                {timeAgo(n.created_at)}
+                              </div>
+                            </div>
+                            {n.body && (
+                              <div className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                                {n.body}
+                              </div>
+                            )}
+                            {!n.is_read && (
+                              <div className="mt-1">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-100">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary-100" />
+                                  New
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Profile dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative" ref={profileDropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
             className="flex items-center gap-2 p-1.5 rounded-full hover:bg-white/10 transition-colors"

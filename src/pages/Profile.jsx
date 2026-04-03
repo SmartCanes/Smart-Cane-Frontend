@@ -6,7 +6,6 @@ import Toast from "../ui/components/Toast"; // adjust path if needed
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Profile() {
-  // ── Profile data ─────────────────────────────────────
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({});
   const [isEditMode, setIsEditMode] = useState(false);
@@ -15,7 +14,6 @@ export default function Profile() {
   const [saveError, setSaveError] = useState("");
   const [originalProfile, setOriginalProfile] = useState(null);
 
-  // ── Toast state ─────────────────────────────────────
   const [toast, setToast] = useState({ message: "", type: "", visible: false });
 
   const showToast = (message, type = "info") => {
@@ -23,14 +21,12 @@ export default function Profile() {
     setTimeout(() => setToast({ message: "", type: "", visible: false }), 3000);
   };
 
-  // ── Image upload ─────────────────────────────────────
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [imageError, setImageError] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
-  // ── Email change OTP flow ────────────────────────────
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpTimer, setOtpTimer] = useState(300);
@@ -44,7 +40,6 @@ export default function Profile() {
   const [emailConflict, setEmailConflict] = useState(""); // inline error for email
   const otpInputRefs = useRef([]);
 
-  // ── Validation ───────────────────────────────────────
   const [errors, setErrors] = useState({
     first_name: "",
     middle_name: "",
@@ -58,7 +53,6 @@ export default function Profile() {
     street_address: "",
   });
 
-  // ── Fetch profile on mount ──────────────────────────
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -82,7 +76,6 @@ export default function Profile() {
     }
   };
 
-  // ── Handle form field changes ───────────────────────
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -110,7 +103,6 @@ export default function Profile() {
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  // ── Check if anything changed ────────────────────────
   const hasChanges = () => {
     if (!originalProfile) return false;
     const fields = Object.keys(form);
@@ -124,7 +116,6 @@ export default function Profile() {
 
   const hasValidationErrors = () => Object.values(errors).some((e) => e) || emailConflict;
 
-  // ── Edit / Cancel ───────────────────────────────────
   const handleEditProfile = () => {
     setOriginalProfile({ ...form, profile_image_url: profileImageUrl });
     setIsEditMode(true);
@@ -140,7 +131,6 @@ export default function Profile() {
     setEmailConflict("");
   };
 
-  // ── Save profile (with email change check) ───────────
   const handleSaveProfile = async (e) => {
     e.preventDefault();
 
@@ -335,7 +325,6 @@ export default function Profile() {
     }
   };
 
-  // ── Image upload handlers ─────────────────────────────
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -368,7 +357,6 @@ export default function Profile() {
     fileInputRef.current?.click();
   };
 
-  // ── OTP timer ───────────────────────────────────────
   useEffect(() => {
     let timer;
     if (showOTPModal && otpTimer > 0) {
@@ -381,7 +369,6 @@ export default function Profile() {
     return () => clearInterval(timer);
   }, [showOTPModal, otpTimer]);
 
-  // ── Helper for OTP input ────────────────────────────
   const handleOTPChange = (index, value) => {
     if (!/^\d?$/.test(value)) return;
     const newOtp = [...otp];
@@ -406,7 +393,6 @@ export default function Profile() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // ── Loading state ────────────────────────────────────
   if (!profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">

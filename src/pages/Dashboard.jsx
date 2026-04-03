@@ -11,7 +11,6 @@ import {
   LineChart, Line,
 } from "recharts";
 
-// ─── Config ──────────────────────────────────────────────
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const TOKEN = () => localStorage.getItem("access_token") || "";
 const authHeaders = () => ({
@@ -19,7 +18,6 @@ const authHeaders = () => ({
   Authorization: `Bearer ${TOKEN()}`,
 });
 
-// ─── Color palette ────────────────────────────────────────
 const BRAND      = "#11285A";
 const BRAND_SOFT = "rgba(17,40,90,0.06)";
 const BRAND_MID  = "rgba(17,40,90,0.07)";
@@ -41,7 +39,6 @@ const PIE_ADMIN  = ["#93b4e8", "#c4d8f5"];
 const PIE_DEVICE = ["#6ee7b7", "#fcd34d", "#fca5a5"];
 const PIE_INVITE = ["#fcd34d", "#6ee7b7", "#fca5a5", "#d1d5db"];
 
-// ─── Helpers ─────────────────────────────────────────────
 function ago(ts) {
   if (!ts) return "—";
   const diff = Date.now() - new Date(ts).getTime();
@@ -104,7 +101,6 @@ function buildPairedByMonth(devices) {
     });
 }
 
-// ─── Stat Card ───────────────────────────────────────────
 function StatCard({ label, value, icon, loading, sub }) {
   return (
     <div style={{
@@ -157,7 +153,6 @@ function StatCard({ label, value, icon, loading, sub }) {
   );
 }
 
-// ─── Section Card ─────────────────────────────────────────
 function SectionCard({ title, icon, children, action }) {
   return (
     <div style={{
@@ -178,7 +173,6 @@ function SectionCard({ title, icon, children, action }) {
   );
 }
 
-// ─── Custom Tooltip ───────────────────────────────────────
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
@@ -210,7 +204,6 @@ function EmptyState({ label }) {
   );
 }
 
-// ─── Main Dashboard ───────────────────────────────────────
 export default function Dashboard() {
   const firstName = localStorage.getItem("first_name") || "Admin";
   const lastName  = localStorage.getItem("last_name")  || "";
@@ -343,7 +336,6 @@ export default function Dashboard() {
         .filter-chip:hover { background: ${BRAND_SOFT} !important; }
       `}</style>
 
-      {/* ── Welcome Banner ── */}
       <div className="dash-row" style={{
         background: C.white,
         borderRadius: "16px",
@@ -369,7 +361,7 @@ export default function Dashboard() {
             {getGreeting()},
           </p>
           <h2 style={{ margin: "0 0 10px", fontSize: "22px", fontWeight: 800, color: C.text, letterSpacing: "-0.5px" }}>
-            {fullName} 👋
+            {fullName} 
           </h2>
           <span style={{
             display: "inline-block", fontSize: "11px", fontWeight: 700,
@@ -413,7 +405,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Stat Cards ── */}
       <div className="dash-row" style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))",
@@ -436,7 +427,6 @@ export default function Dashboard() {
         <StatCard label="Total Log Events" value={stats.totalLogs}       loading={loading} icon={<MapPin size={18} />}  sub="Device log entries" />
       </div>
 
-      {/* ── Charts Row 1: Pie Charts ── */}
       <div className="dash-row" style={{
         display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
         gap: "16px", marginBottom: "24px", animationDelay: "0.1s",
@@ -499,7 +489,6 @@ export default function Dashboard() {
         </SectionCard>
       </div>
 
-      {/* ── Charts Row 2: Bar + Line ── */}
       <div className="dash-row" style={{
         display: "grid", gridTemplateColumns: "1fr 1fr",
         gap: "16px", marginBottom: "24px", animationDelay: "0.15s",
@@ -544,7 +533,6 @@ export default function Dashboard() {
         </SectionCard>
       </div>
 
-      {/* ── Recent Logs ── */}
       <div className="dash-row" style={{ animationDelay: "0.2s" }}>
         <SectionCard
           title="Recent Device Logs"

@@ -15,9 +15,7 @@ import {
   Wifi,
 } from "lucide-react";
 
-// ─────────────────────────────────────────────
 //  Config & Auth Helpers
-// ─────────────────────────────────────────────
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const getToken = () => localStorage.getItem("access_token");
@@ -47,9 +45,7 @@ const apiFetch = async (path, options = {}) => {
   return data;
 };
 
-// ─────────────────────────────────────────────
 //  Toast
-// ─────────────────────────────────────────────
 const Toast = ({ toasts }) => (
   <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none">
     {toasts.map((t) => (
@@ -66,9 +62,7 @@ const Toast = ({ toasts }) => (
   </div>
 );
 
-// ─────────────────────────────────────────────
 //  Modal Wrapper
-// ─────────────────────────────────────────────
 const Modal = ({ isOpen, onClose, title, children }) => {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
@@ -99,9 +93,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   );
 };
 
-// ─────────────────────────────────────────────
 //  Confirm Delete Modal
-// ─────────────────────────────────────────────
 const ConfirmModal = ({ isOpen, onClose, onConfirm, deviceSerial, submitting }) => {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
@@ -155,9 +147,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, deviceSerial, submitting }) 
   );
 };
 
-// ─────────────────────────────────────────────
 //  Device Form (shared for Add & Edit)
-// ─────────────────────────────────────────────
 const SC_PREFIX = "SC-";
 
 const DeviceForm = ({ initialSerial = "", onSubmit, onCancel, submitting, submitLabel }) => {
@@ -233,9 +223,7 @@ const DeviceForm = ({ initialSerial = "", onSubmit, onCancel, submitting, submit
   );
 };
 
-// ─────────────────────────────────────────────
 //  Loading Skeleton
-// ─────────────────────────────────────────────
 const LoadingSkeleton = () => (
   <div className="p-5 space-y-3">
     {[...Array(6)].map((_, i) => (
@@ -252,9 +240,7 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-// ─────────────────────────────────────────────
 //  Main Component
-// ─────────────────────────────────────────────
 export default function ManageDevice() {
   const [devices, setDevices]   = useState([]);
   const [loading, setLoading]   = useState(true);
@@ -262,7 +248,6 @@ export default function ManageDevice() {
   const role                    = getRole();
   const isSuperAdmin            = role === "super_admin";
 
-  // ── Modal State ──────────────────────────────
   const [addModal, setAddModal]     = useState(false);
   const [addSubmitting, setAddSubmitting] = useState(false);
 
@@ -272,14 +257,12 @@ export default function ManageDevice() {
   const [deleteModal, setDeleteModal] = useState({ open: false, device: null });
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
-  // ── Toast ─────────────────────────────────────
   const showToast = useCallback((message, type = "success") => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
   }, []);
 
-  // ── Fetch ─────────────────────────────────────
   const fetchDevices = useCallback(async () => {
     setLoading(true);
     try {
@@ -296,7 +279,6 @@ export default function ManageDevice() {
     fetchDevices();
   }, [fetchDevices]);
 
-  // ── Add ───────────────────────────────────────
   const handleAdd = async (form) => {
     setAddSubmitting(true);
     try {
@@ -314,7 +296,6 @@ export default function ManageDevice() {
     }
   };
 
-  // ── Edit ──────────────────────────────────────
   const handleEdit = async (form) => {
     setEditSubmitting(true);
     try {
@@ -332,7 +313,6 @@ export default function ManageDevice() {
     }
   };
 
-  // ── Delete ────────────────────────────────────
   const handleDelete = async () => {
     setDeleteSubmitting(true);
     try {
@@ -349,14 +329,11 @@ export default function ManageDevice() {
     }
   };
 
-  // ── Stats ─────────────────────────────────────
   const totalDevices  = devices.length;
   const pairedCount   = devices.filter((d) => d.is_paired).length;
   const activeCount   = devices.filter((d) => d.status === "active").length;
 
-  // ─────────────────────────────────────────────
   //  Render
-  // ─────────────────────────────────────────────
   return (
     <>
       {/* Keyframe for toast slide-in */}
@@ -369,7 +346,6 @@ export default function ManageDevice() {
 
       <Toast toasts={toasts} />
 
-      {/* ── Add Device Modal ── */}
       <Modal isOpen={addModal} onClose={() => setAddModal(false)} title="Register New Device">
         <DeviceForm
           initialSerial=""
@@ -380,7 +356,6 @@ export default function ManageDevice() {
         />
       </Modal>
 
-      {/* ── Edit Device Modal ── */}
       <Modal
         isOpen={editModal.open}
         onClose={() => setEditModal({ open: false, device: null })}
@@ -395,7 +370,6 @@ export default function ManageDevice() {
         />
       </Modal>
 
-      {/* ── Delete Confirm Modal ── */}
       <ConfirmModal
         isOpen={deleteModal.open}
         onClose={() => setDeleteModal({ open: false, device: null })}
@@ -404,7 +378,6 @@ export default function ManageDevice() {
         submitting={deleteSubmitting}
       />
 
-      {/* ── Page ── */}
       <div className="min-h-screen bg-[#f9fafb] px-2 sm:px-4 py-4 sm:py-6">
         <div className="space-y-6">
 

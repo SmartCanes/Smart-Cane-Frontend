@@ -9,12 +9,14 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
+  MapPin,
+  Siren,
+  PersonStanding,
+  Activity,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-// ─────────────────────────────────────────────
-//  Config & Auth Helpers
-// ─────────────────────────────────────────────
+//  Config & Auth
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const getToken = () => localStorage.getItem("access_token");
 
@@ -32,9 +34,7 @@ const apiFetch = async (path, options = {}) => {
   return data;
 };
 
-// ─────────────────────────────────────────────
 //  Toast
-// ─────────────────────────────────────────────
 const Toast = ({ toasts }) => (
   <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none">
     {toasts.map((t) => (
@@ -51,9 +51,7 @@ const Toast = ({ toasts }) => (
   </div>
 );
 
-// ─────────────────────────────────────────────
 //  Loading Skeleton
-// ─────────────────────────────────────────────
 const LoadingSkeleton = () => (
   <div className="p-5 space-y-3">
     {[...Array(5)].map((_, i) => (
@@ -61,21 +59,19 @@ const LoadingSkeleton = () => (
         <div className="h-9 bg-gray-100 rounded-xl w-44 flex-shrink-0" />
         <div className="h-9 bg-gray-100 rounded-xl w-40" />
         <div className="h-6 bg-gray-100 rounded-full w-44" />
-        <div className="h-6 bg-gray-100 rounded-full w-56" />
+        <div className="h-6 bg-gray-100 rounded-full w-32" />
+        <div className="h-6 bg-gray-100 rounded-full w-48" />
+        <div className="h-6 bg-gray-100 rounded-full w-36" />
       </div>
     ))}
   </div>
 );
 
-// ─────────────────────────────────────────────
-//  Stat Card (reused)
-// ─────────────────────────────────────────────
+//  Stat Card
 function StatCard({ label, value, icon, loading, sub }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 shadow-sm">
-      <div className="p-3 bg-red-50 rounded-xl shadow-sm">
-        {icon}
-      </div>
+      <div className="p-3 bg-red-50 rounded-xl shadow-sm">{icon}</div>
       <div>
         <p className="text-sm text-gray-500 font-medium">{label}</p>
         {loading ? (
@@ -89,13 +85,32 @@ function StatCard({ label, value, icon, loading, sub }) {
   );
 }
 
-// ─────────────────────────────────────────────
+//  Emergency Type Badge
+function EmergencyBadge({ type }) {
+  const isFall = type === "FALL";
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border whitespace-nowrap
+        ${isFall
+          ? "bg-orange-50 text-orange-700 border-orange-200"
+          : "bg-red-50 text-red-700 border-red-200"
+        }`}
+    >
+      {isFall ? (
+        <PersonStanding size={12} />
+      ) : (
+        <Siren size={12} />
+      )}
+      {isFall ? "Fall Detected" : "SOS / Emergency"}
+    </span>
+  );
+}
+
 //  Main Component
-// ─────────────────────────────────────────────
 export default function ManageEmergencyLogs() {
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs]       = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts]   = useState([]);
 
   const showToast = useCallback((message, type = "error") => {
     const id = Date.now();
@@ -106,9 +121,8 @@ export default function ManageEmergencyLogs() {
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      // Replace with your actual endpoint that returns emergency logs with full details
       const data = await apiFetch("/api/emergency-logs/");
-      setLogs(data);
+      setLogs(Array.isArray(data) ? data : []);
     } catch (err) {
       showToast(err.message || "Failed to load emergency logs", "error");
     } finally {
@@ -116,13 +130,12 @@ export default function ManageEmergencyLogs() {
     }
   }, [showToast]);
 
-  useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+  useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
-  // Stats
   const totalEmergencies = logs.length;
-  const uniqueDevices = new Set(logs.map(l => l.device_serial_number)).size;
+  const totalSOS   = logs.filter((l) => l.emergency_type === "EMERGENCY").length;
+  const totalFalls  = logs.filter((l) => l.emergency_type === "FALL").length;
+  const uniqueDevices = new Set(logs.map((l) => l.device_serial_number)).size;
 
   return (
     <>
@@ -143,7 +156,7 @@ export default function ManageEmergencyLogs() {
             <div>
               <h2 className="text-2xl font-bold text-[#1a2e4a]">Emergency Logs</h2>
               <p className="text-gray-500 text-sm mt-0.5">
-                View all SOS alerts and device‑down events.
+                All SOS alerts and fall detection events from paired canes.
               </p>
             </div>
             <button
@@ -157,24 +170,38 @@ export default function ManageEmergencyLogs() {
           </div>
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              label="Total Emergencies"
+              label="Total Events"
               value={totalEmergencies}
               loading={loading}
-              icon={<AlertTriangle size={22} className="text-red-600" />}
+              icon={<Activity size={22} className="text-red-600" />}
               sub="All time"
+            />
+            <StatCard
+              label="SOS / Emergency"
+              value={totalSOS}
+              loading={loading}
+              icon={<Siren size={22} className="text-red-600" />}
+              sub="Button triggered"
+            />
+            <StatCard
+              label="Fall Detected"
+              value={totalFalls}
+              loading={loading}
+              icon={<PersonStanding size={22} className="text-orange-500" />}
+              sub="Auto-detected"
             />
             <StatCard
               label="Affected Devices"
               value={uniqueDevices}
               loading={loading}
               icon={<Cpu size={22} className="text-red-600" />}
-              sub="Unique devices"
+              sub="Unique canes"
             />
           </div>
 
-          {/* Table Card */}
+          {/* Table */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-semibold text-[#1a2e4a]">Emergency Events</h3>
@@ -191,14 +218,21 @@ export default function ManageEmergencyLogs() {
                   <AlertTriangle size={52} className="mb-4 text-gray-200" />
                   <p className="text-lg font-semibold text-gray-500">No emergency logs found</p>
                   <p className="text-sm mt-1 text-gray-400">
-                    SOS or device‑down events will appear here.
+                    SOS or fall detection events will appear here.
                   </p>
                 </div>
               ) : (
-                <table className="w-full min-w-[800px]">
+                <table className="w-full min-w-[960px]">
                   <thead>
                     <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
-                      {["Cane Serial Number", "Assigned VIP", "Guardians", "Emergency Logs", "Timestamp"].map((h) => (
+                      {[
+                        "Device (Serial)",
+                        "Assigned VIP",
+                        "Guardians",
+                        "Emergency",
+                        "Last Location",
+                        "Date",
+                      ].map((h) => (
                         <th
                           key={h}
                           className="px-5 py-3.5 text-left text-xs font-semibold text-[#1565C0] uppercase tracking-wider whitespace-nowrap"
@@ -212,10 +246,10 @@ export default function ManageEmergencyLogs() {
                     {logs.map((log, idx) => (
                       <tr
                         key={log.id || idx}
-                        className={`border-t border-gray-50 hover:bg-red-50/10 transition-colors
+                        className={`border-t border-gray-50 hover:bg-red-50/20 transition-colors
                           ${idx % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
                       >
-                        {/* Serial Number */}
+                        {/* Device Serial */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-2.5">
                             <div className="p-1.5 bg-blue-50 rounded-lg flex-shrink-0">
@@ -252,7 +286,8 @@ export default function ManageEmergencyLogs() {
                                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap
                                     ${g.role === "primary"
                                       ? "bg-pink-50 text-pink-700 border-pink-200"
-                                      : "bg-blue-50 text-blue-700 border-blue-100"}`}
+                                      : "bg-blue-50 text-blue-700 border-blue-100"
+                                    }`}
                                 >
                                   <User size={10} />
                                   {g.first_name}
@@ -272,15 +307,36 @@ export default function ManageEmergencyLogs() {
                           )}
                         </td>
 
-                        {/* Log Message */}
+                        {/* Emergency Type */}
                         <td className="px-5 py-4">
-                          <div className="flex items-start gap-2">
-                            <AlertTriangle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-gray-700">{log.log_message}</span>
+                          <div className="flex flex-col gap-1.5">
+                            <EmergencyBadge type={log.emergency_type} />
+                            {log.log_message && (
+                              <p className="text-xs text-gray-500 max-w-[200px] line-clamp-2">
+                                {log.log_message}
+                              </p>
+                            )}
                           </div>
                         </td>
 
-                        {/* Timestamp */}
+                        {/* Last Location */}
+                        <td className="px-5 py-4">
+                          {log.last_location ? (
+                            <div className="flex items-start gap-1.5 max-w-[200px]">
+                              <MapPin size={13} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                              <span className="text-sm text-gray-700 leading-snug">
+                                {log.last_location}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5">
+                              <WifiOff size={13} className="text-gray-300" />
+                              <span className="text-xs text-gray-400 italic">No location data</span>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Date */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
                             <Clock size={12} className="flex-shrink-0" />
@@ -288,6 +344,19 @@ export default function ManageEmergencyLogs() {
                               ? formatDistanceToNow(new Date(log.created_at), { addSuffix: true })
                               : "—"}
                           </div>
+                          {log.created_at && (
+                            <p className="text-[10px] text-gray-400 mt-0.5 pl-4">
+                              {new Date(log.created_at).toLocaleString("en-PH", {
+                                timeZone: "Asia/Manila",
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                                hour12: true,
+                              })}
+                            </p>
+                          )}
                         </td>
                       </tr>
                     ))}

@@ -11,9 +11,7 @@ import {
   User,
 } from "lucide-react";
 
-// ─────────────────────────────────────────────
 //  Config & Auth Helpers
-// ─────────────────────────────────────────────
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const getToken = () => localStorage.getItem("access_token");
 
@@ -31,9 +29,7 @@ const apiFetch = async (path, options = {}) => {
   return data;
 };
 
-// ─────────────────────────────────────────────
 //  Toast
-// ─────────────────────────────────────────────
 const Toast = ({ toasts }) => (
   <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none">
     {toasts.map((t) => (
@@ -50,9 +46,7 @@ const Toast = ({ toasts }) => (
   </div>
 );
 
-// ─────────────────────────────────────────────
 //  Loading Skeleton
-// ─────────────────────────────────────────────
 const LoadingSkeleton = () => (
   <div className="p-5 space-y-3">
     {[...Array(6)].map((_, i) => (
@@ -68,9 +62,7 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-// ─────────────────────────────────────────────
 //  Main Component
-// ─────────────────────────────────────────────
 export default function ManageVip() {
   const [vips, setVips]       = useState([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +90,6 @@ export default function ManageVip() {
     fetchVips();
   }, [fetchVips]);
 
-  // ── Stats ──────────────────────────────────
   const totalVips       = vips.length;
   const withDevices     = vips.filter((v) => v.devices?.length > 0).length;
   const withGuardians   = vips.filter((v) => v.guardians?.length > 0).length;

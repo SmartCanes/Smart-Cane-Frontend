@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { Plus, Pencil, Trash2, ShieldCheck, UserCog } from "lucide-react";
 import TextField from "../ui/components/TextField";
 import SelectField from "../ui/components/SelectField";
+import PasswordField from "../ui/components/PasswordField";
 import Toast from "../ui/components/Toast";
 import api from "../api/client";
 
@@ -40,26 +41,22 @@ export default function ManageAdmin() {
     setTimeout(() => setToast({ message: "", type: "", visible: false }), 3000);
   };
 
-  // ── Add modal state ──
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState(emptyForm);
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [addError, setAddError] = useState("");
 
-  // ── Edit modal state ──
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState(emptyForm);
   const [editTarget, setEditTarget] = useState(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
 
-  // ── Delete modal state ──
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
-  // ── Auth guard modal ──
   const [showAuthGuard, setShowAuthGuard] = useState(false);
 
   const role = localStorage.getItem("role") || "";
@@ -76,7 +73,6 @@ export default function ManageAdmin() {
     setLoading(false);
   }
 
-  // ── Add handlers ────────────────────────────────────────────
   const handleAddChange = (e) => {
     setAddForm(f => ({ ...f, [e.target.name]: e.target.value }));
   };
@@ -112,7 +108,6 @@ export default function ManageAdmin() {
     setShowAddModal(true);
   };
 
-  // ── Edit handlers ───────────────────────────────────────────
   const handleEditChange = (e) => {
     setEditForm(f => ({ ...f, [e.target.name]: e.target.value }));
   };
@@ -163,7 +158,6 @@ export default function ManageAdmin() {
     }
   };
 
-  // ── Delete handlers ─────────────────────────────────────────
   const openDeleteModal = (admin) => {
     if (!isSuperAdmin) {
       setShowAuthGuard(true);
@@ -195,7 +189,6 @@ export default function ManageAdmin() {
     }
   };
 
-  // ── Helper for stats ───────────────────────────────────────
   const totalAdmins = admins.length;
   const superAdmins = admins.filter(a => a.role === "super_admin").length;
   const pendingSetup = admins.filter(a => a.is_first_login).length;
@@ -367,8 +360,6 @@ export default function ManageAdmin() {
         </div>
       </div>
 
-      {/* ── ADD MODAL (Redesigned) ── */}
-      {/* ── ADD MODAL (Row-based layout, centered, scrollable) ── */}
 {showAddModal && (
   <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
@@ -430,10 +421,9 @@ export default function ManageAdmin() {
             placeholder="juandelacruz"
             required
           />
-          <TextField
+          <PasswordField
             label="Password"
             name="password"
-            type="password"
             value={addForm.password}
             onChange={handleAddChange}
             placeholder="Temporary password"
@@ -527,7 +517,6 @@ export default function ManageAdmin() {
   </div>
 )}
 
-{/* ── EDIT MODAL (Row-based layout, centered, scrollable) ── */}
 {showEditModal && editTarget && (
   <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
@@ -688,7 +677,6 @@ export default function ManageAdmin() {
   </div>
 )}
 
-      {/* ── DELETE MODAL (unchanged) ── */}
       {showDeleteModal && deleteTarget && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
@@ -737,7 +725,6 @@ export default function ManageAdmin() {
         </div>
       )}
 
-      {/* ── AUTH GUARD MODAL (unchanged) ── */}
       {showAuthGuard && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
