@@ -7,6 +7,7 @@ import FallOverlay from "@/ui/components/FallOverlay";
 import Header from "@/ui/components/Header";
 import ImportantNotificationsBridge from "@/ui/components/ImportantNotificationsBridge";
 import PushNotificationsBridge from "@/ui/components/PushNotificationsBridge";
+import ConcernComposer from "@/ui/components/ConcernComposer";
 import TourGuide from "@/ui/components/TourGuide";
 import { createContext, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
@@ -14,12 +15,20 @@ import { Outlet, useLocation } from "react-router-dom";
 const ScrollContext = createContext();
 
 const DashboardLayoutContent = () => {
-  const { setUser } = useUserStore();
+  const { setUser, user } = useUserStore();
   const { emergency, fall, connectWs, disconnectWs } = useRealtimeStore();
   const location = useLocation();
   const { showToast, clearToast } = useToast();
   const [showNav, setShowNav] = useState(true);
   const lastScrollY = useRef(0);
+
+  const prefillConcernName =
+    [user?.first_name, user?.middle_name, user?.last_name]
+      .filter(Boolean)
+      .join(" ")
+      .trim() ||
+    user?.username ||
+    "";
 
   useEffect(() => {
     connectWs();
@@ -121,6 +130,14 @@ const DashboardLayoutContent = () => {
             <Outlet />
           </main>
         </div>
+
+        <ConcernComposer
+          mode="floating"
+          sourceKey="guardian-dashboard"
+          prefillName={prefillConcernName}
+          prefillEmail={user?.email || ""}
+          lockEmail={Boolean(user?.email)}
+        />
       </div>
     </ScrollContext.Provider>
   );
