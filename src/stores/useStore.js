@@ -21,6 +21,8 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { useRouteStore } from "./useRouteStore";
 
+export { useRouteStore };
+
 const ensureSerialPrefix = (serial) => {
   if (!serial) return null;
 

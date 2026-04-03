@@ -13,9 +13,9 @@ export const TOUR_STEPS = {
   "/dashboard": [
     {
       target: "tour-vip-dropdown",
-      title: "Switch Your VIP",
+      title: "Care Profile Selector",
       description:
-        "Use this dropdown to switch between your paired iCane devices. Each device is assigned to a specific VIP.",
+        "Use this dropdown to choose the person profile you want to assist. Each profile is linked to a paired iCane device.",
       position: "bottom",
       icon: "streamline-plump:user-pin-remix"
     },
