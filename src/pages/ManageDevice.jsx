@@ -94,7 +94,18 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 
 //  Confirm Delete Modal
-const ConfirmModal = ({ isOpen, onClose, onConfirm, deviceSerial, submitting }) => {
+const ConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  deviceSerial,
+  submitting,
+  reasonCode,
+  reasonText,
+  onReasonCodeChange,
+  onReasonTextChange,
+  error,
+}) => {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
@@ -117,6 +128,37 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, deviceSerial, submitting }) 
               <span className="font-semibold text-gray-700">{deviceSerial}</span> and
               all its associated data. This action cannot be undone.
             </p>
+          </div>
+          <div className="w-full space-y-3 text-left">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+              <select
+                value={reasonCode}
+                onChange={(e) => onReasonCodeChange(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+              >
+                <option value="">Select reason</option>
+                <option value="duplicate_device">Duplicate device record</option>
+                <option value="invalid_registration">Invalid registration</option>
+                <option value="decommissioned">Decommissioned device</option>
+                <option value="test_data_cleanup">Test data cleanup</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Details</label>
+              <textarea
+                value={reasonText}
+                onChange={(e) => onReasonTextChange(e.target.value)}
+                rows={3}
+                placeholder="Explain why this device needs to be deleted..."
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+              />
+              <p className="mt-1 text-xs text-gray-500">Minimum 10 characters.</p>
+            </div>
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
           </div>
           <div className="flex gap-3 w-full pt-1">
             <button
@@ -245,6 +287,21 @@ export default function ManageDevice() {
   const [devices, setDevices]   = useState([]);
   const [loading, setLoading]   = useState(true);
   const [toasts, setToasts]     = useState([]);
+  const [isDesktopPreviewMode, setIsDesktopPreviewMode] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 1280 : true
+  );
+  const [guardianHoverPreview, setGuardianHoverPreview] = useState({
+    open: false,
+    x: 0,
+    y: 0,
+    title: "",
+    guardians: [],
+  });
+  const [guardianClickPreview, setGuardianClickPreview] = useState({
+    open: false,
+    title: "",
+    guardians: [],
+  });
   const role                    = getRole();
   const isSuperAdmin            = role === "super_admin";
 
@@ -256,6 +313,9 @@ export default function ManageDevice() {
 
   const [deleteModal, setDeleteModal] = useState({ open: false, device: null });
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteReasonCode, setDeleteReasonCode] = useState("");
+  const [deleteReasonText, setDeleteReasonText] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
   const showToast = useCallback((message, type = "success") => {
     const id = Date.now();
@@ -278,6 +338,57 @@ export default function ManageDevice() {
   useEffect(() => {
     fetchDevices();
   }, [fetchDevices]);
+
+  useEffect(() => {
+    const onResize = () => {
+      const nextDesktopMode = window.innerWidth >= 1280;
+      setIsDesktopPreviewMode(nextDesktopMode);
+      if (!nextDesktopMode) {
+        setGuardianHoverPreview((prev) => ({ ...prev, open: false }));
+      }
+    };
+
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const openGuardianHoverPreview = (event, title, guardians) => {
+    if (!isDesktopPreviewMode || !guardians.length) return;
+
+    const panelWidth = 320;
+    const panelHeight = 240;
+    const x = Math.min(event.clientX + 12, window.innerWidth - panelWidth - 12);
+    const y = Math.min(event.clientY + 12, window.innerHeight - panelHeight - 12);
+
+    setGuardianHoverPreview({
+      open: true,
+      x,
+      y,
+      title,
+      guardians,
+    });
+  };
+
+  const closeGuardianHoverPreview = () => {
+    setGuardianHoverPreview((prev) => ({ ...prev, open: false }));
+  };
+
+  const openGuardianClickPreview = (title, guardians) => {
+    if (!guardians.length) return;
+    setGuardianClickPreview({
+      open: true,
+      title,
+      guardians,
+    });
+  };
+
+  const closeGuardianClickPreview = () => {
+    setGuardianClickPreview({
+      open: false,
+      title: "",
+      guardians: [],
+    });
+  };
 
   const handleAdd = async (form) => {
     setAddSubmitting(true);
@@ -313,17 +424,50 @@ export default function ManageDevice() {
     }
   };
 
+  const openDeleteModal = (device) => {
+    if (device?.is_paired) {
+      showToast("Cannot delete this device because it is already paired.", "error");
+      return;
+    }
+
+    setDeleteReasonCode("");
+    setDeleteReasonText("");
+    setDeleteError("");
+    setDeleteModal({ open: true, device });
+  };
+
   const handleDelete = async () => {
+    if (!deleteModal.device) return;
+
+    setDeleteError("");
+    if (!deleteReasonCode) {
+      setDeleteError("Please select a reason for deletion.");
+      return;
+    }
+    if (deleteReasonText.trim().length < 10) {
+      setDeleteError("Please provide at least 10 characters explaining the deletion.");
+      return;
+    }
+
     setDeleteSubmitting(true);
     try {
       await apiFetch(`/api/devices/${deleteModal.device.device_id}`, {
         method: "DELETE",
+        body: JSON.stringify({
+          reason_code: deleteReasonCode,
+          reason_text: deleteReasonText.trim(),
+        }),
       });
       showToast("Device deleted successfully");
       setDeleteModal({ open: false, device: null });
+      setDeleteReasonCode("");
+      setDeleteReasonText("");
+      setDeleteError("");
       fetchDevices();
     } catch (err) {
-      showToast(err.message, "error");
+      const message = err.message || "Failed to delete device";
+      setDeleteError(message);
+      showToast(message, "error");
     } finally {
       setDeleteSubmitting(false);
     }
@@ -345,6 +489,69 @@ export default function ManageDevice() {
       `}</style>
 
       <Toast toasts={toasts} />
+
+      {guardianHoverPreview.open && isDesktopPreviewMode && (
+        <div
+          className="fixed z-[9998] w-[320px] max-w-[calc(100vw-24px)] rounded-xl border border-[#bfcef0] bg-white p-4 shadow-2xl pointer-events-none"
+          style={{ left: guardianHoverPreview.x, top: guardianHoverPreview.y }}
+        >
+          <p className="text-[11px] uppercase tracking-wide font-semibold text-[#1565C0]">
+            {guardianHoverPreview.title}
+          </p>
+          <div className="mt-2 max-h-[180px] overflow-y-auto space-y-1.5 pr-1">
+            {guardianHoverPreview.guardians.map((g) => (
+              <div
+                key={`hover-${g.guardian_id}`}
+                className="rounded-lg border border-gray-100 bg-[#fafcff] px-2.5 py-2"
+              >
+                <p className="text-xs font-semibold text-[#1a2e4a] break-words">
+                  {g.first_name} {g.last_name}
+                </p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Role: {g.role || "guardian"}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {guardianClickPreview.open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <button
+            type="button"
+            onClick={closeGuardianClickPreview}
+            className="absolute inset-0 bg-black/40"
+            aria-label="Close guardian list"
+          />
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-[#bfcef0] bg-white p-5 shadow-2xl">
+            <div className="flex items-center justify-between gap-3">
+              <h4 className="text-sm uppercase tracking-wide font-semibold text-[#1565C0]">
+                {guardianClickPreview.title}
+              </h4>
+              <button
+                type="button"
+                onClick={closeGuardianClickPreview}
+                className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="mt-3 max-h-[60vh] overflow-y-auto space-y-2 pr-1">
+              {guardianClickPreview.guardians.map((g) => (
+                <div
+                  key={`click-${g.guardian_id}`}
+                  className="rounded-xl border border-gray-100 bg-[#fafcff] px-3 py-2.5"
+                >
+                  <p className="text-sm font-semibold text-[#1a2e4a] break-words">
+                    {g.first_name} {g.last_name}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">Role: {g.role || "guardian"}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <Modal isOpen={addModal} onClose={() => setAddModal(false)} title="Register New Device">
         <DeviceForm
@@ -372,10 +579,20 @@ export default function ManageDevice() {
 
       <ConfirmModal
         isOpen={deleteModal.open}
-        onClose={() => setDeleteModal({ open: false, device: null })}
+        onClose={() => {
+          setDeleteModal({ open: false, device: null });
+          setDeleteReasonCode("");
+          setDeleteReasonText("");
+          setDeleteError("");
+        }}
         onConfirm={handleDelete}
         deviceSerial={deleteModal.device?.device_serial_number}
         submitting={deleteSubmitting}
+        reasonCode={deleteReasonCode}
+        reasonText={deleteReasonText}
+        onReasonCodeChange={setDeleteReasonCode}
+        onReasonTextChange={setDeleteReasonText}
+        error={deleteError}
       />
 
       <div className="min-h-screen bg-[#f9fafb] px-2 sm:px-4 py-4 sm:py-6">
@@ -569,9 +786,18 @@ export default function ManageDevice() {
                                   </span>
                                 ))}
                                 {d.guardians.length > 3 && (
-                                  <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      openGuardianClickPreview(
+                                        `${d.device_serial_number} - Other Guardians`,
+                                        d.guardians.slice(3)
+                                      )
+                                    }
+                                    className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center hover:bg-gray-200 transition-colors"
+                                  >
                                     +{d.guardians.length - 3}
-                                  </span>
+                                  </button>
                                 )}
                               </div>
                             ) : (
@@ -592,7 +818,7 @@ export default function ManageDevice() {
 
                           {isSuperAdmin && (
                             <button
-                              onClick={() => setDeleteModal({ open: true, device: d })}
+                              onClick={() => openDeleteModal(d)}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
                               title="Delete device"
                             >
@@ -693,9 +919,42 @@ export default function ManageDevice() {
                                     </span>
                                   ))}
                                   {d.guardians.length > 2 && (
-                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center">
+                                    <button
+                                      type="button"
+                                      onMouseEnter={(event) =>
+                                        openGuardianHoverPreview(
+                                          event,
+                                          `${d.device_serial_number} - Other Guardians`,
+                                          d.guardians.slice(2)
+                                        )
+                                      }
+                                      onMouseMove={(event) =>
+                                        openGuardianHoverPreview(
+                                          event,
+                                          `${d.device_serial_number} - Other Guardians`,
+                                          d.guardians.slice(2)
+                                        )
+                                      }
+                                      onMouseLeave={closeGuardianHoverPreview}
+                                      onFocus={(event) =>
+                                        openGuardianHoverPreview(
+                                          event,
+                                          `${d.device_serial_number} - Other Guardians`,
+                                          d.guardians.slice(2)
+                                        )
+                                      }
+                                      onBlur={closeGuardianHoverPreview}
+                                      onClick={() =>
+                                        openGuardianClickPreview(
+                                          `${d.device_serial_number} - Other Guardians`,
+                                          d.guardians.slice(2)
+                                        )
+                                      }
+                                      className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold self-center hover:bg-gray-200 transition-colors"
+                                      aria-label="Show other guardians"
+                                    >
                                       +{d.guardians.length - 2}
-                                    </span>
+                                    </button>
                                   )}
                                 </div>
                               ) : (
@@ -743,7 +1002,7 @@ export default function ManageDevice() {
 
                                 {isSuperAdmin && (
                                   <button
-                                    onClick={() => setDeleteModal({ open: true, device: d })}
+                                    onClick={() => openDeleteModal(d)}
                                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                                     title="Delete device"
                                   >

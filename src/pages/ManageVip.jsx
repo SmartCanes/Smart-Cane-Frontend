@@ -9,6 +9,7 @@ import {
   MapPin,
   Calendar,
   User,
+  X,
 } from "lucide-react";
 
 //  Config & Auth Helpers
@@ -67,6 +68,21 @@ export default function ManageVip() {
   const [vips, setVips]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts]   = useState([]);
+  const [isDesktopPreviewMode, setIsDesktopPreviewMode] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 1280 : true
+  );
+  const [guardianHoverPreview, setGuardianHoverPreview] = useState({
+    open: false,
+    x: 0,
+    y: 0,
+    title: "",
+    guardians: [],
+  });
+  const [guardianClickPreview, setGuardianClickPreview] = useState({
+    open: false,
+    title: "",
+    guardians: [],
+  });
 
   const showToast = useCallback((message, type = "error") => {
     const id = Date.now();
@@ -90,6 +106,57 @@ export default function ManageVip() {
     fetchVips();
   }, [fetchVips]);
 
+  useEffect(() => {
+    const onResize = () => {
+      const nextDesktopMode = window.innerWidth >= 1280;
+      setIsDesktopPreviewMode(nextDesktopMode);
+      if (!nextDesktopMode) {
+        setGuardianHoverPreview((prev) => ({ ...prev, open: false }));
+      }
+    };
+
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const openGuardianHoverPreview = (event, title, guardians) => {
+    if (!isDesktopPreviewMode || !guardians.length) return;
+
+    const panelWidth = 320;
+    const panelHeight = 240;
+    const x = Math.min(event.clientX + 12, window.innerWidth - panelWidth - 12);
+    const y = Math.min(event.clientY + 12, window.innerHeight - panelHeight - 12);
+
+    setGuardianHoverPreview({
+      open: true,
+      x,
+      y,
+      title,
+      guardians,
+    });
+  };
+
+  const closeGuardianHoverPreview = () => {
+    setGuardianHoverPreview((prev) => ({ ...prev, open: false }));
+  };
+
+  const openGuardianClickPreview = (title, guardians) => {
+    if (!guardians.length) return;
+    setGuardianClickPreview({
+      open: true,
+      title,
+      guardians,
+    });
+  };
+
+  const closeGuardianClickPreview = () => {
+    setGuardianClickPreview({
+      open: false,
+      title: "",
+      guardians: [],
+    });
+  };
+
   const totalVips       = vips.length;
   const withDevices     = vips.filter((v) => v.devices?.length > 0).length;
   const withGuardians   = vips.filter((v) => v.guardians?.length > 0).length;
@@ -104,6 +171,69 @@ export default function ManageVip() {
       `}</style>
 
       <Toast toasts={toasts} />
+
+      {guardianHoverPreview.open && isDesktopPreviewMode && (
+        <div
+          className="fixed z-[9998] w-[320px] max-w-[calc(100vw-24px)] rounded-xl border border-[#bfcef0] bg-white p-4 shadow-2xl pointer-events-none"
+          style={{ left: guardianHoverPreview.x, top: guardianHoverPreview.y }}
+        >
+          <p className="text-[11px] uppercase tracking-wide font-semibold text-[#1565C0]">
+            {guardianHoverPreview.title}
+          </p>
+          <div className="mt-2 max-h-[180px] overflow-y-auto space-y-1.5 pr-1">
+            {guardianHoverPreview.guardians.map((g) => (
+              <div
+                key={`hover-vip-guardian-${g.guardian_id}`}
+                className="rounded-lg border border-gray-100 bg-[#fafcff] px-2.5 py-2"
+              >
+                <p className="text-xs font-semibold text-[#1a2e4a] break-words">
+                  {g.first_name} {g.last_name}
+                </p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Role: {g.role || "guardian"}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {guardianClickPreview.open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <button
+            type="button"
+            onClick={closeGuardianClickPreview}
+            className="absolute inset-0 bg-black/40"
+            aria-label="Close guardian list"
+          />
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-[#bfcef0] bg-white p-5 shadow-2xl">
+            <div className="flex items-center justify-between gap-3">
+              <h4 className="text-sm uppercase tracking-wide font-semibold text-[#1565C0]">
+                {guardianClickPreview.title}
+              </h4>
+              <button
+                type="button"
+                onClick={closeGuardianClickPreview}
+                className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="mt-3 max-h-[60vh] overflow-y-auto space-y-2 pr-1">
+              {guardianClickPreview.guardians.map((g) => (
+                <div
+                  key={`click-vip-guardian-${g.guardian_id}`}
+                  className="rounded-xl border border-gray-100 bg-[#fafcff] px-3 py-2.5"
+                >
+                  <p className="text-sm font-semibold text-[#1a2e4a] break-words">
+                    {g.first_name} {g.last_name}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">Role: {g.role || "guardian"}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="min-h-screen bg-[#f9fafb] px-2 sm:px-4 py-4 sm:py-6">
         <div className="space-y-6">
@@ -289,9 +419,18 @@ export default function ManageVip() {
                                 </span>
                               ))}
                               {v.guardians.length > 3 && (
-                                <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openGuardianClickPreview(
+                                      `${v.first_name} ${v.last_name} - Other Guardians`,
+                                      v.guardians.slice(3)
+                                    )
+                                  }
+                                  className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold hover:bg-gray-200 transition-colors"
+                                >
                                   +{v.guardians.length - 3}
-                                </span>
+                                </button>
                               )}
                             </div>
                           ) : (
@@ -404,9 +543,42 @@ export default function ManageVip() {
                                     </span>
                                   ))}
                                   {v.guardians.length > 2 && (
-                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">
+                                    <button
+                                      type="button"
+                                      onMouseEnter={(event) =>
+                                        openGuardianHoverPreview(
+                                          event,
+                                          `${v.first_name} ${v.last_name} - Other Guardians`,
+                                          v.guardians.slice(2)
+                                        )
+                                      }
+                                      onMouseMove={(event) =>
+                                        openGuardianHoverPreview(
+                                          event,
+                                          `${v.first_name} ${v.last_name} - Other Guardians`,
+                                          v.guardians.slice(2)
+                                        )
+                                      }
+                                      onMouseLeave={closeGuardianHoverPreview}
+                                      onFocus={(event) =>
+                                        openGuardianHoverPreview(
+                                          event,
+                                          `${v.first_name} ${v.last_name} - Other Guardians`,
+                                          v.guardians.slice(2)
+                                        )
+                                      }
+                                      onBlur={closeGuardianHoverPreview}
+                                      onClick={() =>
+                                        openGuardianClickPreview(
+                                          `${v.first_name} ${v.last_name} - Other Guardians`,
+                                          v.guardians.slice(2)
+                                        )
+                                      }
+                                      className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold hover:bg-gray-200 transition-colors"
+                                      aria-label="Show other guardians"
+                                    >
                                       +{v.guardians.length - 2}
-                                    </span>
+                                    </button>
                                   )}
                                 </div>
                               ) : (

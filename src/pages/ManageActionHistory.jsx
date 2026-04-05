@@ -15,6 +15,7 @@ import api from "../api/client";
 const actionLabels = {
   admin_delete: "Admin Deletion",
   concern_delete: "Concern Deletion",
+  device_delete: "Device Deletion",
   role_change: "Role Change",
 };
 
@@ -182,8 +183,9 @@ export default function ManageActionHistory() {
   const stats = useMemo(() => {
     const adminDeletes = items.filter((i) => i.action_type === "admin_delete").length;
     const concernDeletes = items.filter((i) => i.action_type === "concern_delete").length;
+    const deviceDeletes = items.filter((i) => i.action_type === "device_delete").length;
     const roleChanges = items.filter((i) => i.action_type === "role_change").length;
-    return { adminDeletes, concernDeletes, roleChanges };
+    return { adminDeletes, concernDeletes, deviceDeletes, roleChanges };
   }, [items]);
 
   if (!isAllowed) {
@@ -261,7 +263,7 @@ export default function ManageActionHistory() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-5 flex items-center gap-4 shadow-sm">
             <div className="p-3 bg-blue-50 rounded-xl shadow-sm">
               <UserCog size={22} className="text-blue-600" />
@@ -278,6 +280,15 @@ export default function ManageActionHistory() {
             <div>
               <p className="text-sm text-gray-500 font-medium">Concern Deletions</p>
               <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">{stats.concernDeletes}</p>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-rose-50 to-red-50 rounded-2xl border border-rose-100 p-5 flex items-center gap-4 shadow-sm">
+            <div className="p-3 bg-rose-50 rounded-xl shadow-sm">
+              <ClipboardList size={22} className="text-rose-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Device Deletions</p>
+              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">{stats.deviceDeletes}</p>
             </div>
           </div>
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100 p-5 flex items-center gap-4 shadow-sm">
@@ -318,6 +329,7 @@ export default function ManageActionHistory() {
                 <option value="">All actions</option>
                 <option value="admin_delete">Admin deletion</option>
                 <option value="concern_delete">Concern deletion</option>
+                <option value="device_delete">Device deletion</option>
                 <option value="role_change">Role change</option>
               </select>
             </div>
@@ -401,12 +413,12 @@ export default function ManageActionHistory() {
 
                         <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3 space-y-2">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
-                            Deleted Concern Message
+                              Deleted Concern / Device
                           </p>
                           <div className="text-sm text-gray-700 break-words">
                             <PreviewValue
-                              text={item.deleted_concern_message || "-"}
-                              title="Deleted Concern Message"
+                                text={item.deleted_concern_message || item.deleted_device_serial || "-"}
+                                title="Deleted Concern / Device"
                               maxLength={90}
                               isDesktop={isDesktopPreviewMode}
                               onHoverShow={showHoverPreview}
@@ -443,7 +455,7 @@ export default function ManageActionHistory() {
                           "Actor",
                           "Reason",
                           "Deleted Admin",
-                          "Deleted Concern Message",
+                            "Deleted Concern / Device",
                           "Status",
                           "Created",
                         ].map((h) => (
@@ -501,8 +513,8 @@ export default function ManageActionHistory() {
                           <td className="px-5 py-4 text-sm text-gray-700">
                             <div className="max-w-[320px]">
                               <PreviewValue
-                                text={item.deleted_concern_message || "-"}
-                                title="Deleted Concern Message"
+                                text={item.deleted_concern_message || item.deleted_device_serial || "-"}
+                                title="Deleted Concern / Device"
                                 maxLength={70}
                                 isDesktop={isDesktopPreviewMode}
                                 onHoverShow={showHoverPreview}

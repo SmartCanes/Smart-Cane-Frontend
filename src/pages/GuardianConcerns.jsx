@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Mail,
   CheckCircle,
@@ -93,7 +93,7 @@ const extractConcernSource = (rawMessage = "") => {
 
   const sourceKey = (match[1] || "unknown").trim().toLowerCase();
   const cleanMessage = messageText.slice(match[0].length).trim();
-
+//if naka login yung guardian ay dashboard, pero pag guest, Guest page yung nakalagay
   const sourceMap = {
     "guest-landing": "Guest Page",
     "guardian-dashboard": "Dashboard",
@@ -179,6 +179,9 @@ export default function GuardianConcerns() {
   const [concerns, setConcerns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sourceFilter, setSourceFilter] = useState("all");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteReasonCode, setDeleteReasonCode] = useState("");
@@ -339,9 +342,54 @@ export default function GuardianConcerns() {
     setClickPreview({ open: false, title: "", content: "" });
   };
 
-  const total = concerns.length;
-  const unread = concerns.filter((c) => c.status === "unread").length;
-  const resolved = concerns.filter((c) => c.status === "resolved").length;
+  const sourceOptions = useMemo(() => {
+    const seen = new Set();
+    const options = [];
+
+    concerns.forEach((c) => {
+      const { sourceKey, sourceLabel } = extractConcernSource(c.message);
+      if (seen.has(sourceKey)) return;
+      seen.add(sourceKey);
+      options.push({ value: sourceKey, label: sourceLabel });
+    });
+
+    return options.sort((a, b) => a.label.localeCompare(b.label));
+  }, [concerns]);
+
+  const filteredConcerns = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+
+    return concerns.filter((c) => {
+      const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(c.message);
+
+      if (statusFilter !== "all" && c.status !== statusFilter) {
+        return false;
+      }
+
+      if (sourceFilter !== "all" && sourceKey !== sourceFilter) {
+        return false;
+      }
+
+      if (!q) return true;
+
+      const haystack = [
+        c.name,
+        c.email,
+        cleanMessage,
+        c.admin_reply || "",
+        sourceLabel,
+        sourceKey,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [concerns, searchTerm, statusFilter, sourceFilter]);
+
+  const total = filteredConcerns.length;
+  const unread = filteredConcerns.filter((c) => c.status === "unread").length;
+  const resolved = filteredConcerns.filter((c) => c.status === "resolved").length;
 
   //  Render
   if (!isAdmin) {
@@ -485,21 +533,71 @@ export default function GuardianConcerns() {
               </span>
             </div>
 
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+              <div className="w-full lg:max-w-md">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name, email, message, or source"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full sm:w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Status</option>
+                  <option value="unread">Unread</option>
+                  <option value="read">Read</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+
+                <select
+                  value={sourceFilter}
+                  onChange={(e) => setSourceFilter(e.target.value)}
+                  className="w-full sm:w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Source</option>
+                  {sourceOptions.map((source) => (
+                    <option key={source.value} value={source.value}>
+                      {source.label}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("all");
+                    setSourceFilter("all");
+                  }}
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
             <div>
               {loading ? (
                 <LoadingSkeleton />
-              ) : concerns.length === 0 ? (
+              ) : filteredConcerns.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <MessageSquare size={52} className="mb-4 text-gray-200" />
-                  <p className="text-lg font-semibold text-gray-500">No concerns yet</p>
+                  <p className="text-lg font-semibold text-gray-500">No concerns match your filters</p>
                   <p className="text-sm mt-1 text-gray-400">
-                    Guardian messages will appear here.
+                    Try clearing search or selecting a different status/source.
                   </p>
                 </div>
               ) : (
                 <>
                   <div className="xl:hidden divide-y divide-gray-100">
-                    {concerns.map((c) => (
+                    {filteredConcerns.map((c) => (
                       <div key={c.concern_id} className="p-4 sm:p-5 space-y-3">
                         {(() => {
                           const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(c.message);
@@ -656,7 +754,7 @@ export default function GuardianConcerns() {
                         </tr>
                       </thead>
                       <tbody>
-                        {concerns.map((c, i) => (
+                        {filteredConcerns.map((c, i) => (
                           <tr
                             key={c.concern_id}
                             className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors
