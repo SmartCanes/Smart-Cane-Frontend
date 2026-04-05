@@ -41,8 +41,9 @@ export default function Toast({
   const positionStyles = {
     "top-left": "top-22 left-4 sm:left-4",
     "top-right": "top-22 right-4 sm:right-4",
-    "bottom-left": "bottom-20 md:bottom-6 left-4",
-    "bottom-right": "bottom-20 md:bottom-6 right-4"
+
+    "bottom-left": "bottom-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom)+4.5rem)] md:bottom-24 left-4",
+    "bottom-right": "bottom-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom)+4.5rem)] md:bottom-24 right-4"
   };
 
   const icons = {
