@@ -204,6 +204,11 @@ class SocketAPI {
       this.emit("updatePiConfig", piPayload);
     });
   }
+
+  previewVoice(voicePayload) {
+    this.emit("previewVoice", voicePayload);
+    return true;
+  }
 }
 
 export const wsApi = new SocketAPI(() => {

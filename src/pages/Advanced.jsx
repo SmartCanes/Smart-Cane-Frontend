@@ -36,7 +36,23 @@ const fallbackConfig = {
     enabled: true,
     config: {
       volume: 0.3,
-      speechSpeed: 150
+      speechSpeed: 150,
+      navigation: {
+        voice: "default",
+        volume: 0.3,
+        speechSpeed: 150
+      },
+      visualRecognition: {
+        voice: "default",
+        language: "english",
+        volume: 0.3,
+        speechSpeed: 150
+      },
+      textToSpeech: {
+        voice: "default",
+        volume: 0.3,
+        speechSpeed: 150
+      }
     }
   },
 
@@ -256,13 +272,55 @@ const componentsData = [
   }
 ];
 
-const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
+const VoiceControlPanel = ({
+  isOnline,
+  deviceConfig,
+  onVoiceConfigChange,
+  onPreviewVoice
+}) => {
   const initialConfig = deviceConfig?.config ?? {};
+  const [activeVoiceType, setActiveVoiceType] = useState("navigation");
+  const [previewText, setPreviewText] = useState(
+    "This is a voice preview test."
+  );
+  const [isSendingPreview, setIsSendingPreview] = useState(false);
+
+  const espeakVoices = [
+    { id: "default", name: "Default", type: "default" },
+    { id: "+m1", name: "Male 1", type: "male" },
+    { id: "+m2", name: "Male 2", type: "male" },
+    { id: "+m3", name: "Male 3", type: "male" },
+    { id: "+m4", name: "Male 4", type: "male" },
+    { id: "+m5", name: "Male 5", type: "male" },
+    { id: "+m6", name: "Male 6", type: "male" },
+    { id: "+m7", name: "Male 7", type: "male" },
+    { id: "+f1", name: "Female 1", type: "female" },
+    { id: "+f2", name: "Female 2", type: "female" },
+    { id: "+f3", name: "Female 3", type: "female" },
+    { id: "+f4", name: "Female 4", type: "female" },
+    { id: "+f5", name: "Female 5", type: "female" }
+  ];
 
   const [localConfig, setLocalConfig] = useState({
     volume: initialConfig.volume ?? 0.3,
     speechSpeed: initialConfig.speechSpeed ?? 150,
-    muted: initialConfig.muted ?? false
+    muted: initialConfig.muted ?? false,
+    navigation: initialConfig.navigation ?? {
+      voice: "default",
+      volume: 0.3,
+      speechSpeed: 150
+    },
+    visualRecognition: initialConfig.visualRecognition ?? {
+      voice: "default",
+      language: "english",
+      volume: 0.3,
+      speechSpeed: 150
+    },
+    textToSpeech: initialConfig.textToSpeech ?? {
+      voice: "default",
+      volume: 0.3,
+      speechSpeed: 150
+    }
   });
 
   const debounceRef = useRef(null);
@@ -272,18 +330,32 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
     setLocalConfig({
       volume: deviceConfig?.config?.volume ?? 0.3,
       speechSpeed: deviceConfig?.config?.speechSpeed ?? 150,
-      muted: deviceConfig?.config?.muted ?? false
+      muted: deviceConfig?.config?.muted ?? false,
+      navigation: deviceConfig?.config?.navigation ?? {
+        voice: "default",
+        volume: 0.3,
+        speechSpeed: 150
+      },
+      visualRecognition: deviceConfig?.config?.visualRecognition ?? {
+        voice: "default",
+        language: "english",
+        volume: 0.3,
+        speechSpeed: 150
+      },
+      textToSpeech: deviceConfig?.config?.textToSpeech ?? {
+        voice: "default",
+        volume: 0.3,
+        speechSpeed: 150
+      }
     });
   }, [
     deviceConfig?.config?.volume,
     deviceConfig?.config?.speechSpeed,
-    deviceConfig?.config?.muted
+    deviceConfig?.config?.muted,
+    deviceConfig?.config?.navigation,
+    deviceConfig?.config?.visualRecognition,
+    deviceConfig?.config?.textToSpeech
   ]);
-
-  const speechSpeed = localConfig.speechSpeed ?? 150;
-  const volume = localConfig.volume ?? 0.3;
-  const uiVolume = Math.round((volume || 0) * 100);
-  const isMuted = uiVolume === 0 || Boolean(localConfig.muted);
 
   useEffect(() => {
     if (!isOnline) return;
@@ -305,7 +377,10 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
           ...deviceConfig?.config,
           volume: localConfig.volume,
           speechSpeed: localConfig.speechSpeed,
-          muted: localConfig.muted
+          muted: localConfig.muted,
+          navigation: localConfig.navigation,
+          visualRecognition: localConfig.visualRecognition,
+          textToSpeech: localConfig.textToSpeech
         }
       });
     }, 500);
@@ -319,8 +394,22 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
     localConfig.volume,
     localConfig.speechSpeed,
     localConfig.muted,
-    isOnline
+    localConfig.navigation,
+    localConfig.visualRecognition,
+    localConfig.textToSpeech,
+    isOnline,
+    deviceConfig,
+    onVoiceConfigChange
   ]);
+
+  const speechMin = 80;
+  const speechMax = 250;
+  const speechSpeed = localConfig.speechSpeed ?? 150;
+  const volume = localConfig.volume ?? 0.3;
+  const uiVolume = Math.round((volume || 0) * 100);
+  const isMuted = uiVolume === 0 || Boolean(localConfig.muted);
+  const speechPercent =
+    ((speechSpeed - speechMin) / (speechMax - speechMin)) * 100;
 
   const handleVolumeChange = (e) => {
     const nextUiVolume = Number.parseInt(e.target.value, 10);
@@ -361,125 +450,422 @@ const VoiceControlPanel = ({ isOnline, deviceConfig, onVoiceConfigChange }) => {
     return "mdi:volume-high";
   };
 
+  const voiceTypes = [
+    { id: "navigation", label: "Routing", icon: "mdi:navigation-variant" },
+    { id: "visualRecognition", label: "Visual Recognition", icon: "mdi:eye" },
+    {
+      id: "textToSpeech",
+      label: "TTS Notes",
+      icon: "mdi:text-to-speech"
+    }
+  ];
+
+  const currentVoiceConfig = localConfig[activeVoiceType] || {
+    voice: "default",
+    language: "english",
+    volume: 0.3,
+    speechSpeed: 150
+  };
+  const isVisualRecognition = activeVoiceType === "visualRecognition";
+  const selectedLanguage = (
+    currentVoiceConfig?.language || "english"
+  ).toLowerCase();
+  const isTagalogSelected =
+    isVisualRecognition && selectedLanguage === "tagalog";
+  const currentVoiceVolume = Math.round(
+    (currentVoiceConfig?.volume ?? 0.3) * 100
+  );
+  const currentSpeechPercent =
+    (((currentVoiceConfig?.speechSpeed ?? 150) - speechMin) /
+      (speechMax - speechMin)) *
+    100;
+
+  const handleVoiceTypeChange = (field, value) => {
+    setLocalConfig((prev) => ({
+      ...prev,
+      [activeVoiceType]: {
+        ...prev[activeVoiceType],
+        [field]: value
+      }
+    }));
+  };
+
+  const getVoiceIcon = (type) => {
+    if (type === "male") return "mdi:face-man";
+    if (type === "female") return "mdi:face-woman";
+    return "mdi:account-voice";
+  };
+
+  const getSliderFill = (percent) => ({
+    background: `linear-gradient(to right, #2563eb 0%, #2563eb ${percent}%, #e5e7eb ${percent}%, #e5e7eb 100%)`
+  });
+
+  const handlePreviewVoice = async () => {
+    if (!isOnline || isSendingPreview) return;
+
+    const message = previewText.trim();
+    if (!message) return;
+
+    setIsSendingPreview(true);
+
+    try {
+      await onPreviewVoice?.({
+        message,
+        voiceType: activeVoiceType,
+        voiceConfig: {
+          voice: currentVoiceConfig?.voice || "default",
+          language: currentVoiceConfig?.language || "english",
+          volume: currentVoiceConfig?.volume ?? localConfig.volume ?? 0.3,
+          speechSpeed:
+            currentVoiceConfig?.speechSpeed ?? localConfig.speechSpeed ?? 150,
+          muted: isMuted
+        }
+      });
+    } finally {
+      setIsSendingPreview(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border-2 p-3 sm:p-5 md:p-6 ${
+      className={`rounded-3xl border-2 p-4 sm:p-6 lg:p-7 ${
         isOnline
-          ? "border-primary-200 bg-gradient-to-br from-primary-50/50 to-white"
+          ? "border-primary-200 bg-gradient-to-br from-primary-50 via-white to-primary-50/30"
           : "border-gray-200 bg-gray-50"
       }`}
     >
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <div className="flex items-center gap-3">
+      <div className="mb-5 flex flex-col gap-3 sm:mb-7 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div
-            className={`p-2 sm:p-3 rounded-xl ${
-              isOnline ? "bg-primary-100" : "bg-gray-200"
+            className={`rounded-2xl p-2.5 sm:p-3 ${
+              isOnline
+                ? "bg-primary-100 text-white shadow-sm"
+                : "bg-gray-200 text-gray-500"
             }`}
           >
-            <Icon
-              icon="mdi:voice"
-              className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                isOnline ? "text-white" : "text-gray-500"
-              }`}
-            />
+            <Icon icon="mdi:voice" className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
+
           <div>
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+            <h3 className="text-base font-semibold text-gray-900 sm:text-lg">
               Voice Control
             </h3>
-            <p className="text-xs sm:text-sm text-gray-500">
-              Adjust speech and audio settings
+            <p className="text-xs text-gray-500 sm:text-sm">
+              Configure general voice behavior and per-feature preferences
             </p>
           </div>
         </div>
+
         <div
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
+          className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
             isOnline
               ? "bg-green-100 text-green-700"
               : "bg-gray-100 text-gray-500"
           }`}
         >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              isOnline ? "bg-green-500" : "bg-gray-400"
+            }`}
+          />
           {isOnline ? "Active" : "Offline"}
         </div>
       </div>
 
-      <div className="mb-5 sm:mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
-            <Icon icon="mdi:volume-high" className="w-4 h-4 text-gray-500" />
-            Volume Level
-          </label>
-          <span className="text-xs sm:text-sm font-semibold text-primary-600 bg-primary-50 px-2 py-1 rounded">
-            {uiVolume}%
+      <div className="mb-6 rounded-2xl border border-primary-100 bg-white/80 p-4 sm:mb-7 sm:p-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h4 className="text-sm font-semibold text-gray-900 sm:text-base">
+            General Voice Configuration
+          </h4>
+          <span className="rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-medium text-primary-700 sm:text-xs">
+            Applies to all voice features
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={toggleMute}
-            disabled={!isOnline}
-            className={`p-2 rounded-lg transition-colors ${
-              isMuted
-                ? "bg-red-100 text-red-600"
-                : "hover:bg-gray-100 text-gray-600"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-            aria-label={isMuted ? "Unmute" : "Mute"}
-          >
-            <Icon icon={getVolumeIcon()} className="w-5 h-5" />
-          </button>
 
-          <div className="flex-1 relative">
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={uiVolume}
-              onChange={handleVolumeChange}
-              disabled={!isOnline}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                background: `linear-gradient(to right, #2563eb 0%, #2563eb ${uiVolume}%, #e5e7eb ${uiVolume}%, #e5e7eb 100%)`
-              }}
-            />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <label className="flex items-center gap-2 text-xs font-medium text-gray-700 sm:text-sm">
+                <Icon
+                  icon="mdi:volume-high"
+                  className="h-4 w-4 text-gray-500"
+                />
+                Volume Level
+              </label>
+              <span className="rounded-md bg-primary-50 px-2 py-1 text-xs font-semibold text-primary-600">
+                {uiVolume}%
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleMute}
+                disabled={!isOnline}
+                className={`rounded-lg p-2 transition-colors ${
+                  isMuted
+                    ? "bg-red-100 text-red-600"
+                    : "text-gray-600 hover:bg-gray-100"
+                } disabled:cursor-not-allowed disabled:opacity-50`}
+                aria-label={isMuted ? "Unmute" : "Mute"}
+              >
+                <Icon icon={getVolumeIcon()} className="h-5 w-5" />
+              </button>
+
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={uiVolume}
+                onChange={handleVolumeChange}
+                disabled={!isOnline}
+                className="h-2 w-full appearance-none rounded-lg bg-gray-200 accent-primary-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                style={getSliderFill(uiVolume)}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <label className="flex items-center gap-2 text-xs font-medium text-gray-700 sm:text-sm">
+                <Icon
+                  icon="mdi:speedometer"
+                  className="h-4 w-4 text-gray-500"
+                />
+                Speech Speed
+              </label>
+              <span className="rounded-md bg-primary-50 px-2 py-1 text-xs font-semibold text-primary-600">
+                {speechSpeed} WPM
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Icon icon="mdi:turtle" className="h-5 w-5 text-gray-400" />
+              <input
+                type="range"
+                min={speechMin}
+                max={speechMax}
+                value={speechSpeed}
+                onChange={handleSpeedChange}
+                disabled={!isOnline}
+                className="h-2 w-full appearance-none rounded-lg bg-gray-200 accent-primary-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                style={getSliderFill(speechPercent)}
+              />
+              <Icon icon="mdi:rabbit" className="h-5 w-5 text-gray-400" />
+            </div>
+
+            <div className="mt-1 flex justify-between px-1 text-[11px] text-gray-500 sm:text-xs">
+              <span>Slow</span>
+              <span>Normal</span>
+              <span>Fast</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mb-5 sm:mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
-            <Icon icon="mdi:speedometer" className="w-4 h-4 text-gray-500" />
-            Speech Speed
-          </label>
-          <span className="text-xs sm:text-sm font-semibold text-primary-600 bg-primary-50 px-2 py-1 rounded">
-            {speechSpeed} WPM
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <h4 className="flex items-center gap-2 text-sm font-semibold text-gray-900 sm:text-base">
+            <Icon icon="mdi:account-voice" className="h-4 w-4 text-gray-500" />
+            Function-Specific Voice Profiles
+          </h4>
+          <span className="text-[11px] text-gray-500 sm:text-xs">
+            Fine-tune each function
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Icon icon="mdi:turtle" className="w-5 h-5 text-gray-400" />
-          <input
-            type="range"
-            min="80"
-            max="250"
-            value={speechSpeed}
-            onChange={handleSpeedChange}
-            disabled={!isOnline}
-            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(to right, #2563eb 0%, #2563eb ${
-                ((speechSpeed - 80) / (250 - 80)) * 100
-              }%, #e5e7eb ${((speechSpeed - 80) / (350 - 80)) * 100}%, #e5e7eb 100%)`
-            }}
-          />
-          <Icon icon="mdi:rabbit" className="w-5 h-5 text-gray-400" />
+        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {voiceTypes.map((type) => (
+            <button
+              key={type.id}
+              onClick={() => setActiveVoiceType(type.id)}
+              disabled={!isOnline}
+              className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium transition-all cursor-pointer sm:text-sm ${
+                activeVoiceType === type.id
+                  ? "bg-primary-100 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              } disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              <Icon icon={type.icon} className="w-4 h-4" />
+              <span className="text-center leading-tight">{type.label}</span>
+            </button>
+          ))}
         </div>
 
-        <div className="flex justify-between text-xs text-gray-500 mt-1 px-2">
-          <span>Slow</span>
-          <span>Normal</span>
-          <span>Fast</span>
+        <div className="space-y-4 rounded-xl bg-gray-50 p-3 sm:p-4">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-medium text-gray-700 sm:text-sm">
+              Active Function
+            </p>
+            <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-gray-700">
+              {voiceTypes.find((type) => type.id === activeVoiceType)?.label}
+            </span>
+          </div>
+
+          <div>
+            {isVisualRecognition && (
+              <div className="mb-4">
+                <label className="mb-2 block text-xs font-medium text-gray-700">
+                  Language
+                </label>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {["english", "tagalog"].map((language) => {
+                    const isSelected = selectedLanguage === language;
+
+                    return (
+                      <button
+                        key={language}
+                        type="button"
+                        onClick={() =>
+                          handleVoiceTypeChange("language", language)
+                        }
+                        disabled={!isOnline}
+                        className={`rounded-lg border px-3 py-2 text-xs font-medium capitalize transition-all cursor-pointer sm:text-sm ${
+                          isSelected
+                            ? "bg-primary-100 text-white border-primary-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-primary-300"
+                        } disabled:cursor-not-allowed disabled:opacity-50`}
+                      >
+                        {language}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <label className="mb-2 block text-xs font-medium text-gray-700">
+              Voice Selection
+            </label>
+
+            {isTagalogSelected && (
+              <p className="mb-2 text-xs text-amber-700">
+                Voice selection is only available for English.
+              </p>
+            )}
+
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              {espeakVoices.map((voice) => (
+                <button
+                  key={voice.id}
+                  onClick={() => handleVoiceTypeChange("voice", voice.id)}
+                  disabled={!isOnline || isTagalogSelected}
+                  className={`flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all cursor-pointer ${
+                    currentVoiceConfig?.voice === voice.id
+                      ? "bg-primary-100 text-white border-primary-600"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-primary-300"
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  <Icon
+                    icon={getVoiceIcon(voice.type)}
+                    className="w-3.5 h-3.5"
+                  />
+                  {voice.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-xs font-medium text-gray-700">
+                Volume
+              </label>
+              <span className="rounded bg-white px-2 py-1 text-xs font-semibold text-primary-600">
+                {currentVoiceVolume}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={currentVoiceVolume}
+              onChange={(e) =>
+                handleVoiceTypeChange(
+                  "volume",
+                  Number.parseInt(e.target.value, 10) / 100
+                )
+              }
+              disabled={!isOnline}
+              className="h-2 w-full appearance-none rounded-lg bg-gray-200 accent-primary-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+              style={getSliderFill(currentVoiceVolume)}
+            />
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-xs font-medium text-gray-700">
+                Speech Speed
+              </label>
+              <span className="rounded bg-white px-2 py-1 text-xs font-semibold text-primary-600">
+                {currentVoiceConfig?.speechSpeed ?? 150} WPM
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Icon icon="mdi:turtle" className="w-4 h-4 text-gray-400" />
+              <input
+                type="range"
+                min={speechMin}
+                max={speechMax}
+                value={currentVoiceConfig?.speechSpeed ?? 150}
+                onChange={(e) =>
+                  handleVoiceTypeChange(
+                    "speechSpeed",
+                    Number.parseInt(e.target.value, 10)
+                  )
+                }
+                disabled={!isOnline}
+                className="h-2 flex-1 appearance-none rounded-lg bg-gray-200 accent-primary-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                style={getSliderFill(currentSpeechPercent)}
+              />
+              <Icon icon="mdi:rabbit" className="w-4 h-4 text-gray-400" />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <label className="text-xs font-medium text-gray-700 sm:text-sm">
+                Voice Preview
+              </label>
+              <span className="rounded-md bg-primary-50 px-2 py-1 text-[11px] font-medium text-primary-700 sm:text-xs">
+                Test current selection
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                type="text"
+                value={previewText}
+                onChange={(e) => setPreviewText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handlePreviewVoice();
+                  }
+                }}
+                disabled={!isOnline || isSendingPreview}
+                maxLength={180}
+                placeholder="Type text to test selected voice"
+                className="h-10 flex-1 rounded-lg border border-gray-300 px-3 text-xs text-gray-700 outline-none transition focus:border-primary-300 sm:text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              />
+
+              <button
+                type="button"
+                onClick={handlePreviewVoice}
+                disabled={!isOnline || isSendingPreview || !previewText.trim()}
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-primary-100 px-3 text-xs font-medium text-white transition hover:bg-primary-700 sm:text-sm disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Icon icon="mdi:play" className="h-4 w-4" />
+                {isSendingPreview ? "Sending..." : "Test Voice"}
+              </button>
+            </div>
+
+            <p className="mt-2 text-[11px] text-gray-500 sm:text-xs">
+              Sends a preview event using the active voice profile.
+            </p>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -1316,6 +1702,54 @@ function Advanced() {
     });
   };
 
+  const handleVoicePreview = async ({
+    message,
+    voiceType,
+    voiceConfig
+  } = {}) => {
+    const serial = selectedDevice?.deviceSerialNumber;
+
+    if (!serial) {
+      showToast({
+        type: "error",
+        message: "Please select a device first."
+      });
+      return false;
+    }
+
+    const normalizedMessage = String(message || "").trim();
+    if (!normalizedMessage) {
+      showToast({
+        type: "error",
+        message: "Please enter preview text first."
+      });
+      return false;
+    }
+
+    try {
+      wsApi.previewVoice({
+        deviceId: serial,
+        message: normalizedMessage,
+        voiceType,
+        voiceConfig
+      });
+
+      showToast({
+        type: "success",
+        message: "Voice preview sent."
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Voice preview failed:", error);
+      showToast({
+        type: "error",
+        message: "Failed to send voice preview."
+      });
+      return false;
+    }
+  };
+
   const onlineCount = components.filter((c) => c.isOnline).length;
   const sensorComponents = components.filter((c) => c.type === "sensor");
   // const controllerComponents = components.filter(
@@ -1500,6 +1934,7 @@ function Advanced() {
               <VoiceControlPanel
                 isOnline={componentHealth.raspberryPiStatus}
                 deviceConfig={deviceConfig["VOICE_ENGINE"] || {}}
+                onPreviewVoice={handleVoicePreview}
                 onVoiceConfigChange={(updatedVoiceEngine) =>
                   handlePiConfigUpdate(
                     {
