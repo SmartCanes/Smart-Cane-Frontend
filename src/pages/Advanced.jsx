@@ -38,18 +38,18 @@ const fallbackConfig = {
       volume: 0.3,
       speechSpeed: 150,
       navigation: {
-        voice: "default",
+        voice: "+m3",
         volume: 0.3,
         speechSpeed: 150
       },
       visualRecognition: {
-        voice: "default",
+        voice: "+f5",
         language: "english",
         volume: 0.3,
         speechSpeed: 150
       },
       textToSpeech: {
-        voice: "default",
+        voice: "+m4",
         volume: 0.3,
         speechSpeed: 150
       }
@@ -278,6 +278,28 @@ const VoiceControlPanel = ({
   onVoiceConfigChange,
   onPreviewVoice
 }) => {
+  const buildVoiceLocalConfig = (config = {}) => ({
+    volume: config.volume ?? 0.3,
+    speechSpeed: config.speechSpeed ?? 150,
+    muted: config.muted ?? false,
+    navigation: config.navigation ?? {
+      voice: "+m3",
+      volume: 0.3,
+      speechSpeed: 150
+    },
+    visualRecognition: config.visualRecognition ?? {
+      voice: "+f5",
+      language: "english",
+      volume: 0.3,
+      speechSpeed: 150
+    },
+    textToSpeech: config.textToSpeech ?? {
+      voice: "+m4",
+      volume: 0.3,
+      speechSpeed: 150
+    }
+  });
+
   const initialConfig = deviceConfig?.config ?? {};
   const [activeVoiceType, setActiveVoiceType] = useState("navigation");
   const [previewText, setPreviewText] = useState(
@@ -286,7 +308,6 @@ const VoiceControlPanel = ({
   const [isSendingPreview, setIsSendingPreview] = useState(false);
 
   const espeakVoices = [
-    { id: "default", name: "Default", type: "default" },
     { id: "+m1", name: "Male 1", type: "male" },
     { id: "+m2", name: "Male 2", type: "male" },
     { id: "+m3", name: "Male 3", type: "male" },
@@ -301,61 +322,45 @@ const VoiceControlPanel = ({
     { id: "+f5", name: "Female 5", type: "female" }
   ];
 
-  const [localConfig, setLocalConfig] = useState({
-    volume: initialConfig.volume ?? 0.3,
-    speechSpeed: initialConfig.speechSpeed ?? 150,
-    muted: initialConfig.muted ?? false,
-    navigation: initialConfig.navigation ?? {
-      voice: "default",
-      volume: 0.3,
-      speechSpeed: 150
-    },
-    visualRecognition: initialConfig.visualRecognition ?? {
-      voice: "default",
-      language: "english",
-      volume: 0.3,
-      speechSpeed: 150
-    },
-    textToSpeech: initialConfig.textToSpeech ?? {
-      voice: "default",
-      volume: 0.3,
-      speechSpeed: 150
-    }
-  });
+  const [localConfig, setLocalConfig] = useState(
+    buildVoiceLocalConfig(initialConfig)
+  );
 
   const debounceRef = useRef(null);
   const isFirstRenderRef = useRef(true);
+  const latestDeviceConfigRef = useRef(deviceConfig);
+  const latestVoiceChangeHandlerRef = useRef(onVoiceConfigChange);
+  const lastSentVoiceConfigRef = useRef("");
 
   useEffect(() => {
-    setLocalConfig({
-      volume: deviceConfig?.config?.volume ?? 0.3,
-      speechSpeed: deviceConfig?.config?.speechSpeed ?? 150,
-      muted: deviceConfig?.config?.muted ?? false,
-      navigation: deviceConfig?.config?.navigation ?? {
-        voice: "default",
-        volume: 0.3,
-        speechSpeed: 150
-      },
-      visualRecognition: deviceConfig?.config?.visualRecognition ?? {
-        voice: "default",
-        language: "english",
-        volume: 0.3,
-        speechSpeed: 150
-      },
-      textToSpeech: deviceConfig?.config?.textToSpeech ?? {
-        voice: "default",
-        volume: 0.3,
-        speechSpeed: 150
-      }
+    latestDeviceConfigRef.current = deviceConfig;
+  }, [deviceConfig]);
+
+  useEffect(() => {
+    latestVoiceChangeHandlerRef.current = onVoiceConfigChange;
+  }, [onVoiceConfigChange]);
+
+  useEffect(() => {
+    const nextLocalConfig = buildVoiceLocalConfig({
+      volume: deviceConfig?.config?.volume,
+      speechSpeed: deviceConfig?.config?.speechSpeed,
+      muted: deviceConfig?.config?.muted,
+      navigation: deviceConfig?.config?.navigation,
+      visualRecognition: deviceConfig?.config?.visualRecognition,
+      textToSpeech: deviceConfig?.config?.textToSpeech
     });
-  }, [
-    deviceConfig?.config?.volume,
-    deviceConfig?.config?.speechSpeed,
-    deviceConfig?.config?.muted,
-    deviceConfig?.config?.navigation,
-    deviceConfig?.config?.visualRecognition,
-    deviceConfig?.config?.textToSpeech
-  ]);
+    const serializedNextConfig = JSON.stringify(nextLocalConfig);
+
+    lastSentVoiceConfigRef.current = serializedNextConfig;
+
+    setLocalConfig((prevConfig) => {
+      if (JSON.stringify(prevConfig) === serializedNextConfig) {
+        return prevConfig;
+      }
+
+      return nextLocalConfig;
+    });
+  }, [deviceConfig?.config]);
 
   useEffect(() => {
     if (!isOnline) return;
@@ -370,11 +375,28 @@ const VoiceControlPanel = ({
     }
 
     debounceRef.current = setTimeout(() => {
-      onVoiceConfigChange?.({
-        ...deviceConfig,
-        enabled: deviceConfig?.enabled ?? true,
+      const serializedLocalConfig = JSON.stringify({
+        volume: localConfig.volume,
+        speechSpeed: localConfig.speechSpeed,
+        muted: localConfig.muted,
+        navigation: localConfig.navigation,
+        visualRecognition: localConfig.visualRecognition,
+        textToSpeech: localConfig.textToSpeech
+      });
+
+      if (lastSentVoiceConfigRef.current === serializedLocalConfig) {
+        return;
+      }
+
+      lastSentVoiceConfigRef.current = serializedLocalConfig;
+
+      const latestDeviceConfig = latestDeviceConfigRef.current;
+
+      latestVoiceChangeHandlerRef.current?.({
+        ...latestDeviceConfig,
+        enabled: latestDeviceConfig?.enabled ?? true,
         config: {
-          ...deviceConfig?.config,
+          ...latestDeviceConfig?.config,
           volume: localConfig.volume,
           speechSpeed: localConfig.speechSpeed,
           muted: localConfig.muted,
@@ -390,17 +412,7 @@ const VoiceControlPanel = ({
         clearTimeout(debounceRef.current);
       }
     };
-  }, [
-    localConfig.volume,
-    localConfig.speechSpeed,
-    localConfig.muted,
-    localConfig.navigation,
-    localConfig.visualRecognition,
-    localConfig.textToSpeech,
-    isOnline,
-    deviceConfig,
-    onVoiceConfigChange
-  ]);
+  }, [localConfig, isOnline]);
 
   const speechMin = 80;
   const speechMax = 250;
@@ -461,7 +473,7 @@ const VoiceControlPanel = ({
   ];
 
   const currentVoiceConfig = localConfig[activeVoiceType] || {
-    voice: "default",
+    voice: activeVoiceType === "visualRecognition" ? "+f5" : "+m3",
     language: "english",
     volume: 0.3,
     speechSpeed: 150

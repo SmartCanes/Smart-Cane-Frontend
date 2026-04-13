@@ -177,6 +177,7 @@ class SocketAPI {
   }
 
   async updatePiConfig(piPayload) {
+    console.log("Updating Pi config with payload:", piPayload);
     return new Promise((resolve, reject) => {
       const handleSuccess = (payload) => {
         clearTimeout(timeout);
