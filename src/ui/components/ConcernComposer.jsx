@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { api } from "@/api";
@@ -25,6 +25,8 @@ const buildDefaultEmail = (prefillEmail) => {
   return String(prefillEmail).trim();
 };
 
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
 export default function ConcernComposer({
   mode = "inline",
   sourceKey = "guest-landing",
@@ -45,6 +47,16 @@ export default function ConcernComposer({
   );
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isDraggingLauncher, setIsDraggingLauncher] = useState(false);
+  const dragResetTimeoutRef = useRef(null);
+  const launcherRef = useRef(null);
+  const dragStateRef = useRef({
+    pointerId: null,
+    offsetX: 0,
+    offsetY: 0,
+    moved: false
+  });
+  const [launcherPosition, setLauncherPosition] = useState(null);
   const [formData, setFormData] = useState(initialFormData);
   const [formStatus, setFormStatus] = useState({
     submitting: false,
@@ -54,6 +66,110 @@ export default function ConcernComposer({
   });
 
   const storageNamespace = `contactRate:${sourceKey}`;
+
+  useEffect(() => {
+    const placeLauncher = () => {
+      const launcherNode = launcherRef.current;
+      if (!launcherNode) return;
+
+      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+      const rightOffset = isDesktop ? 24 : 16;
+      const bottomOffset = isDesktop ? 24 : 88;
+      const width = launcherNode.offsetWidth;
+      const height = launcherNode.offsetHeight;
+
+      setLauncherPosition((previous) => {
+        const fallbackX = window.innerWidth - width - rightOffset;
+        const fallbackY = window.innerHeight - height - bottomOffset;
+
+        if (!previous) {
+          return {
+            x: Math.max(0, fallbackX),
+            y: Math.max(0, fallbackY)
+          };
+        }
+
+        return {
+          x: clamp(previous.x, 0, Math.max(0, window.innerWidth - width)),
+          y: clamp(previous.y, 0, Math.max(0, window.innerHeight - height))
+        };
+      });
+    };
+
+    placeLauncher();
+    window.addEventListener("resize", placeLauncher);
+
+    return () => {
+      window.removeEventListener("resize", placeLauncher);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handlePointerMove = (event) => {
+      const launcherNode = launcherRef.current;
+      if (!launcherNode) return;
+
+      const width = launcherNode.offsetWidth;
+      const height = launcherNode.offsetHeight;
+      const nextX = clamp(
+        event.clientX - dragStateRef.current.offsetX,
+        0,
+        Math.max(0, window.innerWidth - width)
+      );
+      const nextY = clamp(
+        event.clientY - dragStateRef.current.offsetY,
+        0,
+        Math.max(0, window.innerHeight - height)
+      );
+
+      setLauncherPosition({ x: nextX, y: nextY });
+      dragStateRef.current.moved = true;
+      setIsDraggingLauncher(true);
+    };
+
+    const handlePointerUp = () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+
+      if (dragResetTimeoutRef.current) {
+        window.clearTimeout(dragResetTimeoutRef.current);
+      }
+
+      dragResetTimeoutRef.current = window.setTimeout(() => {
+        setIsDraggingLauncher(false);
+      }, 0);
+    };
+
+    const launcherNode = launcherRef.current;
+    if (!launcherNode) return undefined;
+
+    const handlePointerDown = (event) => {
+      const rect = launcherNode.getBoundingClientRect();
+      dragStateRef.current.pointerId = event.pointerId;
+      dragStateRef.current.offsetX = event.clientX - rect.left;
+      dragStateRef.current.offsetY = event.clientY - rect.top;
+      dragStateRef.current.moved = false;
+
+      launcherNode.setPointerCapture?.(event.pointerId);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
+    };
+
+    launcherNode.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      launcherNode.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+
+      if (dragResetTimeoutRef.current) {
+        window.clearTimeout(dragResetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -105,7 +221,12 @@ export default function ConcernComposer({
       return;
     }
 
-    setFormStatus({ submitting: true, success: false, error: "", cooldownMsg: "" });
+    setFormStatus({
+      submitting: true,
+      success: false,
+      error: "",
+      cooldownMsg: ""
+    });
 
     try {
       const payload = {
@@ -150,7 +271,10 @@ export default function ConcernComposer({
     <form onSubmit={submitConcern} className="space-y-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor={`concern-name-${sourceKey}`} className="mb-1 block text-sm font-medium text-[#1C253C]">
+          <label
+            htmlFor={`concern-name-${sourceKey}`}
+            className="mb-1 block text-sm font-medium text-[#1C253C]"
+          >
             Name *
           </label>
           <input
@@ -165,7 +289,10 @@ export default function ConcernComposer({
         </div>
 
         <div>
-          <label htmlFor={`concern-email-${sourceKey}`} className="mb-1 block text-sm font-medium text-[#1C253C]">
+          <label
+            htmlFor={`concern-email-${sourceKey}`}
+            className="mb-1 block text-sm font-medium text-[#1C253C]"
+          >
             Email *
           </label>
           <input
@@ -182,7 +309,10 @@ export default function ConcernComposer({
       </div>
 
       <div>
-        <label htmlFor={`concern-message-${sourceKey}`} className="mb-1 block text-sm font-medium text-[#1C253C]">
+        <label
+          htmlFor={`concern-message-${sourceKey}`}
+          className="mb-1 block text-sm font-medium text-[#1C253C]"
+        >
           Message *
         </label>
         <textarea
@@ -207,14 +337,16 @@ export default function ConcernComposer({
             <p className="font-medium text-red-600">{formStatus.error}</p>
           )}
           {formStatus.cooldownMsg && (
-            <p className="font-medium text-amber-600">{formStatus.cooldownMsg}</p>
+            <p className="font-medium text-amber-600">
+              {formStatus.cooldownMsg}
+            </p>
           )}
         </div>
 
         <button
           type="submit"
           disabled={formStatus.submitting}
-          className="flex w-full items-center justify-center rounded-[10px] bg-[#1C253C] px-8 py-3 font-medium text-white transition-all hover:bg-[#0d1c3f] active:scale-95 active:bg-[#0a1630] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-[180px]"
+          className="flex w-full items-center justify-center rounded-[10px] bg-[#1C253C] px-8 py-3 font-medium text-white transition-all hover:bg-[#0d1c3f] active:scale-95 active:bg-[#0a1630] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-[180px] cursor-pointer"
         >
           {formStatus.submitting ? (
             <>
@@ -233,18 +365,42 @@ export default function ConcernComposer({
     return (
       <>
         {!isOpen && (
-          <button
+          <motion.button
+            ref={launcherRef}
             type="button"
-            onClick={() => setIsOpen(true)}
-            className="fixed right-4 bottom-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom)+0.75rem)] md:right-6 md:bottom-6 z-[60] inline-flex items-center gap-2 rounded-full bg-[#11285A] px-4 py-3 text-white shadow-[0_16px_40px_rgba(17,40,90,0.35)] transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2"
+            onClick={() => {
+              if (isDraggingLauncher || dragStateRef.current.moved) {
+                dragStateRef.current.moved = false;
+                return;
+              }
+
+              setIsOpen(true);
+            }}
+            className="fixed z-[60] inline-flex items-center gap-2 rounded-full bg-[#11285A] px-4 py-3 text-white shadow-[0_16px_40px_rgba(17,40,90,0.35)] transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11285A] focus-visible:ring-offset-2 cursor-grab active:cursor-grabbing touch-none select-none"
+            style={
+              launcherPosition
+                ? {
+                    left: `${launcherPosition.x}px`,
+                    top: `${launcherPosition.y}px`
+                  }
+                : undefined
+            }
             aria-label="Open concern form"
           >
             <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15">
-              <span className="absolute inset-0 animate-ping rounded-full bg-white/25" aria-hidden="true" />
-              <Icon icon="material-symbols:contact-support-rounded" className="relative text-2xl" />
+              <span
+                className="absolute inset-0 animate-ping rounded-full bg-white/25"
+                aria-hidden="true"
+              />
+              <Icon
+                icon="material-symbols:contact-support-rounded"
+                className="relative text-2xl"
+              />
             </span>
-            <span className="hidden text-sm font-semibold tracking-wide sm:inline">Raise Concern</span>
-          </button>
+            <span className="hidden text-sm font-semibold tracking-wide sm:inline">
+              Raise Concern
+            </span>
+          </motion.button>
         )}
 
         <AnimatePresence>
@@ -266,26 +422,31 @@ export default function ConcernComposer({
               >
                 <div className="flex items-center justify-between bg-gradient-to-r from-[#11285A] to-[#1C253C] px-5 py-4 text-white">
                   <div className="flex items-center gap-3">
-                    <Icon icon="material-symbols:contact-support-rounded" className="text-2xl" />
+                    <Icon
+                      icon="material-symbols:contact-support-rounded"
+                      className="text-2xl"
+                    />
                     <div>
-                      <h3 className="text-base font-semibold sm:text-lg">Raise a Concern</h3>
-                      <p className="text-xs text-white/80 sm:text-sm">We are here to listen and support you.</p>
+                      <h3 className="text-base font-semibold sm:text-lg">
+                        Raise a Concern
+                      </h3>
+                      <p className="text-xs text-white/80 sm:text-sm">
+                        We are here to listen and support you.
+                      </p>
                     </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="rounded-full p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+                    className="rounded-full p-1 text-white/80 transition hover:bg-white/15 hover:text-white cursor-pointer"
                     aria-label="Close concern form"
                   >
                     <Icon icon="ph:x-bold" className="text-xl" />
                   </button>
                 </div>
 
-                <div className="p-4 sm:p-6">
-                  {formMarkup}
-                </div>
+                <div className="p-4 sm:p-6">{formMarkup}</div>
               </motion.div>
             </motion.div>
           )}
@@ -295,9 +456,15 @@ export default function ConcernComposer({
   }
 
   return (
-    <div className={`rounded-2xl border border-gray-100 bg-white p-6 shadow-lg sm:p-8 ${className}`}>
-      <h3 className="mb-2 text-center text-2xl font-semibold text-[#11285A] sm:text-left">{title}</h3>
-      <p className="mb-6 text-center text-sm text-[#4B5563] sm:text-left">{subtitle}</p>
+    <div
+      className={`rounded-2xl border border-gray-100 bg-white p-6 shadow-lg sm:p-8 ${className}`}
+    >
+      <h3 className="mb-2 text-center text-2xl font-semibold text-[#11285A] sm:text-left">
+        {title}
+      </h3>
+      <p className="mb-6 text-center text-sm text-[#4B5563] sm:text-left">
+        {subtitle}
+      </p>
       {formMarkup}
     </div>
   );
