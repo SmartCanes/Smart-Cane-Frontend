@@ -378,7 +378,6 @@ export const useRealtimeStore = create(
 
         wsApi.on("gps", (data) => {
           const payload = data?.payload || data;
-          console.log(payload);
 
           const lat = payload?.lat;
           const lng = payload?.lng;
