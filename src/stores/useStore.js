@@ -140,7 +140,9 @@ export const useRealtimeStore = create(
         wsApi.off("configSaved");
         wsApi.off("deviceConfig");
         wsApi.off("emergencyTriggered");
+        wsApi.off("emergencyStopped");
         wsApi.off("fallDetected");
+        wsApi.off("fallCleared");
         wsApi.off("routeResponse");
         wsApi.off("destinationReached");
         wsApi.off("destinationCleared");
@@ -471,6 +473,10 @@ export const useRealtimeStore = create(
           });
         });
 
+        wsApi.on("emergencyStopped", () => {
+          set({ emergency: false });
+        });
+
         wsApi.on("fallDetected", (data) => {
           const payload = data?.payload || data || {};
 
@@ -488,6 +494,10 @@ export const useRealtimeStore = create(
           pushRealtimeAlertLog("FALL", payload).then(() => {
             setTimeout(() => refreshDeviceLogs(), 400);
           });
+        });
+
+        wsApi.on("fallCleared", () => {
+          set({ fall: false });
         });
 
         // ROUTE RELATED EVENTS

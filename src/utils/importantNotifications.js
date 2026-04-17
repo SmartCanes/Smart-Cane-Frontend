@@ -39,11 +39,13 @@ const dispatchImportantNotification = (
     useSettingsStore.getState().settings?.notifications || {};
   const pushEnabled = Boolean(notificationSettings.push);
   const emergencyPushEnabled = Boolean(notificationSettings.emergency);
-  const canPush =
-    pushEnabled &&
-    (!shouldRespectEmergencySetting || emergencyPushEnabled === true);
+  const isCriticalSafetyAlert = pushType === "SOS" || pushType === "FALL";
+  const canTriggerClientAlert =
+    isCriticalSafetyAlert ||
+    (pushEnabled &&
+      (!shouldRespectEmergencySetting || emergencyPushEnabled === true));
 
-  if (canPush) {
+  if (canTriggerClientAlert) {
     triggerSmartCaneNotification({
       type: pushType,
       title: notification.title,
