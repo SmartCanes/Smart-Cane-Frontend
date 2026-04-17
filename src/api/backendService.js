@@ -208,3 +208,12 @@ export const getLastLocation = (deviceSerial) =>
 export const getSharedDeviceRoute = async (deviceId) => {
   return handleRequest(() => backendApi.get(`/device/${deviceId}/route`));
 };
+
+export const sendConcernMessage = (payload) =>
+  handleRequest(() =>
+    backendApi.post(`/contact`, payload, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+  );

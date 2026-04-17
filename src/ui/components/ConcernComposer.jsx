@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { api } from "@/api";
+import { sendConcernMessage } from "@/api/backendService";
 
 const getCooldownWindowMs = (sendCount) => {
   if (sendCount === 1) return 60 * 1000;
@@ -236,9 +237,14 @@ export default function ConcernComposer({
         source: sourceKey
       };
 
-      const response = await api.post("/contact", payload);
+      const response = await sendConcernMessage(payload);
+      console.log(response);
 
-      if (response.status === 200 || response.status === 201) {
+      if (
+        response.status === 200 ||
+        response.status === 201 ||
+        response.success
+      ) {
         localStorage.setItem(`${storageKey}:lastSendTime`, now.toString());
         localStorage.setItem(`${storageKey}:sendCount`, String(sendCount + 1));
 
