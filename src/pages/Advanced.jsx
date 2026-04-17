@@ -484,6 +484,7 @@ const VoiceControlPanel = ({
   ).toLowerCase();
   const isTagalogSelected =
     isVisualRecognition && selectedLanguage === "tagalog";
+  const disablePreviewForTagalog = isVisualRecognition && isTagalogSelected;
   const currentVoiceVolume = Math.round(
     (currentVoiceConfig?.volume ?? 0.3) * 100
   );
@@ -828,7 +829,7 @@ const VoiceControlPanel = ({
                     Number.parseInt(e.target.value, 10)
                   )
                 }
-                disabled={!isOnline}
+                disabled={!isOnline || isTagalogSelected}
                 className="h-2 flex-1 appearance-none rounded-lg bg-gray-200 accent-primary-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                 style={getSliderFill(currentSpeechPercent)}
               />
@@ -853,11 +854,14 @@ const VoiceControlPanel = ({
                 onChange={(e) => setPreviewText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
+                    if (disablePreviewForTagalog) return;
                     e.preventDefault();
                     handlePreviewVoice();
                   }
                 }}
-                disabled={!isOnline || isSendingPreview}
+                disabled={
+                  !isOnline || isSendingPreview || disablePreviewForTagalog
+                }
                 maxLength={180}
                 placeholder="Type text to test selected voice"
                 className="h-10 flex-1 rounded-lg border border-gray-300 px-3 text-xs text-gray-700 outline-none transition focus:border-primary-300 sm:text-sm disabled:cursor-not-allowed disabled:opacity-50"
@@ -866,7 +870,12 @@ const VoiceControlPanel = ({
               <button
                 type="button"
                 onClick={handlePreviewVoice}
-                disabled={!isOnline || isSendingPreview || !previewText.trim()}
+                disabled={
+                  !isOnline ||
+                  isSendingPreview ||
+                  !previewText.trim() ||
+                  disablePreviewForTagalog
+                }
                 className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-primary-100 px-3 text-xs font-medium text-white transition hover:bg-primary-700 sm:text-sm disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Icon icon="mdi:play" className="h-4 w-4" />
