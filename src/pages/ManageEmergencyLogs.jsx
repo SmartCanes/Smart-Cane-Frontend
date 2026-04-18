@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   AlertTriangle,
   RefreshCw,
@@ -32,6 +32,46 @@ const apiFetch = async (path, options = {}) => {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Request failed");
   return data;
+};
+
+const matchesTriggeredDate = (createdAt, dateFilter) => {
+  if (dateFilter === "all") return true;
+  if (!createdAt) return false;
+
+  const triggeredDate = new Date(createdAt);
+  if (Number.isNaN(triggeredDate.getTime())) return false;
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (dateFilter === "today") {
+    return triggeredDate >= startOfToday;
+  }
+
+  if (dateFilter === "last7") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 6);
+    return triggeredDate >= cutoff;
+  }
+
+  if (dateFilter === "last30") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 29);
+    return triggeredDate >= cutoff;
+  }
+
+  if (dateFilter === "this_month") {
+    return (
+      triggeredDate.getFullYear() === now.getFullYear() &&
+      triggeredDate.getMonth() === now.getMonth()
+    );
+  }
+
+  if (dateFilter === "this_year") {
+    return triggeredDate.getFullYear() === now.getFullYear();
+  }
+
+  return true;
 };
 
 //  Toast
@@ -111,6 +151,10 @@ export default function ManageEmergencyLogs() {
   const [logs, setLogs]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts]   = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [triggeredDateFilter, setTriggeredDateFilter] = useState("all");
 
   const showToast = useCallback((message, type = "error") => {
     const id = Date.now();
@@ -132,10 +176,52 @@ export default function ManageEmergencyLogs() {
 
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
-  const totalEmergencies = logs.length;
-  const totalSOS   = logs.filter((l) => l.emergency_type === "EMERGENCY").length;
-  const totalFalls  = logs.filter((l) => l.emergency_type === "FALL").length;
-  const uniqueDevices = new Set(logs.map((l) => l.device_serial_number)).size;
+  const filteredLogs = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+
+    return logs.filter((log) => {
+      if (typeFilter !== "all" && log.emergency_type !== typeFilter) {
+        return false;
+      }
+
+      const hasLocation = Boolean(log.last_location);
+      if (locationFilter === "with_location" && !hasLocation) return false;
+      if (locationFilter === "without_location" && hasLocation) return false;
+
+      if (!matchesTriggeredDate(log.created_at, triggeredDateFilter)) {
+        return false;
+      }
+
+      if (!q) return true;
+
+      const guardianText = (log.guardians || [])
+        .map((g) => `${g.first_name || ""} ${g.last_name || ""} ${g.role || ""}`.trim())
+        .join(" ");
+
+      const haystack = [
+        log.device_serial_number || "",
+        log.emergency_type || "",
+        log.log_message || "",
+        log.last_location || "",
+        log.vip ? `${log.vip.first_name || ""} ${log.vip.last_name || ""}`.trim() : "",
+        guardianText,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [logs, searchTerm, typeFilter, locationFilter, triggeredDateFilter]);
+
+  const totalEmergencies = filteredLogs.length;
+  const totalSOS   = filteredLogs.filter((l) => l.emergency_type === "EMERGENCY").length;
+  const totalFalls  = filteredLogs.filter((l) => l.emergency_type === "FALL").length;
+  const uniqueDevices = new Set(filteredLogs.map((l) => l.device_serial_number)).size;
+  const hasActiveFilters =
+    searchTerm.trim().length > 0 ||
+    typeFilter !== "all" ||
+    locationFilter !== "all" ||
+    triggeredDateFilter !== "all";
 
   return (
     <>
@@ -210,21 +296,85 @@ export default function ManageEmergencyLogs() {
               </span>
             </div>
 
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+              <div className="w-full lg:max-w-md">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search device, VIP, guardian, message, or location"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 w-full lg:w-auto">
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Types</option>
+                  <option value="EMERGENCY">SOS / Emergency</option>
+                  <option value="FALL">Fall Detected</option>
+                </select>
+
+                <select
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Location States</option>
+                  <option value="with_location">With Location</option>
+                  <option value="without_location">No Location</option>
+                </select>
+
+                <select
+                  value={triggeredDateFilter}
+                  onChange={(e) => setTriggeredDateFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Trigger Dates</option>
+                  <option value="today">Triggered Today</option>
+                  <option value="last7">Last 7 Days</option>
+                  <option value="last30">Last 30 Days</option>
+                  <option value="this_month">This Month</option>
+                  <option value="this_year">This Year</option>
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setTypeFilter("all");
+                    setLocationFilter("all");
+                    setTriggeredDateFilter("all");
+                  }}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
             <div>
               {loading ? (
                 <LoadingSkeleton />
-              ) : logs.length === 0 ? (
+              ) : filteredLogs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <AlertTriangle size={52} className="mb-4 text-gray-200" />
-                  <p className="text-lg font-semibold text-gray-500">No emergency logs found</p>
+                  <p className="text-lg font-semibold text-gray-500">
+                    {hasActiveFilters ? "No emergency logs match your filters" : "No emergency logs found"}
+                  </p>
                   <p className="text-sm mt-1 text-gray-400">
-                    SOS or fall detection events will appear here.
+                    {hasActiveFilters
+                      ? "Try adjusting your search or filter options."
+                      : "SOS or fall detection events will appear here."}
                   </p>
                 </div>
               ) : (
                 <>
                   <div className="xl:hidden divide-y divide-gray-100">
-                    {logs.map((log, idx) => (
+                    {filteredLogs.map((log, idx) => (
                       <div key={log.id || idx} className="p-4 sm:p-5 space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-2.5 min-w-0">
@@ -352,7 +502,7 @@ export default function ManageEmergencyLogs() {
                         </tr>
                       </thead>
                       <tbody>
-                        {logs.map((log, idx) => (
+                        {filteredLogs.map((log, idx) => (
                           <tr
                             key={log.id || idx}
                             className={`border-t border-gray-50 hover:bg-red-50/20 transition-colors

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Cpu,
   Plus,
@@ -43,6 +43,46 @@ const apiFetch = async (path, options = {}) => {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Request failed");
   return data;
+};
+
+const matchesRecordDate = (createdAt, dateFilter) => {
+  if (dateFilter === "all") return true;
+  if (!createdAt) return false;
+
+  const recordDate = new Date(createdAt);
+  if (Number.isNaN(recordDate.getTime())) return false;
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (dateFilter === "today") {
+    return recordDate >= startOfToday;
+  }
+
+  if (dateFilter === "last7") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 6);
+    return recordDate >= cutoff;
+  }
+
+  if (dateFilter === "last30") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 29);
+    return recordDate >= cutoff;
+  }
+
+  if (dateFilter === "this_month") {
+    return (
+      recordDate.getFullYear() === now.getFullYear() &&
+      recordDate.getMonth() === now.getMonth()
+    );
+  }
+
+  if (dateFilter === "this_year") {
+    return recordDate.getFullYear() === now.getFullYear();
+  }
+
+  return true;
 };
 
 //  Toast
@@ -287,6 +327,11 @@ export default function ManageDevice() {
   const [devices, setDevices]   = useState([]);
   const [loading, setLoading]   = useState(true);
   const [toasts, setToasts]     = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pairFilter, setPairFilter] = useState("all");
+  const [activityFilter, setActivityFilter] = useState("all");
+  const [vipFilter, setVipFilter] = useState("all");
+  const [registrationDateFilter, setRegistrationDateFilter] = useState("all");
   const [isDesktopPreviewMode, setIsDesktopPreviewMode] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 1280 : true
   );
@@ -304,6 +349,7 @@ export default function ManageDevice() {
   });
   const role                    = getRole();
   const isSuperAdmin            = role === "super_admin";
+  const canAddDevice            = role === "super_admin" || role === "admin";
 
   const [addModal, setAddModal]     = useState(false);
   const [addSubmitting, setAddSubmitting] = useState(false);
@@ -473,9 +519,55 @@ export default function ManageDevice() {
     }
   };
 
-  const totalDevices  = devices.length;
-  const pairedCount   = devices.filter((d) => d.is_paired).length;
-  const activeCount   = devices.filter((d) => d.status === "active").length;
+  const filteredDevices = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+
+    return devices.filter((d) => {
+      if (pairFilter === "paired" && !d.is_paired) return false;
+      if (pairFilter === "unpaired" && d.is_paired) return false;
+
+      if (activityFilter === "active" && d.status !== "active") return false;
+      if (activityFilter === "inactive" && d.status === "active") return false;
+
+      if (vipFilter === "with_vip" && !d.vip) return false;
+      if (vipFilter === "no_vip" && d.vip) return false;
+
+      if (!matchesRecordDate(d.created_at, registrationDateFilter)) {
+        return false;
+      }
+
+      if (!q) return true;
+
+      const vipName = d.vip
+        ? `${d.vip.first_name || ""} ${d.vip.last_name || ""}`.trim()
+        : "";
+      const guardianText = (d.guardians || [])
+        .map((g) => `${g.first_name || ""} ${g.last_name || ""} ${g.role || ""}`.trim())
+        .join(" ");
+
+      const haystack = [
+        d.device_serial_number || "",
+        d.status || "",
+        d.is_paired ? "paired" : "unpaired",
+        vipName,
+        guardianText,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [devices, searchTerm, pairFilter, activityFilter, vipFilter, registrationDateFilter]);
+
+  const totalDevices  = filteredDevices.length;
+  const pairedCount   = filteredDevices.filter((d) => d.is_paired).length;
+  const activeCount   = filteredDevices.filter((d) => d.status === "active").length;
+  const hasActiveFilters =
+    searchTerm.trim().length > 0 ||
+    pairFilter !== "all" ||
+    activityFilter !== "all" ||
+    vipFilter !== "all" ||
+    registrationDateFilter !== "all";
 
   //  Render
   return (
@@ -615,7 +707,7 @@ export default function ManageDevice() {
               >
                 <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               </button>
-              {isSuperAdmin && (
+              {canAddDevice && (
                 <button
                   onClick={() => setAddModal(true)}
                   className="flex items-center gap-2 px-5 py-2.5 bg-[#11285A] text-white rounded-xl font-semibold hover:bg-[#0d1b3d] transition-all hover:shadow-lg cursor-pointer text-sm"
@@ -683,15 +775,90 @@ export default function ManageDevice() {
               </span>
             </div>
 
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+              <div className="w-full lg:max-w-md">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search serial, VIP, guardian, or status"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2 w-full lg:w-auto">
+                <select
+                  value={pairFilter}
+                  onChange={(e) => setPairFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Pairing</option>
+                  <option value="paired">Paired</option>
+                  <option value="unpaired">Unpaired</option>
+                </select>
+
+                <select
+                  value={activityFilter}
+                  onChange={(e) => setActivityFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Activity</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+
+                <select
+                  value={vipFilter}
+                  onChange={(e) => setVipFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All VIP</option>
+                  <option value="with_vip">With VIP</option>
+                  <option value="no_vip">No VIP</option>
+                </select>
+
+                <select
+                  value={registrationDateFilter}
+                  onChange={(e) => setRegistrationDateFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Registration Dates</option>
+                  <option value="today">Registered Today</option>
+                  <option value="last7">Last 7 Days</option>
+                  <option value="last30">Last 30 Days</option>
+                  <option value="this_month">This Month</option>
+                  <option value="this_year">This Year</option>
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setPairFilter("all");
+                    setActivityFilter("all");
+                    setVipFilter("all");
+                    setRegistrationDateFilter("all");
+                  }}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
             <div>
               {loading ? (
                 <LoadingSkeleton />
-              ) : devices.length === 0 ? (
+              ) : filteredDevices.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <Cpu size={52} className="mb-4 text-gray-200" />
-                  <p className="text-lg font-semibold text-gray-500">No devices registered yet</p>
+                  <p className="text-lg font-semibold text-gray-500">
+                    {hasActiveFilters ? "No devices match your filters" : "No devices registered yet"}
+                  </p>
                   <p className="text-sm mt-1 text-gray-400">
-                    {isSuperAdmin
+                    {hasActiveFilters
+                      ? "Try adjusting your search or filter options."
+                      : canAddDevice
                       ? "Click 'Add Device' to register your first SmartCane."
                       : "No devices have been added yet."}
                   </p>
@@ -699,7 +866,7 @@ export default function ManageDevice() {
               ) : (
                 <>
                   <div className="xl:hidden divide-y divide-gray-100">
-                    {devices.map((d) => (
+                    {filteredDevices.map((d) => (
                       <div key={d.device_id} className="p-4 sm:p-5 space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-2.5 min-w-0">
@@ -807,14 +974,16 @@ export default function ManageDevice() {
                         </div>
 
                         <div className="flex items-center justify-end gap-2 pt-1">
-                          <button
-                            onClick={() => setEditModal({ open: true, device: d })}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
-                            title="Edit serial number"
-                          >
-                            <Pencil size={13} />
-                            Edit
-                          </button>
+                          {isSuperAdmin && (
+                            <button
+                              onClick={() => setEditModal({ open: true, device: d })}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                              title="Edit serial number"
+                            >
+                              <Pencil size={13} />
+                              Edit
+                            </button>
+                          )}
 
                           {isSuperAdmin && (
                             <button
@@ -854,7 +1023,7 @@ export default function ManageDevice() {
                         </tr>
                       </thead>
                       <tbody>
-                        {devices.map((d, i) => (
+                        {filteredDevices.map((d, i) => (
                           <tr
                             key={d.device_id}
                             className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors
@@ -992,13 +1161,15 @@ export default function ManageDevice() {
 
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => setEditModal({ open: true, device: d })}
-                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                  title="Edit serial number"
-                                >
-                                  <Pencil size={15} />
-                                </button>
+                                {isSuperAdmin && (
+                                  <button
+                                    onClick={() => setEditModal({ open: true, device: d })}
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Edit serial number"
+                                  >
+                                    <Pencil size={15} />
+                                  </button>
+                                )}
 
                                 {isSuperAdmin && (
                                   <button

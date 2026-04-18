@@ -11,8 +11,8 @@ import {
   X,
   MessageSquare,
   User,
-  Inbox,
   Archive,
+  Flag,
 } from "lucide-react";
 
 //  Config & Auth Helpers
@@ -43,6 +43,72 @@ const apiFetch = async (path, options = {}) => {
   if (!res.ok) throw new Error(data.message || "Request failed");
   return data;
 };
+
+const matchesRecordDate = (createdAt, dateFilter) => {
+  if (dateFilter === "all") return true;
+  if (!createdAt) return false;
+
+  const recordDate = new Date(createdAt);
+  if (Number.isNaN(recordDate.getTime())) return false;
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (dateFilter === "today") {
+    return recordDate >= startOfToday;
+  }
+
+  if (dateFilter === "last7") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 6);
+    return recordDate >= cutoff;
+  }
+
+  if (dateFilter === "last30") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 29);
+    return recordDate >= cutoff;
+  }
+
+  if (dateFilter === "this_month") {
+    return (
+      recordDate.getFullYear() === now.getFullYear() &&
+      recordDate.getMonth() === now.getMonth()
+    );
+  }
+
+  if (dateFilter === "this_year") {
+    return recordDate.getFullYear() === now.getFullYear();
+  }
+
+  return true;
+};
+
+const PROCESS_STAGE_OPTIONS = [
+  { value: "new", label: "New", hint: "Recently submitted" },
+  { value: "acknowledged", label: "Acknowledged", hint: "Seen by an admin" },
+  { value: "ongoing", label: "Ongoing", hint: "Work is in progress" },
+  { value: "awaiting_client", label: "Awaiting Client", hint: "Waiting for client response" },
+  { value: "escalated", label: "Escalated", hint: "Forwarded for deeper handling" },
+  { value: "resolved", label: "Resolved", hint: "Issue is solved" },
+  { value: "failed_to_resolve", label: "Failed To Resolve", hint: "Issue could not be solved" },
+];
+
+const PROCESS_STAGE_LABEL = Object.fromEntries(
+  PROCESS_STAGE_OPTIONS.map((item) => [item.value, item.label])
+);
+
+const PROCESS_STAGES_REQUIRING_REMARKS = new Set(["escalated", "failed_to_resolve"]);
+
+const getNormalizedProcessStage = (concern) => {
+  const rawStage = String(concern?.process_stage || "").trim().toLowerCase();
+  if (PROCESS_STAGE_LABEL[rawStage]) return rawStage;
+  if (concern?.status === "resolved") return "resolved";
+  if (concern?.status === "read") return "acknowledged";
+  return "new";
+};
+
+const getProcessStageLabel = (stage) => PROCESS_STAGE_LABEL[stage] || "Unknown";
 
 //  Toast Component
 const Toast = ({ toasts }) => (
@@ -181,7 +247,16 @@ export default function GuardianConcerns() {
   const [toasts, setToasts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [processFilter, setProcessFilter] = useState("all");
+  const [remarksFilter, setRemarksFilter] = useState("all");
   const [sourceFilter, setSourceFilter] = useState("all");
+  const [submittedDateFilter, setSubmittedDateFilter] = useState("all");
+  const [showProcessModal, setShowProcessModal] = useState(false);
+  const [processTarget, setProcessTarget] = useState(null);
+  const [processStageValue, setProcessStageValue] = useState("new");
+  const [processRemarksValue, setProcessRemarksValue] = useState("");
+  const [processSaving, setProcessSaving] = useState(false);
+  const [processError, setProcessError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteReasonCode, setDeleteReasonCode] = useState("");
@@ -256,6 +331,89 @@ export default function GuardianConcerns() {
     }
   };
 
+  const openProcessModal = (concern) => {
+    const stage = getNormalizedProcessStage(concern);
+    setProcessTarget(concern);
+    setProcessStageValue(stage);
+    setProcessRemarksValue(concern.resolution_remarks || "");
+    setProcessError("");
+    setShowProcessModal(true);
+  };
+
+  const closeProcessModal = () => {
+    if (processSaving) return;
+    setShowProcessModal(false);
+    setProcessTarget(null);
+    setProcessStageValue("new");
+    setProcessRemarksValue("");
+    setProcessError("");
+  };
+
+  const saveProcessUpdate = async () => {
+    if (!processTarget) return;
+
+    const currentStage = getNormalizedProcessStage(processTarget);
+    const currentRemarks = String(processTarget.resolution_remarks || "").trim();
+    const trimmedRemarks = processRemarksValue.trim();
+    const requiresRemarks = PROCESS_STAGES_REQUIRING_REMARKS.has(processStageValue);
+
+    if (requiresRemarks && trimmedRemarks.length < 10) {
+      setProcessError("Please provide at least 10 characters for this process stage.");
+      showToast("Remarks must be at least 10 characters for this process stage.", "error");
+      return;
+    }
+
+    const isStageChanged = currentStage !== processStageValue;
+    const isRemarksChanged = currentRemarks !== trimmedRemarks;
+
+    if (!isStageChanged && !isRemarksChanged) {
+      setProcessError("No changes detected.");
+      showToast("No process or remarks changes to save.", "error");
+      return;
+    }
+
+    setProcessError("");
+    setProcessSaving(true);
+    try {
+      await apiFetch(`/api/guardian-concerns/${processTarget.concern_id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          process_stage: processStageValue,
+          resolution_remarks: trimmedRemarks,
+          ...(processStageValue === "resolved" ? { status: "resolved" } : {}),
+        }),
+      });
+
+      if (processStageValue === "resolved") {
+        showToast("Concern resolved successfully.", "success");
+      } else if (processStageValue === "failed_to_resolve") {
+        showToast("Concern marked as failed to resolve.", "error");
+      } else if (processStageValue === "escalated") {
+        showToast("Concern escalated with remarks.", "success");
+      } else if (isStageChanged) {
+        showToast(`Process updated to ${getProcessStageLabel(processStageValue)}.`, "success");
+      }
+
+      if (isRemarksChanged && trimmedRemarks) {
+        showToast(`Remarks updated for ${getProcessStageLabel(processStageValue)}.`, "success");
+      } else if (isRemarksChanged && !trimmedRemarks) {
+        showToast(`Remarks cleared for ${getProcessStageLabel(processStageValue)}.`, "success");
+      }
+
+      setShowProcessModal(false);
+      setProcessTarget(null);
+      setProcessStageValue("new");
+      setProcessRemarksValue("");
+      fetchConcerns();
+    } catch (err) {
+      const message = err.message || "Failed to update process";
+      setProcessError(message);
+      showToast(message, "error");
+    } finally {
+      setProcessSaving(false);
+    }
+  };
+
   const openDeleteModal = (concern) => {
     setDeleteTarget(concern);
     setDeleteReasonCode("");
@@ -319,6 +477,35 @@ export default function GuardianConcerns() {
     );
   };
 
+  const processBadge = (processStage) => {
+    const stage = String(processStage || "new").toLowerCase();
+    const styles = {
+      new: "bg-slate-100 text-slate-700 border-slate-200",
+      acknowledged: "bg-blue-100 text-blue-700 border-blue-200",
+      ongoing: "bg-amber-100 text-amber-700 border-amber-200",
+      awaiting_client: "bg-cyan-100 text-cyan-700 border-cyan-200",
+      escalated: "bg-purple-100 text-purple-700 border-purple-200",
+      resolved: "bg-green-100 text-green-700 border-green-200",
+      failed_to_resolve: "bg-rose-100 text-rose-700 border-rose-200",
+    };
+    const icons = {
+      new: <AlertCircle size={12} />,
+      acknowledged: <Eye size={12} />,
+      ongoing: <RefreshCw size={12} />,
+      awaiting_client: <Mail size={12} />,
+      escalated: <Flag size={12} />,
+      resolved: <Check size={12} />,
+      failed_to_resolve: <X size={12} />,
+    };
+
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[stage] || styles.new}`}>
+        {icons[stage] || icons.new}
+        {getProcessStageLabel(stage)}
+      </span>
+    );
+  };
+
   const showHoverPreview = (event, title, content) => {
     if (!isDesktopPreviewMode) return;
 
@@ -361,12 +548,30 @@ export default function GuardianConcerns() {
 
     return concerns.filter((c) => {
       const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(c.message);
+      const processStage = getNormalizedProcessStage(c);
+      const remarksText = String(c.resolution_remarks || "").trim();
 
       if (statusFilter !== "all" && c.status !== statusFilter) {
         return false;
       }
 
+      if (processFilter !== "all" && processStage !== processFilter) {
+        return false;
+      }
+
+      if (remarksFilter === "with_remarks" && !remarksText) {
+        return false;
+      }
+
+      if (remarksFilter === "without_remarks" && remarksText) {
+        return false;
+      }
+
       if (sourceFilter !== "all" && sourceKey !== sourceFilter) {
+        return false;
+      }
+
+      if (!matchesRecordDate(c.created_at, submittedDateFilter)) {
         return false;
       }
 
@@ -377,6 +582,9 @@ export default function GuardianConcerns() {
         c.email,
         cleanMessage,
         c.admin_reply || "",
+        remarksText,
+        processStage,
+        getProcessStageLabel(processStage),
         sourceLabel,
         sourceKey,
       ]
@@ -385,11 +593,28 @@ export default function GuardianConcerns() {
 
       return haystack.includes(q);
     });
-  }, [concerns, searchTerm, statusFilter, sourceFilter]);
+  }, [
+    concerns,
+    searchTerm,
+    statusFilter,
+    processFilter,
+    remarksFilter,
+    sourceFilter,
+    submittedDateFilter,
+  ]);
 
   const total = filteredConcerns.length;
-  const unread = filteredConcerns.filter((c) => c.status === "unread").length;
-  const resolved = filteredConcerns.filter((c) => c.status === "resolved").length;
+  const ongoingCount = filteredConcerns.filter((c) => getNormalizedProcessStage(c) === "ongoing").length;
+  const awaitingClientCount = filteredConcerns.filter((c) => getNormalizedProcessStage(c) === "awaiting_client").length;
+  const failedCount = filteredConcerns.filter((c) => getNormalizedProcessStage(c) === "failed_to_resolve").length;
+  const resolvedCount = filteredConcerns.filter((c) => getNormalizedProcessStage(c) === "resolved").length;
+  const hasActiveFilters =
+    searchTerm.trim().length > 0 ||
+    statusFilter !== "all" ||
+    processFilter !== "all" ||
+    remarksFilter !== "all" ||
+    sourceFilter !== "all" ||
+    submittedDateFilter !== "all";
 
   //  Render
   if (!isAdmin) {
@@ -479,7 +704,7 @@ export default function GuardianConcerns() {
           </div>
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {[
               {
                 label: "Total Concerns",
@@ -491,17 +716,26 @@ export default function GuardianConcerns() {
                 iconColor: "text-blue-600",
               },
               {
-                label: "Unread",
-                value: unread,
-                icon: Inbox,
+                label: "Ongoing",
+                value: ongoingCount,
+                icon: RefreshCw,
                 gradient: "from-amber-50 to-yellow-50",
                 border: "border-amber-100",
                 iconBg: "bg-amber-50",
                 iconColor: "text-amber-600",
               },
               {
-                label: "Resolved",
-                value: resolved,
+                label: "Awaiting Client",
+                value: awaitingClientCount,
+                icon: Mail,
+                gradient: "from-cyan-50 to-sky-50",
+                border: "border-cyan-100",
+                iconBg: "bg-cyan-50",
+                iconColor: "text-cyan-600",
+              },
+              {
+                label: "Resolved / Failed",
+                value: `${resolvedCount}/${failedCount}`,
                 icon: Archive,
                 gradient: "from-green-50 to-emerald-50",
                 border: "border-green-100",
@@ -539,16 +773,16 @@ export default function GuardianConcerns() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name, email, message, or source"
+                  placeholder="Search name, email, message, process, remarks, or source"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
                 />
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-2 w-full lg:w-auto">
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full sm:w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
                 >
                   <option value="all">All Status</option>
                   <option value="unread">Unread</option>
@@ -557,9 +791,32 @@ export default function GuardianConcerns() {
                 </select>
 
                 <select
+                  value={processFilter}
+                  onChange={(e) => setProcessFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Process</option>
+                  {PROCESS_STAGE_OPTIONS.map((stage) => (
+                    <option key={stage.value} value={stage.value}>
+                      {stage.label}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={remarksFilter}
+                  onChange={(e) => setRemarksFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Remarks</option>
+                  <option value="with_remarks">With Remarks</option>
+                  <option value="without_remarks">Without Remarks</option>
+                </select>
+
+                <select
                   value={sourceFilter}
                   onChange={(e) => setSourceFilter(e.target.value)}
-                  className="w-full sm:w-44 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
                 >
                   <option value="all">All Source</option>
                   {sourceOptions.map((source) => (
@@ -569,14 +826,30 @@ export default function GuardianConcerns() {
                   ))}
                 </select>
 
+                <select
+                  value={submittedDateFilter}
+                  onChange={(e) => setSubmittedDateFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Submit Dates</option>
+                  <option value="today">Submitted Today</option>
+                  <option value="last7">Last 7 Days</option>
+                  <option value="last30">Last 30 Days</option>
+                  <option value="this_month">This Month</option>
+                  <option value="this_year">This Year</option>
+                </select>
+
                 <button
                   type="button"
                   onClick={() => {
                     setSearchTerm("");
                     setStatusFilter("all");
+                    setProcessFilter("all");
+                    setRemarksFilter("all");
                     setSourceFilter("all");
+                    setSubmittedDateFilter("all");
                   }}
-                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Clear
                 </button>
@@ -589,9 +862,13 @@ export default function GuardianConcerns() {
               ) : filteredConcerns.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <MessageSquare size={52} className="mb-4 text-gray-200" />
-                  <p className="text-lg font-semibold text-gray-500">No concerns match your filters</p>
+                  <p className="text-lg font-semibold text-gray-500">
+                    {hasActiveFilters ? "No concerns match your filters" : "No concerns found"}
+                  </p>
                   <p className="text-sm mt-1 text-gray-400">
-                    Try clearing search or selecting a different status/source.
+                    {hasActiveFilters
+                      ? "Try clearing or adjusting your filter options."
+                      : "Concern submissions will appear here."}
                   </p>
                 </div>
               ) : (
@@ -601,6 +878,8 @@ export default function GuardianConcerns() {
                       <div key={c.concern_id} className="p-4 sm:p-5 space-y-3">
                         {(() => {
                           const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(c.message);
+                          const processStage = getNormalizedProcessStage(c);
+                          const remarksText = String(c.resolution_remarks || "").trim();
                           return (
                             <>
                         <div className="flex items-start justify-between gap-3">
@@ -611,7 +890,10 @@ export default function GuardianConcerns() {
                             </div>
                             <p className="text-xs text-gray-500 mt-0.5">#{c.concern_id}</p>
                           </div>
-                          <div className="flex-shrink-0">{statusBadge(c.status)}</div>
+                          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                            {statusBadge(c.status)}
+                            {processBadge(processStage)}
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -675,7 +957,35 @@ export default function GuardianConcerns() {
                           )}
                         </div>
 
+                        <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Resolution Remarks</p>
+                          {remarksText ? (
+                            <div className="mt-1.5 text-sm text-gray-600 break-words">
+                              <PreviewValue
+                                text={remarksText}
+                                title="Resolution Remarks"
+                                maxLength={90}
+                                isDesktop={isDesktopPreviewMode}
+                                onHoverShow={showHoverPreview}
+                                onHoverHide={hideHoverPreview}
+                                onMobileOpen={openClickPreview}
+                              />
+                            </div>
+                          ) : (
+                            <p className="mt-1.5 text-sm text-gray-400 italic">No remarks yet</p>
+                          )}
+                        </div>
+
                         <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+                          <button
+                            onClick={() => openProcessModal(c)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer"
+                            title="Update process and remarks"
+                          >
+                            <Flag size={13} />
+                            Process
+                          </button>
+
                           <a
                             href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.email)}&su=${encodeURIComponent(`For your concern`)}&body=${encodeURIComponent(
                               `Hello ${c.name},\n\nWe're the iCane Team. We appreciate your concerns.\n\nYour concern is: ${cleanMessage}\n\nIcane Team response: \n\n\n--- Thankyou ---\n`
@@ -700,17 +1010,6 @@ export default function GuardianConcerns() {
                             </button>
                           )}
 
-                          {c.status !== "resolved" && (
-                            <button
-                              onClick={() => updateStatus(c.concern_id, "resolved")}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-100 rounded-lg hover:bg-green-100 transition-colors cursor-pointer"
-                              title="Mark as resolved"
-                            >
-                              <Check size={13} />
-                              Resolve
-                            </button>
-                          )}
-
                           {isSuperAdmin && (
                             <button
                               onClick={() => openDeleteModal(c)}
@@ -730,7 +1029,7 @@ export default function GuardianConcerns() {
                   </div>
 
                   <div className="hidden xl:block overflow-x-auto">
-                    <table className="w-full min-w-[980px]">
+                    <table className="w-full min-w-[1160px]">
                       <thead>
                         <tr className="bg-gradient-to-r from-[#f0f6ff] to-[#e8f0fe]">
                           {[
@@ -740,6 +1039,8 @@ export default function GuardianConcerns() {
                             "Message",
                             "Source",
                             "Status",
+                            "Process",
+                            "Remarks",
                             "Admin Reply",
                             "Submitted",
                             "Actions",
@@ -762,6 +1063,8 @@ export default function GuardianConcerns() {
                           >
                             {(() => {
                               const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(c.message);
+                              const processStage = getNormalizedProcessStage(c);
+                              const remarksText = String(c.resolution_remarks || "").trim();
                               return (
                                 <>
                             <td className="px-5 py-4 text-sm font-mono text-gray-600">
@@ -790,6 +1093,25 @@ export default function GuardianConcerns() {
                             </td>
                             <td className="px-5 py-4">{sourceBadge(sourceKey, sourceLabel)}</td>
                             <td className="px-5 py-4">{statusBadge(c.status)}</td>
+                            <td className="px-5 py-4">{processBadge(processStage)}</td>
+                            <td className="px-5 py-4 text-sm text-gray-500">
+                              {remarksText ? (
+                                <div className="max-w-xs text-sm text-gray-500">
+                                  <PreviewValue
+                                    text={remarksText}
+                                    title="Resolution Remarks"
+                                    maxLength={50}
+                                    isDesktop={isDesktopPreviewMode}
+                                    onHoverShow={showHoverPreview}
+                                    onHoverHide={hideHoverPreview}
+                                    onMobileOpen={openClickPreview}
+                                    className="max-w-xs truncate"
+                                  />
+                                </div>
+                              ) : (
+                                <span className="text-gray-400 italic">No remarks</span>
+                              )}
+                            </td>
                             <td className="px-5 py-4 text-sm text-gray-500">
                               {c.admin_reply ? (
                                 <div className="max-w-xs text-sm text-gray-500">
@@ -821,6 +1143,14 @@ export default function GuardianConcerns() {
                             </td>
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => openProcessModal(c)}
+                                  className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Update process and remarks"
+                                >
+                                  <Flag size={15} />
+                                </button>
+
                                 <a
                                   href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.email)}&su=${encodeURIComponent(`For your concern`)}&body=${encodeURIComponent(
                                     `Hello ${c.name},\n\nWe're the iCane Team. We appreciate your concerns.\n\nYour concern is: ${cleanMessage}\n\nIcane Team response: \n\n\n--- Thankyou ---\n`
@@ -841,16 +1171,6 @@ export default function GuardianConcerns() {
                                     title="Mark as read"
                                   >
                                     <Eye size={15} />
-                                  </button>
-                                )}
-
-                                {c.status !== "resolved" && (
-                                  <button
-                                    onClick={() => updateStatus(c.concern_id, "resolved")}
-                                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors cursor-pointer"
-                                    title="Mark as resolved"
-                                  >
-                                    <Check size={15} />
                                   </button>
                                 )}
 
@@ -879,6 +1199,81 @@ export default function GuardianConcerns() {
           </div>
         </div>
       </div>
+
+      {showProcessModal && processTarget && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+          <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-lg relative z-10">
+            <h3 className="text-lg font-semibold text-gray-800">Update Concern Process</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Set the current handling stage and add remarks for this concern.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Process Stage</label>
+                <select
+                  value={processStageValue}
+                  onChange={(e) => {
+                    setProcessStageValue(e.target.value);
+                    setProcessError("");
+                  }}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  {PROCESS_STAGE_OPTIONS.map((stage) => (
+                    <option key={stage.value} value={stage.value}>
+                      {stage.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  {PROCESS_STAGE_OPTIONS.find((s) => s.value === processStageValue)?.hint || "Update process stage"}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                <textarea
+                  value={processRemarksValue}
+                  onChange={(e) => {
+                    setProcessRemarksValue(e.target.value);
+                    setProcessError("");
+                  }}
+                  rows={4}
+                  placeholder="Add handling notes, client response details, or resolution context..."
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {PROCESS_STAGES_REQUIRING_REMARKS.has(processStageValue)
+                    ? "Remarks are required for the selected process stage (minimum 10 characters)."
+                    : "Optional, but recommended for clear admin-to-client tracking."}
+                </p>
+              </div>
+            </div>
+
+            {processError && <p className="text-red-500 text-sm mt-3">{processError}</p>}
+
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeProcessModal}
+                disabled={processSaving}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={saveProcessUpdate}
+                disabled={processSaving}
+                className="px-4 py-2 rounded-lg bg-[#1565C0] text-white hover:bg-[#0f4f98] transition-colors disabled:opacity-50"
+              >
+                {processSaving ? "Saving..." : "Save Process"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showDeleteModal && deleteTarget && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Users,
   RefreshCw,
@@ -28,6 +28,46 @@ const apiFetch = async (path, options = {}) => {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Request failed");
   return data;
+};
+
+const matchesRegistrationDate = (createdAt, dateFilter) => {
+  if (dateFilter === "all") return true;
+  if (!createdAt) return false;
+
+  const createdDate = new Date(createdAt);
+  if (Number.isNaN(createdDate.getTime())) return false;
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (dateFilter === "today") {
+    return createdDate >= startOfToday;
+  }
+
+  if (dateFilter === "last7") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 6);
+    return createdDate >= cutoff;
+  }
+
+  if (dateFilter === "last30") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 29);
+    return createdDate >= cutoff;
+  }
+
+  if (dateFilter === "this_month") {
+    return (
+      createdDate.getFullYear() === now.getFullYear() &&
+      createdDate.getMonth() === now.getMonth()
+    );
+  }
+
+  if (dateFilter === "this_year") {
+    return createdDate.getFullYear() === now.getFullYear();
+  }
+
+  return true;
 };
 
 //  Toast
@@ -68,6 +108,10 @@ export default function ManageVip() {
   const [vips, setVips]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts]   = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deviceFilter, setDeviceFilter] = useState("all");
+  const [guardianFilter, setGuardianFilter] = useState("all");
+  const [registrationDateFilter, setRegistrationDateFilter] = useState("all");
   const [isDesktopPreviewMode, setIsDesktopPreviewMode] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 1280 : true
   );
@@ -157,9 +201,57 @@ export default function ManageVip() {
     });
   };
 
-  const totalVips       = vips.length;
-  const withDevices     = vips.filter((v) => v.devices?.length > 0).length;
-  const withGuardians   = vips.filter((v) => v.guardians?.length > 0).length;
+  const filteredVips = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+
+    return vips.filter((v) => {
+      const hasDevices = (v.devices?.length || 0) > 0;
+      const hasGuardians = (v.guardians?.length || 0) > 0;
+
+      if (deviceFilter === "with_devices" && !hasDevices) return false;
+      if (deviceFilter === "without_devices" && hasDevices) return false;
+      if (guardianFilter === "with_guardians" && !hasGuardians) return false;
+      if (guardianFilter === "without_guardians" && hasGuardians) return false;
+
+      if (!matchesRegistrationDate(v.created_at, registrationDateFilter)) {
+        return false;
+      }
+
+      if (!q) return true;
+
+      const deviceText = (v.devices || [])
+        .map((d) => d.device_serial_number || "")
+        .join(" ");
+      const guardianText = (v.guardians || [])
+        .map((g) => `${g.first_name || ""} ${g.last_name || ""} ${g.role || ""}`.trim())
+        .join(" ");
+
+      const haystack = [
+        v.first_name || "",
+        v.middle_name || "",
+        v.last_name || "",
+        v.city || "",
+        v.province || "",
+        v.barangay || "",
+        v.street_address || "",
+        deviceText,
+        guardianText,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [vips, searchTerm, deviceFilter, guardianFilter, registrationDateFilter]);
+
+  const totalVips       = filteredVips.length;
+  const withDevices     = filteredVips.filter((v) => v.devices?.length > 0).length;
+  const withGuardians   = filteredVips.filter((v) => v.guardians?.length > 0).length;
+  const hasActiveFilters =
+    searchTerm.trim().length > 0 ||
+    deviceFilter !== "all" ||
+    guardianFilter !== "all" ||
+    registrationDateFilter !== "all";
 
   return (
     <>
@@ -311,21 +403,85 @@ export default function ManageVip() {
               </span>
             </div>
 
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+              <div className="w-full lg:max-w-md">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search VIP, location, device, or guardian"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 w-full lg:w-auto">
+                <select
+                  value={deviceFilter}
+                  onChange={(e) => setDeviceFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Device Coverage</option>
+                  <option value="with_devices">With Devices</option>
+                  <option value="without_devices">No Devices</option>
+                </select>
+
+                <select
+                  value={guardianFilter}
+                  onChange={(e) => setGuardianFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Guardian Coverage</option>
+                  <option value="with_guardians">With Guardians</option>
+                  <option value="without_guardians">No Guardians</option>
+                </select>
+
+                <select
+                  value={registrationDateFilter}
+                  onChange={(e) => setRegistrationDateFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Registration Dates</option>
+                  <option value="today">Registered Today</option>
+                  <option value="last7">Last 7 Days</option>
+                  <option value="last30">Last 30 Days</option>
+                  <option value="this_month">This Month</option>
+                  <option value="this_year">This Year</option>
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setDeviceFilter("all");
+                    setGuardianFilter("all");
+                    setRegistrationDateFilter("all");
+                  }}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
             <div>
               {loading ? (
                 <LoadingSkeleton />
-              ) : vips.length === 0 ? (
+              ) : filteredVips.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <Users size={52} className="mb-4 text-gray-200" />
-                  <p className="text-lg font-semibold text-gray-500">No VIPs registered yet</p>
+                  <p className="text-lg font-semibold text-gray-500">
+                    {hasActiveFilters ? "No VIPs match your filters" : "No VIPs registered yet"}
+                  </p>
                   <p className="text-sm mt-1 text-gray-400">
-                    VIP profiles are created through the guardian app.
+                    {hasActiveFilters
+                      ? "Try adjusting your search or filter options."
+                      : "VIP profiles are created through the guardian app."}
                   </p>
                 </div>
               ) : (
                 <>
                   <div className="xl:hidden divide-y divide-gray-100">
-                    {vips.map((v) => (
+                    {filteredVips.map((v) => (
                       <div key={v.vip_id} className="p-4 sm:p-5 space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-2.5 min-w-0">
@@ -462,7 +618,7 @@ export default function ManageVip() {
                         </tr>
                       </thead>
                       <tbody>
-                        {vips.map((v, i) => (
+                        {filteredVips.map((v, i) => (
                           <tr
                             key={v.vip_id}
                             className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors

@@ -9,17 +9,41 @@ import {
   Search,
   Clock,
   X,
+  RotateCcw,
 } from "lucide-react";
 import api from "../api/client";
+import Toast from "../ui/components/Toast";
 
 const actionLabels = {
   admin_delete: "Admin Deletion",
+  admin_restore: "Admin Restore",
   concern_delete: "Concern Deletion",
+  concern_restore: "Concern Restore",
   device_delete: "Device Deletion",
+  device_deleted: "Device Deletion",
+  device_restore: "Device Restore",
   role_change: "Role Change",
 };
 
-const roleFromStorage = () => localStorage.getItem("role") || "";
+const RESTORABLE_ACTIONS = new Set(["admin_delete", "concern_delete", "device_delete", "device_deleted"]);
+
+const roleFromAuth = () => {
+  const token = localStorage.getItem("access_token") || "";
+  if (token) {
+    try {
+      const payload = token.split(".")[1] || "";
+      if (payload) {
+        const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+        const tokenRole = String(decoded?.role || "").trim();
+        if (tokenRole) return tokenRole;
+      }
+    } catch {
+      // Fallback to localStorage role when token payload is unavailable.
+    }
+  }
+
+  return String(localStorage.getItem("role") || "").trim();
+};
 
 const LoadingSkeleton = () => (
   <div className="p-5 space-y-3">
@@ -89,10 +113,13 @@ export default function ManageActionHistory() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState(null);
+  const [restoreLoadingId, setRestoreLoadingId] = useState(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [actionType, setActionType] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
   const [isDesktopPreviewMode, setIsDesktopPreviewMode] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 1280 : true
   );
@@ -110,8 +137,9 @@ export default function ManageActionHistory() {
   });
 
   const limit = 20;
-  const role = roleFromStorage();
+  const role = roleFromAuth();
   const isAllowed = role === "admin" || role === "super_admin";
+  const isSuperAdmin = role === "super_admin";
 
   const totalPages = Math.max(Math.ceil(total / limit), 1);
 
@@ -161,6 +189,7 @@ export default function ManageActionHistory() {
     params.set("limit", String(limit));
     if (search.trim()) params.set("q", search.trim());
     if (actionType) params.set("action_type", actionType);
+    if (dateFilter !== "all") params.set("date_filter", dateFilter);
 
     const res = await api.get(`/api/admin/audit-logs?${params.toString()}`);
     if (!res || !res.ok) {
@@ -174,7 +203,49 @@ export default function ManageActionHistory() {
     setItems(Array.isArray(res.data?.items) ? res.data.items : []);
     setTotal(Number(res.data?.total || 0));
     setLoading(false);
-  }, [actionType, isAllowed, page, search]);
+  }, [actionType, dateFilter, isAllowed, page, search]);
+
+  const showToast = useCallback((message, type = "info") => {
+    setToast({ id: Date.now(), message, type });
+  }, []);
+
+  const canRestore = useCallback(
+    (item) => {
+      const normalizedStatus = String(item?.status || "").trim().toLowerCase();
+      const normalizedAction = String(item?.action_type || "").trim().toLowerCase();
+      return isSuperAdmin && normalizedStatus === "success" && RESTORABLE_ACTIONS.has(normalizedAction);
+    },
+    [isSuperAdmin]
+  );
+
+  const restoreFromAudit = useCallback(
+    async (item) => {
+      if (!canRestore(item)) return;
+
+      setRestoreLoadingId(item.audit_id);
+      const normalizedAction = String(item?.action_type || "").trim().toLowerCase();
+      const isDeviceDelete = normalizedAction === "device_delete" || normalizedAction === "device_deleted";
+
+      let res = await api.post(`/api/admin/audit-logs/${item.audit_id}/restore`, {});
+
+      // Backward-compatible fallback for deployments that only expose device restore under /api/devices.
+      if ((!res || !res.ok) && isDeviceDelete) {
+        res = await api.post(`/api/devices/restore/${item.audit_id}`, {});
+      }
+
+      if (!res || !res.ok) {
+        showToast(res?.data?.message || "Failed to restore record.", "error");
+        setRestoreLoadingId(null);
+        return;
+      }
+
+      const restoredLabel = actionLabels[res.data?.restored_action_type] || "Record";
+      showToast(res.data?.message || `${restoredLabel} restored successfully.`, "success");
+      await fetchHistory();
+      setRestoreLoadingId(null);
+    },
+    [canRestore, fetchHistory, showToast]
+  );
 
   useEffect(() => {
     fetchHistory();
@@ -183,10 +254,13 @@ export default function ManageActionHistory() {
   const stats = useMemo(() => {
     const adminDeletes = items.filter((i) => i.action_type === "admin_delete").length;
     const concernDeletes = items.filter((i) => i.action_type === "concern_delete").length;
-    const deviceDeletes = items.filter((i) => i.action_type === "device_delete").length;
+    const deviceDeletes = items.filter(
+      (i) => i.action_type === "device_delete" || i.action_type === "device_deleted"
+    ).length;
     const roleChanges = items.filter((i) => i.action_type === "role_change").length;
     return { adminDeletes, concernDeletes, deviceDeletes, roleChanges };
   }, [items]);
+  const hasActiveFilters = search.trim().length > 0 || actionType || dateFilter !== "all";
 
   if (!isAllowed) {
     return (
@@ -202,6 +276,17 @@ export default function ManageActionHistory() {
 
   return (
     <div className="min-h-screen bg-[#f9fafb] px-2 sm:px-4 py-4 sm:py-6">
+      {toast && (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={3200}
+          position="top-right"
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {hoverPreview.open && isDesktopPreviewMode && (
         <div
           className="fixed z-[9998] max-w-[360px] rounded-xl border border-[#bfcef0] bg-white p-4 shadow-2xl pointer-events-none"
@@ -305,7 +390,7 @@ export default function ManageActionHistory() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <h3 className="font-semibold text-[#1a2e4a]">Audit Records</h3>
-            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 w-full md:w-auto">
               <div className="relative w-full sm:w-64">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -324,14 +409,46 @@ export default function ManageActionHistory() {
                   setPage(1);
                   setActionType(e.target.value);
                 }}
-                className="w-full sm:w-48 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
               >
                 <option value="">All actions</option>
                 <option value="admin_delete">Admin deletion</option>
+                <option value="admin_restore">Admin restore</option>
                 <option value="concern_delete">Concern deletion</option>
+                <option value="concern_restore">Concern restore</option>
                 <option value="device_delete">Device deletion</option>
+                <option value="device_restore">Device restore</option>
                 <option value="role_change">Role change</option>
               </select>
+
+              <select
+                value={dateFilter}
+                onChange={(e) => {
+                  setPage(1);
+                  setDateFilter(e.target.value);
+                }}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+              >
+                <option value="all">All Dates</option>
+                <option value="today">Today</option>
+                <option value="last7">Last 7 Days</option>
+                <option value="last30">Last 30 Days</option>
+                <option value="this_month">This Month</option>
+                <option value="this_year">This Year</option>
+              </select>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPage(1);
+                  setSearch("");
+                  setActionType("");
+                  setDateFilter("all");
+                }}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Clear
+              </button>
             </div>
           </div>
 
@@ -343,8 +460,14 @@ export default function ManageActionHistory() {
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                 <ClipboardList size={52} className="mb-4 text-gray-200" />
-                <p className="text-lg font-semibold text-gray-500">No audit history found</p>
-                <p className="text-sm mt-1 text-gray-400">Actions will appear here once recorded.</p>
+                <p className="text-lg font-semibold text-gray-500">
+                  {hasActiveFilters ? "No audit records match your filters" : "No audit history found"}
+                </p>
+                <p className="text-sm mt-1 text-gray-400">
+                  {hasActiveFilters
+                    ? "Try adjusting your search or date/action filters."
+                    : "Actions will appear here once recorded."}
+                </p>
               </div>
             ) : (
               <>
@@ -441,6 +564,21 @@ export default function ManageActionHistory() {
                             })
                           : "-"}
                       </div>
+
+                      {canRestore(item) && (
+                        <div className="flex justify-end pt-1">
+                          <button
+                            type="button"
+                            onClick={() => restoreFromAudit(item)}
+                            disabled={restoreLoadingId === item.audit_id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors disabled:opacity-50"
+                            title="Restore this record"
+                          >
+                            <RotateCcw size={13} className={restoreLoadingId === item.audit_id ? "animate-spin" : ""} />
+                            {restoreLoadingId === item.audit_id ? "Restoring..." : "Restore"}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -458,6 +596,7 @@ export default function ManageActionHistory() {
                             "Deleted Concern / Device",
                           "Status",
                           "Created",
+                            "Actions",
                         ].map((h) => (
                           <th
                             key={h}
@@ -545,6 +684,22 @@ export default function ManageActionHistory() {
                                   minute: "2-digit",
                                 })
                               : "-"}
+                          </td>
+                          <td className="px-5 py-4">
+                            {canRestore(item) ? (
+                              <button
+                                type="button"
+                                onClick={() => restoreFromAudit(item)}
+                                disabled={restoreLoadingId === item.audit_id}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors disabled:opacity-50"
+                                title="Restore this record"
+                              >
+                                <RotateCcw size={13} className={restoreLoadingId === item.audit_id ? "animate-spin" : ""} />
+                                {restoreLoadingId === item.audit_id ? "Restoring..." : "Restore"}
+                              </button>
+                            ) : (
+                              <span className="text-xs text-gray-300">-</span>
+                            )}
                           </td>
                         </tr>
                       ))}

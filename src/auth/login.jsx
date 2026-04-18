@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import TextField from "../ui/components/TextField";
 import PasswordField from "../ui/components/PasswordField";
 import PrimaryButton from "../ui/components/PrimaryButton";
-import icaneLogoWhite from "../assets/images/icane-logo-white.png";
+// import icaneLogoWhite from "../assets/images/icane-logo-white.png";
+import smartcaneLogo from "../assets/images/smartcane-logo.png";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -417,7 +418,7 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 bg-[#11285A] items-center justify-center">
         <div className="text-center flex flex-col items-center gap-4 px-10 -mt-12">
           <img
-            src={icaneLogoWhite}
+            src={smartcaneLogo}
             alt="iCane Logo"
             className="w-44 h-44 object-contain"
           />

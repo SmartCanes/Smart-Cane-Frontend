@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Icon } from "@iconify/react";
 import { Plus, Pencil, Trash2, ShieldCheck, UserCog } from "lucide-react";
 import TextField from "../ui/components/TextField";
@@ -31,10 +31,54 @@ const LoadingSkeleton = () => (
   </div>
 );
 
+const matchesRecordDate = (createdAt, dateFilter) => {
+  if (dateFilter === "all") return true;
+  if (!createdAt) return false;
+
+  const recordDate = new Date(createdAt);
+  if (Number.isNaN(recordDate.getTime())) return false;
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (dateFilter === "today") {
+    return recordDate >= startOfToday;
+  }
+
+  if (dateFilter === "last7") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 6);
+    return recordDate >= cutoff;
+  }
+
+  if (dateFilter === "last30") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 29);
+    return recordDate >= cutoff;
+  }
+
+  if (dateFilter === "this_month") {
+    return (
+      recordDate.getFullYear() === now.getFullYear() &&
+      recordDate.getMonth() === now.getMonth()
+    );
+  }
+
+  if (dateFilter === "this_year") {
+    return recordDate.getFullYear() === now.getFullYear();
+  }
+
+  return true;
+};
+
 export default function ManageAdmin() {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ message: "", type: "", visible: false });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [setupFilter, setSetupFilter] = useState("all");
+  const [createdDateFilter, setCreatedDateFilter] = useState("all");
 
   const showToast = (message, type = "info") => {
     setToast({ message, type, visible: true });
@@ -257,9 +301,46 @@ export default function ManageAdmin() {
     }
   };
 
-  const totalAdmins = admins.length;
-  const superAdmins = admins.filter(a => a.role === "super_admin").length;
-  const pendingSetup = admins.filter(a => a.is_first_login).length;
+  const filteredAdmins = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+
+    return admins.filter((a) => {
+      if (roleFilter !== "all" && a.role !== roleFilter) {
+        return false;
+      }
+
+      if (setupFilter === "pending" && !a.is_first_login) return false;
+      if (setupFilter === "active" && a.is_first_login) return false;
+
+      if (!matchesRecordDate(a.created_at, createdDateFilter)) {
+        return false;
+      }
+
+      if (!q) return true;
+
+      const fullName = [a.first_name, a.middle_name, a.last_name].filter(Boolean).join(" ");
+      const haystack = [
+        fullName,
+        a.username || "",
+        a.email || "",
+        a.role || "",
+        a.is_first_login ? "pending setup" : "active",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [admins, searchTerm, roleFilter, setupFilter, createdDateFilter]);
+
+  const totalAdmins = filteredAdmins.length;
+  const superAdmins = filteredAdmins.filter((a) => a.role === "super_admin").length;
+  const pendingSetup = filteredAdmins.filter((a) => a.is_first_login).length;
+  const hasActiveFilters =
+    searchTerm.trim().length > 0 ||
+    roleFilter !== "all" ||
+    setupFilter !== "all" ||
+    createdDateFilter !== "all";
 
   return (
     <>
@@ -332,21 +413,85 @@ export default function ManageAdmin() {
               </span>
             </div>
 
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+              <div className="w-full lg:max-w-md">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search name, username, email, or status"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 w-full lg:w-auto">
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
+                >
+                  <option value="all">All Roles</option>
+                  <option value="super_admin">Super Admin</option>
+                  <option value="admin">Admin</option>
+                </select>
+
+                <select
+                  value={setupFilter}
+                  onChange={(e) => setSetupFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
+                >
+                  <option value="all">All Setup Status</option>
+                  <option value="pending">Pending Setup</option>
+                  <option value="active">Active</option>
+                </select>
+
+                <select
+                  value={createdDateFilter}
+                  onChange={(e) => setCreatedDateFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
+                >
+                  <option value="all">All Created Dates</option>
+                  <option value="today">Created Today</option>
+                  <option value="last7">Last 7 Days</option>
+                  <option value="last30">Last 30 Days</option>
+                  <option value="this_month">This Month</option>
+                  <option value="this_year">This Year</option>
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setRoleFilter("all");
+                    setSetupFilter("all");
+                    setCreatedDateFilter("all");
+                  }}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
             <div>
               {loading ? (
                 <LoadingSkeleton />
-              ) : admins.length === 0 ? (
+              ) : filteredAdmins.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <UserCog size={52} className="mb-4 text-gray-200" />
-                  <p className="text-lg font-semibold text-gray-500">No admins found</p>
+                  <p className="text-lg font-semibold text-gray-500">
+                    {hasActiveFilters ? "No admins match your filters" : "No admins found"}
+                  </p>
                   <p className="text-sm mt-1 text-gray-400">
-                    Click "Add Admin" to create one.
+                    {hasActiveFilters
+                      ? "Try adjusting your search or filter options."
+                      : "Click \"Add Admin\" to create one."}
                   </p>
                 </div>
               ) : (
                 <>
                   <div className="xl:hidden divide-y divide-gray-100">
-                    {admins.map((a, i) => (
+                    {filteredAdmins.map((a, i) => (
                       <div key={a.admin_id} className="p-4 sm:p-5 space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-2.5 min-w-0">
@@ -424,7 +569,7 @@ export default function ManageAdmin() {
                          </tr>
                       </thead>
                       <tbody>
-                        {admins.map((a, i) => (
+                        {filteredAdmins.map((a, i) => (
                           <tr
                             key={a.admin_id}
                             className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors ${

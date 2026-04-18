@@ -647,7 +647,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <div style={{ fontSize: isPhone ? "12px" : "13px", color: C.text, fontWeight: 500, lineHeight: 1.3 }}>
-                        {log.message || "—"}
+                        {log.specific_message || log.message || "—"}
                       </div>
                       <div style={{ fontSize: "11px", color: C.sub, marginTop: "4px", display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
                         <span style={{
@@ -656,7 +656,17 @@ export default function Dashboard() {
                         }}>
                           {(log.activity_type || "").replace(/_/g, " ")}
                         </span>
-                        {log.device_id && <span>Device #{log.device_id}</span>}
+                        {(log.device_serial_number || log.device_id) && (
+                          <span>
+                            {log.device_serial_number ? `Device ${log.device_serial_number}` : `Device #${log.device_id}`}
+                          </span>
+                        )}
+                        {log.vip_name && <span>VIP {log.vip_name}</span>}
+                        {log.last_location && (
+                          <span style={{ maxWidth: isPhone ? "100%" : "220px", overflowWrap: "anywhere" }}>
+                            At {log.last_location}
+                          </span>
+                        )}
                         {log.status && (
                           <span style={{ color: log.status === "success" ? C.green : C.sub }}>
                             {log.status}

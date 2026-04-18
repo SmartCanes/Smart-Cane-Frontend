@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import icaneLogo from "../../assets/images/smartcane-logo.png";
 
+
 const DeviceIcon = ({ className }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M9 3c0 0 3 2 3 9s-3 9-3 9" />
@@ -60,7 +61,7 @@ export default function Sidebar({ isMobileOpen = false, onCloseMobile = () => {}
         <div className="py-6 px-5 border-b border-white/15 flex items-center gap-3">
           <img src={icaneLogo} alt="iCane logo" className="h-8 w-8 object-contain" />
           <span className="text-white font-bold text-lg tracking-wide font-gabriela">
-            iCane Admin
+            iCane
           </span>
         </div>
 
@@ -83,7 +84,7 @@ export default function Sidebar({ isMobileOpen = false, onCloseMobile = () => {}
           <div className="py-5 px-4 border-b border-white/15 flex items-center gap-3">
             <img src={icaneLogo} alt="iCane logo" className="h-8 w-8 object-contain" />
             <span className="text-white font-bold text-lg tracking-wide font-gabriela">
-              iCane Admin
+              iCane
             </span>
           </div>
 

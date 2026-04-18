@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import {
   ShieldCheck,
   RefreshCw,
@@ -28,6 +28,46 @@ const apiFetch = async (path, options = {}) => {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Request failed");
   return data;
+};
+
+const matchesRegistrationDate = (createdAt, dateFilter) => {
+  if (dateFilter === "all") return true;
+  if (!createdAt) return false;
+
+  const createdDate = new Date(createdAt);
+  if (Number.isNaN(createdDate.getTime())) return false;
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (dateFilter === "today") {
+    return createdDate >= startOfToday;
+  }
+
+  if (dateFilter === "last7") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 6);
+    return createdDate >= cutoff;
+  }
+
+  if (dateFilter === "last30") {
+    const cutoff = new Date(startOfToday);
+    cutoff.setDate(cutoff.getDate() - 29);
+    return createdDate >= cutoff;
+  }
+
+  if (dateFilter === "this_month") {
+    return (
+      createdDate.getFullYear() === now.getFullYear() &&
+      createdDate.getMonth() === now.getMonth()
+    );
+  }
+
+  if (dateFilter === "this_year") {
+    return createdDate.getFullYear() === now.getFullYear();
+  }
+
+  return true;
 };
 
 //  Toast
@@ -227,6 +267,10 @@ export default function ManageGuardian() {
   const [guardians, setGuardians] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [toasts, setToasts]       = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deviceFilter, setDeviceFilter] = useState("all");
+  const [vipFilter, setVipFilter] = useState("all");
+  const [registrationDateFilter, setRegistrationDateFilter] = useState("all");
 
   const showToast = useCallback((message, type = "error") => {
     const id = Date.now();
@@ -250,11 +294,62 @@ export default function ManageGuardian() {
     fetchGuardians();
   }, [fetchGuardians]);
 
-  const totalGuardians   = guardians.length;
-  const withDevices      = guardians.filter((g) => g.devices?.length > 0).length;
-  const primaryCount     = guardians.filter((g) =>
+  const filteredGuardians = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+
+    return guardians.filter((g) => {
+      const hasDevices = (g.devices?.length || 0) > 0;
+      const hasVips = (g.vips?.length || 0) > 0;
+
+      if (deviceFilter === "with_devices" && !hasDevices) return false;
+      if (deviceFilter === "without_devices" && hasDevices) return false;
+      if (vipFilter === "with_vips" && !hasVips) return false;
+      if (vipFilter === "without_vips" && hasVips) return false;
+
+      if (!matchesRegistrationDate(g.created_at, registrationDateFilter)) {
+        return false;
+      }
+
+      if (!q) return true;
+
+      const deviceText = (g.devices || [])
+        .map((d) => `${d.device_serial_number || ""} ${d.role || ""}`.trim())
+        .join(" ");
+      const vipText = (g.vips || [])
+        .map((v) => `${v.first_name || ""} ${v.last_name || ""}`.trim())
+        .join(" ");
+
+      const haystack = [
+        g.first_name || "",
+        g.middle_name || "",
+        g.last_name || "",
+        g.username || "",
+        g.email || "",
+        g.contact_number || "",
+        g.city || "",
+        g.province || "",
+        g.barangay || "",
+        g.village || "",
+        deviceText,
+        vipText,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [guardians, searchTerm, deviceFilter, vipFilter, registrationDateFilter]);
+
+  const totalGuardians   = filteredGuardians.length;
+  const withDevices      = filteredGuardians.filter((g) => g.devices?.length > 0).length;
+  const primaryCount     = filteredGuardians.filter((g) =>
     g.devices?.some((d) => d.role === "primary")
   ).length;
+  const hasActiveFilters =
+    searchTerm.trim().length > 0 ||
+    deviceFilter !== "all" ||
+    vipFilter !== "all" ||
+    registrationDateFilter !== "all";
 
   return (
     <>
@@ -343,21 +438,85 @@ export default function ManageGuardian() {
               </span>
             </div>
 
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+              <div className="w-full lg:max-w-md">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search guardian, contact, device, VIP, or location"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 w-full lg:w-auto">
+                <select
+                  value={deviceFilter}
+                  onChange={(e) => setDeviceFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Devices</option>
+                  <option value="with_devices">With Devices</option>
+                  <option value="without_devices">No Devices</option>
+                </select>
+
+                <select
+                  value={vipFilter}
+                  onChange={(e) => setVipFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All VIPs</option>
+                  <option value="with_vips">With VIPs</option>
+                  <option value="without_vips">No VIPs</option>
+                </select>
+
+                <select
+                  value={registrationDateFilter}
+                  onChange={(e) => setRegistrationDateFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                >
+                  <option value="all">All Registration Dates</option>
+                  <option value="today">Registered Today</option>
+                  <option value="last7">Last 7 Days</option>
+                  <option value="last30">Last 30 Days</option>
+                  <option value="this_month">This Month</option>
+                  <option value="this_year">This Year</option>
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setDeviceFilter("all");
+                    setVipFilter("all");
+                    setRegistrationDateFilter("all");
+                  }}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
             {loading ? (
               <LoadingSkeleton />
-            ) : guardians.length === 0 ? (
+            ) : filteredGuardians.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                 <ShieldCheck size={52} className="mb-4 text-gray-200" />
-                <p className="text-lg font-semibold text-gray-500">No guardians registered yet</p>
+                <p className="text-lg font-semibold text-gray-500">
+                  {hasActiveFilters ? "No guardians match your filters" : "No guardians registered yet"}
+                </p>
                 <p className="text-sm mt-1 text-gray-400">
-                  Guardians register through the mobile app.
+                  {hasActiveFilters
+                    ? "Try adjusting your search or filter options."
+                    : "Guardians register through the mobile app."}
                 </p>
               </div>
             ) : (
               <>
                 {/* Mobile/Tablet cards */}
                 <div className="xl:hidden p-3 sm:p-4 space-y-3">
-                  {guardians.map((g) => (
+                  {filteredGuardians.map((g) => (
                     <div key={g.guardian_id} className="rounded-xl border border-gray-100 bg-[#fafcff] p-3 sm:p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2.5 min-w-0">
@@ -455,7 +614,7 @@ export default function ManageGuardian() {
                       </tr>
                     </thead>
                     <tbody>
-                      {guardians.map((g, i) => (
+                      {filteredGuardians.map((g, i) => (
                         <tr
                           key={g.guardian_id}
                           className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors

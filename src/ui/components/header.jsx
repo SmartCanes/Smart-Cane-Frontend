@@ -147,7 +147,24 @@ export default function Header({ onMenuClick }) {
     if (type === "guardian_concern") return "ph:warning-circle";
     if (type === "admin_created") return "ph:user-plus";
     if (type === "admin_setup_completed") return "ph:check-circle";
+    if (type === "device_created") return "ph:plus-circle";
+    if (type === "device_deleted") return "ph:trash";
+    if (type === "admin_deleted") return "ph:user-minus";
+    if (type === "concern_deleted") return "ph:chat-teardrop-slash";
     return "ph:bell";
+  };
+
+  const notifTypeLabel = (type) => {
+    const labels = {
+      guardian_concern: "Concern",
+      concern_deleted: "Concern Deleted",
+      admin_created: "Admin Invite",
+      admin_setup_completed: "Setup Complete",
+      device_created: "Device Added",
+      admin_deleted: "Admin Deleted",
+      device_deleted: "Device Deleted",
+    };
+    return labels[type] || "Notification";
   };
 
   const timeAgo = (iso) => {
@@ -252,14 +269,17 @@ export default function Header({ onMenuClick }) {
                                 {n.body}
                               </div>
                             )}
-                            {!n.is_read && (
-                              <div className="mt-1">
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                              <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600">
+                                {notifTypeLabel(n.type)}
+                              </span>
+                              {!n.is_read && (
                                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-100">
                                   <span className="w-1.5 h-1.5 rounded-full bg-primary-100" />
                                   New
                                 </span>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         </button>
                       ))}
