@@ -238,7 +238,6 @@ export default function ConcernComposer({
       };
 
       const response = await sendConcernMessage(payload);
-      console.log(response);
 
       if (
         response.status === 200 ||
