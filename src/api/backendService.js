@@ -210,10 +210,4 @@ export const getSharedDeviceRoute = async (deviceId) => {
 };
 
 export const sendConcernMessage = (payload) =>
-  handleRequest(() =>
-    backendApi.post(`/contact`, payload, {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-  );
+  handleRequest(() => backendApi.post(`/contact`, payload));
