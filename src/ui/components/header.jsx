@@ -2,8 +2,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/client";
+import Modal from "./modal";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const LOGOUT_TRANSITION_MS = 550;
 
 export default function Header({ onMenuClick }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -13,6 +15,8 @@ export default function Header({ onMenuClick }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [logoutSubmitting, setLogoutSubmitting] = useState(false);
   const profileDropdownRef = useRef(null);
   const notifDropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -115,10 +119,21 @@ export default function Header({ onMenuClick }) {
   }, [fetchNotifications]);
 
   const handleLogout = () => {
+    setDropdownOpen(false);
+    setNotifOpen(false);
+    setLogoutModalOpen(true);
+  };
+
+  const confirmLogout = async () => {
+    if (logoutSubmitting) return;
+    setLogoutSubmitting(true);
+    await new Promise((resolve) => setTimeout(resolve, LOGOUT_TRANSITION_MS));
     localStorage.clear();
     setDropdownOpen(false);
     setNotifOpen(false);
+    setLogoutModalOpen(false);
     navigate("/login", { replace: true });
+    setLogoutSubmitting(false);
   };
 
   const handleProfile = () => {
@@ -184,6 +199,7 @@ export default function Header({ onMenuClick }) {
   };
 
   return (
+    <>
     <header className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-50 shadow-sm">
       <div className="flex items-center gap-2 text-white font-semibold tracking-wide">
         <button
@@ -348,5 +364,20 @@ export default function Header({ onMenuClick }) {
         </div>
       </div>
     </header>
+    <Modal
+      isOpen={logoutModalOpen}
+      onClose={() => {
+        if (!logoutSubmitting) setLogoutModalOpen(false);
+      }}
+      onConfirm={confirmLogout}
+      title="Confirm Logout"
+      message="Are you sure you want to log out of the Admin Panel?"
+      confirmText="Logout"
+      submittingText="Signing out..."
+      cancelText="Stay Logged In"
+      isSubmitting={logoutSubmitting}
+      type="danger"
+    />
+    </>
   );
 }
