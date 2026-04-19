@@ -72,6 +72,7 @@ export default function Modal({
   actionText,
   onAction,
   confirmText,
+  submittingText = "Processing...",
 
   handleConfirm,
   handleCancel,
@@ -194,9 +195,11 @@ export default function Modal({
                       )}
 
                       {confirmText
-                        ? confirmText
+                        ? isSubmitting
+                          ? submittingText
+                          : confirmText
                         : isSubmitting
-                          ? "Processing..."
+                          ? submittingText
                           : "Confirm"}
                     </button>
                   </div>
