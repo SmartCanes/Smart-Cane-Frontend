@@ -229,7 +229,11 @@ export default function ManageActionHistory() {
       let res = await api.post(`/api/admin/audit-logs/${item.audit_id}/restore`, {});
 
       // Backward-compatible fallback for deployments that only expose device restore under /api/devices.
-      if ((!res || !res.ok) && isDeviceDelete) {
+      // Only fallback when the primary endpoint is missing, not when it returned a valid business error (e.g., 409).
+      const shouldUseLegacyFallback =
+        isDeviceDelete && (!res || res.status === 404 || res.status === 405);
+
+      if (shouldUseLegacyFallback) {
         res = await api.post(`/api/devices/restore/${item.audit_id}`, {});
       }
 

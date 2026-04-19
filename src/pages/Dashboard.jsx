@@ -49,6 +49,22 @@ function ago(ts) {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
+function formatPHDateTime(ts) {
+  if (!ts) return "—";
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return "—";
+  const formatted = date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${formatted} (UTC+8)`;
+}
+
 function getTodayLabel() {
   const now = new Date();
   const days   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -629,6 +645,7 @@ export default function Dashboard() {
             <div style={{ display: "flex", flexDirection: "column", gap: "2px", maxHeight: "360px", overflowY: "auto" }}>
               {filteredLogs.slice(0, 20).map((log, i) => {
                 const color = activityColor(log.activity_type);
+                const phDateTime = formatPHDateTime(log.created_at);
                 return (
                   <div key={log.log_id || i} className="log-row" style={{
                     display: "grid", gridTemplateColumns: isPhone ? "28px 1fr" : "28px 1fr auto",
@@ -673,15 +690,21 @@ export default function Dashboard() {
                           </span>
                         )}
                         {isPhone && (
-                          <span style={{ marginLeft: "auto", whiteSpace: "nowrap", fontSize: "10px" }}>
-                            {ago(log.created_at)}
+                          <span style={{ marginLeft: "auto", textAlign: "right", minWidth: "120px" }}>
+                            <span style={{ display: "block", whiteSpace: "nowrap", fontSize: "10px" }}>
+                              {ago(log.created_at)}
+                            </span>
+                            <span style={{ display: "block", fontSize: "10px", color: C.sub }}>
+                              {phDateTime}
+                            </span>
                           </span>
                         )}
                       </div>
                     </div>
                     {!isPhone && (
-                    <div style={{ fontSize: "11px", color: C.sub, whiteSpace: "nowrap" }}>
-                      {ago(log.created_at)}
+                    <div style={{ fontSize: "11px", color: C.sub, textAlign: "right" }}>
+                      <div style={{ whiteSpace: "nowrap" }}>{ago(log.created_at)}</div>
+                      <div style={{ fontSize: "10px" }}>{phDateTime}</div>
                     </div>
                     )}
                   </div>

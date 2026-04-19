@@ -74,6 +74,22 @@ const matchesTriggeredDate = (createdAt, dateFilter) => {
   return true;
 };
 
+const formatPHDateTime = (createdAt) => {
+  if (!createdAt) return "—";
+  const date = new Date(createdAt);
+  if (Number.isNaN(date.getTime())) return "—";
+  const formatted = date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${formatted} (UTC+8)`;
+};
+
 //  Toast
 const Toast = ({ toasts }) => (
   <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none">
@@ -403,15 +419,7 @@ export default function ManageEmergencyLogs() {
                             </div>
                             {log.created_at && (
                               <p className="text-[10px] text-gray-400 mt-0.5">
-                                {new Date(log.created_at).toLocaleString("en-PH", {
-                                  timeZone: "Asia/Manila",
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                })}
+                                {formatPHDateTime(log.created_at)}
                               </p>
                             )}
                           </div>
@@ -599,15 +607,7 @@ export default function ManageEmergencyLogs() {
                               </div>
                               {log.created_at && (
                                 <p className="text-[10px] text-gray-400 mt-0.5 pl-4">
-                                  {new Date(log.created_at).toLocaleString("en-PH", {
-                                    timeZone: "Asia/Manila",
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                    hour: "numeric",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                  })}
+                                  {formatPHDateTime(log.created_at)}
                                 </p>
                               )}
                             </td>
