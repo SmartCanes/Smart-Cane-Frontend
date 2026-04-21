@@ -25,7 +25,12 @@ const actionLabels = {
   role_change: "Role Change",
 };
 
-const RESTORABLE_ACTIONS = new Set(["admin_delete", "concern_delete", "device_delete", "device_deleted"]);
+const RESTORABLE_ACTIONS = new Set([
+  "admin_delete",
+  "concern_delete",
+  "device_delete",
+  "device_deleted",
+]);
 
 const roleFromAuth = () => {
   const token = localStorage.getItem("access_token") || "";
@@ -33,7 +38,9 @@ const roleFromAuth = () => {
     try {
       const payload = token.split(".")[1] || "";
       if (payload) {
-        const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+        const decoded = JSON.parse(
+          atob(payload.replace(/-/g, "+").replace(/_/g, "/")),
+        );
         const tokenRole = String(decoded?.role || "").trim();
         if (tokenRole) return tokenRole;
       }
@@ -76,7 +83,9 @@ const PreviewValue = ({
 
   if (!isLong) {
     return (
-      <span className={`${sharedClass} ${isDesktop ? "" : "whitespace-normal break-all"}`}>
+      <span
+        className={`${sharedClass} ${isDesktop ? "" : "whitespace-normal break-all"}`}
+      >
         {display}
       </span>
     );
@@ -121,7 +130,7 @@ export default function ManageActionHistory() {
   const [actionType, setActionType] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
   const [isDesktopPreviewMode, setIsDesktopPreviewMode] = useState(
-    typeof window !== "undefined" ? window.innerWidth >= 1280 : true
+    typeof window !== "undefined" ? window.innerWidth >= 1280 : true,
   );
   const [hoverPreview, setHoverPreview] = useState({
     open: false,
@@ -162,7 +171,10 @@ export default function ManageActionHistory() {
     const panelWidth = 360;
     const panelHeight = 220;
     const x = Math.min(event.clientX + 14, window.innerWidth - panelWidth - 12);
-    const y = Math.min(event.clientY + 14, window.innerHeight - panelHeight - 12);
+    const y = Math.min(
+      event.clientY + 14,
+      window.innerHeight - panelHeight - 12,
+    );
 
     setHoverPreview({ open: true, title, content, x, y });
   };
@@ -211,11 +223,19 @@ export default function ManageActionHistory() {
 
   const canRestore = useCallback(
     (item) => {
-      const normalizedStatus = String(item?.status || "").trim().toLowerCase();
-      const normalizedAction = String(item?.action_type || "").trim().toLowerCase();
-      return isSuperAdmin && normalizedStatus === "success" && RESTORABLE_ACTIONS.has(normalizedAction);
+      const normalizedStatus = String(item?.status || "")
+        .trim()
+        .toLowerCase();
+      const normalizedAction = String(item?.action_type || "")
+        .trim()
+        .toLowerCase();
+      return (
+        isSuperAdmin &&
+        normalizedStatus === "success" &&
+        RESTORABLE_ACTIONS.has(normalizedAction)
+      );
     },
-    [isSuperAdmin]
+    [isSuperAdmin],
   );
 
   const restoreFromAudit = useCallback(
@@ -223,10 +243,17 @@ export default function ManageActionHistory() {
       if (!canRestore(item)) return;
 
       setRestoreLoadingId(item.audit_id);
-      const normalizedAction = String(item?.action_type || "").trim().toLowerCase();
-      const isDeviceDelete = normalizedAction === "device_delete" || normalizedAction === "device_deleted";
+      const normalizedAction = String(item?.action_type || "")
+        .trim()
+        .toLowerCase();
+      const isDeviceDelete =
+        normalizedAction === "device_delete" ||
+        normalizedAction === "device_deleted";
 
-      let res = await api.post(`/api/admin/audit-logs/${item.audit_id}/restore`, {});
+      let res = await api.post(
+        `/api/admin/audit-logs/${item.audit_id}/restore/`,
+        {},
+      );
 
       // Backward-compatible fallback for deployments that only expose device restore under /api/devices.
       // Only fallback when the primary endpoint is missing, not when it returned a valid business error (e.g., 409).
@@ -234,7 +261,7 @@ export default function ManageActionHistory() {
         isDeviceDelete && (!res || res.status === 404 || res.status === 405);
 
       if (shouldUseLegacyFallback) {
-        res = await api.post(`/api/devices/restore/${item.audit_id}`, {});
+        res = await api.post(`/api/devices/restore/${item.audit_id}/`, {});
       }
 
       if (!res || !res.ok) {
@@ -243,12 +270,16 @@ export default function ManageActionHistory() {
         return;
       }
 
-      const restoredLabel = actionLabels[res.data?.restored_action_type] || "Record";
-      showToast(res.data?.message || `${restoredLabel} restored successfully.`, "success");
+      const restoredLabel =
+        actionLabels[res.data?.restored_action_type] || "Record";
+      showToast(
+        res.data?.message || `${restoredLabel} restored successfully.`,
+        "success",
+      );
       await fetchHistory();
       setRestoreLoadingId(null);
     },
-    [canRestore, fetchHistory, showToast]
+    [canRestore, fetchHistory, showToast],
   );
 
   useEffect(() => {
@@ -256,15 +287,23 @@ export default function ManageActionHistory() {
   }, [fetchHistory]);
 
   const stats = useMemo(() => {
-    const adminDeletes = items.filter((i) => i.action_type === "admin_delete").length;
-    const concernDeletes = items.filter((i) => i.action_type === "concern_delete").length;
-    const deviceDeletes = items.filter(
-      (i) => i.action_type === "device_delete" || i.action_type === "device_deleted"
+    const adminDeletes = items.filter(
+      (i) => i.action_type === "admin_delete",
     ).length;
-    const roleChanges = items.filter((i) => i.action_type === "role_change").length;
+    const concernDeletes = items.filter(
+      (i) => i.action_type === "concern_delete",
+    ).length;
+    const deviceDeletes = items.filter(
+      (i) =>
+        i.action_type === "device_delete" || i.action_type === "device_deleted",
+    ).length;
+    const roleChanges = items.filter(
+      (i) => i.action_type === "role_change",
+    ).length;
     return { adminDeletes, concernDeletes, deviceDeletes, roleChanges };
   }, [items]);
-  const hasActiveFilters = search.trim().length > 0 || actionType || dateFilter !== "all";
+  const hasActiveFilters =
+    search.trim().length > 0 || actionType || dateFilter !== "all";
 
   if (!isAllowed) {
     return (
@@ -272,7 +311,9 @@ export default function ManageActionHistory() {
         <div className="bg-white p-8 rounded-2xl shadow-md text-center">
           <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
           <h2 className="text-xl font-bold text-gray-800">Access Denied</h2>
-          <p className="text-gray-600 mt-2">You do not have permission to view this page.</p>
+          <p className="text-gray-600 mt-2">
+            You do not have permission to view this page.
+          </p>
         </div>
       </div>
     );
@@ -337,7 +378,9 @@ export default function ManageActionHistory() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-[#1a2e4a]">Action History</h2>
+            <h2 className="text-2xl font-bold text-[#1a2e4a]">
+              Action History
+            </h2>
             <p className="text-gray-500 text-sm mt-0.5">
               Track sensitive admin and super admin actions with reasons.
             </p>
@@ -358,8 +401,12 @@ export default function ManageActionHistory() {
               <UserCog size={22} className="text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Admin Deletions</p>
-              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">{stats.adminDeletes}</p>
+              <p className="text-sm text-gray-500 font-medium">
+                Admin Deletions
+              </p>
+              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">
+                {stats.adminDeletes}
+              </p>
             </div>
           </div>
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-100 p-5 flex items-center gap-4 shadow-sm">
@@ -367,8 +414,12 @@ export default function ManageActionHistory() {
               <ClipboardList size={22} className="text-amber-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Concern Deletions</p>
-              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">{stats.concernDeletes}</p>
+              <p className="text-sm text-gray-500 font-medium">
+                Concern Deletions
+              </p>
+              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">
+                {stats.concernDeletes}
+              </p>
             </div>
           </div>
           <div className="bg-gradient-to-br from-rose-50 to-red-50 rounded-2xl border border-rose-100 p-5 flex items-center gap-4 shadow-sm">
@@ -376,8 +427,12 @@ export default function ManageActionHistory() {
               <ClipboardList size={22} className="text-rose-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Device Deletions</p>
-              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">{stats.deviceDeletes}</p>
+              <p className="text-sm text-gray-500 font-medium">
+                Device Deletions
+              </p>
+              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">
+                {stats.deviceDeletes}
+              </p>
             </div>
           </div>
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100 p-5 flex items-center gap-4 shadow-sm">
@@ -386,7 +441,9 @@ export default function ManageActionHistory() {
             </div>
             <div>
               <p className="text-sm text-gray-500 font-medium">Role Changes</p>
-              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">{stats.roleChanges}</p>
+              <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">
+                {stats.roleChanges}
+              </p>
             </div>
           </div>
         </div>
@@ -396,7 +453,10 @@ export default function ManageActionHistory() {
             <h3 className="font-semibold text-[#1a2e4a]">Audit Records</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 w-full md:w-auto">
               <div className="relative w-full sm:w-64">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search
+                  size={14}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
                 <input
                   value={search}
                   onChange={(e) => {
@@ -456,7 +516,9 @@ export default function ManageActionHistory() {
             </div>
           </div>
 
-          {error && <p className="px-6 py-3 text-sm text-red-600 bg-red-50">{error}</p>}
+          {error && (
+            <p className="px-6 py-3 text-sm text-red-600 bg-red-50">{error}</p>
+          )}
 
           <div>
             {loading ? (
@@ -465,7 +527,9 @@ export default function ManageActionHistory() {
               <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                 <ClipboardList size={52} className="mb-4 text-gray-200" />
                 <p className="text-lg font-semibold text-gray-500">
-                  {hasActiveFilters ? "No audit records match your filters" : "No audit history found"}
+                  {hasActiveFilters
+                    ? "No audit records match your filters"
+                    : "No audit history found"}
                 </p>
                 <p className="text-sm mt-1 text-gray-400">
                   {hasActiveFilters
@@ -483,7 +547,9 @@ export default function ManageActionHistory() {
                           <p className="text-sm font-semibold text-[#1a2e4a]">
                             {actionLabels[item.action_type] || item.action_type}
                           </p>
-                          <p className="text-xs text-gray-500">Record #{item.audit_id}</p>
+                          <p className="text-xs text-gray-500">
+                            Record #{item.audit_id}
+                          </p>
                         </div>
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
@@ -492,21 +558,32 @@ export default function ManageActionHistory() {
                               : "bg-red-100 text-red-700"
                           }`}
                         >
-                          {item.status === "success" ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                          {item.status === "success" ? (
+                            <CheckCircle size={12} />
+                          ) : (
+                            <AlertCircle size={12} />
+                          )}
                           {item.status}
                         </span>
                       </div>
 
                       <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3 space-y-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Actor</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                          Actor
+                        </p>
                         <p className="text-sm text-gray-700 break-words">
-                          {item.actor_name || "Unknown"} (ID: {item.actor_admin_id})
+                          {item.actor_name || "Unknown"} (ID:{" "}
+                          {item.actor_admin_id})
                         </p>
                       </div>
 
                       <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3 space-y-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Reason</p>
-                        <p className="text-xs text-gray-500 uppercase">{item.reason_code}</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                          Reason
+                        </p>
+                        <p className="text-xs text-gray-500 uppercase">
+                          {item.reason_code}
+                        </p>
                         <div className="text-sm text-gray-700 break-words">
                           <PreviewValue
                             text={item.reason_text}
@@ -540,12 +617,16 @@ export default function ManageActionHistory() {
 
                         <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3 space-y-2">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
-                              Deleted Concern / Device
+                            Deleted Concern / Device
                           </p>
                           <div className="text-sm text-gray-700 break-words">
                             <PreviewValue
-                                text={item.deleted_concern_message || item.deleted_device_serial || "-"}
-                                title="Deleted Concern / Device"
+                              text={
+                                item.deleted_concern_message ||
+                                item.deleted_device_serial ||
+                                "-"
+                              }
+                              title="Deleted Concern / Device"
                               maxLength={90}
                               isDesktop={isDesktopPreviewMode}
                               onHoverShow={showHoverPreview}
@@ -578,8 +659,17 @@ export default function ManageActionHistory() {
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors disabled:opacity-50"
                             title="Restore this record"
                           >
-                            <RotateCcw size={13} className={restoreLoadingId === item.audit_id ? "animate-spin" : ""} />
-                            {restoreLoadingId === item.audit_id ? "Restoring..." : "Restore"}
+                            <RotateCcw
+                              size={13}
+                              className={
+                                restoreLoadingId === item.audit_id
+                                  ? "animate-spin"
+                                  : ""
+                              }
+                            />
+                            {restoreLoadingId === item.audit_id
+                              ? "Restoring..."
+                              : "Restore"}
                           </button>
                         </div>
                       )}
@@ -597,10 +687,10 @@ export default function ManageActionHistory() {
                           "Actor",
                           "Reason",
                           "Deleted Admin",
-                            "Deleted Concern / Device",
+                          "Deleted Concern / Device",
                           "Status",
                           "Created",
-                            "Actions",
+                          "Actions",
                         ].map((h) => (
                           <th
                             key={h}
@@ -619,15 +709,20 @@ export default function ManageActionHistory() {
                             i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"
                           }`}
                         >
-                          <td className="px-5 py-4 text-sm text-gray-600">#{item.audit_id}</td>
+                          <td className="px-5 py-4 text-sm text-gray-600">
+                            #{item.audit_id}
+                          </td>
                           <td className="px-5 py-4 text-sm font-medium text-[#1a2e4a]">
                             {actionLabels[item.action_type] || item.action_type}
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-700">
-                            {item.actor_name || "Unknown"} (ID: {item.actor_admin_id})
+                            {item.actor_name || "Unknown"} (ID:{" "}
+                            {item.actor_admin_id})
                           </td>
                           <td className="px-5 py-4">
-                            <p className="text-xs text-gray-500 uppercase">{item.reason_code}</p>
+                            <p className="text-xs text-gray-500 uppercase">
+                              {item.reason_code}
+                            </p>
                             <div className="text-sm text-gray-700 mt-0.5 break-words max-w-[460px]">
                               <PreviewValue
                                 text={item.reason_text}
@@ -656,7 +751,11 @@ export default function ManageActionHistory() {
                           <td className="px-5 py-4 text-sm text-gray-700">
                             <div className="max-w-[320px]">
                               <PreviewValue
-                                text={item.deleted_concern_message || item.deleted_device_serial || "-"}
+                                text={
+                                  item.deleted_concern_message ||
+                                  item.deleted_device_serial ||
+                                  "-"
+                                }
                                 title="Deleted Concern / Device"
                                 maxLength={70}
                                 isDesktop={isDesktopPreviewMode}
@@ -674,19 +773,26 @@ export default function ManageActionHistory() {
                                   : "bg-red-100 text-red-700"
                               }`}
                             >
-                              {item.status === "success" ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                              {item.status === "success" ? (
+                                <CheckCircle size={12} />
+                              ) : (
+                                <AlertCircle size={12} />
+                              )}
                               {item.status}
                             </span>
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-500 whitespace-nowrap">
                             {item.created_at
-                              ? new Date(item.created_at).toLocaleString("en-PH", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
+                              ? new Date(item.created_at).toLocaleString(
+                                  "en-PH",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )
                               : "-"}
                           </td>
                           <td className="px-5 py-4">
@@ -698,8 +804,17 @@ export default function ManageActionHistory() {
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors disabled:opacity-50"
                                 title="Restore this record"
                               >
-                                <RotateCcw size={13} className={restoreLoadingId === item.audit_id ? "animate-spin" : ""} />
-                                {restoreLoadingId === item.audit_id ? "Restoring..." : "Restore"}
+                                <RotateCcw
+                                  size={13}
+                                  className={
+                                    restoreLoadingId === item.audit_id
+                                      ? "animate-spin"
+                                      : ""
+                                  }
+                                />
+                                {restoreLoadingId === item.audit_id
+                                  ? "Restoring..."
+                                  : "Restore"}
                               </button>
                             ) : (
                               <span className="text-xs text-gray-300">-</span>
@@ -716,7 +831,8 @@ export default function ManageActionHistory() {
 
           <div className="px-4 sm:px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-3">
             <p className="text-sm text-gray-500">
-              Page {page} of {totalPages} • {total} record{total !== 1 ? "s" : ""}
+              Page {page} of {totalPages} • {total} record
+              {total !== 1 ? "s" : ""}
             </p>
             <div className="flex items-center gap-2">
               <button
