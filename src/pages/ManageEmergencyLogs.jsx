@@ -36,12 +36,14 @@ const apiFetch = async (path, options = {}) => {
 
 const parseServerTimestamp = (value) => {
   if (!value) return null;
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (value instanceof Date)
+    return Number.isNaN(value.getTime()) ? null : value;
 
   const text = String(value).trim();
   if (!text) return null;
 
-  const isPlainDateTime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d{1,6})?$/.test(text);
+  const isPlainDateTime =
+    /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d{1,6})?$/.test(text);
   const normalized = isPlainDateTime ? `${text.replace(" ", "T")}Z` : text;
   const date = new Date(normalized);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -55,7 +57,11 @@ const matchesTriggeredDate = (createdAt, dateFilter) => {
   if (!triggeredDate) return false;
 
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
 
   if (dateFilter === "today") {
     return triggeredDate >= startOfToday;
@@ -113,7 +119,11 @@ const Toast = ({ toasts }) => (
           ${t.type === "success" ? "bg-green-600" : t.type === "error" ? "bg-red-600" : "bg-[#11285A]"}`}
         style={{ animation: "slideIn 0.25s ease" }}
       >
-        {t.type === "success" ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+        {t.type === "success" ? (
+          <CheckCircle size={16} />
+        ) : (
+          <AlertCircle size={16} />
+        )}
         {t.message}
       </div>
     ))}
@@ -146,7 +156,9 @@ function StatCard({ label, value, icon, loading, sub }) {
         {loading ? (
           <div className="h-8 w-16 bg-gray-100 rounded animate-pulse" />
         ) : (
-          <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">{value}</p>
+          <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">
+            {value}
+          </p>
         )}
         {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
       </div>
@@ -160,16 +172,13 @@ function EmergencyBadge({ type }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border whitespace-nowrap
-        ${isFall
-          ? "bg-orange-50 text-orange-700 border-orange-200"
-          : "bg-red-50 text-red-700 border-red-200"
+        ${
+          isFall
+            ? "bg-orange-50 text-orange-700 border-orange-200"
+            : "bg-red-50 text-red-700 border-red-200"
         }`}
     >
-      {isFall ? (
-        <PersonStanding size={12} />
-      ) : (
-        <Siren size={12} />
-      )}
+      {isFall ? <PersonStanding size={12} /> : <Siren size={12} />}
       {isFall ? "Fall Detected" : "SOS / Emergency"}
     </span>
   );
@@ -177,9 +186,9 @@ function EmergencyBadge({ type }) {
 
 //  Main Component
 export default function ManageEmergencyLogs() {
-  const [logs, setLogs]       = useState([]);
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toasts, setToasts]   = useState([]);
+  const [toasts, setToasts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -188,7 +197,10 @@ export default function ManageEmergencyLogs() {
   const showToast = useCallback((message, type = "error") => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
+    setTimeout(
+      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+      3500,
+    );
   }, []);
 
   const fetchLogs = useCallback(async () => {
@@ -203,7 +215,9 @@ export default function ManageEmergencyLogs() {
     }
   }, [showToast]);
 
-  useEffect(() => { fetchLogs(); }, [fetchLogs]);
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
 
   const filteredLogs = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -224,7 +238,9 @@ export default function ManageEmergencyLogs() {
       if (!q) return true;
 
       const guardianText = (log.guardians || [])
-        .map((g) => `${g.first_name || ""} ${g.last_name || ""} ${g.role || ""}`.trim())
+        .map((g) =>
+          `${g.first_name || ""} ${g.last_name || ""} ${g.role || ""}`.trim(),
+        )
         .join(" ");
 
       const haystack = [
@@ -232,7 +248,9 @@ export default function ManageEmergencyLogs() {
         log.emergency_type || "",
         log.log_message || "",
         log.last_location || "",
-        log.vip ? `${log.vip.first_name || ""} ${log.vip.last_name || ""}`.trim() : "",
+        log.vip
+          ? `${log.vip.first_name || ""} ${log.vip.last_name || ""}`.trim()
+          : "",
         guardianText,
       ]
         .join(" ")
@@ -243,9 +261,14 @@ export default function ManageEmergencyLogs() {
   }, [logs, searchTerm, typeFilter, locationFilter, triggeredDateFilter]);
 
   const totalEmergencies = filteredLogs.length;
-  const totalSOS   = filteredLogs.filter((l) => l.emergency_type === "EMERGENCY").length;
-  const totalFalls  = filteredLogs.filter((l) => l.emergency_type === "FALL").length;
-  const uniqueDevices = new Set(filteredLogs.map((l) => l.device_serial_number)).size;
+  const totalSOS = filteredLogs.filter(
+    (l) => l.emergency_type === "EMERGENCY",
+  ).length;
+  const totalFalls = filteredLogs.filter(
+    (l) => l.emergency_type === "FALL",
+  ).length;
+  const uniqueDevices = new Set(filteredLogs.map((l) => l.device_serial_number))
+    .size;
   const hasActiveFilters =
     searchTerm.trim().length > 0 ||
     typeFilter !== "all" ||
@@ -265,11 +288,12 @@ export default function ManageEmergencyLogs() {
 
       <div className="min-h-screen bg-[#f9fafb] px-2 sm:px-4 py-4 sm:py-6">
         <div className="space-y-6">
-
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-[#1a2e4a]">Emergency Logs</h2>
+              <h2 className="text-2xl font-bold text-[#1a2e4a]">
+                Emergency Logs
+              </h2>
               <p className="text-gray-500 text-sm mt-0.5">
                 All SOS alerts and fall detection events from paired canes.
               </p>
@@ -392,7 +416,9 @@ export default function ManageEmergencyLogs() {
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <AlertTriangle size={52} className="mb-4 text-gray-200" />
                   <p className="text-lg font-semibold text-gray-500">
-                    {hasActiveFilters ? "No emergency logs match your filters" : "No emergency logs found"}
+                    {hasActiveFilters
+                      ? "No emergency logs match your filters"
+                      : "No emergency logs found"}
                   </p>
                   <p className="text-sm mt-1 text-gray-400">
                     {hasActiveFilters
@@ -416,10 +442,13 @@ export default function ManageEmergencyLogs() {
                               </p>
                               {log.vip ? (
                                 <p className="text-xs text-gray-500 mt-0.5">
-                                  {log.vip.first_name} {log.vip.last_name} · ID #{log.vip.vip_id}
+                                  {log.vip.first_name} {log.vip.last_name} · ID
+                                  #{log.vip.vip_id}
                                 </p>
                               ) : (
-                                <p className="text-xs text-gray-400 italic mt-0.5">No VIP assigned</p>
+                                <p className="text-xs text-gray-400 italic mt-0.5">
+                                  No VIP assigned
+                                </p>
                               )}
                             </div>
                           </div>
@@ -427,9 +456,13 @@ export default function ManageEmergencyLogs() {
                             <div className="flex items-center justify-end gap-1.5 text-xs text-gray-500 whitespace-nowrap">
                               <Clock size={12} className="flex-shrink-0" />
                               {(() => {
-                                const createdAt = parseServerTimestamp(log.created_at);
+                                const createdAt = parseServerTimestamp(
+                                  log.created_at,
+                                );
                                 return createdAt
-                                  ? formatDistanceToNow(createdAt, { addSuffix: true })
+                                  ? formatDistanceToNow(createdAt, {
+                                      addSuffix: true,
+                                    })
                                   : "—";
                               })()}
                             </div>
@@ -442,18 +475,24 @@ export default function ManageEmergencyLogs() {
                         </div>
 
                         <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Emergency</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                            Emergency
+                          </p>
                           <div className="mt-1.5 flex flex-col gap-1.5">
                             <EmergencyBadge type={log.emergency_type} />
                             {log.log_message && (
-                              <p className="text-xs text-gray-500 break-words">{log.log_message}</p>
+                              <p className="text-xs text-gray-500 break-words">
+                                {log.log_message}
+                              </p>
                             )}
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Guardians</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                              Guardians
+                            </p>
                             {log.guardians && log.guardians.length > 0 ? (
                               <div className="mt-1.5 flex flex-wrap gap-1.5">
                                 {log.guardians.slice(0, 3).map((g) => (
@@ -461,14 +500,23 @@ export default function ManageEmergencyLogs() {
                                     key={g.guardian_id}
                                     title={`${g.first_name} ${g.last_name} · ${g.role}`}
                                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border max-w-full
-                                      ${g.role === "primary"
-                                        ? "bg-pink-50 text-pink-700 border-pink-200"
-                                        : "bg-blue-50 text-blue-700 border-blue-100"}`}
+                                      ${
+                                        g.role === "primary"
+                                          ? "bg-pink-50 text-pink-700 border-pink-200"
+                                          : "bg-blue-50 text-blue-700 border-blue-100"
+                                      }`}
                                   >
                                     <User size={10} className="flex-shrink-0" />
-                                    <span className="truncate">{g.first_name}</span>
+                                    <span className="truncate">
+                                      {g.first_name}
+                                    </span>
                                     {g.role === "primary" && (
-                                      <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
+                                      <span
+                                        className="text-pink-400 leading-none"
+                                        style={{ fontSize: "10px" }}
+                                      >
+                                        ♥
+                                      </span>
                                     )}
                                   </span>
                                 ))}
@@ -479,15 +527,22 @@ export default function ManageEmergencyLogs() {
                                 )}
                               </div>
                             ) : (
-                              <p className="mt-1.5 text-xs text-gray-400 italic">None assigned</p>
+                              <p className="mt-1.5 text-xs text-gray-400 italic">
+                                None assigned
+                              </p>
                             )}
                           </div>
 
                           <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Last Location</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                              Last Location
+                            </p>
                             {log.last_location ? (
                               <div className="mt-1.5 flex items-start gap-1.5">
-                                <MapPin size={13} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                                <MapPin
+                                  size={13}
+                                  className="text-gray-400 mt-0.5 flex-shrink-0"
+                                />
                                 <span className="text-sm text-gray-700 leading-snug break-words">
                                   {log.last_location}
                                 </span>
@@ -495,7 +550,9 @@ export default function ManageEmergencyLogs() {
                             ) : (
                               <div className="mt-1.5 flex items-center gap-1.5">
                                 <WifiOff size={13} className="text-gray-300" />
-                                <span className="text-xs text-gray-400 italic">No location data</span>
+                                <span className="text-xs text-gray-400 italic">
+                                  No location data
+                                </span>
                               </div>
                             )}
                           </div>
@@ -549,10 +606,14 @@ export default function ManageEmergencyLogs() {
                                   <p className="text-sm font-semibold text-[#1a2e4a] leading-tight">
                                     {log.vip.first_name} {log.vip.last_name}
                                   </p>
-                                  <p className="text-xs text-gray-400">ID #{log.vip.vip_id}</p>
+                                  <p className="text-xs text-gray-400">
+                                    ID #{log.vip.vip_id}
+                                  </p>
                                 </div>
                               ) : (
-                                <span className="text-xs text-gray-400 italic">No VIP assigned</span>
+                                <span className="text-xs text-gray-400 italic">
+                                  No VIP assigned
+                                </span>
                               )}
                             </td>
 
@@ -564,15 +625,21 @@ export default function ManageEmergencyLogs() {
                                       key={g.guardian_id}
                                       title={`${g.first_name} ${g.last_name} · ${g.role}`}
                                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap
-                                        ${g.role === "primary"
-                                          ? "bg-pink-50 text-pink-700 border-pink-200"
-                                          : "bg-blue-50 text-blue-700 border-blue-100"
+                                        ${
+                                          g.role === "primary"
+                                            ? "bg-pink-50 text-pink-700 border-pink-200"
+                                            : "bg-blue-50 text-blue-700 border-blue-100"
                                         }`}
                                     >
                                       <User size={10} />
                                       {g.first_name}
                                       {g.role === "primary" && (
-                                        <span className="text-pink-400 leading-none" style={{ fontSize: "10px" }}>♥</span>
+                                        <span
+                                          className="text-pink-400 leading-none"
+                                          style={{ fontSize: "10px" }}
+                                        >
+                                          ♥
+                                        </span>
                                       )}
                                     </span>
                                   ))}
@@ -583,7 +650,9 @@ export default function ManageEmergencyLogs() {
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-xs text-gray-400 italic">None assigned</span>
+                                <span className="text-xs text-gray-400 italic">
+                                  None assigned
+                                </span>
                               )}
                             </td>
 
@@ -601,15 +670,23 @@ export default function ManageEmergencyLogs() {
                             <td className="px-5 py-4">
                               {log.last_location ? (
                                 <div className="flex items-start gap-1.5 max-w-[200px]">
-                                  <MapPin size={13} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                                  <MapPin
+                                    size={13}
+                                    className="text-gray-400 mt-0.5 flex-shrink-0"
+                                  />
                                   <span className="text-sm text-gray-700 leading-snug">
                                     {log.last_location}
                                   </span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-1.5">
-                                  <WifiOff size={13} className="text-gray-300" />
-                                  <span className="text-xs text-gray-400 italic">No location data</span>
+                                  <WifiOff
+                                    size={13}
+                                    className="text-gray-300"
+                                  />
+                                  <span className="text-xs text-gray-400 italic">
+                                    No location data
+                                  </span>
                                 </div>
                               )}
                             </td>
@@ -618,9 +695,13 @@ export default function ManageEmergencyLogs() {
                               <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
                                 <Clock size={12} className="flex-shrink-0" />
                                 {(() => {
-                                  const createdAt = parseServerTimestamp(log.created_at);
+                                  const createdAt = parseServerTimestamp(
+                                    log.created_at,
+                                  );
                                   return createdAt
-                                    ? formatDistanceToNow(createdAt, { addSuffix: true })
+                                    ? formatDistanceToNow(createdAt, {
+                                        addSuffix: true,
+                                      })
                                     : "—";
                                 })()}
                               </div>
@@ -639,7 +720,6 @@ export default function ManageEmergencyLogs() {
               )}
             </div>
           </div>
-
         </div>
       </div>
     </>

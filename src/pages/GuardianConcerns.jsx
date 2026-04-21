@@ -46,12 +46,14 @@ const apiFetch = async (path, options = {}) => {
 
 const parseServerTimestamp = (value) => {
   if (!value) return null;
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (value instanceof Date)
+    return Number.isNaN(value.getTime()) ? null : value;
 
   const text = String(value).trim();
   if (!text) return null;
 
-  const isPlainDateTime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d{1,6})?$/.test(text);
+  const isPlainDateTime =
+    /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d{1,6})?$/.test(text);
   const normalized = isPlainDateTime ? `${text.replace(" ", "T")}Z` : text;
   const date = new Date(normalized);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -79,7 +81,11 @@ const matchesRecordDate = (createdAt, dateFilter) => {
   if (!recordDate) return false;
 
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
 
   if (dateFilter === "today") {
     return recordDate >= startOfToday;
@@ -115,20 +121,37 @@ const PROCESS_STAGE_OPTIONS = [
   { value: "new", label: "New", hint: "Recently submitted" },
   { value: "acknowledged", label: "Acknowledged", hint: "Seen by an admin" },
   { value: "ongoing", label: "Ongoing", hint: "Work is in progress" },
-  { value: "awaiting_client", label: "Awaiting Client", hint: "Waiting for client response" },
-  { value: "escalated", label: "Escalated", hint: "Forwarded for deeper handling" },
+  {
+    value: "awaiting_client",
+    label: "Awaiting Client",
+    hint: "Waiting for client response",
+  },
+  {
+    value: "escalated",
+    label: "Escalated",
+    hint: "Forwarded for deeper handling",
+  },
   { value: "resolved", label: "Resolved", hint: "Issue is solved" },
-  { value: "failed_to_resolve", label: "Failed To Resolve", hint: "Issue could not be solved" },
+  {
+    value: "failed_to_resolve",
+    label: "Failed To Resolve",
+    hint: "Issue could not be solved",
+  },
 ];
 
 const PROCESS_STAGE_LABEL = Object.fromEntries(
-  PROCESS_STAGE_OPTIONS.map((item) => [item.value, item.label])
+  PROCESS_STAGE_OPTIONS.map((item) => [item.value, item.label]),
 );
 
-const PROCESS_STAGES_REQUIRING_REMARKS = new Set(["escalated", "failed_to_resolve"]);
+const PROCESS_STAGES_REQUIRING_REMARKS = new Set([
+  "escalated",
+  "failed_to_resolve",
+]);
 
 const getNormalizedProcessStage = (concern) => {
-  const rawStage = String(concern?.process_stage || "").trim().toLowerCase();
+  const rawStage = String(concern?.process_stage || "")
+    .trim()
+    .toLowerCase();
   if (PROCESS_STAGE_LABEL[rawStage]) return rawStage;
   if (concern?.status === "resolved") return "resolved";
   if (concern?.status === "read") return "acknowledged";
@@ -147,7 +170,11 @@ const Toast = ({ toasts }) => (
           ${t.type === "success" ? "bg-green-600" : t.type === "error" ? "bg-red-600" : "bg-[#11285A]"}`}
         style={{ animation: "slideIn 0.25s ease" }}
       >
-        {t.type === "success" ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+        {t.type === "success" ? (
+          <CheckCircle size={16} />
+        ) : (
+          <AlertCircle size={16} />
+        )}
         {t.message}
       </div>
     ))}
@@ -186,7 +213,7 @@ const extractConcernSource = (rawMessage = "") => {
 
   const sourceKey = (match[1] || "unknown").trim().toLowerCase();
   const cleanMessage = messageText.slice(match[0].length).trim();
-//if naka login yung guardian ay dashboard, pero pag guest, Guest page yung nakalagay
+  //if naka login yung guardian ay dashboard, pero pag guest, Guest page yung nakalagay
   const sourceMap = {
     "guest-landing": "Guest Page",
     "guardian-dashboard": "Dashboard",
@@ -291,7 +318,7 @@ export default function GuardianConcerns() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [isDesktopPreviewMode, setIsDesktopPreviewMode] = useState(
-    typeof window !== "undefined" ? window.innerWidth >= 1280 : true
+    typeof window !== "undefined" ? window.innerWidth >= 1280 : true,
   );
   const [hoverPreview, setHoverPreview] = useState({
     open: false,
@@ -325,7 +352,10 @@ export default function GuardianConcerns() {
   const showToast = useCallback((message, type = "success") => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
+    setTimeout(
+      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+      3500,
+    );
   }, []);
 
   const fetchConcerns = useCallback(async () => {
@@ -380,13 +410,21 @@ export default function GuardianConcerns() {
     if (!processTarget) return;
 
     const currentStage = getNormalizedProcessStage(processTarget);
-    const currentRemarks = String(processTarget.resolution_remarks || "").trim();
+    const currentRemarks = String(
+      processTarget.resolution_remarks || "",
+    ).trim();
     const trimmedRemarks = processRemarksValue.trim();
-    const requiresRemarks = PROCESS_STAGES_REQUIRING_REMARKS.has(processStageValue);
+    const requiresRemarks =
+      PROCESS_STAGES_REQUIRING_REMARKS.has(processStageValue);
 
     if (requiresRemarks && trimmedRemarks.length < 10) {
-      setProcessError("Please provide at least 10 characters for this process stage.");
-      showToast("Remarks must be at least 10 characters for this process stage.", "error");
+      setProcessError(
+        "Please provide at least 10 characters for this process stage.",
+      );
+      showToast(
+        "Remarks must be at least 10 characters for this process stage.",
+        "error",
+      );
       return;
     }
 
@@ -418,13 +456,22 @@ export default function GuardianConcerns() {
       } else if (processStageValue === "escalated") {
         showToast("Concern escalated with remarks.", "success");
       } else if (isStageChanged) {
-        showToast(`Process updated to ${getProcessStageLabel(processStageValue)}.`, "success");
+        showToast(
+          `Process updated to ${getProcessStageLabel(processStageValue)}.`,
+          "success",
+        );
       }
 
       if (isRemarksChanged && trimmedRemarks) {
-        showToast(`Remarks updated for ${getProcessStageLabel(processStageValue)}.`, "success");
+        showToast(
+          `Remarks updated for ${getProcessStageLabel(processStageValue)}.`,
+          "success",
+        );
       } else if (isRemarksChanged && !trimmedRemarks) {
-        showToast(`Remarks cleared for ${getProcessStageLabel(processStageValue)}.`, "success");
+        showToast(
+          `Remarks cleared for ${getProcessStageLabel(processStageValue)}.`,
+          "success",
+        );
       }
 
       setShowProcessModal(false);
@@ -459,7 +506,9 @@ export default function GuardianConcerns() {
       return;
     }
     if (deleteReasonText.trim().length < 10) {
-      setDeleteError("Please provide at least 10 characters explaining the deletion.");
+      setDeleteError(
+        "Please provide at least 10 characters explaining the deletion.",
+      );
       return;
     }
 
@@ -497,7 +546,9 @@ export default function GuardianConcerns() {
       resolved: <Check size={12} />,
     };
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[status]}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[status]}`}
+      >
         {icons[status]}
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
@@ -526,7 +577,9 @@ export default function GuardianConcerns() {
     };
 
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[stage] || styles.new}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[stage] || styles.new}`}
+      >
         {icons[stage] || icons.new}
         {getProcessStageLabel(stage)}
       </span>
@@ -539,7 +592,10 @@ export default function GuardianConcerns() {
     const panelWidth = 360;
     const panelHeight = 220;
     const x = Math.min(event.clientX + 14, window.innerWidth - panelWidth - 12);
-    const y = Math.min(event.clientY + 14, window.innerHeight - panelHeight - 12);
+    const y = Math.min(
+      event.clientY + 14,
+      window.innerHeight - panelHeight - 12,
+    );
 
     setHoverPreview({ open: true, title, content, x, y });
   };
@@ -574,7 +630,9 @@ export default function GuardianConcerns() {
     const q = searchTerm.trim().toLowerCase();
 
     return concerns.filter((c) => {
-      const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(c.message);
+      const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(
+        c.message,
+      );
       const processStage = getNormalizedProcessStage(c);
       const remarksText = String(c.resolution_remarks || "").trim();
 
@@ -631,10 +689,18 @@ export default function GuardianConcerns() {
   ]);
 
   const total = filteredConcerns.length;
-  const ongoingCount = filteredConcerns.filter((c) => getNormalizedProcessStage(c) === "ongoing").length;
-  const awaitingClientCount = filteredConcerns.filter((c) => getNormalizedProcessStage(c) === "awaiting_client").length;
-  const failedCount = filteredConcerns.filter((c) => getNormalizedProcessStage(c) === "failed_to_resolve").length;
-  const resolvedCount = filteredConcerns.filter((c) => getNormalizedProcessStage(c) === "resolved").length;
+  const ongoingCount = filteredConcerns.filter(
+    (c) => getNormalizedProcessStage(c) === "ongoing",
+  ).length;
+  const awaitingClientCount = filteredConcerns.filter(
+    (c) => getNormalizedProcessStage(c) === "awaiting_client",
+  ).length;
+  const failedCount = filteredConcerns.filter(
+    (c) => getNormalizedProcessStage(c) === "failed_to_resolve",
+  ).length;
+  const resolvedCount = filteredConcerns.filter(
+    (c) => getNormalizedProcessStage(c) === "resolved",
+  ).length;
   const hasActiveFilters =
     searchTerm.trim().length > 0 ||
     statusFilter !== "all" ||
@@ -650,7 +716,9 @@ export default function GuardianConcerns() {
         <div className="bg-white p-8 rounded-2xl shadow-md text-center">
           <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
           <h2 className="text-xl font-bold text-gray-800">Access Denied</h2>
-          <p className="text-gray-600 mt-2">You don't have permission to view this page.</p>
+          <p className="text-gray-600 mt-2">
+            You don't have permission to view this page.
+          </p>
         </div>
       </div>
     );
@@ -715,7 +783,9 @@ export default function GuardianConcerns() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-[#1a2e4a]">Guardian Concerns</h2>
+              <h2 className="text-2xl font-bold text-[#1a2e4a]">
+                Guardian Concerns
+              </h2>
               <p className="text-gray-500 text-sm mt-0.5">
                 View and manage messages submitted by guardians.
               </p>
@@ -769,20 +839,32 @@ export default function GuardianConcerns() {
                 iconBg: "bg-green-50",
                 iconColor: "text-green-600",
               },
-            ].map(({ label, value, icon: Icon, gradient, border, iconBg, iconColor }) => (
-              <div
-                key={label}
-                className={`bg-gradient-to-br ${gradient} rounded-2xl border ${border} p-5 flex items-center gap-4 shadow-sm`}
-              >
-                <div className={`p-3 ${iconBg} rounded-xl shadow-sm`}>
-                  <Icon size={22} className={iconColor} />
+            ].map(
+              ({
+                label,
+                value,
+                icon: Icon,
+                gradient,
+                border,
+                iconBg,
+                iconColor,
+              }) => (
+                <div
+                  key={label}
+                  className={`bg-gradient-to-br ${gradient} rounded-2xl border ${border} p-5 flex items-center gap-4 shadow-sm`}
+                >
+                  <div className={`p-3 ${iconBg} rounded-xl shadow-sm`}>
+                    <Icon size={22} className={iconColor} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">{label}</p>
+                    <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">
+                      {value}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">{label}</p>
-                  <p className="text-3xl font-bold text-[#1a2e4a] leading-tight">{value}</p>
-                </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
 
           {/* Table Card */}
@@ -890,7 +972,9 @@ export default function GuardianConcerns() {
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <MessageSquare size={52} className="mb-4 text-gray-200" />
                   <p className="text-lg font-semibold text-gray-500">
-                    {hasActiveFilters ? "No concerns match your filters" : "No concerns found"}
+                    {hasActiveFilters
+                      ? "No concerns match your filters"
+                      : "No concerns found"}
                   </p>
                   <p className="text-sm mt-1 text-gray-400">
                     {hasActiveFilters
@@ -904,143 +988,180 @@ export default function GuardianConcerns() {
                     {filteredConcerns.map((c) => (
                       <div key={c.concern_id} className="p-4 sm:p-5 space-y-3">
                         {(() => {
-                          const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(c.message);
+                          const { sourceKey, sourceLabel, cleanMessage } =
+                            extractConcernSource(c.message);
                           const processStage = getNormalizedProcessStage(c);
-                          const remarksText = String(c.resolution_remarks || "").trim();
+                          const remarksText = String(
+                            c.resolution_remarks || "",
+                          ).trim();
                           return (
                             <>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 text-sm font-semibold text-[#1a2e4a]">
-                              <User size={14} className="text-gray-400 flex-shrink-0" />
-                              <span className="break-words">{c.name}</span>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-0.5">#{c.concern_id}</p>
-                          </div>
-                          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                            {statusBadge(c.status)}
-                            {processBadge(processStage)}
-                          </div>
-                        </div>
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2 text-sm font-semibold text-[#1a2e4a]">
+                                    <User
+                                      size={14}
+                                      className="text-gray-400 flex-shrink-0"
+                                    />
+                                    <span className="break-words">
+                                      {c.name}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-0.5">
+                                    #{c.concern_id}
+                                  </p>
+                                </div>
+                                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                                  {statusBadge(c.status)}
+                                  {processBadge(processStage)}
+                                </div>
+                              </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Email</p>
-                            <p className="mt-1.5 text-sm text-gray-600 break-all">{c.email}</p>
-                          </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                                  <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                                    Email
+                                  </p>
+                                  <p className="mt-1.5 text-sm text-gray-600 break-all">
+                                    {c.email}
+                                  </p>
+                                </div>
 
-                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Source</p>
-                            <div className="mt-1.5">{sourceBadge(sourceKey, sourceLabel)}</div>
-                          </div>
+                                <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                                  <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                                    Source
+                                  </p>
+                                  <div className="mt-1.5">
+                                    {sourceBadge(sourceKey, sourceLabel)}
+                                  </div>
+                                </div>
 
-                          <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Submitted</p>
-                            <div className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
-                              <Clock size={12} className="flex-shrink-0" />
-                              <span>{formatPHDateTimeShort(c.created_at)}</span>
-                            </div>
-                          </div>
-                        </div>
+                                <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                                  <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                                    Submitted
+                                  </p>
+                                  <div className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
+                                    <Clock
+                                      size={12}
+                                      className="flex-shrink-0"
+                                    />
+                                    <span>
+                                      {formatPHDateTimeShort(c.created_at)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
 
-                        <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Message</p>
-                          <div className="mt-1.5 text-sm text-gray-700 break-words">
-                            <PreviewValue
-                              text={cleanMessage}
-                              title="Message"
-                              maxLength={90}
-                              isDesktop={isDesktopPreviewMode}
-                              onHoverShow={showHoverPreview}
-                              onHoverHide={hideHoverPreview}
-                              onMobileOpen={openClickPreview}
-                            />
-                          </div>
-                        </div>
+                              <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                                  Message
+                                </p>
+                                <div className="mt-1.5 text-sm text-gray-700 break-words">
+                                  <PreviewValue
+                                    text={cleanMessage}
+                                    title="Message"
+                                    maxLength={90}
+                                    isDesktop={isDesktopPreviewMode}
+                                    onHoverShow={showHoverPreview}
+                                    onHoverHide={hideHoverPreview}
+                                    onMobileOpen={openClickPreview}
+                                  />
+                                </div>
+                              </div>
 
-                        <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Admin Reply</p>
-                          {c.admin_reply ? (
-                            <div className="mt-1.5 text-sm text-gray-600 break-words">
-                              <PreviewValue
-                                text={c.admin_reply}
-                                title="Admin Reply"
-                                maxLength={90}
-                                isDesktop={isDesktopPreviewMode}
-                                onHoverShow={showHoverPreview}
-                                onHoverHide={hideHoverPreview}
-                                onMobileOpen={openClickPreview}
-                              />
-                            </div>
-                          ) : (
-                            <p className="mt-1.5 text-sm text-gray-400 italic">No reply yet</p>
-                          )}
-                        </div>
+                              <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                                  Admin Reply
+                                </p>
+                                {c.admin_reply ? (
+                                  <div className="mt-1.5 text-sm text-gray-600 break-words">
+                                    <PreviewValue
+                                      text={c.admin_reply}
+                                      title="Admin Reply"
+                                      maxLength={90}
+                                      isDesktop={isDesktopPreviewMode}
+                                      onHoverShow={showHoverPreview}
+                                      onHoverHide={hideHoverPreview}
+                                      onMobileOpen={openClickPreview}
+                                    />
+                                  </div>
+                                ) : (
+                                  <p className="mt-1.5 text-sm text-gray-400 italic">
+                                    No reply yet
+                                  </p>
+                                )}
+                              </div>
 
-                        <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Resolution Remarks</p>
-                          {remarksText ? (
-                            <div className="mt-1.5 text-sm text-gray-600 break-words">
-                              <PreviewValue
-                                text={remarksText}
-                                title="Resolution Remarks"
-                                maxLength={90}
-                                isDesktop={isDesktopPreviewMode}
-                                onHoverShow={showHoverPreview}
-                                onHoverHide={hideHoverPreview}
-                                onMobileOpen={openClickPreview}
-                              />
-                            </div>
-                          ) : (
-                            <p className="mt-1.5 text-sm text-gray-400 italic">No remarks yet</p>
-                          )}
-                        </div>
+                              <div className="rounded-xl border border-gray-100 bg-[#fafcff] p-3">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
+                                  Resolution Remarks
+                                </p>
+                                {remarksText ? (
+                                  <div className="mt-1.5 text-sm text-gray-600 break-words">
+                                    <PreviewValue
+                                      text={remarksText}
+                                      title="Resolution Remarks"
+                                      maxLength={90}
+                                      isDesktop={isDesktopPreviewMode}
+                                      onHoverShow={showHoverPreview}
+                                      onHoverHide={hideHoverPreview}
+                                      onMobileOpen={openClickPreview}
+                                    />
+                                  </div>
+                                ) : (
+                                  <p className="mt-1.5 text-sm text-gray-400 italic">
+                                    No remarks yet
+                                  </p>
+                                )}
+                              </div>
 
-                        <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
-                          <button
-                            onClick={() => openProcessModal(c)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer"
-                            title="Update process and remarks"
-                          >
-                            <Flag size={13} />
-                            Process
-                          </button>
+                              <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+                                <button
+                                  onClick={() => openProcessModal(c)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer"
+                                  title="Update process and remarks"
+                                >
+                                  <Flag size={13} />
+                                  Process
+                                </button>
 
-                          <a
-                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.email)}&su=${encodeURIComponent(`For your concern`)}&body=${encodeURIComponent(
-                              `Hello ${c.name},\n\nWe're the iCane Team. We appreciate your concerns.\n\nYour concern is: ${cleanMessage}\n\nIcane Team response: \n\n\n--- Thankyou ---\n`
-                            )}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
-                            title="Reply via Gmail"
-                          >
-                            <Mail size={13} />
-                            Reply
-                          </a>
+                                <a
+                                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.email)}&su=${encodeURIComponent(`For your concern`)}&body=${encodeURIComponent(
+                                    `Hello ${c.name},\n\nWe're the iCane Team. We appreciate your concerns.\n\nYour concern is: ${cleanMessage}\n\nIcane Team response: \n\n\n--- Thankyou ---\n`,
+                                  )}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                                  title="Reply via Gmail"
+                                >
+                                  <Mail size={13} />
+                                  Reply
+                                </a>
 
-                          {c.status === "unread" && (
-                            <button
-                              onClick={() => updateStatus(c.concern_id, "read")}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
-                              title="Mark as read"
-                            >
-                              <Eye size={13} />
-                              Read
-                            </button>
-                          )}
+                                {c.status === "unread" && (
+                                  <button
+                                    onClick={() =>
+                                      updateStatus(c.concern_id, "read")
+                                    }
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                                    title="Mark as read"
+                                  >
+                                    <Eye size={13} />
+                                    Read
+                                  </button>
+                                )}
 
-                          {isSuperAdmin && (
-                            <button
-                              onClick={() => openDeleteModal(c)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
-                              title="Delete concern"
-                            >
-                              <Trash2 size={13} />
-                              Delete
-                            </button>
-                          )}
-                        </div>
+                                {isSuperAdmin && (
+                                  <button
+                                    onClick={() => openDeleteModal(c)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
+                                    title="Delete concern"
+                                  >
+                                    <Trash2 size={13} />
+                                    Delete
+                                  </button>
+                                )}
+                              </div>
                             </>
                           );
                         })()}
@@ -1082,124 +1203,148 @@ export default function GuardianConcerns() {
                               ${i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"}`}
                           >
                             {(() => {
-                              const { sourceKey, sourceLabel, cleanMessage } = extractConcernSource(c.message);
+                              const { sourceKey, sourceLabel, cleanMessage } =
+                                extractConcernSource(c.message);
                               const processStage = getNormalizedProcessStage(c);
-                              const remarksText = String(c.resolution_remarks || "").trim();
+                              const remarksText = String(
+                                c.resolution_remarks || "",
+                              ).trim();
                               return (
                                 <>
-                            <td className="px-5 py-4 text-sm font-mono text-gray-600">
-                              #{c.concern_id}
-                            </td>
-                            <td className="px-5 py-4">
-                              <div className="flex items-center gap-2">
-                                <User size={14} className="text-gray-400" />
-                                <span className="text-sm font-medium text-gray-800">{c.name}</span>
-                              </div>
-                            </td>
-                            <td className="px-5 py-4 text-sm text-gray-600 break-all">{c.email}</td>
-                            <td className="px-5 py-4">
-                              <div className="max-w-xs text-sm text-gray-700">
-                                <PreviewValue
-                                  text={cleanMessage}
-                                  title="Message"
-                                  maxLength={60}
-                                  isDesktop={isDesktopPreviewMode}
-                                  onHoverShow={showHoverPreview}
-                                  onHoverHide={hideHoverPreview}
-                                  onMobileOpen={openClickPreview}
-                                  className="max-w-xs truncate"
-                                />
-                              </div>
-                            </td>
-                            <td className="px-5 py-4">{sourceBadge(sourceKey, sourceLabel)}</td>
-                            <td className="px-5 py-4">{statusBadge(c.status)}</td>
-                            <td className="px-5 py-4">{processBadge(processStage)}</td>
-                            <td className="px-5 py-4 text-sm text-gray-500">
-                              {remarksText ? (
-                                <div className="max-w-xs text-sm text-gray-500">
-                                  <PreviewValue
-                                    text={remarksText}
-                                    title="Resolution Remarks"
-                                    maxLength={50}
-                                    isDesktop={isDesktopPreviewMode}
-                                    onHoverShow={showHoverPreview}
-                                    onHoverHide={hideHoverPreview}
-                                    onMobileOpen={openClickPreview}
-                                    className="max-w-xs truncate"
-                                  />
-                                </div>
-                              ) : (
-                                <span className="text-gray-400 italic">No remarks</span>
-                              )}
-                            </td>
-                            <td className="px-5 py-4 text-sm text-gray-500">
-                              {c.admin_reply ? (
-                                <div className="max-w-xs text-sm text-gray-500">
-                                  <PreviewValue
-                                    text={c.admin_reply}
-                                    title="Admin Reply"
-                                    maxLength={50}
-                                    isDesktop={isDesktopPreviewMode}
-                                    onHoverShow={showHoverPreview}
-                                    onHoverHide={hideHoverPreview}
-                                    onMobileOpen={openClickPreview}
-                                    className="max-w-xs truncate"
-                                  />
-                                </div>
-                              ) : (
-                                <span className="text-gray-400 italic">No reply yet</span>
-                              )}
-                            </td>
-                            <td className="px-5 py-4">
-                              <div className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
-                                <Clock size={12} />
-                                {formatPHDateTimeShort(c.created_at)}
-                              </div>
-                            </td>
-                            <td className="px-5 py-4">
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => openProcessModal(c)}
-                                  className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
-                                  title="Update process and remarks"
-                                >
-                                  <Flag size={15} />
-                                </button>
+                                  <td className="px-5 py-4 text-sm font-mono text-gray-600">
+                                    #{c.concern_id}
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    <div className="flex items-center gap-2">
+                                      <User
+                                        size={14}
+                                        className="text-gray-400"
+                                      />
+                                      <span className="text-sm font-medium text-gray-800">
+                                        {c.name}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="px-5 py-4 text-sm text-gray-600 break-all">
+                                    {c.email}
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    <div className="max-w-xs text-sm text-gray-700">
+                                      <PreviewValue
+                                        text={cleanMessage}
+                                        title="Message"
+                                        maxLength={60}
+                                        isDesktop={isDesktopPreviewMode}
+                                        onHoverShow={showHoverPreview}
+                                        onHoverHide={hideHoverPreview}
+                                        onMobileOpen={openClickPreview}
+                                        className="max-w-xs truncate"
+                                      />
+                                    </div>
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    {sourceBadge(sourceKey, sourceLabel)}
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    {statusBadge(c.status)}
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    {processBadge(processStage)}
+                                  </td>
+                                  <td className="px-5 py-4 text-sm text-gray-500">
+                                    {remarksText ? (
+                                      <div className="max-w-xs text-sm text-gray-500">
+                                        <PreviewValue
+                                          text={remarksText}
+                                          title="Resolution Remarks"
+                                          maxLength={50}
+                                          isDesktop={isDesktopPreviewMode}
+                                          onHoverShow={showHoverPreview}
+                                          onHoverHide={hideHoverPreview}
+                                          onMobileOpen={openClickPreview}
+                                          className="max-w-xs truncate"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <span className="text-gray-400 italic">
+                                        No remarks
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="px-5 py-4 text-sm text-gray-500">
+                                    {c.admin_reply ? (
+                                      <div className="max-w-xs text-sm text-gray-500">
+                                        <PreviewValue
+                                          text={c.admin_reply}
+                                          title="Admin Reply"
+                                          maxLength={50}
+                                          isDesktop={isDesktopPreviewMode}
+                                          onHoverShow={showHoverPreview}
+                                          onHoverHide={hideHoverPreview}
+                                          onMobileOpen={openClickPreview}
+                                          className="max-w-xs truncate"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <span className="text-gray-400 italic">
+                                        No reply yet
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    <div className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
+                                      <Clock size={12} />
+                                      {formatPHDateTimeShort(c.created_at)}
+                                    </div>
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        onClick={() => openProcessModal(c)}
+                                        className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                                        title="Update process and remarks"
+                                      >
+                                        <Flag size={15} />
+                                      </button>
 
-                                <a
-                                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.email)}&su=${encodeURIComponent(`For your concern`)}&body=${encodeURIComponent(
-                                    `Hello ${c.name},\n\nWe're the iCane Team. We appreciate your concerns.\n\nYour concern is: ${cleanMessage}\n\nIcane Team response: \n\n\n--- Thankyou ---\n`
-                                  )}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1"
-                                  title="Reply via Gmail"
-                                >
-                                  <Mail size={15} />
-                                  <span className="text-xs hidden sm:inline">Reply</span>
-                                </a>
+                                      <a
+                                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.email)}&su=${encodeURIComponent(`For your concern`)}&body=${encodeURIComponent(
+                                          `Hello ${c.name},\n\nWe're the iCane Team. We appreciate your concerns.\n\nYour concern is: ${cleanMessage}\n\nIcane Team response: \n\n\n--- Thankyou ---\n`,
+                                        )}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1"
+                                        title="Reply via Gmail"
+                                      >
+                                        <Mail size={15} />
+                                        <span className="text-xs hidden sm:inline">
+                                          Reply
+                                        </span>
+                                      </a>
 
-                                {c.status === "unread" && (
-                                  <button
-                                    onClick={() => updateStatus(c.concern_id, "read")}
-                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                    title="Mark as read"
-                                  >
-                                    <Eye size={15} />
-                                  </button>
-                                )}
+                                      {c.status === "unread" && (
+                                        <button
+                                          onClick={() =>
+                                            updateStatus(c.concern_id, "read")
+                                          }
+                                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                          title="Mark as read"
+                                        >
+                                          <Eye size={15} />
+                                        </button>
+                                      )}
 
-                                {isSuperAdmin && (
-                                  <button
-                                    onClick={() => openDeleteModal(c)}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                                    title="Delete concern"
-                                  >
-                                    <Trash2 size={15} />
-                                  </button>
-                                )}
-                              </div>
-                            </td>
+                                      {isSuperAdmin && (
+                                        <button
+                                          onClick={() => openDeleteModal(c)}
+                                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                          title="Delete concern"
+                                        >
+                                          <Trash2 size={15} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </td>
                                 </>
                               );
                             })()}
@@ -1219,14 +1364,18 @@ export default function GuardianConcerns() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
           <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-lg relative z-10">
-            <h3 className="text-lg font-semibold text-gray-800">Update Concern Process</h3>
+            <h3 className="text-lg font-semibold text-gray-800">
+              Update Concern Process
+            </h3>
             <p className="text-sm text-gray-600 mt-1">
               Set the current handling stage and add remarks for this concern.
             </p>
 
             <div className="mt-4 space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Process Stage</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Process Stage
+                </label>
                 <select
                   value={processStageValue}
                   onChange={(e) => {
@@ -1242,12 +1391,16 @@ export default function GuardianConcerns() {
                   ))}
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
-                  {PROCESS_STAGE_OPTIONS.find((s) => s.value === processStageValue)?.hint || "Update process stage"}
+                  {PROCESS_STAGE_OPTIONS.find(
+                    (s) => s.value === processStageValue,
+                  )?.hint || "Update process stage"}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Remarks
+                </label>
                 <textarea
                   value={processRemarksValue}
                   onChange={(e) => {
@@ -1266,7 +1419,9 @@ export default function GuardianConcerns() {
               </div>
             </div>
 
-            {processError && <p className="text-red-500 text-sm mt-3">{processError}</p>}
+            {processError && (
+              <p className="text-red-500 text-sm mt-3">{processError}</p>
+            )}
 
             <div className="mt-5 flex justify-end gap-3">
               <button
@@ -1294,14 +1449,18 @@ export default function GuardianConcerns() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
           <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-md relative z-10">
-            <h3 className="text-lg font-semibold text-gray-800">Delete Concern</h3>
+            <h3 className="text-lg font-semibold text-gray-800">
+              Delete Concern
+            </h3>
             <p className="text-sm text-gray-600 mt-1">
               Please provide a reason before deleting this concern.
             </p>
 
             <div className="mt-4 space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reason
+                </label>
                 <select
                   value={deleteReasonCode}
                   onChange={(e) => setDeleteReasonCode(e.target.value)}
@@ -1312,13 +1471,17 @@ export default function GuardianConcerns() {
                   <option value="abusive_content">Abusive content</option>
                   <option value="duplicate_concern">Duplicate concern</option>
                   <option value="pii_exposure">Contains sensitive info</option>
-                  <option value="legal_request">Legal/compliance request</option>
+                  <option value="legal_request">
+                    Legal/compliance request
+                  </option>
                   <option value="other">Other</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Details</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Details
+                </label>
                 <textarea
                   value={deleteReasonText}
                   onChange={(e) => setDeleteReasonText(e.target.value)}
@@ -1326,11 +1489,15 @@ export default function GuardianConcerns() {
                   placeholder="Explain why this concern needs to be deleted..."
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
                 />
-                <p className="mt-1 text-xs text-gray-500">Minimum 10 characters.</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Minimum 10 characters.
+                </p>
               </div>
             </div>
 
-            {deleteError && <p className="text-red-500 text-sm mt-3">{deleteError}</p>}
+            {deleteError && (
+              <p className="text-red-500 text-sm mt-3">{deleteError}</p>
+            )}
 
             <div className="mt-5 flex justify-end gap-3">
               <button
