@@ -15,15 +15,30 @@ import api from "../api/client";
 import Toast from "../ui/components/Toast";
 
 const actionLabels = {
-  admin_delete: "Admin Deletion",
-  admin_restore: "Admin Restore",
-  concern_delete: "Concern Deletion",
-  concern_restore: "Concern Restore",
-  device_delete: "Device Deletion",
-  device_deleted: "Device Deletion",
-  device_restore: "Device Restore",
-  role_change: "Role Change",
+  admin_create: "Admin Created",
+  admin_delete: "Admin Deleted",
+  admin_restore: "Admin Restored",
+  admin_update: "Admin Updated",
+  concern_delete: "Concern Deleted",
+  concern_restore: "Concern Restored",
+  concern_update: "Concern Updated",
+  device_assign: "Device Assigned",
+  device_create: "Device Created",
+  device_delete: "Device Deleted",
+  device_deleted: "Device Deleted",
+  device_restore: "Device Restored",
+  device_update: "Device Updated",
+  device_unassign: "Device Unassigned",
+  role_change: "Role Changed",
+  login: "Login",
+  logout: "Logout",
 };
+
+const formatActionLabel = (key) =>
+  actionLabels[key] ??
+  String(key)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
 const RESTORABLE_ACTIONS = new Set([
   "admin_delete",
@@ -271,7 +286,7 @@ export default function ManageActionHistory() {
       }
 
       const restoredLabel =
-        actionLabels[res.data?.restored_action_type] || "Record";
+        formatActionLabel(res.data?.restored_action_type) || "Record";
       showToast(
         res.data?.message || `${restoredLabel} restored successfully.`,
         "success",
@@ -545,7 +560,7 @@ export default function ManageActionHistory() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-[#1a2e4a]">
-                            {actionLabels[item.action_type] || item.action_type}
+                            {formatActionLabel(item.action_type)}
                           </p>
                           <p className="text-xs text-gray-500">
                             Record #{item.audit_id}
@@ -713,7 +728,7 @@ export default function ManageActionHistory() {
                             #{item.audit_id}
                           </td>
                           <td className="px-5 py-4 text-sm font-medium text-[#1a2e4a]">
-                            {actionLabels[item.action_type] || item.action_type}
+                            {formatActionLabel(item.action_type)}
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-700">
                             {item.actor_name || "Unknown"} (ID:{" "}
