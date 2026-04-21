@@ -251,7 +251,7 @@ export default function ManageActionHistory() {
         normalizedAction === "device_deleted";
 
       let res = await api.post(
-        `/api/admin/audit-logs/${item.audit_id}/restore/`,
+        `/api/admin/audit-logs/${item.audit_id}/restore`,
         {},
       );
 
@@ -261,7 +261,7 @@ export default function ManageActionHistory() {
         isDeviceDelete && (!res || res.status === 404 || res.status === 405);
 
       if (shouldUseLegacyFallback) {
-        res = await api.post(`/api/devices/restore/${item.audit_id}/`, {});
+        res = await api.post(`/api/devices/restore/${item.audit_id}`, {});
       }
 
       if (!res || !res.ok) {

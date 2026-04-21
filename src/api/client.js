@@ -21,7 +21,8 @@ async function request(method, endpoint, body = null) {
   if (body !== null && body !== undefined) options.body = JSON.stringify(body);
 
   try {
-    const res  = await fetch(`${API_URL}${endpoint}`, options);
+    const url = `${API_URL.replace(/\/+$/, '')}/${endpoint.replace(/^\/+/, '')}`;
+  const res  = await fetch(url, options);
     const data = await res.json();
 
     if (res.status === 401 || res.status === 422) {
