@@ -252,6 +252,7 @@ export default function ManageActionHistory() {
       return (
         isSuperAdmin &&
         normalizedStatus === "success" &&
+        !normalizedAction.includes("restore") &&
         RESTORABLE_ACTIONS.has(normalizedAction)
       );
     },
@@ -575,6 +576,8 @@ export default function ManageActionHistory() {
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                             item.status === "success"
                               ? "bg-green-100 text-green-700"
+                              : item.status === "restored"
+                              ? "bg-teal-100 text-teal-700"
                               : "bg-red-100 text-red-700"
                           }`}
                         >
@@ -583,7 +586,7 @@ export default function ManageActionHistory() {
                           ) : (
                             <AlertCircle size={12} />
                           )}
-                          {item.status}
+                          {String(item.status || "").replace(/\b\w/g, (c) => c.toUpperCase())}
                         </span>
                       </div>
 
@@ -790,6 +793,8 @@ export default function ManageActionHistory() {
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                                 item.status === "success"
                                   ? "bg-green-100 text-green-700"
+                                  : item.status === "restored"
+                                  ? "bg-teal-100 text-teal-700"
                                   : "bg-red-100 text-red-700"
                               }`}
                             >
@@ -798,7 +803,7 @@ export default function ManageActionHistory() {
                               ) : (
                                 <AlertCircle size={12} />
                               )}
-                              {item.status}
+                              {String(item.status || "").replace(/\b\w/g, (c) => c.toUpperCase())}
                             </span>
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-500 whitespace-nowrap">
