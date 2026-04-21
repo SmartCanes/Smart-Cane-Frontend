@@ -44,12 +44,39 @@ const apiFetch = async (path, options = {}) => {
   return data;
 };
 
+const parseServerTimestamp = (value) => {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+
+  const text = String(value).trim();
+  if (!text) return null;
+
+  const isPlainDateTime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d{1,6})?$/.test(text);
+  const normalized = isPlainDateTime ? `${text.replace(" ", "T")}Z` : text;
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatPHDateTimeShort = (createdAt) => {
+  const date = parseServerTimestamp(createdAt);
+  if (!date) return "—";
+
+  return date.toLocaleString("en-PH", {
+    timeZone: "Asia/Manila",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 const matchesRecordDate = (createdAt, dateFilter) => {
   if (dateFilter === "all") return true;
   if (!createdAt) return false;
 
-  const recordDate = new Date(createdAt);
-  if (Number.isNaN(recordDate.getTime())) return false;
+  const recordDate = parseServerTimestamp(createdAt);
+  if (!recordDate) return false;
 
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -911,14 +938,7 @@ export default function GuardianConcerns() {
                             <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">Submitted</p>
                             <div className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
                               <Clock size={12} className="flex-shrink-0" />
-                              <span>
-                                {new Date(c.created_at).toLocaleString("en-PH", {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </span>
+                              <span>{formatPHDateTimeShort(c.created_at)}</span>
                             </div>
                           </div>
                         </div>
@@ -1133,12 +1153,7 @@ export default function GuardianConcerns() {
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
                                 <Clock size={12} />
-                                {new Date(c.created_at).toLocaleString("en-PH", {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {formatPHDateTimeShort(c.created_at)}
                               </div>
                             </td>
                             <td className="px-5 py-4">

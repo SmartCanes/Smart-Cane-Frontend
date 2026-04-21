@@ -34,12 +34,25 @@ const apiFetch = async (path, options = {}) => {
   return data;
 };
 
+const parseServerTimestamp = (value) => {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+
+  const text = String(value).trim();
+  if (!text) return null;
+
+  const isPlainDateTime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d{1,6})?$/.test(text);
+  const normalized = isPlainDateTime ? `${text.replace(" ", "T")}Z` : text;
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 const matchesTriggeredDate = (createdAt, dateFilter) => {
   if (dateFilter === "all") return true;
   if (!createdAt) return false;
 
-  const triggeredDate = new Date(createdAt);
-  if (Number.isNaN(triggeredDate.getTime())) return false;
+  const triggeredDate = parseServerTimestamp(createdAt);
+  if (!triggeredDate) return false;
 
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -76,8 +89,8 @@ const matchesTriggeredDate = (createdAt, dateFilter) => {
 
 const formatPHDateTime = (createdAt) => {
   if (!createdAt) return "—";
-  const date = new Date(createdAt);
-  if (Number.isNaN(date.getTime())) return "—";
+  const date = parseServerTimestamp(createdAt);
+  if (!date) return "—";
   const formatted = date.toLocaleString("en-PH", {
     timeZone: "Asia/Manila",
     month: "short",
@@ -413,9 +426,12 @@ export default function ManageEmergencyLogs() {
                           <div className="text-right flex-shrink-0">
                             <div className="flex items-center justify-end gap-1.5 text-xs text-gray-500 whitespace-nowrap">
                               <Clock size={12} className="flex-shrink-0" />
-                              {log.created_at
-                                ? formatDistanceToNow(new Date(log.created_at), { addSuffix: true })
-                                : "—"}
+                              {(() => {
+                                const createdAt = parseServerTimestamp(log.created_at);
+                                return createdAt
+                                  ? formatDistanceToNow(createdAt, { addSuffix: true })
+                                  : "—";
+                              })()}
                             </div>
                             {log.created_at && (
                               <p className="text-[10px] text-gray-400 mt-0.5">
@@ -601,9 +617,12 @@ export default function ManageEmergencyLogs() {
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
                                 <Clock size={12} className="flex-shrink-0" />
-                                {log.created_at
-                                  ? formatDistanceToNow(new Date(log.created_at), { addSuffix: true })
-                                  : "—"}
+                                {(() => {
+                                  const createdAt = parseServerTimestamp(log.created_at);
+                                  return createdAt
+                                    ? formatDistanceToNow(createdAt, { addSuffix: true })
+                                    : "—";
+                                })()}
                               </div>
                               {log.created_at && (
                                 <p className="text-[10px] text-gray-400 mt-0.5 pl-4">
