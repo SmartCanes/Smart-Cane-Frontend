@@ -40,6 +40,11 @@ const formatActionLabel = (key) =>
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
+const formatCode = (code) =>
+  String(code || "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
 const RESTORABLE_ACTIONS = new Set([
   "admin_delete",
   "concern_delete",
@@ -596,8 +601,8 @@ export default function ManageActionHistory() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1565C0]">
                           Reason
                         </p>
-                        <p className="text-xs text-gray-500 uppercase">
-                          {item.reason_code}
+                        <p className="text-xs text-gray-500">
+                          {formatCode(item.reason_code)}
                         </p>
                         <div className="text-sm text-gray-700 break-words">
                           <PreviewValue
@@ -735,8 +740,8 @@ export default function ManageActionHistory() {
                             {item.actor_admin_id})
                           </td>
                           <td className="px-5 py-4">
-                            <p className="text-xs text-gray-500 uppercase">
-                              {item.reason_code}
+                            <p className="text-xs text-gray-500">
+                              {formatCode(item.reason_code)}
                             </p>
                             <div className="text-sm text-gray-700 mt-0.5 break-words max-w-[460px]">
                               <PreviewValue
