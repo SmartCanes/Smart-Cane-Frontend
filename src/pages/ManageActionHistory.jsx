@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../api/client";
 import Toast from "../ui/components/Toast";
+import Modal from "../ui/components/modal";
 
 const actionLabels = {
   admin_create: "Admin Created",
@@ -44,6 +45,24 @@ const formatCode = (code) =>
   String(code || "")
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+
+// Always render in Philippine Standard Time (UTC+8) so audit timestamps
+// are never shifted to the next/previous day by a different browser timezone.
+const formatDate = (isoString) => {
+  if (!isoString) return "-";
+  try {
+    return new Date(isoString).toLocaleString("en-PH", {
+      timeZone: "Asia/Manila",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return isoString;
+  }
+};
 
 const RESTORABLE_ACTIONS = new Set([
   "admin_delete",
@@ -164,6 +183,7 @@ export default function ManageActionHistory() {
     title: "",
     content: "",
   });
+  const [restoreTarget, setRestoreTarget] = useState(null);
 
   const limit = 20;
   const role = roleFromAuth();
@@ -243,6 +263,11 @@ export default function ManageActionHistory() {
 
   const canRestore = useCallback(
     (item) => {
+      // Prefer the authoritative flag from the backend when available.
+      if (typeof item?.is_restorable === "boolean") {
+        return isSuperAdmin && item.is_restorable;
+      }
+      // Fallback: compute client-side using the same rules as the backend.
       const normalizedStatus = String(item?.status || "")
         .trim()
         .toLowerCase();
@@ -259,49 +284,74 @@ export default function ManageActionHistory() {
     [isSuperAdmin],
   );
 
+  const openRestoreModal = useCallback(
+    (item) => {
+      if (!canRestore(item) || restoreLoadingId !== null) return;
+      setRestoreTarget(item);
+    },
+    [canRestore, restoreLoadingId],
+  );
+
+  const closeRestoreModal = useCallback(() => {
+    if (restoreLoadingId !== null) return;
+    setRestoreTarget(null);
+  }, [restoreLoadingId]);
+
   const restoreFromAudit = useCallback(
     async (item) => {
       if (!canRestore(item)) return;
 
       setRestoreLoadingId(item.audit_id);
-      const normalizedAction = String(item?.action_type || "")
-        .trim()
-        .toLowerCase();
-      const isDeviceDelete =
-        normalizedAction === "device_delete" ||
-        normalizedAction === "device_deleted";
+      try {
+        const normalizedAction = String(item?.action_type || "")
+          .trim()
+          .toLowerCase();
+        const isDeviceDelete =
+          normalizedAction === "device_delete" ||
+          normalizedAction === "device_deleted";
 
-      let res = await api.post(
-        `/api/admin/audit-logs/${item.audit_id}/restore`,
-        {},
-      );
+        let res = await api.post(
+          `/api/admin/audit-logs/${item.audit_id}/restore`,
+          {},
+        );
 
-      // Backward-compatible fallback for deployments that only expose device restore under /api/devices.
-      // Only fallback when the primary endpoint is missing, not when it returned a valid business error (e.g., 409).
-      const shouldUseLegacyFallback =
-        isDeviceDelete && (!res || res.status === 404 || res.status === 405);
+        // Backward-compatible fallback for deployments that only expose device restore under /api/devices.
+        // Only fallback when the primary endpoint is missing, not when it returned a valid business error (e.g., 409).
+        const shouldUseLegacyFallback =
+          isDeviceDelete && (!res || res.status === 404 || res.status === 405);
 
-      if (shouldUseLegacyFallback) {
-        res = await api.post(`/api/devices/restore/${item.audit_id}`, {});
-      }
+        if (shouldUseLegacyFallback) {
+          res = await api.post(`/api/devices/restore/${item.audit_id}`, {});
+        }
 
-      if (!res || !res.ok) {
-        showToast(res?.data?.message || "Failed to restore record.", "error");
+        if (!res || !res.ok) {
+          showToast(res?.data?.message || "Failed to restore record.", "error");
+          await fetchHistory();
+          return;
+        }
+
+        const restoredLabel =
+          formatActionLabel(res.data?.restored_action_type) || "Record";
+        showToast(
+          res.data?.message || `${restoredLabel} restored successfully.`,
+          "success",
+        );
+        await fetchHistory();
+      } catch {
+        showToast("Failed to restore record.", "error");
+        await fetchHistory();
+      } finally {
         setRestoreLoadingId(null);
-        return;
       }
-
-      const restoredLabel =
-        formatActionLabel(res.data?.restored_action_type) || "Record";
-      showToast(
-        res.data?.message || `${restoredLabel} restored successfully.`,
-        "success",
-      );
-      await fetchHistory();
-      setRestoreLoadingId(null);
     },
     [canRestore, fetchHistory, showToast],
   );
+
+  const confirmRestoreFromModal = useCallback(async () => {
+    if (!restoreTarget) return;
+    await restoreFromAudit(restoreTarget);
+    setRestoreTarget(null);
+  }, [restoreFromAudit, restoreTarget]);
 
   useEffect(() => {
     fetchHistory();
@@ -352,6 +402,25 @@ export default function ManageActionHistory() {
           onClose={() => setToast(null)}
         />
       )}
+
+      <Modal
+        isOpen={Boolean(restoreTarget)}
+        onClose={closeRestoreModal}
+        onConfirm={confirmRestoreFromModal}
+        title="Restore Record?"
+        message={
+          restoreTarget
+            ? `Action: ${formatActionLabel(restoreTarget.action_type)}. Audit ID: #${restoreTarget.audit_id}. This will undo the deletion and make the record active again.`
+            : ""
+        }
+        confirmText="Restore"
+        submittingText="Restoring..."
+        cancelText="Cancel"
+        isSubmitting={Boolean(
+          restoreTarget && restoreLoadingId === restoreTarget.audit_id,
+        )}
+        type="warning"
+      />
 
       {hoverPreview.open && isDesktopPreviewMode && (
         <div
@@ -578,10 +647,12 @@ export default function ManageActionHistory() {
                               ? "bg-green-100 text-green-700"
                               : item.status === "restored"
                               ? "bg-teal-100 text-teal-700"
-                              : "bg-red-100 text-red-700"
+                              : item.status === "failed"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-600"
                           }`}
                         >
-                          {item.status === "success" ? (
+                          {item.status === "success" || item.status === "restored" ? (
                             <CheckCircle size={12} />
                           ) : (
                             <AlertCircle size={12} />
@@ -595,8 +666,10 @@ export default function ManageActionHistory() {
                           Actor
                         </p>
                         <p className="text-sm text-gray-700 break-words">
-                          {item.actor_name || "Unknown"} (ID:{" "}
-                          {item.actor_admin_id})
+                          {item.actor_name || "Unknown"}
+                          {item.actor_admin_id != null
+                            ? ` (ID: ${item.actor_admin_id})`
+                            : " (account deleted)"}
                         </p>
                       </div>
 
@@ -662,22 +735,14 @@ export default function ManageActionHistory() {
 
                       <div className="flex items-center gap-1 text-xs text-gray-500">
                         <Clock size={12} />
-                        {item.created_at
-                          ? new Date(item.created_at).toLocaleString("en-PH", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : "-"}
+                        {formatDate(item.created_at)}
                       </div>
 
                       {canRestore(item) && (
                         <div className="flex justify-end pt-1">
                           <button
                             type="button"
-                            onClick={() => restoreFromAudit(item)}
+                            onClick={() => openRestoreModal(item)}
                             disabled={restoreLoadingId === item.audit_id}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors disabled:opacity-50"
                             title="Restore this record"
@@ -739,8 +804,10 @@ export default function ManageActionHistory() {
                             {formatActionLabel(item.action_type)}
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-700">
-                            {item.actor_name || "Unknown"} (ID:{" "}
-                            {item.actor_admin_id})
+                            {item.actor_name || "Unknown"}
+                            {item.actor_admin_id != null
+                              ? ` (ID: ${item.actor_admin_id})`
+                              : " (account deleted)"}
                           </td>
                           <td className="px-5 py-4">
                             <p className="text-xs text-gray-500">
@@ -795,10 +862,12 @@ export default function ManageActionHistory() {
                                   ? "bg-green-100 text-green-700"
                                   : item.status === "restored"
                                   ? "bg-teal-100 text-teal-700"
-                                  : "bg-red-100 text-red-700"
+                                  : item.status === "failed"
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-gray-100 text-gray-600"
                               }`}
                             >
-                              {item.status === "success" ? (
+                              {item.status === "success" || item.status === "restored" ? (
                                 <CheckCircle size={12} />
                               ) : (
                                 <AlertCircle size={12} />
@@ -807,24 +876,13 @@ export default function ManageActionHistory() {
                             </span>
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-500 whitespace-nowrap">
-                            {item.created_at
-                              ? new Date(item.created_at).toLocaleString(
-                                  "en-PH",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )
-                              : "-"}
+                            {formatDate(item.created_at)}
                           </td>
                           <td className="px-5 py-4">
                             {canRestore(item) ? (
                               <button
                                 type="button"
-                                onClick={() => restoreFromAudit(item)}
+                                onClick={() => openRestoreModal(item)}
                                 disabled={restoreLoadingId === item.audit_id}
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-lg hover:bg-teal-100 transition-colors disabled:opacity-50"
                                 title="Restore this record"
