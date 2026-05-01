@@ -5,6 +5,29 @@ import { validateField } from "@/utils/ValidationHelper";
 import { wsApi } from "@/api/ws-api";
 import { useDevicesStore, useRealtimeStore } from "@/stores/useStore";
 
+const PROFANITY_API_URL = "https://vector.profanity.dev";
+
+const hasProfanity = async (message) => {
+  const res = await fetch(PROFANITY_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message })
+  });
+
+  if (!res.ok) {
+    throw new Error("PROFANITY_CHECK_FAILED");
+  }
+
+  const data = await res.json();
+
+  return Boolean(
+    data?.isProfanity ??
+      data?.profanity ??
+      data?.containsProfanity ??
+      data?.hasProfanity
+  );
+};
+
 const SendNote = () => {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,9 +66,18 @@ const SendNote = () => {
     try {
       setIsSubmitting(true);
 
-      const response = await wsApi.sendNotes(message);
+      const profane = await hasProfanity(message.trim());
+      if (profane) {
+        setModalConfig({
+          isOpen: true,
+          title: "Error!",
+          message: "Profanity is not allowed.",
+          variant: "error"
+        });
+        return;
+      }
 
-      console.log(response);
+      const response = await wsApi.sendNotes(message);
 
       if (!response.success) {
         throw new Error("Failed to send message");
@@ -60,11 +92,16 @@ const SendNote = () => {
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
+
+      const isProfanityCheckError =
+        error instanceof Error && error.message === "PROFANITY_CHECK_FAILED";
+
       setModalConfig({
         isOpen: true,
         title: "Error!",
-        message:
-          "There was an error sending your message. Please try again later.",
+        message: isProfanityCheckError
+          ? "Unable to validate message content right now. Please try again."
+          : "There was an error sending your message. Please try again later.",
         variant: "error"
       });
     } finally {
@@ -91,7 +128,6 @@ const SendNote = () => {
             className="w-full h-48 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent text-sm text-gray-700 placeholder-gray-400"
             placeholder="Type your message here..."
             value={message}
-            on
             onChange={(e) => {
               const value = e.target.value;
               setMessage(value);

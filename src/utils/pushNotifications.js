@@ -176,6 +176,7 @@ export const showForegroundNotification = async ({
     icon,
     badge: icon,
     tag,
+    silent: false,
     requireInteraction,
     renotify: true,
     vibrate: [300, 150, 300],
