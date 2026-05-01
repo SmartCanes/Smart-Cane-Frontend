@@ -2,6 +2,7 @@
 
 Frontend application for the **Smart Cane Guardian System**, built with **React + Vite**.
 This application serves as the main interface for guardians to monitor devices, track locations, receive alerts, and manage accounts in real time.
+
 ---
 
 ## 📌 Overview
