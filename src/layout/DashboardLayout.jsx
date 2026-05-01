@@ -9,6 +9,7 @@ import ImportantNotificationsBridge from "@/ui/components/ImportantNotifications
 import PushNotificationsBridge from "@/ui/components/PushNotificationsBridge";
 import ConcernComposer from "@/ui/components/ConcernComposer";
 import TourGuide from "@/ui/components/TourGuide";
+import { setCriticalAlertState } from "@/utils/NotificationManager";
 import { createContext, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
@@ -20,6 +21,7 @@ const DashboardLayoutContent = () => {
   const location = useLocation();
   const { showToast, clearToast } = useToast();
   const [showNav, setShowNav] = useState(true);
+  const [needsAudioUnlock, setNeedsAudioUnlock] = useState(false);
   const lastScrollY = useRef(0);
 
   const prefillConcernName =
@@ -35,7 +37,7 @@ const DashboardLayoutContent = () => {
     return () => {
       disconnectWs();
     };
-  }, []);
+  }, [connectWs, disconnectWs]);
 
   useEffect(() => {
     const hydrateUser = async () => {
@@ -50,7 +52,7 @@ const DashboardLayoutContent = () => {
     };
 
     hydrateUser();
-  }, []);
+  }, [setUser]);
 
   useEffect(() => {
     if (emergency) {
@@ -75,6 +77,37 @@ const DashboardLayoutContent = () => {
 
     clearToast();
   }, [emergency, fall, showToast, clearToast]);
+
+  useEffect(() => {
+    setCriticalAlertState({ emergency, fall }).catch(() => {
+      // Audio autoplay policies can block playback until user interaction.
+    });
+
+    return () => {
+      setCriticalAlertState({ emergency: false, fall: false }).catch(() => {
+        // No-op cleanup when audio stop fails.
+      });
+    };
+  }, [emergency, fall]);
+
+  useEffect(() => {
+    const handleBlockedAudioState = (event) => {
+      const needsGesture = Boolean(event?.detail?.needsGesture);
+      setNeedsAudioUnlock(needsGesture);
+    };
+
+    window.addEventListener(
+      "critical-alert-audio-blocked",
+      handleBlockedAudioState
+    );
+
+    return () => {
+      window.removeEventListener(
+        "critical-alert-audio-blocked",
+        handleBlockedAudioState
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const showModal = location.state?.showModal;
@@ -112,6 +145,14 @@ const DashboardLayoutContent = () => {
   return (
     <ScrollContext.Provider value={{ handleScroll }}>
       <div className="min-h-screen flex flex-col overflow-y-hidden bg-primary-100">
+        {needsAudioUnlock && (emergency || fall) ? (
+          <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[120] px-4 w-[min(92vw,560px)]">
+            <div className="rounded-2xl border border-amber-300 bg-amber-50 text-amber-900 shadow-lg px-4 py-3 text-sm font-medium">
+              Tap anywhere on the page to enable continuous emergency alarm
+              sound.
+            </div>
+          </div>
+        ) : null}
         {activeAlert === "fall" && <FallOverlay fall={true} />}
         {activeAlert === "emergency" && <EmergencyOverlay emergency={true} />}
         <TourGuide />
