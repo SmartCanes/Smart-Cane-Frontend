@@ -1,4 +1,3 @@
----
 # 🦯 Smart Cane Frontend (Guardian Platform)
 
 Frontend application for the **Smart Cane Guardian System**, built with **React + Vite**.
