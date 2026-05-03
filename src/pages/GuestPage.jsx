@@ -698,7 +698,7 @@ const GuestPage = () => {
       </FadeIn>
 
       {/* Reusable concern composer (guest inline mode) */}
-      <SlideUp delay={0.6} className="mt-4">
+      {/* <SlideUp delay={0.6} className="mt-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <ConcernComposer
             mode="inline"
@@ -707,7 +707,7 @@ const GuestPage = () => {
             subtitle="Tell us what you need and our team will get back to you quickly."
           />
         </div>
-      </SlideUp>
+      </SlideUp> */}
 
       <div className="mx-auto mt-12 max-w-7xl px-4 text-center text-[12px] sm:px-6 md:px-8">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-y-10 text-center text-[12px] sm:grid-cols-2 sm:items-stretch sm:gap-x-12 sm:text-left">
