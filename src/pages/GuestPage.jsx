@@ -394,14 +394,14 @@ const GuestPage = () => {
             </nav>
 
             {/* RIGHT: Desktop CTA (fixed width) */}
-            <div className="hidden md:flex justify-end w-[220px]">
+            {/* <div className="hidden md:flex justify-end w-[220px]">
               <button
                 onClick={() => navigate("/login")}
                 className="flex items-center justify-center rounded-[10px] bg-[#1C253C] px-10 py-3 text-base font-regular text-white transition-colors duration-200 hover:bg-[#0d1c3f] cursor-pointer"
               >
                 Log In
               </button>
-            </div>
+            </div> */}
 
             {/* MOBILE: burger */}
             <div className="md:hidden ml-auto flex items-center">
@@ -555,7 +555,7 @@ const GuestPage = () => {
             </p>
           </TextFade>
 
-          <ScaleIn delay={1.3} once={false}>
+          {/* <ScaleIn delay={1.3} once={false}>
             <div className="mx-auto max-w-xs pt-4 sm:max-w-none">
               <Link
                 to="/get-started"
@@ -564,7 +564,7 @@ const GuestPage = () => {
                 Get Started
               </Link>
             </div>
-          </ScaleIn>
+          </ScaleIn> */}
         </div>
       </section>
       {/* Feature carousel */}
@@ -742,9 +742,12 @@ const GuestPage = () => {
               className="flex h-full flex-col items-center sm:items-start sm:justify-between"
             >
               <div className="flex flex-col items-center gap-3 sm:items-start">
-                <h3 className="text-lg font-semibold text-card-100">Email Us</h3>
+                <h3 className="text-lg font-semibold text-card-100">
+                  Email Us
+                </h3>
                 <p className="max-w-md text-sm">
-                  Send us an email and we’ll get back to you as soon as possible.
+                  Send us an email and we’ll get back to you as soon as
+                  possible.
                 </p>
               </div>
               <div className="mx-auto mt-4 flex w-[230px] items-center justify-start gap-3 sm:mx-0 sm:w-auto">
