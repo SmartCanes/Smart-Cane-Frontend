@@ -496,7 +496,7 @@ const GuestPage = () => {
                     Contact Us
                   </ScrollLink>
 
-                  <div className="pt-2">
+                  {/* <div className="pt-2">
                     <button
                       onClick={() => {
                         setIsMobileMenuOpen(false);
@@ -506,7 +506,7 @@ const GuestPage = () => {
                     >
                       Log In
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </motion.div>
             )}
