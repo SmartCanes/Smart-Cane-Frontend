@@ -120,7 +120,7 @@ const PasswordField = ({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className={`w-full px-4 py-2.5 sm:py-3.5 text-sm sm:text-base border rounded-customradius focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent item-center font-poppins ${
+          className={`w-full pl-4 pr-10 py-2.5 sm:py-3.5 text-sm sm:text-base border rounded-customradius focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent item-center font-poppins ${
             hasError ? "" : "border-gray-300"
           } ${inputClassName}`}
           style={

@@ -629,9 +629,9 @@ export default function ManageActionHistory() {
               </div>
             ) : (
               <>
-                <div className="xl:hidden divide-y divide-gray-100">
+                <div className="xl:hidden space-y-3 p-3 sm:p-4">
                   {items.map((item) => (
-                    <div key={item.audit_id} className="p-4 sm:p-5 space-y-3">
+                    <div key={item.audit_id} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5 space-y-3">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-[#1a2e4a]">

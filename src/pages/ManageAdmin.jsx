@@ -507,20 +507,18 @@ export default function ManageAdmin() {
                           </div>
                           <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                             <span
-                              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                a.role === "super_admin"
+                              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${a.role === "super_admin"
                                   ? "bg-amber-100 text-amber-800"
                                   : "bg-blue-100 text-blue-800"
-                              }`}
+                                }`}
                             >
                               {a.role === "super_admin" ? "Super Admin" : "Admin"}
                             </span>
                             <span
-                              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                a.is_first_login
+                              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${a.is_first_login
                                   ? "bg-yellow-100 text-yellow-800"
                                   : "bg-green-100 text-green-800"
-                              }`}
+                                }`}
                             >
                               {a.is_first_login ? "Pending setup" : "Active"}
                             </span>
@@ -566,15 +564,14 @@ export default function ManageAdmin() {
                               {h}
                             </th>
                           ))}
-                         </tr>
+                        </tr>
                       </thead>
                       <tbody>
                         {filteredAdmins.map((a, i) => (
                           <tr
                             key={a.admin_id}
-                            className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors ${
-                              i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"
-                            }`}
+                            className={`border-t border-gray-50 hover:bg-blue-50/20 transition-colors ${i % 2 === 0 ? "bg-white" : "bg-[#fafcff]"
+                              }`}
                           >
                             <td className="px-5 py-4 text-sm text-gray-500">{i + 1}</td>
                             <td className="px-5 py-4">
@@ -591,22 +588,20 @@ export default function ManageAdmin() {
                             <td className="px-5 py-4 text-sm text-gray-700">{a.email}</td>
                             <td className="px-5 py-4">
                               <span
-                                className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                  a.role === "super_admin"
+                                className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${a.role === "super_admin"
                                     ? "bg-amber-100 text-amber-800"
                                     : "bg-blue-100 text-blue-800"
-                                }`}
+                                  }`}
                               >
                                 {a.role === "super_admin" ? "Super Admin" : "Admin"}
                               </span>
                             </td>
                             <td className="px-5 py-4">
                               <span
-                                className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                  a.is_first_login
+                                className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${a.is_first_login
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-green-100 text-green-800"
-                                }`}
+                                  }`}
                               >
                                 {a.is_first_login ? "Pending setup" : "Active"}
                               </span>
@@ -641,364 +636,404 @@ export default function ManageAdmin() {
         </div>
       </div>
 
-{showAddModal && (
-  <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-    <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-    <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-4xl relative z-10 max-h-[90vh] overflow-y-auto">
-      <div className="flex flex-col space-y-1 mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">Add New Admin</h3>
-        <p className="text-sm text-gray-500">Fill in the details to create a new admin account.</p>
-      </div>
-
-      <form onSubmit={handleAddSubmit} className="space-y-6">
-        {/* Row 1: First Name + Middle Name */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="First Name"
-            name="first_name"
-            value={addForm.first_name}
-            onChange={handleAddChange}
-            placeholder="Juan"
-            required
-          />
-          <TextField
-            label="Middle Name"
-            name="middle_name"
-            value={addForm.middle_name}
-            onChange={handleAddChange}
-            placeholder="Optional"
-          />
-        </div>
-
-        {/* Row 2: Last Name + Role */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Last Name"
-            name="last_name"
-            value={addForm.last_name}
-            onChange={handleAddChange}
-            placeholder="Dela Cruz"
-            required
-          />
-          <SelectField
-            label="Role"
-            name="role"
-            value={addForm.role}
-            onChange={handleAddChange}
-            options={[
-              { value: "admin", label: "Admin" },
-              { value: "super_admin", label: "Super Admin" },
-            ]}
-          />
-        </div>
-
-        {/* Row 3: Username + Password */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Username"
-            name="username"
-            value={addForm.username}
-            onChange={handleAddChange}
-            placeholder="juandelacruz"
-            required
-          />
-          <PasswordField
-            label="Password"
-            name="password"
-            value={addForm.password}
-            onChange={handleAddChange}
-            placeholder="Temporary password"
-            required
-          />
-        </div>
-
-        {/* Row 4: Email + Contact Number */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Email Address"
-            name="email"
-            type="email"
-            value={addForm.email}
-            onChange={handleAddChange}
-            placeholder="admin@example.com"
-            required
-          />
-          <TextField
-            label="Contact Number"
-            name="contact_number"
-            value={addForm.contact_number}
-            onChange={handleAddChange}
-            placeholder="09123456789"
-            maxLength={11}
-            inputMode="numeric"
-            pattern="[0-9]*"
-          />
-        </div>
-
-        {/* Row 5: Street Address + Barangay */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Street Address"
-            name="street_address"
-            value={addForm.street_address}
-            onChange={handleAddChange}
-            placeholder="123 Main St."
-          />
-          <TextField
-            label="Barangay"
-            name="barangay"
-            value={addForm.barangay}
-            onChange={handleAddChange}
-            placeholder="Barangay"
-          />
-        </div>
-
-        {/* Row 6: Province + City */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Province"
-            name="province"
-            value={addForm.province}
-            onChange={handleAddChange}
-            placeholder="Province"
-          />
-          <TextField
-            label="City"
-            name="city"
-            value={addForm.city}
-            onChange={handleAddChange}
-            placeholder="City"
-          />
-        </div>
-
-        {addError && <p className="text-red-500 text-sm text-center">{addError}</p>}
-
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
-          <button
-            type="button"
-            onClick={() => setShowAddModal(false)}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={addSubmitting}
-            className="px-4 py-2 rounded-lg bg-primary-100 text-white hover:bg-primary-200 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
-          >
-            {addSubmitting ? (
-              <>
-                <Icon icon="ph:circle-notch-bold" className="w-4 h-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              "Create Admin"
-            )}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
-{showEditModal && editTarget && (
-  <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-    <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-    <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-4xl relative z-10 max-h-[90vh] overflow-y-auto">
-      <div className="flex flex-col space-y-1 mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">
-          Edit Admin — <span className="text-primary-100">{editTarget.username}</span>
-        </h3>
-        <p className="text-sm text-gray-500">Update the admin's information below.</p>
-      </div>
-
-      <form onSubmit={handleEditSubmit} className="space-y-6">
-        {/* Row 1: First Name + Middle Name */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="First Name"
-            name="first_name"
-            value={editForm.first_name}
-            onChange={handleEditChange}
-            placeholder="Juan"
-            required
-          />
-          <TextField
-            label="Middle Name"
-            name="middle_name"
-            value={editForm.middle_name}
-            onChange={handleEditChange}
-            placeholder="Optional"
-          />
-        </div>
-
-        {/* Row 2: Last Name + Role */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Last Name"
-            name="last_name"
-            value={editForm.last_name}
-            onChange={handleEditChange}
-            placeholder="Dela Cruz"
-            required
-          />
-          <SelectField
-            label="Role"
-            name="role"
-            value={editForm.role}
-            onChange={handleEditChange}
-            options={[
-              { value: "admin", label: "Admin" },
-              { value: "super_admin", label: "Super Admin" },
-            ]}
-          />
-        </div>
-
-        {editForm.role !== editOriginalRole && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role Change Reason
-              </label>
-              <select
-                value={editRoleReasonCode}
-                onChange={(e) => setEditRoleReasonCode(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
-              >
-                <option value="">Select reason</option>
-                <option value="least_privilege">Least privilege enforcement</option>
-                <option value="policy_violation">Policy violation</option>
-                <option value="security_incident">Security incident</option>
-                <option value="assignment_change">Assignment or org change</option>
-                <option value="user_request">User request</option>
-                <option value="other">Other</option>
-              </select>
+      {showAddModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+          <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-4xl relative z-10 max-h-[90vh] overflow-y-auto">
+            <div className="flex flex-col space-y-1 mb-6">
+              <h3 className="text-xl font-semibold text-gray-800">Add New Admin</h3>
+              <p className="text-sm text-gray-500">Fill in the details to create a new admin account.</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Details
-              </label>
-              <textarea
-                rows={3}
-                value={editRoleReasonText}
-                onChange={(e) => setEditRoleReasonText(e.target.value)}
-                placeholder="Explain why the role is being changed..."
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-100"
-              />
-              <p className="mt-1 text-xs text-gray-500">Minimum 10 characters.</p>
-            </div>
+
+            <form onSubmit={handleAddSubmit} className="space-y-6">
+              {/* Row 1: First Name + Middle Name */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="First Name"
+                  name="first_name"
+                  value={addForm.first_name}
+                  onChange={handleAddChange}
+                  placeholder="Juan"
+                  required
+                />
+                <TextField
+                  label="Middle Name"
+                  name="middle_name"
+                  value={addForm.middle_name}
+                  onChange={handleAddChange}
+                  placeholder="Optional"
+                />
+              </div>
+
+              {/* Row 2: Last Name + Role */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Last Name"
+                  name="last_name"
+                  value={addForm.last_name}
+                  onChange={handleAddChange}
+                  placeholder="Dela Cruz"
+                  required
+                />
+                <SelectField
+                  label="Role"
+                  name="role"
+                  value={addForm.role}
+                  onChange={handleAddChange}
+                  options={[
+                    { value: "admin", label: "Admin" },
+                    { value: "super_admin", label: "Super Admin" },
+                  ]}
+                />
+              </div>
+
+              {/* Row 3: Username + Password */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Username"
+                  name="username"
+                  value={addForm.username}
+                  onChange={handleAddChange}
+                  placeholder="juandelacruz"
+                  required
+                />
+                <PasswordField
+                  label="Password"
+                  name="password"
+                  value={addForm.password}
+                  onChange={handleAddChange}
+                  placeholder="Temporary password"
+                  required
+                />
+              </div>
+
+              {/* Row 4: Email + Contact Number */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  value={addForm.email}
+                  onChange={handleAddChange}
+                  placeholder="admin@example.com"
+                  required
+                />
+                <TextField
+                  label="Contact Number"
+                  name="contact_number"
+                  value={addForm.contact_number}
+                  onChange={handleAddChange}
+                  placeholder="09123456789"
+                  maxLength={11}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                />
+              </div>
+
+              {/* Row 5: Street Address + Barangay */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Street Address"
+                  name="street_address"
+                  value={addForm.street_address}
+                  onChange={handleAddChange}
+                  placeholder="123 Main St."
+                />
+                <TextField
+                  label="Barangay"
+                  name="barangay"
+                  value={addForm.barangay}
+                  onChange={handleAddChange}
+                  placeholder="Barangay"
+                />
+              </div>
+
+              {/* Row 6: Province + City */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Province"
+                  name="province"
+                  value={addForm.province}
+                  onChange={handleAddChange}
+                  placeholder="Province"
+                />
+                <TextField
+                  label="City"
+                  name="city"
+                  value={addForm.city}
+                  onChange={handleAddChange}
+                  placeholder="City"
+                />
+              </div>
+
+              {addError && <p className="text-red-500 text-sm text-center">{addError}</p>}
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={addSubmitting}
+                  className="px-4 py-2 rounded-lg bg-primary-100 text-white hover:bg-primary-200 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
+                >
+                  {addSubmitting ? (
+                    <>
+                      <Icon icon="ph:circle-notch-bold" className="w-4 h-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Admin"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-
-        {/* Row 3: Username + Password */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Username"
-            name="username"
-            value={editForm.username}
-            onChange={handleEditChange}
-            placeholder="juandelacruz"
-            required
-          />
-          <TextField
-            label="New Password"
-            name="password"
-            type="password"
-            value={editForm.password}
-            onChange={handleEditChange}
-            placeholder="Leave blank to keep current"
-            helperText="Only fill this to change the password."
-          />
         </div>
+      )}
 
-        {/* Row 4: Email + Contact Number */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Email Address"
-            name="email"
-            type="email"
-            value={editForm.email}
-            onChange={handleEditChange}
-            placeholder="admin@example.com"
-            required
-          />
-          <TextField
-            label="Contact Number"
-            name="contact_number"
-            value={editForm.contact_number}
-            onChange={handleEditChange}
-            placeholder="09123456789"
-            maxLength={11}
-            inputMode="numeric"
-            pattern="[0-9]*"
-          />
+      {showEditModal && editTarget && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+          <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-4xl relative z-10 max-h-[90vh] overflow-y-auto">
+            <div className="flex flex-col space-y-1 mb-6">
+              <h3 className="text-xl font-semibold text-gray-800">
+                Edit Admin — <span className="text-primary-100">{editTarget.username}</span>
+              </h3>
+              <p className="text-sm text-gray-500">Update the admin's information below.</p>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-6">
+              {/* Row 1: First Name + Middle Name */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="First Name"
+                  name="first_name"
+                  value={editForm.first_name}
+                  onChange={handleEditChange}
+                  placeholder="Juan"
+                  required
+                />
+                <TextField
+                  label="Middle Name"
+                  name="middle_name"
+                  value={editForm.middle_name}
+                  onChange={handleEditChange}
+                  placeholder="Optional"
+                />
+              </div>
+
+              {/* Row 2: Last Name + Role */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Last Name"
+                  name="last_name"
+                  value={editForm.last_name}
+                  onChange={handleEditChange}
+                  placeholder="Dela Cruz"
+                  required
+                />
+                <SelectField
+                  label="Role"
+                  name="role"
+                  value={editForm.role}
+                  onChange={handleEditChange}
+                  options={[
+                    { value: "admin", label: "Admin" },
+                    { value: "super_admin", label: "Super Admin" },
+                  ]}
+                />
+              </div>
+
+              {editForm.role !== editOriginalRole && (() => {
+                const isPromotion = editOriginalRole === "admin" && editForm.role === "super_admin";
+                const promotionReasons = [
+                  { value: "expanded_responsibilities", label: "Expanded responsibilities" },
+                  { value: "probationary_passed", label: "Passed probationary period" },
+                  { value: "management_request", label: "Management request" },
+                  { value: "assignment_change", label: "Assignment or org change" },
+                  { value: "user_request", label: "User request" },
+                  { value: "other", label: "Other" },
+                ];
+                const demotionReasons = [
+                  { value: "least_privilege", label: "Least privilege enforcement" },
+                  { value: "policy_violation", label: "Policy violation" },
+                  { value: "security_incident", label: "Security incident" },
+                  { value: "assignment_change", label: "Assignment or org change" },
+                  { value: "user_request", label: "User request" },
+                  { value: "other", label: "Other" },
+                ];
+                const reasons = isPromotion ? promotionReasons : demotionReasons;
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Role Change Reason
+                        <span className={`ml-2 text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          isPromotion
+                            ? "bg-green-100 text-green-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}>
+                          {isPromotion ? "↑ Promotion" : "↓ Demotion"}
+                        </span>
+                      </label>
+                      <select
+                        value={editRoleReasonCode}
+                        onChange={(e) => setEditRoleReasonCode(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
+                      >
+                        <option value="">Select reason</option>
+                        {reasons.map((r) => (
+                          <option key={r.value} value={r.value}>{r.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Details
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editRoleReasonText}
+                        onChange={(e) => setEditRoleReasonText(e.target.value)}
+                        placeholder="Explain why the role is being changed..."
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-100"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">Minimum 10 characters.</p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Row 3: Username + New Password (password only shown for pending admins) */}
+              {editTarget.is_first_login ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <TextField
+                    label="Username"
+                    name="username"
+                    value={editForm.username}
+                    onChange={handleEditChange}
+                    placeholder="juandelacruz"
+                    required
+                  />
+                  <div>
+                    <PasswordField
+                      label="New Password"
+                      name="password"
+                      value={editForm.password}
+                      onChange={handleEditChange}
+                      placeholder="Enter new temporary password"
+                      helperText="This admin hasn't logged in yet. Set a new temporary password if needed."
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <TextField
+                    label="Username"
+                    name="username"
+                    value={editForm.username}
+                    onChange={handleEditChange}
+                    placeholder="juandelacruz"
+                    required
+                  />
+                  {/* New Password hidden — admin is active and manages their own password */}
+                  <div />
+                </div>
+              )}
+
+              {/* Row 4: Email + Contact Number */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  value={editForm.email}
+                  onChange={handleEditChange}
+                  placeholder="admin@example.com"
+                  required
+                />
+                <TextField
+                  label="Contact Number"
+                  name="contact_number"
+                  value={editForm.contact_number}
+                  onChange={handleEditChange}
+                  placeholder="09123456789"
+                  maxLength={11}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                />
+              </div>
+
+              {/* Row 5: Street Address + Barangay */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Street Address"
+                  name="street_address"
+                  value={editForm.street_address}
+                  onChange={handleEditChange}
+                  placeholder="123 Main St."
+                />
+                <TextField
+                  label="Barangay"
+                  name="barangay"
+                  value={editForm.barangay}
+                  onChange={handleEditChange}
+                  placeholder="Barangay"
+                />
+              </div>
+
+              {/* Row 6: Province + City */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <TextField
+                  label="Province"
+                  name="province"
+                  value={editForm.province}
+                  onChange={handleEditChange}
+                  placeholder="Province"
+                />
+                <TextField
+                  label="City"
+                  name="city"
+                  value={editForm.city}
+                  onChange={handleEditChange}
+                  placeholder="City"
+                />
+              </div>
+
+              {editError && <p className="text-red-500 text-sm text-center">{editError}</p>}
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSubmitting}
+                  className="px-4 py-2 rounded-lg bg-primary-100 text-white hover:bg-primary-200 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
+                >
+                  {editSubmitting ? (
+                    <>
+                      <Icon icon="ph:circle-notch-bold" className="w-4 h-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        {/* Row 5: Street Address + Barangay */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Street Address"
-            name="street_address"
-            value={editForm.street_address}
-            onChange={handleEditChange}
-            placeholder="123 Main St."
-          />
-          <TextField
-            label="Barangay"
-            name="barangay"
-            value={editForm.barangay}
-            onChange={handleEditChange}
-            placeholder="Barangay"
-          />
-        </div>
-
-        {/* Row 6: Province + City */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <TextField
-            label="Province"
-            name="province"
-            value={editForm.province}
-            onChange={handleEditChange}
-            placeholder="Province"
-          />
-          <TextField
-            label="City"
-            name="city"
-            value={editForm.city}
-            onChange={handleEditChange}
-            placeholder="City"
-          />
-        </div>
-
-        {editError && <p className="text-red-500 text-sm text-center">{editError}</p>}
-
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
-          <button
-            type="button"
-            onClick={() => setShowEditModal(false)}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={editSubmitting}
-            className="px-4 py-2 rounded-lg bg-primary-100 text-white hover:bg-primary-200 disabled:opacity-50 transition-colors cursor-pointer flex items-center gap-2"
-          >
-            {editSubmitting ? (
-              <>
-                <Icon icon="ph:circle-notch-bold" className="w-4 h-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Changes"
-            )}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
+      )}
 
       {showDeleteModal && deleteTarget && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">

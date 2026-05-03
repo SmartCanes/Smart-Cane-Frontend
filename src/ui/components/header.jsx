@@ -7,7 +7,7 @@ import Modal from "./modal";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 const LOGOUT_TRANSITION_MS = 550;
 
-export default function Header({ onMenuClick }) {
+export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
@@ -200,17 +200,9 @@ export default function Header({ onMenuClick }) {
 
   return (
     <>
-    <header className="w-full h-[var(--header-height)] bg-primary-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-50 shadow-sm">
-      <div className="flex items-center gap-2 text-white font-semibold tracking-wide">
-        <button
-          type="button"
-          onClick={onMenuClick}
-          className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg hover:bg-white/10"
-          aria-label="Open menu"
-        >
-          <Icon icon="ph:list" className="w-6 h-6" />
-        </button>
-        <span className="text-sm sm:text-base">Admin Panel</span>
+    <header className="w-full h-[var(--header-height)] bg-white sm:bg-primary-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-40 shadow-sm sm:shadow-none border-b border-gray-100 sm:border-none">
+      <div className="flex items-center gap-2 text-primary-100 sm:text-white font-semibold tracking-wide">
+        <span className="text-lg sm:text-base font-bold sm:font-semibold">Admin Panel</span>
       </div>
 
       {/* Right – Actions */}
@@ -222,7 +214,7 @@ export default function Header({ onMenuClick }) {
               setNotifOpen((p) => !p);
               fetchNotifications();
             }}
-            className="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+            className="relative p-2 text-primary-100 sm:text-white hover:bg-black/5 sm:hover:bg-white/10 rounded-full transition-colors"
             aria-label="Notifications"
           >
             <Icon icon="ph:bell" className="w-6 h-6" />
@@ -311,9 +303,9 @@ export default function Header({ onMenuClick }) {
         <div className="relative" ref={profileDropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2 p-1.5 rounded-full hover:bg-white/10 transition-colors"
+            className="flex items-center gap-2 p-1.5 rounded-full hover:bg-black/5 sm:hover:bg-white/10 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-medium text-sm overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-primary-100 sm:bg-white/20 flex items-center justify-center text-white font-medium text-sm overflow-hidden">
               {profileImageUrl ? (
                 <img
                   src={profileImageUrl}
