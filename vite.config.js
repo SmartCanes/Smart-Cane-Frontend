@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
 
   const serverConfig = {
     host: true,
-    port: 5173
+    port: 5174
   };
 
   if (isProd) {

@@ -157,7 +157,7 @@ npm run dev
 App runs at:
 
 ```
-http://localhost:5173
+http://localhost:5174
 ```
 
 ---
@@ -181,8 +181,8 @@ http://localhost:5173
 
 ```env
 VITE_BACKEND_ENABLED=true
-VITE_BACKEND_API_URL=http://localhost:5000/api
-VITE_BACKEND_URL=http://localhost:5000
+VITE_BACKEND_API_URL=http://localhost:5001/api
+VITE_BACKEND_URL=http://localhost:5001
 VITE_MIDDLEWARE_WS_URL=ws://localhost:3000
 
 VITE_WEB_PUSH_PUBLIC_KEY=
