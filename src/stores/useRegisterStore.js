@@ -6,6 +6,7 @@ export const useRegisterStore = create(
     (set) => ({
       formData: {
         firstName: "",
+        middleName: "",
         lastName: "",
         username: "",
         password: "",
@@ -88,6 +89,7 @@ export const useRegisterStore = create(
         set({
           formData: {
             firstName: "",
+            middleName: "",
             lastName: "",
             username: "",
             password: "",

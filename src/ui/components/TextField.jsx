@@ -6,7 +6,7 @@ const TextField = forwardRef(
       label,
       type = "text",
       placeholder = "",
-      value,
+      value = "",
       onChange,
       name,
       id,
